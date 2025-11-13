@@ -11,12 +11,12 @@ export default function Home() {
 
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
-    console.log('Left menu clicked');
+    console.log('Левое меню нажато');
   };
 
   const handleRightMenuClick = () => {
     setRightMenuOpen(!rightMenuOpen);
-    console.log('Right menu clicked');
+    console.log('Правое меню нажато');
   };
 
   return (
@@ -29,7 +29,7 @@ export default function Home() {
       {/* Menu placeholders */}
       {leftMenuOpen && (
         <div className="bg-blue-100 p-4">
-          <p>Left Menu Content</p>
+          <p>Содержимое левого меню</p>
         </div>
       )}
       
@@ -39,7 +39,7 @@ export default function Home() {
       
       {rightMenuOpen && (
         <div className="bg-green-100 p-4">
-          <p>Right Menu Content</p>
+          <p>Содержимое правого меню</p>
         </div>
       )}
       

@@ -12,14 +12,14 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
         onClick={onLeftMenuClick}
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
       >
-        Left Menu
+        Левое меню
       </button>
       <h1 className="text-xl font-bold">My White Board</h1>
       <button 
         onClick={onRightMenuClick}
         className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
       >
-        Right Menu
+        Правое меню
       </button>
     </header>
   );
