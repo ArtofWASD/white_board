@@ -8,6 +8,7 @@ import { EventContentArg } from '@fullcalendar/core';
 import AddEventButton from './AddEventButton';
 import EventActionMenu from './EventActionMenu';
 import EventModal from './EventModal';
+import AddResultModal from './AddResultModal';
 
 interface Exercise {
   id: number;
@@ -22,6 +23,10 @@ interface CalendarEvent {
   date: string;
   exerciseType?: string;
   exercises?: Exercise[];
+}
+
+interface CalendarProps {
+  isMenuOpen?: boolean;
 }
 
 // New component for event tooltip
@@ -80,7 +85,7 @@ const EventTooltip: React.FC<{
   );
 };
 
-const Calendar: React.FC = () => {
+const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([
     { id: '1', title: 'Sample Event', date: new Date().toISOString().split('T')[0], exercises: [] }
   ]);
@@ -91,6 +96,8 @@ const Calendar: React.FC = () => {
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
   const [showEditModal, setShowEditModal] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
+  const [showAddResultModal, setShowAddResultModal] = useState(false);
+  const [eventToAddResult, setEventToAddResult] = useState<CalendarEvent | null>(null);
   // State for tooltip
   const [tooltipEvent, setTooltipEvent] = useState<CalendarEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -199,6 +206,28 @@ const Calendar: React.FC = () => {
     }
   };
 
+  const handleAddResult = () => {
+    if (selectedEvent) {
+      setEventToAddResult(selectedEvent);
+      setShowAddResultModal(true);
+      setShowEventActionMenu(false);
+    }
+  };
+
+  const handleSaveResult = (time: string) => {
+    // Here you would typically save the result to your backend
+    console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
+    // For now, we'll just show an alert
+    alert(`Результат сохранен для события &quot;${eventToAddResult?.title}&quot;: ${time}`);
+    setShowAddResultModal(false);
+    setEventToAddResult(null);
+  };
+
+  const handleCloseAddResultModal = () => {
+    setShowAddResultModal(false);
+    setEventToAddResult(null);
+  };
+
   const handleUpdateEvent = (title: string, exerciseType: string, exercises: Exercise[]) => {
     if (eventToEdit) {
       setEvents(events.map(event => 
@@ -258,7 +287,7 @@ const Calendar: React.FC = () => {
   };
 
   return (
-    <div className="p-4 relative">
+    <div className={`p-4 relative ${isMenuOpen ? 'md:pl-4' : ''}`}>
       <FullCalendar
         ref={calendarRef}
         plugins={[dayGridPlugin, interactionPlugin]}
@@ -292,6 +321,7 @@ const Calendar: React.FC = () => {
         <EventActionMenu
           onDelete={handleDeleteEvent}
           onEdit={handleEditEvent}
+          onAddResult={handleAddResult}
           position={buttonPosition}
           onClose={handleCloseEventActionMenu}
         />
@@ -308,6 +338,15 @@ const Calendar: React.FC = () => {
             exerciseType: eventToEdit.exerciseType || '',
             exercises: eventToEdit.exercises || []
           }}
+        />
+      )}
+              
+      {showAddResultModal && eventToAddResult && (
+        <AddResultModal
+          isOpen={showAddResultModal}
+          onClose={handleCloseAddResultModal}
+          onSave={handleSaveResult}
+          eventName={eventToAddResult.title}
         />
       )}
       

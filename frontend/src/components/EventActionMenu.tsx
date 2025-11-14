@@ -5,11 +5,12 @@ import React from 'react';
 interface EventActionMenuProps {
   onDelete: () => void;
   onEdit: () => void;
+  onAddResult: () => void;
   position: { top: number; left: number };
   onClose: () => void;
 }
 
-const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, position, onClose }) => {
+const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, onAddResult, position, onClose }) => {
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   const handleMenuClick = (e: React.MouseEvent) => {
@@ -53,6 +54,12 @@ const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, pos
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 text-red-600"
         >
           Удалить
+        </button>
+        <button 
+          onClick={onAddResult}
+          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-t border-gray-200 mt-1"
+        >
+          Добавить результат
         </button>
         <button 
           onClick={onClose}
