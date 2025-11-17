@@ -7,6 +7,8 @@ interface User {
   name: string;
   email: string;
   role: 'trainer' | 'athlete'; // Added role property
+  height?: number;
+  weight?: number;
 }
 
 interface AuthContextType {

@@ -102,6 +102,17 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   const calendarRef = useRef<FullCalendar>(null);
   const { isAuthenticated, user } = useAuth(); // Get authentication status and user info
 
+  // Handle calendar resize when menu opens/closes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (calendarRef.current) {
+        calendarRef.current.getApi().updateSize();
+      }
+    }, 300); // Match the transition duration
+
+    return () => clearTimeout(timer);
+  }, [isMenuOpen]);
+
   const handleDateClick = (arg: { dateStr: string, jsEvent: MouseEvent }) => {
     // Close event action menu if open
     setShowEventActionMenu(false);
@@ -349,26 +360,28 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   return (
-    <div className={`p-4 relative ${isMenuOpen ? 'md:pl-4' : ''}`}>
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, interactionPlugin]}
-        initialView="dayGridMonth"
-        events={events.map(event => ({
-          id: event.id,
-          title: event.title,
-          date: event.date,
-          classNames: ['calendar-event']
-        }))}
-        dateClick={handleDateClick}
-        eventClick={handleEventClick}
-        eventContent={renderEventContent}
-        headerToolbar={{
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,dayGridWeek,dayGridDay'
-        }}
-      />
+    <div className={`p-4 relative transition-all duration-300 ease-in-out w-full ${isMenuOpen ? 'md:pl-4' : ''}`}>
+      <div className="transition-all duration-300 ease-in-out">
+        <FullCalendar
+          ref={calendarRef}
+          plugins={[dayGridPlugin, interactionPlugin]}
+          initialView="dayGridMonth"
+          events={events.map(event => ({
+            id: event.id,
+            title: event.title,
+            date: event.date,
+            classNames: ['calendar-event']
+          }))}
+          dateClick={handleDateClick}
+          eventClick={handleEventClick}
+          eventContent={renderEventContent}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek,dayGridDay'
+          }}
+        />
+      </div>
       
       {showAddEventButton && (
         <AddEventButton

@@ -3,6 +3,8 @@ export interface User {
   name: string;
   email: string;
   role: 'trainer' | 'athlete';
+  height?: number;
+  weight?: number;
 }
 
 export interface AuthContextType {

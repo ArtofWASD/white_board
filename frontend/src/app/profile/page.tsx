@@ -1,11 +1,36 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
+  const [height, setHeight] = useState(user?.height || '');
+  const [weight, setWeight] = useState(user?.weight || '');
+
+  const handleSave = () => {
+    // In a real app, you would send this data to your backend
+    // For now, we'll just update localStorage
+    if (user) {
+      const updatedUser = {
+        ...user,
+        height: height ? Number(height) : undefined,
+        weight: weight ? Number(weight) : undefined
+      };
+      
+      // Update localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      
+      // In a real app, you would also update the context
+      // For now, we'll just toggle edit mode
+      setIsEditing(false);
+      
+      // Refresh the page to show updated data
+      window.location.reload();
+    }
+  };
 
   if (!user) {
     return (
@@ -53,6 +78,43 @@ export default function ProfilePage() {
           </div>
           
           <div className="border rounded-lg p-4">
+            <h3 className="font-semibold text-lg mb-2">Физические параметры</h3>
+            {isEditing ? (
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Рост (см)</label>
+                  <input
+                    type="number"
+                    value={height}
+                    onChange={(e) => setHeight(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="Введите рост"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Вес (кг)</label>
+                  <input
+                    type="number"
+                    value={weight}
+                    onChange={(e) => setWeight(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                    placeholder="Введите вес"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-gray-700">
+                  <span className="font-medium">Рост:</span> {user.height ? `${user.height} см` : 'Не указан'}
+                </p>
+                <p className="text-gray-700">
+                  <span className="font-medium">Вес:</span> {user.weight ? `${user.weight} кг` : 'Не указан'}
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <div className="border rounded-lg p-4">
             <h3 className="font-semibold text-lg mb-2">Статистика</h3>
             <p className="text-gray-700">Событий создано: 12</p>
             <p className="text-gray-700">Активных задач: 5</p>
@@ -68,9 +130,33 @@ export default function ProfilePage() {
           Выйти из аккаунта
         </button>
         
-        <button className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-300">
-          Редактировать профиль
-        </button>
+        {isEditing ? (
+          <>
+            <button 
+              onClick={handleSave}
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition duration-300"
+            >
+              Сохранить
+            </button>
+            <button 
+              onClick={() => {
+                setIsEditing(false);
+                setHeight(user.height?.toString() || '');
+                setWeight(user.weight?.toString() || '');
+              }}
+              className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition duration-300"
+            >
+              Отмена
+            </button>
+          </>
+        ) : (
+          <button 
+            onClick={() => setIsEditing(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+          >
+            Редактировать профиль
+          </button>
+        )}
       </div>
     </div>
   );
