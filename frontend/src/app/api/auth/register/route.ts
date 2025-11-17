@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password, role } = await request.json();
     
     // In a real application, you would:
     // 1. Validate the input data
@@ -12,12 +12,13 @@ export async function POST(request: Request) {
     // 5. Generate JWT token
     
     // For this example, we'll simulate a successful registration
-    if (name && email && password) {
+    if (name && email && password && role) {
       // Simulate database save
       const user = {
         id: Date.now().toString(),
         name: name,
         email: email,
+        role: role, // Include role in user object
       };
       
       // In a real app, you would generate a real JWT token

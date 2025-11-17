@@ -3,10 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
-
-interface UserDashboardProps {
-  onClose?: () => void;
-}
+import { UserDashboardProps } from '../types';
 
 export default function UserDashboard({ onClose }: UserDashboardProps) {
   const { user, logout } = useAuth();

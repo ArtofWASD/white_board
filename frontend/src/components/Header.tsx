@@ -1,6 +1,7 @@
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface HeaderProps {
   onLeftMenuClick: () => void;
@@ -28,7 +29,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
         className="bg-transparent hover:bg-transparent text-white font-bold p-3 rounded-full cursor-pointer"
         aria-label="Menu"
       >
-        <img src="/menu.png" alt="Menu" className="w-10 h-10" />
+        <Image src="/menu.png" alt="Menu" width={40} height={40} />
       </button>
       <h1 className="text-xl font-bold">My White Board</h1>
       {isAuthenticated && user ? (
@@ -46,7 +47,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
           onClick={handleRegisterClick}
           className="bg-transparent hover:bg-transparent text-white font-bold p-3 rounded-full cursor-pointer"
         >
-          <img src="/login.png" alt="Login" className="w-10 h-10" />
+          <Image src="/login.png" alt="Login" width={40} height={40} />
         </button>
       )}
     </header>

@@ -1,17 +1,12 @@
 'use client';
 
 import React from 'react';
-
-interface EventActionMenuProps {
-  onDelete: () => void;
-  onEdit: () => void;
-  onAddResult: () => void;
-  position: { top: number; left: number };
-  onClose: () => void;
-}
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
+import { EventActionMenuProps } from '../types';
 
 const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, onAddResult, position, onClose }) => {
   const menuRef = React.useRef<HTMLDivElement>(null);
+  const { isAuthenticated } = useAuth(); // Get authentication status
 
   const handleMenuClick = (e: React.MouseEvent) => {
     // Prevent the click from propagating to the overlay which would close the menu
@@ -46,18 +41,21 @@ const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, onA
         <button 
           onClick={onEdit}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
+          disabled={!isAuthenticated} // Disable if not authenticated
         >
           Редактировать
         </button>
         <button 
           onClick={onDelete}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 text-red-600"
+          disabled={!isAuthenticated} // Disable if not authenticated
         >
           Удалить
         </button>
         <button 
           onClick={onAddResult}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-t border-gray-200 mt-1"
+          disabled={!isAuthenticated} // Disable if not authenticated
         >
           Добавить результат
         </button>

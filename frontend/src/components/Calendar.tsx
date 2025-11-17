@@ -9,25 +9,8 @@ import AddEventButton from './AddEventButton';
 import EventActionMenu from './EventActionMenu';
 import EventModal from './EventModal';
 import AddResultModal from './AddResultModal';
-
-interface Exercise {
-  id: number;
-  name: string;
-  weight: string;
-  repetitions: string;
-}
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  date: string;
-  exerciseType?: string;
-  exercises?: Exercise[];
-}
-
-interface CalendarProps {
-  isMenuOpen?: boolean;
-}
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
+import { Exercise, EventResult, CalendarEvent, CalendarProps } from '../types';
 
 // New component for event tooltip
 const EventTooltip: React.FC<{ 
@@ -49,7 +32,7 @@ const EventTooltip: React.FC<{
 
   return (
     <div 
-      className="absolute z-30 bg-white p-3 rounded-lg shadow-lg border border-gray-200 w-64"
+      className="absolute bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm z-20 w-64"
       style={{
         top: `${position.y}px`,
         left: `${position.x}px`,
@@ -60,24 +43,39 @@ const EventTooltip: React.FC<{
       <div className="text-sm text-gray-600 mt-1">
         Дата: {event.date}
       </div>
-      {event.exerciseType && (
-        <div className="text-sm text-gray-600 mt-1">
-          Тип упражнения: {event.exerciseType}
-        </div>
-      )}
+      
       {event.exercises && event.exercises.length > 0 && (
         <div className="mt-2">
-          <div className="text-xs font-medium text-gray-500 uppercase">Упражнения:</div>
-          <ul className="text-sm mt-1 space-y-1">
+          <div className="text-xs font-medium text-gray-700 mb-1">Упражнения:</div>
+          <ul className="space-y-1">
             {event.exercises.slice(0, 3).map((exercise, index) => (
-              <li key={index} className="flex justify-between">
-                <span>{exercise.name}</span>
-                <span>{exercise.weight || '0'} kg × {exercise.repetitions || '0'}</span>
+              <li key={index} className="text-xs flex justify-between">
+                <span className="text-gray-600">{exercise.name}</span>
+                <span className="text-gray-500">
+                  {exercise.weight || '0'} kg × {exercise.repetitions || '0'}
+                </span>
               </li>
             ))}
             {event.exercises.length > 3 && (
               <li className="text-xs text-gray-500">+ {event.exercises.length - 3} больше...</li>
             )}
+          </ul>
+        </div>
+      )}
+      
+      {event.results && event.results.length > 0 && (
+        <div className="mt-2 pt-2 border-t border-gray-100">
+          <div className="text-xs font-medium text-gray-700 mb-1">Результаты:</div>
+          <ul className="space-y-1 max-h-20 overflow-y-auto">
+            {event.results.map((result) => (
+              <li key={result.id} className="text-xs flex justify-between">
+                <span className="text-gray-600">{result.time}</span>
+                <div className="text-gray-500 text-xs">
+                  <div>{result.dateAdded}</div>
+                  <div>{result.username}</div>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
       )}
@@ -87,7 +85,7 @@ const EventTooltip: React.FC<{
 
 const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([
-    { id: '1', title: 'Sample Event', date: new Date().toISOString().split('T')[0], exercises: [] }
+    { id: '1', title: 'Sample Event', date: new Date().toISOString().split('T')[0], exercises: [], results: [], color: 'bg-blue-100' }
   ]);
   const [showAddEventButton, setShowAddEventButton] = useState(false);
   const [showEventActionMenu, setShowEventActionMenu] = useState(false);
@@ -102,6 +100,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   const [tooltipEvent, setTooltipEvent] = useState<CalendarEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const calendarRef = useRef<FullCalendar>(null);
+  const { isAuthenticated, user } = useAuth(); // Get authentication status and user info
 
   const handleDateClick = (arg: { dateStr: string, jsEvent: MouseEvent }) => {
     // Close event action menu if open
@@ -167,6 +166,21 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleAddEvent = (title: string, exerciseType: string, exercises: Exercise[]) => {
+    // Define an array of colors to cycle through
+    const colors = [
+      'bg-blue-100',
+      'bg-green-100',
+      'bg-purple-100',
+      'bg-yellow-100',
+      'bg-pink-100',
+      'bg-red-100',
+      'bg-indigo-100',
+      'bg-teal-100'
+    ];
+    
+    // Get the next color based on the number of existing events
+    const nextColor = colors[events.length % colors.length];
+    
     const newEvent: CalendarEvent = {
       id: Date.now().toString(),
       title,
@@ -176,7 +190,9 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
         ...exercise,
         weight: exercise.weight || '',
         repetitions: exercise.repetitions || ''
-      }))
+      })),
+      results: [], // Initialize with empty results array
+      color: nextColor // Assign the color to the new event
     };
     setEvents([...events, newEvent]);
     setShowAddEventButton(false);
@@ -192,6 +208,13 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleDeleteEvent = () => {
+    // Check if user is authenticated before allowing event deletion
+    if (!isAuthenticated) {
+      alert('Вы должны быть авторизованы для удаления события');
+      setShowEventActionMenu(false);
+      return;
+    }
+    
     if (selectedEvent) {
       setEvents(events.filter(event => event.id !== selectedEvent.id));
       setShowEventActionMenu(false);
@@ -199,6 +222,13 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleEditEvent = () => {
+    // Check if user is authenticated before allowing event editing
+    if (!isAuthenticated) {
+      alert('Вы должны быть авторизованы для редактирования события');
+      setShowEventActionMenu(false);
+      return;
+    }
+    
     if (selectedEvent) {
       setEventToEdit(selectedEvent);
       setShowEditModal(true);
@@ -207,6 +237,13 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleAddResult = () => {
+    // Check if user is authenticated before allowing adding results
+    if (!isAuthenticated) {
+      alert('Вы должны быть авторизованы для добавления результата');
+      setShowEventActionMenu(false);
+      return;
+    }
+    
     if (selectedEvent) {
       setEventToAddResult(selectedEvent);
       setShowAddResultModal(true);
@@ -215,10 +252,31 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleSaveResult = (time: string) => {
-    // Here you would typically save the result to your backend
-    console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
-    // For now, we'll just show an alert
-    alert(`Результат сохранен для события &quot;${eventToAddResult?.title}&quot;: ${time}`);
+    if (eventToAddResult) {
+      // Get the current user's name from the component level context
+      const username = user?.name || 'Anonymous';
+      
+      // Create a new result object
+      const newResult: EventResult = {
+        id: Date.now().toString(),
+        time,
+        dateAdded: new Date().toLocaleDateString('ru-RU'),
+        username
+      };
+      
+      // Update the event with the new result
+      setEvents(events.map(event => 
+        event.id === eventToAddResult.id 
+          ? { 
+              ...event, 
+              results: [...(event.results || []), newResult] 
+            } 
+          : event
+      ));
+      
+      console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
+      alert(`Результат сохранен для события "${eventToAddResult?.title}": ${time}`);
+    }
     setShowAddResultModal(false);
     setEventToAddResult(null);
   };
@@ -232,7 +290,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     if (eventToEdit) {
       setEvents(events.map(event => 
         event.id === eventToEdit.id 
-          ? { ...event, title, exerciseType, exercises } 
+          ? { ...event, title, exerciseType, exercises } // Results are preserved since we're not overwriting them
           : event
       ));
       setShowEditModal(false);
@@ -268,11 +326,15 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     };
   }, [showAddEventButton, showEventActionMenu, selectedEvent]);
 
-  // Custom event rendering to add data-id attribute
+  // Custom event rendering to add data-id attribute and styling
   const renderEventContent = (eventInfo: EventContentArg) => {
+    const event = events.find(e => e.id === eventInfo.event.id);
+    const eventColor = event?.color || 'bg-blue-100'; // Default color if not set
+    
     return (
       <div 
-        className="fc-event-main" 
+        className={`fc-event-main ${eventColor} h-[30px] flex items-center`}
+        style={{ color: 'black' }} // Added inline style to ensure black text
         data-id={eventInfo.event.id}
         onMouseEnter={(e) => handleEventMouseEnter({ 
           event: { id: eventInfo.event.id }, 
@@ -336,7 +398,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
           eventData={{
             title: eventToEdit.title,
             exerciseType: eventToEdit.exerciseType || '',
-            exercises: eventToEdit.exercises || []
+            exercises: eventToEdit.exercises || [],
+            results: eventToEdit.results || []
           }}
         />
       )}

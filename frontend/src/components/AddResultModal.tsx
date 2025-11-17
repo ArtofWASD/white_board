@@ -2,20 +2,19 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-
-interface AddResultModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (time: string) => void;
-  eventName: string;
-}
+import { AddResultModalProps } from '../types';
 
 const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave, eventName }) => {
   const [time, setTime] = useState('');
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Check if user is authenticated before allowing to save result
+    if (!isAuthenticated) {
+      alert('Вы должны быть авторизованы для добавления результата');
+      return;
+    }
     if (time.trim()) {
       onSave(time);
     }
@@ -54,6 +53,7 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Введите время (например: 10:30)"
               autoFocus
+              disabled={!isAuthenticated} // Disable if not authenticated
             />
           </div>
           
@@ -67,7 +67,12 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
             </button>
             <button
               type="submit"
-              className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
+              className={`px-4 py-2 text-white rounded-md focus:outline-none ${
+                isAuthenticated 
+                  ? 'bg-blue-500 hover:bg-blue-600' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
+              disabled={!isAuthenticated} // Disable if not authenticated
             >
               Сохранить
             </button>

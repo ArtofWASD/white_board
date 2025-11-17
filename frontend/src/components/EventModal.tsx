@@ -1,65 +1,65 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-
-interface Exercise {
-  id: number;
-  name: string;
-  weight: string;
-  repetitions: string;
-}
-
-interface EventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (title: string, exerciseType: string, exercises: Exercise[]) => void;
-  date: string;
-  eventData?: {
-    title: string;
-    exerciseType: string;
-    exercises: Exercise[];
-  };
-}
+import { Exercise, EventResult, EventModalProps } from '../types';
 
 const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, eventData }) => {
-  const [eventTitle, setEventTitle] = useState('');
-  const [exerciseType, setExerciseType] = useState('');
+  const [eventTitle, setEventTitle] = useState(eventData?.title || '');
+  const [exerciseType, setExerciseType] = useState(eventData?.exerciseType || '');
   const [rounds, setRounds] = useState('');
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>(eventData?.exercises || []);
   const [exerciseInput, setExerciseInput] = useState('');
   const [weightInput, setWeightInput] = useState('');
   const [repetitionsInput, setRepetitionsInput] = useState('');
+  const [sortedResults, setSortedResults] = useState<EventResult[]>(eventData?.results || []);
+  const [isSorted, setIsSorted] = useState(false);
+
+  // Handle form initialization and updates without directly calling setState in effects
+  useEffect(() => {
+    let isMounted = true;
+    
+    // Use requestAnimationFrame to defer state updates
+    const updateState = () => {
+      if (!isMounted) return;
+      
+      if (isOpen && eventData) {
+        setEventTitle(eventData.title || '');
+        setExerciseType(eventData.exerciseType || '');
+        setExercises(eventData.exercises || []);
+        setSortedResults(eventData.results || []);
+      } else if (isOpen) {
+        // Reset form when opening without eventData
+        setEventTitle('');
+        setExerciseType('');
+        setExercises([]);
+        setRounds('');
+        setExerciseInput('');
+        setWeightInput('');
+        setRepetitionsInput('');
+        setSortedResults([]);
+        setIsSorted(false);
+      }
+    };
+    
+    const rafId = requestAnimationFrame(updateState);
+    
+    return () => {
+      isMounted = false;
+      cancelAnimationFrame(rafId);
+    };
+  }, [isOpen, eventData]);
 
   const resetForm = () => {
-    setEventTitle('');
-    setExerciseType('');
-    setExercises([]);
+    setEventTitle(eventData?.title || '');
+    setExerciseType(eventData?.exerciseType || '');
+    setExercises(eventData?.exercises || []);
     setRounds('');
     setExerciseInput('');
     setWeightInput('');
     setRepetitionsInput('');
+    setSortedResults(eventData?.results || []);
+    setIsSorted(false);
   };
-
-  // Handle form initialization and reset
-  useEffect(() => {
-    if (isOpen) {
-      // Initialize form when modal opens or eventData changes
-      setEventTitle(eventData?.title || '');
-      setExerciseType(eventData?.exerciseType || '');
-      setExercises(eventData?.exercises || []);
-      setRounds('');
-      setExerciseInput('');
-      setWeightInput('');
-      setRepetitionsInput('');
-    }
-    
-    // Cleanup function to reset form when modal closes
-    return () => {
-      if (!isOpen) {
-        resetForm();
-      }
-    };
-  }, [isOpen, eventData]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,6 +208,49 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
               </ul>
             )}
           </div>
+          
+          {/* Results section */}
+          {eventData?.results && eventData.results.length > 0 && (
+            <div className="mb-4 pt-4 border-t border-dotted border-gray-300">
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Результаты
+                </label>
+                <button 
+                  onClick={() => {
+                    // Sort results by time
+                    const sorted = [...(isSorted ? eventData.results! : sortedResults)].sort((a, b) => {
+                      // Convert time strings to numbers for comparison (assuming format like "10:30")
+                      const [aMinutes, aSeconds] = a.time.split(':').map(Number);
+                      const [bMinutes, bSeconds] = b.time.split(':').map(Number);
+                      const aTotalSeconds = aMinutes * 60 + (aSeconds || 0);
+                      const bTotalSeconds = bMinutes * 60 + (bSeconds || 0);
+                      return aTotalSeconds - bTotalSeconds;
+                    });
+                    setSortedResults(sorted);
+                    setIsSorted(!isSorted);
+                  }}
+                  className="text-xs text-blue-500 hover:text-blue-700"
+                >
+                  {isSorted ? 'Отменить сортировку' : 'Сортировать по времени'}
+                </button>
+              </div>
+              <ul className="border border-gray-200 rounded-md max-h-32 overflow-y-auto bg-gray-50">
+                {(isSorted ? sortedResults : eventData.results).map((result) => (
+                  <li 
+                    key={result.id} 
+                    className="flex justify-between items-center px-3 py-2 border-b border-gray-100 last:border-b-0 text-sm"
+                  >
+                    <span className="font-medium">{result.time}</span>
+                    <div className="text-gray-500 text-xs">
+                      <div>{result.dateAdded}</div>
+                      <div>{result.username}</div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           
           <div className="flex justify-end gap-2">
             <button

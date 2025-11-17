@@ -6,12 +6,13 @@ interface User {
   id: string;
   name: string;
   email: string;
+  role: 'trainer' | 'athlete'; // Added role property
 }
 
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string, role: 'trainer' | 'athlete') => Promise<boolean>; // Updated signature
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -62,14 +63,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: 'trainer' | 'athlete'): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, email, password, role }), // Include role in request
       });
       
       const data = await response.json();

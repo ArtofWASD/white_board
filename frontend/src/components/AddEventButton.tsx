@@ -2,25 +2,19 @@
 
 import React, { useState } from 'react';
 import EventModal from './EventModal';
-
-interface Exercise {
-  id: number;
-  name: string;
-  weight: string;
-  repetitions: string;
-}
-
-interface AddEventButtonProps {
-  onAddEvent: (title: string, exerciseType: string, exercises: Exercise[]) => void;
-  onCancel: () => void;
-  date: string;
-  position: { top: number; left: number };
-}
+import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
+import { Exercise, AddEventButtonProps } from '../types';
 
 const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, date, position }) => {
   const [showModal, setShowModal] = useState(false);
+  const { isAuthenticated } = useAuth(); // Get authentication status
 
   const handleAddEventClick = () => {
+    // Check if user is authenticated before allowing event creation
+    if (!isAuthenticated) {
+      alert('Вы должны быть авторизованы для создания события');
+      return;
+    }
     setShowModal(true);
   };
 

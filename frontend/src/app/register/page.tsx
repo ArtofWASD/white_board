@@ -11,6 +11,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<'trainer' | 'athlete'>('athlete');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -33,9 +34,12 @@ export default function RegisterPage() {
     }
 
     try {
-      const success = await register(name, email, password);
+      const success = await register(name, email, password, role);
       if (!success) {
         setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
+      } else {
+        // Registration successful, redirect to login or dashboard
+        router.push('/login');
       }
     } catch (err) {
       setError('Произошла ошибка. Попробуйте еще раз.');
@@ -102,7 +106,7 @@ export default function RegisterPage() {
             />
           </div>
           
-          <div className="mb-6">
+          <div className="mb-4">
             <label htmlFor="confirmPassword" className="block text-gray-700 font-medium mb-2">
               Подтвердите пароль
             </label>
@@ -114,6 +118,35 @@ export default function RegisterPage() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
+          </div>
+          
+          {/* Role Selection */}
+          <div className="mb-6">
+            <label className="block text-gray-700 font-medium mb-2">
+              Роль
+            </label>
+            <div className="flex space-x-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  checked={role === 'athlete'}
+                  onChange={() => setRole('athlete')}
+                  className="form-radio h-4 w-4 text-blue-600"
+                />
+                <span className="ml-2">Атлет</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  checked={role === 'trainer'}
+                  onChange={() => setRole('trainer')}
+                  className="form-radio h-4 w-4 text-blue-600"
+                />
+                <span className="ml-2">Тренер</span>
+              </label>
+            </div>
           </div>
           
           <button

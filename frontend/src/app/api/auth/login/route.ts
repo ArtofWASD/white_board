@@ -12,6 +12,7 @@ export async function POST(request: Request) {
         id: '1',
         name: 'Demo User',
         email: email,
+        role: 'athlete', // Default role for demo purposes
       };
       
       // In a real app, you would generate a real JWT token
