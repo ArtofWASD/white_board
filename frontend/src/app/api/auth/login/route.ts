@@ -4,29 +4,28 @@ export async function POST(request: Request) {
   try {
     const { email, password } = await request.json();
     
-    // In a real application, you would validate credentials against a database
-    // For this example, we'll simulate a successful login
-    if (email && password) {
-      // Simulate database check
-      const user = {
-        id: '1',
-        name: 'Demo User',
-        email: email,
-        role: 'athlete', // Default role for demo purposes
-      };
-      
-      // In a real app, you would generate a real JWT token
-      const token = 'fake-jwt-token-for-demo-purposes';
-      
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+    const response = await fetch(`${backendUrl}/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+    
+    if (response.ok) {
       return NextResponse.json({
-        user,
-        token,
+        user: data.user,
+        token: data.token,
         message: 'Успешный вход'
       });
     } else {
       return NextResponse.json(
-        { message: 'Неверные учетные данные' },
-        { status: 401 }
+        { message: data.message || 'Неверные учетные данные' },
+        { status: response.status }
       );
     }
   } catch (error) {

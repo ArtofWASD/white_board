@@ -4,35 +4,28 @@ export async function POST(request: Request) {
   try {
     const { name, email, password, role } = await request.json();
     
-    // In a real application, you would:
-    // 1. Validate the input data
-    // 2. Check if user already exists
-    // 3. Hash the password
-    // 4. Save user to database
-    // 5. Generate JWT token
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+    const response = await fetch(`${backendUrl}/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password, role }),
+    });
+
+    const data = await response.json();
     
-    // For this example, we'll simulate a successful registration
-    if (name && email && password && role) {
-      // Simulate database save
-      const user = {
-        id: Date.now().toString(),
-        name: name,
-        email: email,
-        role: role, // Include role in user object
-      };
-      
-      // In a real app, you would generate a real JWT token
-      const token = 'fake-jwt-token-for-demo-purposes';
-      
+    if (response.ok) {
       return NextResponse.json({
-        user,
-        token,
+        user: data.user,
+        token: data.token,
         message: 'Успешная регистрация'
       });
     } else {
       return NextResponse.json(
-        { message: 'Все поля обязательны для заполнения' },
-        { status: 400 }
+        { message: data.message || 'Все поля обязательны для заполнения' },
+        { status: response.status }
       );
     }
   } catch (error) {
