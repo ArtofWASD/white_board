@@ -81,3 +81,16 @@ export interface EventModalProps {
 export interface UserDashboardProps {
   onClose?: () => void;
 }
+
+// New Event interface for athlete events
+export interface Event {
+  id: string;
+  title: string;
+  description?: string;
+  eventDate: string;
+  status: 'past' | 'future';
+  exerciseType?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}

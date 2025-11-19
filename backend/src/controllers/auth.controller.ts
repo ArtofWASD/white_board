@@ -1,6 +1,14 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Put,
+  Param,
+} from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
-import { LoginDto, RegisterDto } from '../dtos/auth.dto';
+import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -16,5 +24,14 @@ export class AuthController {
   @Post('register')
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Put('profile/:userId')
+  async updateProfile(
+    @Param('userId') userId: string,
+    @Body() updateProfileDto: UpdateProfileDto,
+  ) {
+    return this.authService.updateProfile(userId, updateProfileDto);
   }
 }

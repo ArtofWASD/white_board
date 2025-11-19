@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../entities/user.entity';
-import { LoginDto, RegisterDto } from '../dtos/auth.dto';
+import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -14,9 +18,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
+  async validateUser(
+    email: string,
+    password: string,
+  ): Promise<Omit<User, 'password'> | null> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
       return result;
     }
@@ -28,8 +36,12 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    
-    const payload = { email: user.email, sub: user.id, role: user.role };
+
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+    };
     return {
       user: {
         id: user.id,
@@ -44,10 +56,10 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.userRepository.findOne({ 
-      where: { email: registerDto.email } 
+    const existingUser = await this.userRepository.findOne({
+      where: { email: registerDto.email },
     });
-    
+
     if (existingUser) {
       throw new UnauthorizedException('User already exists');
     }
@@ -59,8 +71,12 @@ export class AuthService {
     });
 
     const savedUser = await this.userRepository.save(newUser);
-    
-    const payload = { email: savedUser.email, sub: savedUser.id, role: savedUser.role };
+
+    const payload = {
+      email: savedUser.email,
+      sub: savedUser.id,
+      role: savedUser.role,
+    };
     return {
       user: {
         id: savedUser.id,
@@ -71,6 +87,28 @@ export class AuthService {
         weight: savedUser.weight,
       },
       token: this.jwtService.sign(payload),
+    };
+  }
+
+  async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Update user with new data
+    Object.assign(user, updateProfileDto);
+    const updatedUser = await this.userRepository.save(user);
+
+    return {
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        role: updatedUser.role,
+        height: updatedUser.height,
+        weight: updatedUser.weight,
+      },
     };
   }
 }

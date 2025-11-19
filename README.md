@@ -80,6 +80,16 @@ BACKEND_URL=http://localhost:3001
 - `POST /auth/login` - Вход пользователя
 - `POST /auth/register` - Регистрация пользователя
 
+### События
+- `POST /events` - Создание события
+- `GET /events/:userId` - Получение всех событий пользователя
+- `GET /events/:userId/past` - Получение прошедших событий пользователя
+- `GET /events/:userId/future` - Получение предстоящих событий пользователя
+- `PUT /events/:eventId/status` - Обновление статуса события
+- `DELETE /events/:eventId` - Удаление события
+
+Более подробную информацию о работе с событиями можно найти в файле [EVENTS_API.md](backend/EVENTS_API.md)
+
 ## Технологии
 
 ### Frontend

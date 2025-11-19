@@ -5,7 +5,7 @@ export async function POST(request: Request) {
     const { email, password } = await request.json();
     
     // Forward the request to our NestJS backend
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+    const backendUrl = process.env.BACKEND_URL || 'http://backend:3001';
     const response = await fetch(`${backendUrl}/auth/login`, {
       method: 'POST',
       headers: {

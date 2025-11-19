@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
 import { UserDashboardProps } from '../types';
+import AthleteEvents from './AthleteEvents';
 
 export default function UserDashboard({ onClose }: UserDashboardProps) {
   const { user, logout } = useAuth();
@@ -49,6 +50,11 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
           <h3 className="text-xl font-semibold mb-2">Профиль</h3>
           <p className="text-gray-700">Настройте ваш профиль и предпочтения</p>
         </Link>
+      </div>
+      
+      <div className="mt-8">
+        <h3 className="text-xl font-semibold mb-4">События спортсмена</h3>
+        <AthleteEvents userId={user.id} />
       </div>
       
       <div className="mt-8">

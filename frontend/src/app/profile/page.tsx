@@ -7,28 +7,38 @@ import { useAuth } from '../../contexts/AuthContext';
 export default function ProfilePage() {
   const { user, logout } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
-  const [height, setHeight] = useState(user?.height || '');
-  const [weight, setWeight] = useState(user?.weight || '');
+  const [height, setHeight] = useState(user?.height?.toString() || '');
+  const [weight, setWeight] = useState(user?.weight?.toString() || '');
 
-  const handleSave = () => {
-    // In a real app, you would send this data to your backend
-    // For now, we'll just update localStorage
+  const handleSave = async () => {
     if (user) {
-      const updatedUser = {
-        ...user,
-        height: height ? Number(height) : undefined,
-        weight: weight ? Number(weight) : undefined
-      };
-      
-      // Update localStorage
-      localStorage.setItem('user', JSON.stringify(updatedUser));
-      
-      // In a real app, you would also update the context
-      // For now, we'll just toggle edit mode
-      setIsEditing(false);
-      
-      // Refresh the page to show updated data
-      window.location.reload();
+      try {
+        // Send data to NestJS backend directly
+        const response = await fetch(`http://localhost:3001/auth/profile/${user.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            height: height ? Number(height) : undefined,
+            weight: weight ? Number(weight) : undefined,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.user) {
+          // Update localStorage and context with new data
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          // Refresh the page to show updated data
+          window.location.reload();
+        } else {
+          console.error('Failed to update profile:', data.message);
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
     }
   };
 

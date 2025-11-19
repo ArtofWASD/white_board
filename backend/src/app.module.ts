@@ -3,7 +3,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth.module';
+import { EventsModule } from './modules/events.module';
 import { User } from './entities/user.entity';
+import { Event } from './entities/event.entity';
 
 @Module({
   imports: [
@@ -14,10 +16,11 @@ import { User } from './entities/user.entity';
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_NAME || 'whiteboard',
-      entities: [User],
+      entities: [User, Event],
       synchronize: true, // Только для разработки
     }),
     AuthModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

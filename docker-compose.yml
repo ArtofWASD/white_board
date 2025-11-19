@@ -17,6 +17,23 @@ services:
     networks:
       - whiteboard_network
 
+  # pgAdmin - PostgreSQL Administration Tool
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: whiteboard_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+    networks:
+      - whiteboard_network
+
   # Backend NestJS API
   backend:
     build:
@@ -49,6 +66,7 @@ services:
       - "3000:3000"
     environment:
       NEXT_PUBLIC_API_URL: http://localhost:3001
+      BACKEND_URL: http://backend:3001
     depends_on:
       - backend
     networks:
@@ -56,6 +74,7 @@ services:
 
 volumes:
   postgres_data:
+  pgadmin_data:
 
 networks:
   whiteboard_network:
