@@ -15,4 +15,7 @@ async function runMigrations() {
   }
 }
 
-runMigrations();
+runMigrations().catch((error) => {
+  console.error('Error during migration run:', error);
+  process.exit(1);
+});

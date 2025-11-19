@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Event } from '../entities/event.entity';
@@ -22,7 +22,7 @@ export class EventsService {
   ): Promise<Event> {
     const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException('User not found');
     }
 
     const event = this.eventRepository.create({
@@ -66,7 +66,7 @@ export class EventsService {
       where: { id: eventId },
     });
     if (!event) {
-      throw new Error('Event not found');
+      throw new NotFoundException('Event not found');
     }
 
     event.status = status;
@@ -74,6 +74,13 @@ export class EventsService {
   }
 
   async deleteEvent(eventId: string): Promise<void> {
+    const event = await this.eventRepository.findOne({
+      where: { id: eventId },
+    });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
     await this.eventRepository.delete(eventId);
   }
 }

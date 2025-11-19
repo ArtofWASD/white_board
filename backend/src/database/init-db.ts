@@ -20,4 +20,7 @@ async function initializeDatabase() {
   }
 }
 
-initializeDatabase();
+initializeDatabase().catch((error) => {
+  console.error('Unhandled error in database initialization:', error);
+  process.exit(1);
+});

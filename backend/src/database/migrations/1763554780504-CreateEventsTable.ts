@@ -4,14 +4,25 @@ export class CreateEventsTable1763554780504 implements MigrationInterface {
   name = 'CreateEventsTable1763554780504';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // Create the events table
+    // Create enum type for status if it doesn't exist
+    await queryRunner.query(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'events_status_enum') THEN
+          CREATE TYPE "public"."events_status_enum" AS ENUM('past', 'future');
+        END IF;
+      END
+      $$;
+    `);
+
+    // Create the events table with the correct enum type
     await queryRunner.query(`
       CREATE TABLE IF NOT EXISTS "events" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(),
         "title" character varying NOT NULL,
         "description" text,
         "event_date" TIMESTAMP NOT NULL,
-        "status" character varying NOT NULL DEFAULT 'future',
+        "status" "public"."events_status_enum" NOT NULL DEFAULT 'future',
         "exercise_type" character varying,
         "user_id" uuid NOT NULL,
         "created_at" TIMESTAMP NOT NULL DEFAULT now(),
@@ -27,24 +38,6 @@ export class CreateEventsTable1763554780504 implements MigrationInterface {
       FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
       ON DELETE CASCADE
-    `);
-
-    // Create enum type for status if it doesn't exist
-    await queryRunner.query(`
-      DO $$
-      BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'events_status_enum') THEN
-          CREATE TYPE "public"."events_status_enum" AS ENUM('past', 'future');
-        END IF;
-      END
-      $$;
-    `);
-
-    // Apply the enum type to the status column
-    await queryRunner.query(`
-      ALTER TABLE "events"
-      ALTER COLUMN "status" TYPE "public"."events_status_enum"
-      USING "status"::"public"."events_status_enum"
     `);
   }
 

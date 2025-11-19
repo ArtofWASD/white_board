@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { User } from './src/entities/user.entity';
+import { Event } from './src/entities/event.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -8,7 +9,7 @@ export const AppDataSource = new DataSource({
   username: process.env.DB_USERNAME || 'postgres',
   password: process.env.DB_PASSWORD || 'postgres',
   database: process.env.DB_NAME || 'whiteboard',
-  entities: [User],
+  entities: [User, Event],
   synchronize: true,
   logging: false,
 });

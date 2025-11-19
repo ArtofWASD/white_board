@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity('users')
 export class User {
@@ -17,7 +23,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: ['trainer', 'athlete'],
-    default: 'athlete'
+    default: 'athlete',
   })
   role: string;
 

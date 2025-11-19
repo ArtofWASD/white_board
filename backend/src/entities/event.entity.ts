@@ -28,7 +28,7 @@ export class Event {
     enum: ['past', 'future'],
     default: 'future',
   })
-  status: string;
+  status: 'past' | 'future';
 
   @Column({ nullable: true })
   exerciseType: string;
