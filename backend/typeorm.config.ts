@@ -14,6 +14,6 @@ export const dataSource = new DataSource({
   database: process.env.DB_NAME || 'whiteboard',
   entities: [User, Event],
   migrations: ['src/database/migrations/*.{ts,js}'],
-  synchronize: true,
+  synchronize: false, // Отключаем автоматическую синхронизацию
   logging: false,
 });

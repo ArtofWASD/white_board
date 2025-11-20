@@ -11,34 +11,70 @@ export default function ProfilePage() {
   const [weight, setWeight] = useState(user?.weight?.toString() || '');
 
   const handleSave = async () => {
+    console.log('Handle save function called');
     if (user) {
       try {
-        // Send data to NestJS backend directly
-        const response = await fetch(`http://localhost:3001/auth/profile/${user.id}`, {
+        // Log the data being sent
+        console.log('Sending profile update for user:', user.id);
+        console.log('Height:', height ? Number(height) : undefined);
+        console.log('Weight:', weight ? Number(weight) : undefined);
+        
+        // Prepare the data to send
+        const requestData = {
+          height: height && height !== '' ? Number(height) : undefined,
+          weight: weight && weight !== '' ? Number(weight) : undefined,
+        };
+        
+        // Remove undefined values
+        const cleanData = Object.fromEntries(
+          Object.entries(requestData).filter(([_, v]) => v !== undefined)
+        );
+        
+        console.log('Clean data being sent:', cleanData);
+        
+        // Check if there's actually data to send
+        if (Object.keys(cleanData).length === 0) {
+          console.log('No data to send');
+          setIsEditing(false);
+          return;
+        }
+        
+        // Send data through Next.js API route instead of directly to NestJS backend
+        console.log('Making fetch request to:', `/api/auth/profile/${user.id}`);
+        const response = await fetch(`/api/auth/profile/${user.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            height: height ? Number(height) : undefined,
-            weight: weight ? Number(weight) : undefined,
-          }),
+          body: JSON.stringify(cleanData),
         });
 
+        console.log('Response received:', response.status, response.statusText);
         const data = await response.json();
+        console.log('Profile update response:', data);
 
         if (response.ok && data.user) {
           // Update localStorage and context with new data
           localStorage.setItem('user', JSON.stringify(data.user));
           
-          // Refresh the page to show updated data
-          window.location.reload();
+          // Update state with new values
+          setHeight(data.user.height?.toString() || '');
+          setWeight(data.user.weight?.toString() || '');
+          
+          // Exit edit mode
+          setIsEditing(false);
+          
+          console.log('Profile updated successfully');
         } else {
           console.error('Failed to update profile:', data.message);
+          alert(`Failed to update profile: ${data.message || 'Unknown error'}`);
         }
-      } catch (error) {
+      } catch (error: unknown) {
         console.error('Error updating profile:', error);
+        alert(`Error updating profile: ${(error as Error).message || 'Unknown error'}`);
       }
+    } else {
+      console.log('No user found');
     }
   };
 

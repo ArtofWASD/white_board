@@ -96,9 +96,15 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
+    // Log the incoming data
+    console.log('Updating profile for user:', userId);
+    console.log('Incoming data:', updateProfileDto);
+
     // Update user with new data
     Object.assign(user, updateProfileDto);
     const updatedUser = await this.userRepository.save(user);
+
+    console.log('Updated user:', updatedUser);
 
     return {
       user: {

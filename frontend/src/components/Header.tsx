@@ -12,9 +12,9 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
   const { user, isAuthenticated } = useAuth();
   const router = useRouter();
 
-  const handleRegisterClick = () => {
-    // Navigate to the registration page
-    router.push('/register');
+  const handleLoginClick = () => {
+    // Navigate to the login page
+    router.push('/login');
   };
 
   const handleUserIconClick = () => {
@@ -44,7 +44,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
         </div>
       ) : (
         <button 
-          onClick={handleRegisterClick}
+          onClick={handleLoginClick}
           className="bg-transparent hover:bg-transparent text-white font-bold p-3 rounded-full cursor-pointer"
         >
           <Image src="/login.png" alt="Login" width={40} height={40} />
