@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
-import TeamManagement from '../../components/TeamManagement';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -109,10 +108,10 @@ export default function ProfilePage() {
       <div className="border rounded-lg p-6 mb-6">
         <div className="flex items-center mb-6">
           <div className="w-20 h-20 rounded-full bg-blue-500 flex items-center justify-center mr-6">
-            <span className="text-3xl font-bold text-white">{user.name.charAt(0)}</span>
+            <span className="text-3xl font-bold text-white">{user.name.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}</span>
           </div>
           <div>
-            <h2 className="text-2xl font-semibold">{user.name}</h2>
+            <h2 className="text-2xl font-semibold">{user.name}{user.lastName ? ` ${user.lastName}` : ''}</h2>
             <p className="text-gray-600">{user.email}</p>
           </div>
         </div>
@@ -166,13 +165,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-      
-      {/* Team Management Section for Trainers */}
-      {user.role === 'trainer' && (
-        <div className="mb-6">
-          <TeamManagement />
-        </div>
-      )}
       
       <div className="flex space-x-4">
         <button

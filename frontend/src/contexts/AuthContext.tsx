@@ -15,7 +15,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, role: 'trainer' | 'athlete') => Promise<boolean>; // Updated signature
+  register: (name: string, email: string, password: string, role: 'trainer' | 'athlete', lastName?: string) => Promise<boolean>; // Updated signature
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -66,14 +66,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: 'trainer' | 'athlete'): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: 'trainer' | 'athlete', lastName?: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password, role }), // Include role in request
+        body: JSON.stringify({ name, lastName, email, password, role }), // Include role and lastName in request
       });
       
       const data = await response.json();

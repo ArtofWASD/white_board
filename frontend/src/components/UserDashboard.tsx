@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
 import { UserDashboardProps } from '../types';
 import AthleteEvents from './AthleteEvents';
+import CreateTeamModal from './CreateTeamModal';
 
 // Define the Event type
 interface Event {
@@ -20,6 +21,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
   const { user, logout } = useAuth();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchEvents = async () => {
@@ -54,7 +56,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Добро пожаловать, {user.name} ({user.role === 'athlete' ? 'Атлет' : 'Тренер'})!</h2>
+        <h2 className="text-2xl font-bold">Добро пожаловать, {user.name}{user.lastName ? ` ${user.lastName}` : ''} ({user.role === 'athlete' ? 'Атлет' : 'Тренер'})!</h2>
         <div className="flex space-x-2">
           {onClose && (
             <button
@@ -94,12 +96,32 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
         </Link>
       </div>
       
+      {/* Create Team Button for Trainers */}
+      {user.role === 'trainer' && (
+        <div className="mt-8">
+          <button
+            onClick={() => setIsCreateTeamModalOpen(true)}
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+          >
+            Создать команду
+          </button>
+        </div>
+      )}
+      
       <div className="mt-8">
         <h3 className="text-xl font-semibold mb-4">События спортсмена</h3>
         <AthleteEvents userId={user.id} />
       </div>
       
-
+      {/* Create Team Modal */}
+      <CreateTeamModal 
+        isOpen={isCreateTeamModalOpen}
+        onClose={() => setIsCreateTeamModalOpen(false)}
+        onTeamCreated={() => {
+          // Optionally refresh team data or show notification
+          console.log('Team created successfully');
+        }}
+      />
     </div>
   );
 }

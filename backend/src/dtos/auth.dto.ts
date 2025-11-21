@@ -45,6 +45,10 @@ export class RegisterDto {
 
 export class UpdateProfileDto {
   @IsOptional()
+  @IsString()
+  lastName?: string;
+
+  @IsOptional()
   @IsNumber()
   height?: number;
 

@@ -37,9 +37,9 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
           className="flex items-center space-x-2 cursor-pointer"
           onClick={handleUserIconClick}
         >
-          <span className="hidden md:inline">Привет, {user.name}!</span>
+          <span className="hidden md:inline">Привет, {user.name}{user.lastName ? ` ${user.lastName}` : ''}!</span>
           <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="font-bold">{user.name.charAt(0)}</span>
+            <span className="font-bold">{user.name.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}</span>
           </div>
         </div>
       ) : (

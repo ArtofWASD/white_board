@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
-import { SafeUser, UserResponse } from '../types';
+import { SafeUser, UserResponse, User } from '../types';
 
 @Injectable()
 export class AuthService {
@@ -44,6 +44,7 @@ export class AuthService {
       user: {
         id: user.id,
         name: user.name,
+        lastName: user.lastName,
         email: user.email,
         role: user.role,
         height: user.height,
@@ -65,8 +66,11 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     const newUser = await this.prisma.user.create({
       data: {
-        ...registerDto,
+        name: registerDto.name,
+        lastName: registerDto.lastName, // Properly handle lastName
+        email: registerDto.email,
         password: hashedPassword,
+        role: registerDto.role, // Use the provided role
       },
     });
 
@@ -79,6 +83,7 @@ export class AuthService {
       user: {
         id: newUser.id,
         name: newUser.name,
+        lastName: newUser.lastName,
         email: newUser.email,
         role: newUser.role,
         height: newUser.height,
@@ -98,10 +103,22 @@ export class AuthService {
     console.log('Updating profile for user:', userId);
     console.log('Incoming data:', updateProfileDto);
 
+    // Build update data object with only provided fields
+    const updateData: Partial<User> = {};
+    if (updateProfileDto.lastName !== undefined) {
+      updateData.lastName = updateProfileDto.lastName;
+    }
+    if (updateProfileDto.height !== undefined) {
+      updateData.height = updateProfileDto.height;
+    }
+    if (updateProfileDto.weight !== undefined) {
+      updateData.weight = updateProfileDto.weight;
+    }
+
     // Update user with new data
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
-      data: updateProfileDto,
+      data: updateData,
     });
 
     console.log('Updated user:', updatedUser);
@@ -110,6 +127,7 @@ export class AuthService {
       user: {
         id: updatedUser.id,
         name: updatedUser.name,
+        lastName: updatedUser.lastName,
         email: updatedUser.email,
         role: updatedUser.role,
         height: updatedUser.height,

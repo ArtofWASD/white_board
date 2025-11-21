@@ -1,12 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const [showCreateTeamForm, setShowCreateTeamForm] = useState(false);
+  const [teamName, setTeamName] = useState('');
+  const [teamDescription, setTeamDescription] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
   if (!user) {
     return (
@@ -29,6 +35,47 @@ export default function DashboardPage() {
 
   const handleGoToProfile = () => {
     router.push('/profile');
+  };
+
+  const handleCreateTeam = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!teamName.trim() || !user) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+      
+      const response = await fetch('/api/teams', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: teamName,
+          description: teamDescription,
+        }),
+      });
+
+      if (response.ok) {
+        // Reset form
+        setTeamName('');
+        setTeamDescription('');
+        setSuccess('Команда успешно создана!');
+        
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || 'Не удалось создать команду');
+      }
+    } catch (err) {
+      setError('Не удалось создать команду');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -93,6 +140,87 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+        
+        {/* Create Team Section for Trainers */}
+        {user.role === 'trainer' && (
+          <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h3 className="text-xl font-semibold mb-2 text-indigo-600">Создать команду</h3>
+            <p className="text-gray-700 mb-4">Создайте новую команду для управления спортсменами</p>
+            {!showCreateTeamForm ? (
+              <button 
+                onClick={() => setShowCreateTeamForm(true)}
+                className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition duration-300"
+              >
+                Создать команду
+              </button>
+            ) : (
+              <div className="mt-4">
+                {error && (
+                  <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {error}
+                  </div>
+                )}
+                {success && (
+                  <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                    {success}
+                  </div>
+                )}
+                <form onSubmit={handleCreateTeam} className="space-y-4">
+                  <div>
+                    <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-1">
+                      Название команды *
+                    </label>
+                    <input
+                      type="text"
+                      id="teamName"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="teamDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                      Описание
+                    </label>
+                    <textarea
+                      id="teamDescription"
+                      value={teamDescription}
+                      onChange={(e) => setTeamDescription(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      rows={3}
+                    />
+                  </div>
+                  
+                  <div className="flex space-x-3">
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                    >
+                      {loading ? 'Создание...' : 'Создать команду'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowCreateTeamForm(false);
+                        // Reset form when closing
+                        setTeamName('');
+                        setTeamDescription('');
+                        setError(null);
+                        setSuccess(null);
+                      }}
+                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                      Отмена
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="bg-white rounded-lg shadow-xl p-6">
           <h3 className="text-xl font-semibold mb-4">Последние действия</h3>

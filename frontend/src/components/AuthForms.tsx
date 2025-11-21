@@ -10,6 +10,7 @@ export default function AuthForms() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState(''); // Adding last name state
+  const [role, setRole] = useState<'athlete' | 'trainer'>('athlete'); // Adding role state
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -35,9 +36,8 @@ export default function AuthForms() {
           return;
         }
         
-        // Combine first name and last name for the name field
-        const fullName = lastName ? `${name} ${lastName}` : name;
-        const success = await register(fullName, email, password, 'athlete');
+        // Use separate first name and last name fields
+        const success = await register(name, email, password, role);
         if (!success) {
           setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
         }
@@ -90,6 +90,36 @@ export default function AuthForms() {
               onChange={(e) => setLastName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
+          </div>
+        )}
+        
+        {!isLogin && (
+          <div className="mb-4">
+            <label className="block text-gray-700 font-medium mb-2">
+              Роль
+            </label>
+            <div className="flex space-x-4">
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  checked={role === 'athlete'}
+                  onChange={() => setRole('athlete')}
+                  className="form-radio"
+                />
+                <span className="ml-2">Атлет</span>
+              </label>
+              <label className="inline-flex items-center">
+                <input
+                  type="radio"
+                  name="role"
+                  checked={role === 'trainer'}
+                  onChange={() => setRole('trainer')}
+                  className="form-radio"
+                />
+                <span className="ml-2">Тренер</span>
+              </label>
+            </div>
           </div>
         )}
         
