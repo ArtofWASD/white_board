@@ -1,17 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Event } from '../entities/event.entity';
-import { User } from '../entities/user.entity';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class EventsService {
-  constructor(
-    @InjectRepository(Event)
-    private eventRepository: Repository<Event>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async createEvent(
     userId: string,
@@ -19,68 +11,80 @@ export class EventsService {
     eventDate: Date,
     description?: string,
     exerciseType?: string,
-  ): Promise<Event> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  ) {
+    // Check if user exists
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const event = this.eventRepository.create({
-      title,
-      eventDate,
-      description,
-      exerciseType,
-      user,
-      userId,
+    const event = await this.prisma.event.create({
+      data: {
+        title,
+        eventDate,
+        description,
+        exerciseType,
+        userId,
+      },
     });
 
-    return this.eventRepository.save(event);
+    return event;
   }
 
-  async getEventsByUserId(userId: string): Promise<Event[]> {
-    return this.eventRepository.find({
+  async getEventsByUserId(userId: string) {
+    return this.prisma.event.findMany({
       where: { userId },
-      order: { eventDate: 'ASC' },
+      orderBy: { eventDate: 'asc' },
     });
   }
 
-  async getPastEventsByUserId(userId: string): Promise<Event[]> {
-    return this.eventRepository.find({
-      where: { userId, status: 'past' },
-      order: { eventDate: 'DESC' },
+  async getPastEventsByUserId(userId: string) {
+    return this.prisma.event.findMany({
+      where: { 
+        userId,
+        status: 'past'
+      },
+      orderBy: { eventDate: 'desc' },
     });
   }
 
-  async getFutureEventsByUserId(userId: string): Promise<Event[]> {
-    return this.eventRepository.find({
-      where: { userId, status: 'future' },
-      order: { eventDate: 'ASC' },
+  async getFutureEventsByUserId(userId: string) {
+    return this.prisma.event.findMany({
+      where: { 
+        userId,
+        status: 'future'
+      },
+      orderBy: { eventDate: 'asc' },
     });
   }
 
   async updateEventStatus(
     eventId: string,
     status: 'past' | 'future',
-  ): Promise<Event> {
-    const event = await this.eventRepository.findOne({
+  ) {
+    const event = await this.prisma.event.findUnique({
       where: { id: eventId },
     });
     if (!event) {
       throw new NotFoundException('Event not found');
     }
 
-    event.status = status;
-    return this.eventRepository.save(event);
+    return this.prisma.event.update({
+      where: { id: eventId },
+      data: { status },
+    });
   }
 
   async deleteEvent(eventId: string): Promise<void> {
-    const event = await this.eventRepository.findOne({
+    const event = await this.prisma.event.findUnique({
       where: { id: eventId },
     });
     if (!event) {
       throw new NotFoundException('Event not found');
     }
 
-    await this.eventRepository.delete(eventId);
+    await this.prisma.event.delete({
+      where: { id: eventId },
+    });
   }
 }

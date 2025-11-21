@@ -5,24 +5,21 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
+import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private prisma: PrismaService,
     private jwtService: JwtService,
   ) {}
 
   async validateUser(
     email: string,
     password: string,
-  ): Promise<Omit<User, 'password'> | null> {
-    const user = await this.userRepository.findOne({ where: { email } });
+  ): Promise<Omit<any, 'password'> | null> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...result } = user;
@@ -56,7 +53,7 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.userRepository.findOne({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
     });
 
@@ -65,33 +62,33 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    const newUser = this.userRepository.create({
-      ...registerDto,
-      password: hashedPassword,
+    const newUser = await this.prisma.user.create({
+      data: {
+        ...registerDto,
+        password: hashedPassword,
+      },
     });
 
-    const savedUser = await this.userRepository.save(newUser);
-
     const payload = {
-      email: savedUser.email,
-      sub: savedUser.id,
-      role: savedUser.role,
+      email: newUser.email,
+      sub: newUser.id,
+      role: newUser.role,
     };
     return {
       user: {
-        id: savedUser.id,
-        name: savedUser.name,
-        email: savedUser.email,
-        role: savedUser.role,
-        height: savedUser.height,
-        weight: savedUser.weight,
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        height: newUser.height,
+        weight: newUser.weight,
       },
       token: this.jwtService.sign(payload),
     };
   }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -101,8 +98,10 @@ export class AuthService {
     console.log('Incoming data:', updateProfileDto);
 
     // Update user with new data
-    Object.assign(user, updateProfileDto);
-    const updatedUser = await this.userRepository.save(user);
+    const updatedUser = await this.prisma.user.update({
+      where: { id: userId },
+      data: updateProfileDto,
+    });
 
     console.log('Updated user:', updatedUser);
 
