@@ -39,29 +39,32 @@ export class EventsService {
   }
 
   async getPastEventsByUserId(userId: string) {
+    // First update event statuses based on current date
+    await this.updateEventStatuses();
+
     return this.prisma.event.findMany({
-      where: { 
+      where: {
         userId,
-        status: 'past'
+        status: 'past',
       },
       orderBy: { eventDate: 'desc' },
     });
   }
 
   async getFutureEventsByUserId(userId: string) {
+    // First update event statuses based on current date
+    await this.updateEventStatuses();
+
     return this.prisma.event.findMany({
-      where: { 
+      where: {
         userId,
-        status: 'future'
+        status: 'future',
       },
       orderBy: { eventDate: 'asc' },
     });
   }
 
-  async updateEventStatus(
-    eventId: string,
-    status: 'past' | 'future',
-  ) {
+  async updateEventStatus(eventId: string, status: 'past' | 'future') {
     const event = await this.prisma.event.findUnique({
       where: { id: eventId },
     });
@@ -72,6 +75,36 @@ export class EventsService {
     return this.prisma.event.update({
       where: { id: eventId },
       data: { status },
+    });
+  }
+
+  async updateEventStatuses(): Promise<void> {
+    const now = new Date();
+
+    // Update past events
+    await this.prisma.event.updateMany({
+      where: {
+        eventDate: {
+          lt: now,
+        },
+        status: 'future',
+      },
+      data: {
+        status: 'past',
+      },
+    });
+
+    // Update future events
+    await this.prisma.event.updateMany({
+      where: {
+        eventDate: {
+          gte: now,
+        },
+        status: 'past',
+      },
+      data: {
+        status: 'future',
+      },
     });
   }
 

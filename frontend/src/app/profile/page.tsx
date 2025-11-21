@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
+import TeamManagement from '../../components/TeamManagement';
 
 export default function ProfilePage() {
   const { user, logout } = useAuth();
@@ -94,7 +95,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
+    <div className="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Профиль пользователя</h1>
         <Link 
@@ -165,6 +166,13 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      
+      {/* Team Management Section for Trainers */}
+      {user.role === 'trainer' && (
+        <div className="mb-6">
+          <TeamManagement />
+        </div>
+      )}
       
       <div className="flex space-x-4">
         <button

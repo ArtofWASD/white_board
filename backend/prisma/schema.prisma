@@ -19,6 +19,10 @@ model User {
   events    Event[]
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  
+  // Team relationships
+  ownedTeams   Team[]     @relation("OwnedTeams")
+  teamMemberships TeamMember[]
 
   @@map("users")
 }
@@ -36,4 +40,32 @@ model Event {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("events")
+}
+
+// Team model for managing trainer teams
+model Team {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String
+  owner       User     @relation("OwnedTeams", fields: [ownerId], references: [id])
+  members     TeamMember[]
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("teams")
+}
+
+// Junction table for team members
+model TeamMember {
+  id     String @id @default(uuid())
+  teamId String
+  userId String
+  role   String @default("athlete") // athlete or trainer
+  
+  team   Team   @relation(fields: [teamId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+  
+  @@unique([teamId, userId])
+  @@map("team_members")
 }

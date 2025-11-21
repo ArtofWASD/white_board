@@ -5,6 +5,8 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  IsUUID,
+  IsEnum,
 } from 'class-validator';
 
 export class LoginDto {
@@ -49,4 +51,31 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsNumber()
   weight?: number;
+}
+
+// Team DTOs
+export class CreateTeamDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+}
+
+export class AddTeamMemberDto {
+  @IsUUID()
+  @IsNotEmpty()
+  userId: string;
+
+  @IsString()
+  @IsEnum(['athlete', 'trainer'])
+  role: 'athlete' | 'trainer';
+}
+
+export class RemoveTeamMemberDto {
+  @IsUUID()
+  @IsNotEmpty()
+  userId: string;
 }
