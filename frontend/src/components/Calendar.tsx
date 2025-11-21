@@ -84,9 +84,7 @@ const EventTooltip: React.FC<{
 };
 
 const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
-  const [events, setEvents] = useState<CalendarEvent[]>([
-    { id: '1', title: 'Sample Event', date: new Date().toISOString().split('T')[0], exercises: [], results: [], color: 'bg-blue-100' }
-  ]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showAddEventButton, setShowAddEventButton] = useState(false);
   const [showEventActionMenu, setShowEventActionMenu] = useState(false);
   const [selectedDate, setSelectedDate] = useState('');

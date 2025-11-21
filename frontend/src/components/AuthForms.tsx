@@ -9,6 +9,7 @@ export default function AuthForms() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [lastName, setLastName] = useState(''); // Adding last name state
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -34,7 +35,9 @@ export default function AuthForms() {
           return;
         }
         
-        const success = await register(name, email, password, 'athlete');
+        // Combine first name and last name for the name field
+        const fullName = lastName ? `${name} ${lastName}` : name;
+        const success = await register(fullName, email, password, 'athlete');
         if (!success) {
           setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
         }
@@ -71,6 +74,21 @@ export default function AuthForms() {
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required={!isLogin}
+            />
+          </div>
+        )}
+        
+        {!isLogin && (
+          <div className="mb-4">
+            <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">
+              Фамилия
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         )}

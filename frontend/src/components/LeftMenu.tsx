@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { CalendarEvent, EventResult } from '../types';
 
@@ -22,6 +22,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   onShowEventDetails
 }) => {
   const { isAuthenticated, user } = useAuth();
+  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
 
   // Extract recent results from all events
   const getRecentResults = () => {
@@ -45,7 +46,23 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       .slice(0, 5);
   };
 
+  // Get upcoming events (events with dates today or in the future)
+  const getUpcomingEvents = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    return events
+      .filter(event => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate >= today;
+      })
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(0, 5); // Limit to 5 upcoming events
+  };
+
   const recentResults = getRecentResults();
+  const upcomingEventsList = getUpcomingEvents();
 
   return (
     <>
@@ -72,6 +89,30 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
                   <h3 className="font-bold text-lg mb-2">Физические параметры</h3>
                   <p className="text-gray-700"><span className="font-medium">Рост:</span> {user.height ? `${user.height} см` : 'Не указан'}</p>
                   <p className="text-gray-700"><span className="font-medium">Вес:</span> {user.weight ? `${user.weight} кг` : 'Не указан'}</p>
+                </div>
+                
+                {/* Upcoming Events Section */}
+                <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-bold text-lg mb-2">Будущие события</h3>
+                  {upcomingEventsList.length > 0 ? (
+                    <ul className="space-y-2">
+                      {upcomingEventsList.map((event) => (
+                        <li key={event.id} className="border-b border-gray-200 pb-2 last:border-b-0">
+                          <div 
+                            className="cursor-pointer hover:bg-gray-100 p-2 rounded"
+                            onClick={() => onShowEventDetails(event)}
+                          >
+                            <p className="font-medium text-blue-600">{event.title}</p>
+                            <div className="flex justify-between text-sm mt-1">
+                              <span className="text-gray-600">Дата: {event.date}</span>
+                            </div>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-500 text-sm">Нет предстоящих событий</p>
+                  )}
                 </div>
                 
                 {/* Recent Results Section */}

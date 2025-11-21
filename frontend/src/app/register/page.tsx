@@ -8,6 +8,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { isAuthenticated, register } = useAuth();
   const [name, setName] = useState('');
+  const [lastName, setLastName] = useState(''); // Adding last name state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -34,7 +35,9 @@ export default function RegisterPage() {
     }
 
     try {
-      const success = await register(name, email, password, role);
+      // Combine first name and last name for the name field
+      const fullName = lastName ? `${name} ${lastName}` : name;
+      const success = await register(fullName, email, password, role);
       if (!success) {
         setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
       } else {
@@ -75,6 +78,19 @@ export default function RegisterPage() {
               onChange={(e) => setName(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
+            />
+          </div>
+          
+          <div className="mb-4">
+            <label htmlFor="lastName" className="block text-gray-700 font-medium mb-2">
+              Фамилия
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           

@@ -60,7 +60,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-2xl font-semibold">{user.name}</h2>
               <p className="text-gray-600">{user.email}</p>
-              <p className="text-sm text-gray-500">ID: {user.id}</p>
+              <p className="text-sm text-gray-500">Роль: {user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
             </div>
           </div>
         </div>
@@ -96,11 +96,6 @@ export default function DashboardPage() {
         
         <div className="bg-white rounded-lg shadow-xl p-6">
           <h3 className="text-xl font-semibold mb-4">Последние действия</h3>
-          <ul className="border rounded-lg divide-y">
-            <li className="p-4 hover:bg-gray-50">Создано новое событие: &quot;Встреча с командой&quot;</li>
-            <li className="p-4 hover:bg-gray-50">Обновлен календарь на эту неделю</li>
-            <li className="p-4 hover:bg-gray-50">Добавлены напоминания для важных задач</li>
-          </ul>
         </div>
       </div>
     </div>

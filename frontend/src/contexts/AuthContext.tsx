@@ -5,6 +5,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface User {
   id: string;
   name: string;
+  lastName?: string; // Adding lastName field
   email: string;
   role: 'trainer' | 'athlete'; // Added role property
   height?: number;

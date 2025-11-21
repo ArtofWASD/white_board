@@ -1,22 +1,60 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
 import { UserDashboardProps } from '../types';
 import AthleteEvents from './AthleteEvents';
 
+// Define the Event type
+interface Event {
+  id: string;
+  title: string;
+  description: string;
+  eventDate: string;
+  exerciseType?: string;
+  status: 'past' | 'future';
+}
+
 export default function UserDashboard({ onClose }: UserDashboardProps) {
   const { user, logout } = useAuth();
+  const [events, setEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`/api/events?userId=${user.id}`);
+          const data: Event[] = await response.json();
+          
+          if (response.ok) {
+            setEvents(data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch events:', error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (user) {
+      fetchEvents();
+    }
+  }, [user]);
 
   if (!user) {
     return null;
   }
 
+  const futureEvents = events.filter(event => event.status === 'future');
+  const pastEvents = events.filter(event => event.status === 'past');
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Добро пожаловать, {user.name}!</h2>
+        <h2 className="text-2xl font-bold">Добро пожаловать, {user.name} ({user.role === 'athlete' ? 'Атлет' : 'Тренер'})!</h2>
         <div className="flex space-x-2">
           {onClose && (
             <button
@@ -38,7 +76,11 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-blue-50 p-6 rounded-lg">
           <h3 className="text-xl font-semibold mb-2">Ваши события</h3>
-          <p className="text-gray-700">Управляйте своими событиями и задачами</p>
+          {loading ? (
+            <p className="text-gray-700">Загрузка...</p>
+          ) : (
+            <p className="text-gray-700">Всего событий: {events.length}</p>
+          )}
         </div>
         
         <div className="bg-green-50 p-6 rounded-lg">
@@ -57,14 +99,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
         <AthleteEvents userId={user.id} />
       </div>
       
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4">Последние действия</h3>
-        <ul className="border rounded-lg divide-y">
-          <li className="p-4 hover:bg-gray-50">Создано новое событие: &quot;Встреча с командой&quot;</li>
-          <li className="p-4 hover:bg-gray-50">Обновлен календарь на эту неделю</li>
-          <li className="p-4 hover:bg-gray-50">Добавлены напоминания для важных задач</li>
-        </ul>
-      </div>
+
     </div>
   );
 }

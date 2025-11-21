@@ -7,6 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
+import { SafeUser, UserResponse } from '../types';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,7 @@ export class AuthService {
   async validateUser(
     email: string,
     password: string,
-  ): Promise<Omit<any, 'password'> | null> {
+  ): Promise<SafeUser | null> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     if (user && (await bcrypt.compare(password, user.password))) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -47,7 +48,7 @@ export class AuthService {
         role: user.role,
         height: user.height,
         weight: user.weight,
-      },
+      } as UserResponse,
       token: this.jwtService.sign(payload),
     };
   }
@@ -82,7 +83,7 @@ export class AuthService {
         role: newUser.role,
         height: newUser.height,
         weight: newUser.weight,
-      },
+      } as UserResponse,
       token: this.jwtService.sign(payload),
     };
   }
@@ -113,7 +114,7 @@ export class AuthService {
         role: updatedUser.role,
         height: updatedUser.height,
         weight: updatedUser.weight,
-      },
+      } as UserResponse,
     };
   }
 }

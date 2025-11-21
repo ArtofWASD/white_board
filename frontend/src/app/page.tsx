@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Calendar from '../components/Calendar';
 import Footer from '../components/Footer';
@@ -23,44 +23,49 @@ interface CalendarEvent {
   results?: EventResult[];
 }
 
-// Mock events data
-const mockEvents: CalendarEvent[] = [
-  { 
-    id: '1', 
-    title: 'Утренняя тренировка', 
-    date: '2023-06-15',
-    results: [
-      { id: 'r1', time: '25:30', dateAdded: '15.06.2023', username: 'Иван И.' },
-      { id: 'r2', time: '24:15', dateAdded: '14.06.2023', username: 'Петр П.' }
-    ]
-  },
-  { 
-    id: '2', 
-    title: 'Силовая тренировка', 
-    date: '2023-06-16',
-    results: [
-      { id: 'r3', time: '45:20', dateAdded: '16.06.2023', username: 'Анна А.' }
-    ]
-  },
-  { 
-    id: '3', 
-    title: 'Кардио', 
-    date: '2023-06-17',
-    results: [
-      { id: 'r4', time: '30:00', dateAdded: '17.06.2023', username: 'Мария М.' },
-      { id: 'r5', time: '32:10', dateAdded: '16.06.2023', username: 'Сергей С.' }
-    ]
-  }
-];
+// Define type for API response
+interface ApiEvent {
+  id: string;
+  title: string;
+  eventDate: string;
+  results?: EventResult[];
+}
 
 export default function Home() {
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  const [events] = useState<CalendarEvent[]>(mockEvents); // Store events for displaying results
+  const [events, setEvents] = useState<CalendarEvent[]>([]); // Store events for displaying results
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // For showing event details
   const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
   
   const { isAuthenticated, user } = useAuth();
+
+  // Fetch events from the backend
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const response = await fetch(`/api/events?userId=${user.id}`);
+          const data: ApiEvent[] = await response.json();
+          
+          if (response.ok) {
+            // Transform the data to match our CalendarEvent interface
+            const transformedEvents = data.map((event) => ({
+              id: event.id,
+              title: event.title,
+              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+              results: event.results || []
+            }));
+            setEvents(transformedEvents);
+          }
+        } catch (error) {
+          console.error('Failed to fetch events:', error);
+        }
+      }
+    };
+
+    fetchEvents();
+  }, [isAuthenticated, user]);
 
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
@@ -84,30 +89,6 @@ export default function Home() {
     setShowEventModal(false);
     setSelectedEvent(null);
   };
-
-  // Extract recent results from all events
-  const getRecentResults = () => {
-    const allResults: (EventResult & { eventName: string; eventId: string })[] = [];
-    
-    events.forEach(event => {
-      if (event.results && event.results.length > 0) {
-        event.results.forEach(result => {
-          allResults.push({
-            ...result,
-            eventName: event.title,
-            eventId: event.id
-          });
-        });
-      }
-    });
-    
-    // Sort by dateAdded (newest first) and take top 5
-    return allResults
-      .sort((a, b) => new Date(b.dateAdded.split('.').reverse().join('-')).getTime() - new Date(a.dateAdded.split('.').reverse().join('-')).getTime())
-      .slice(0, 5);
-  };
-
-  const recentResults = getRecentResults();
 
   return (
     <div className="min-h-screen flex flex-col">

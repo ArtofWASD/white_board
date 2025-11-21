@@ -119,7 +119,7 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold text-lg mb-2">Информация об аккаунте</h3>
-            <p className="text-gray-700">ID: {user.id}</p>
+            <p className="text-gray-700">Роль: {user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
             <p className="text-gray-700">Статус: Активный пользователь</p>
           </div>
           
@@ -162,8 +162,6 @@ export default function ProfilePage() {
           
           <div className="border rounded-lg p-4">
             <h3 className="font-semibold text-lg mb-2">Статистика</h3>
-            <p className="text-gray-700">Событий создано: 12</p>
-            <p className="text-gray-700">Активных задач: 5</p>
           </div>
         </div>
       </div>

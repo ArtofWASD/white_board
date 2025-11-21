@@ -23,6 +23,10 @@ export class RegisterDto {
   @IsNotEmpty()
   name: string;
 
+  @IsString()
+  @IsOptional() // Last name is optional
+  lastName?: string; // Adding last name field
+
   @IsEmail()
   @IsNotEmpty()
   email: string;
