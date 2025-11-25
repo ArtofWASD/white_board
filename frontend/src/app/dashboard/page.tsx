@@ -47,10 +47,14 @@ export default function DashboardPage() {
       setError(null);
       setSuccess(null);
       
+      // Get token from localStorage
+      const token = localStorage.getItem('token');
+      
       const response = await fetch('/api/teams', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify({
           name: teamName,
@@ -68,11 +72,16 @@ export default function DashboardPage() {
         setTimeout(() => setSuccess(null), 3000);
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Не удалось создать команду');
+        setError(errorData.message || errorData.error || 'Не удалось создать команду');
       }
     } catch (err) {
-      setError('Не удалось создать команду');
-      console.error(err);
+      console.error('Error creating team:', err);
+      if (err instanceof TypeError && err.message.includes('fetch')) {
+        setError('Сервис недоступен. Пожалуйста, убедитесь, что сервер запущен.');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
+        setError('Не удалось создать команду: ' + errorMessage);
+      }
     } finally {
       setLoading(false);
     }

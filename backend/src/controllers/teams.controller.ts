@@ -8,6 +8,7 @@ import {
   Get,
   Delete,
   Request,
+  Headers,
 } from '@nestjs/common';
 import { TeamsService } from '../services/teams.service';
 import {
@@ -15,6 +16,7 @@ import {
   AddTeamMemberDto,
   RemoveTeamMemberDto,
 } from '../dtos/teams.dto';
+import { extractUserIdFromToken } from '../utils/jwt.utils';
 
 @Controller('teams')
 export class TeamsController {
@@ -22,11 +24,19 @@ export class TeamsController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('create')
-  async createTeam(@Request() req, @Body() createTeamDto: CreateTeamDto) {
-    // In a real implementation, we would get the ownerId from the authenticated user
-    // For now, we'll use a placeholder
-    const ownerId = req.user?.id || 'placeholder-user-id';
-    return await this.teamsService.createTeam(createTeamDto, ownerId);
+  async createTeam(
+    @Body() createTeamDto: CreateTeamDto,
+    @Headers('authorization') authHeader: string,
+  ) {
+    // Extract user ID from JWT token
+    const ownerId = extractUserIdFromToken(authHeader);
+
+    if (!ownerId) {
+      return { message: 'Authentication required', statusCode: 401 };
+    }
+
+    const result = await this.teamsService.createTeam(createTeamDto, ownerId);
+    return result;
   }
 
   @HttpCode(HttpStatus.OK)
@@ -35,7 +45,11 @@ export class TeamsController {
     @Param('teamId') teamId: string,
     @Body() addTeamMemberDto: AddTeamMemberDto,
   ) {
-    return await this.teamsService.addTeamMember(teamId, addTeamMemberDto);
+    const result = await this.teamsService.addTeamMember(
+      teamId,
+      addTeamMemberDto,
+    );
+    return result;
   }
 
   @HttpCode(HttpStatus.OK)
@@ -44,21 +58,24 @@ export class TeamsController {
     @Param('teamId') teamId: string,
     @Body() removeTeamMemberDto: RemoveTeamMemberDto,
   ) {
-    return await this.teamsService.removeTeamMember(
+    const result = await this.teamsService.removeTeamMember(
       teamId,
       removeTeamMemberDto,
     );
+    return result;
   }
 
   @HttpCode(HttpStatus.OK)
   @Get(':teamId/members')
   async getTeamMembers(@Param('teamId') teamId: string) {
-    return await this.teamsService.getTeamMembers(teamId);
+    const result = await this.teamsService.getTeamMembers(teamId);
+    return result;
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('user/:userId')
   async getUserTeams(@Param('userId') userId: string) {
-    return await this.teamsService.getUserTeams(userId);
+    const result = await this.teamsService.getUserTeams(userId);
+    return result;
   }
 }
