@@ -10,7 +10,7 @@ import EventActionMenu from './EventActionMenu';
 import EventModal from './EventModal';
 import AddResultModal from './AddResultModal';
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
-import { Exercise, EventResult, CalendarEvent, CalendarProps } from '../types';
+import { Exercise, EventResult, CalendarEvent } from '../types';
 
 // Add Event interface that matches the backend
 interface BackendEvent {
@@ -21,6 +21,12 @@ interface BackendEvent {
   exerciseType?: string;
   exercises?: Exercise[]; // Add exercises field
   status: 'past' | 'future';
+}
+
+// Define the CalendarProps interface to include the onUpdateEvents callback
+interface CalendarProps {
+  isMenuOpen: boolean;
+  onUpdateEvents?: (events: CalendarEvent[]) => void; // Add callback for updating events in the parent component
 }
 
 // New component for event tooltip
@@ -94,7 +100,7 @@ const EventTooltip: React.FC<{
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
+const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showAddEventButton, setShowAddEventButton] = useState(false);
   const [showEventActionMenu, setShowEventActionMenu] = useState(false);
@@ -252,69 +258,54 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
   };
 
   const handleAddEvent = async (title: string, exerciseType: string, exercises: Exercise[]) => {
-    // Define an array of colors to cycle through
-    const colors = [
-      'bg-blue-100',
-      'bg-green-100',
-      'bg-purple-100',
-      'bg-yellow-100',
-      'bg-pink-100',
-      'bg-red-100',
-      'bg-indigo-100',
-      'bg-teal-100'
-    ];
-    
-    // Get the next color based on the number of existing events
-    const nextColor = colors[events.length % colors.length];
-    
-    // Check if user is authenticated before allowing event creation
-    if (!isAuthenticated || !user) {
-      alert('Вы должны быть авторизованы для создания события');
-      return;
-    }
-    
-    try {
-      // Save event to backend
-      const response = await fetch('/api/events', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: user.id,
-          title,
-          description: '', // No description in this version
-          eventDate: new Date(selectedDate).toISOString(),
-          exerciseType,
-          exercises: exercises.length > 0 ? exercises : undefined, // Send exercises to backend
-        }),
-      });
-      
-      const data = await response.json();
-      
-      if (response.ok) {
-        // Transform backend event to calendar event
-        const newCalendarEvent: CalendarEvent = {
-          id: data.event.id,
-          title: data.event.title,
-          date: data.event.eventDate.split('T')[0],
-          exerciseType: data.event.exerciseType,
-          exercises: data.event.exercises || [], // Use exercises from response
-          results: [],
-          color: nextColor
-        };
+    if (user) {
+      try {
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            title,
+            description: '',
+            eventDate: selectedDate,
+            exerciseType,
+            exercises: exercises.length > 0 ? exercises : undefined,
+          }),
+        });
         
-        setEvents([...events, newCalendarEvent]);
-        setShowAddEventButton(false);
+        const data = await response.json();
         
-        // Refresh events from backend to ensure consistency
-        refreshEvents();
-      } else {
-        alert(data.message || 'Ошибка при создании события');
+        if (response.ok) {
+          // Add the new event to the local state
+          const newEvent: CalendarEvent = {
+            id: data.id,
+            title: data.title,
+            date: data.eventDate.split('T')[0],
+            exerciseType: data.exerciseType,
+            exercises: data.exercises || [],
+            results: [], // New event has no results initially
+            color: 'bg-blue-100'
+          };
+          
+          const updatedEvents = [...events, newEvent];
+          setEvents(updatedEvents);
+          
+          // Call the callback to update events in the parent component
+          if (onUpdateEvents) {
+            onUpdateEvents(updatedEvents);
+          }
+          
+          setShowAddEventButton(false);
+          alert('Событие успешно создано');
+        } else {
+          alert(data.message || 'Ошибка при создании события');
+        }
+      } catch (error) {
+        console.error('Error creating event:', error);
+        alert('Произошла ошибка при создании события');
       }
-    } catch (error) {
-      console.error('Error creating event:', error);
-      alert('Произошла ошибка при создании события');
     }
   };
 
@@ -353,6 +344,11 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
             };
           }));
           setEvents(calendarEvents);
+          
+          // Call the callback to update events in the parent component
+          if (onUpdateEvents) {
+            onUpdateEvents(calendarEvents);
+          }
         }
       } catch (error) {
         console.error('Failed to refresh events:', error);
@@ -388,7 +384,14 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
         
         if (response.ok) {
           // Remove the event from the local state
-          setEvents(events.filter(event => event.id !== selectedEvent.id));
+          const updatedEvents = events.filter(event => event.id !== selectedEvent.id);
+          setEvents(updatedEvents);
+          
+          // Call the callback to update events in the parent component
+          if (onUpdateEvents) {
+            onUpdateEvents(updatedEvents);
+          }
+          
           setShowEventActionMenu(false);
           setSelectedEvent(null);
           alert('Событие успешно удалено');
@@ -445,14 +448,21 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
           };
           
           // Update the event with the new result
-          setEvents(events.map(event => 
+          const updatedEvents = events.map(event => 
             event.id === eventToAddResult.id 
               ? { 
                   ...event, 
                   results: [...(event.results || []), newResult] 
                 } 
               : event
-          ));
+          );
+          
+          setEvents(updatedEvents);
+          
+          // Call the callback to update events in the parent component
+          if (onUpdateEvents) {
+            onUpdateEvents(updatedEvents);
+          }
           
           console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
           alert(`Результат сохранен для события "${eventToAddResult?.title}": ${time}`);
@@ -496,7 +506,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
         
         if (response.ok) {
           // Update the event in the local state
-          setEvents(events.map(event => 
+          const updatedEvents = events.map(event => 
             event.id === eventToEdit.id 
               ? { 
                   ...event, 
@@ -506,7 +516,15 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
                   // Preserve results since we're not overwriting them
                 } 
               : event
-          ));
+          );
+          
+          setEvents(updatedEvents);
+          
+          // Call the callback to update events in the parent component
+          if (onUpdateEvents) {
+            onUpdateEvents(updatedEvents);
+          }
+          
           setShowEditModal(false);
           setEventToEdit(null);
           

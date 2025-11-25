@@ -41,6 +41,11 @@ export default function CalendarPage() {
   
   const { isAuthenticated, user } = useAuth();
 
+  // Function to update events in the calendar page
+  const updateEvents = (newEvents: CalendarEvent[]) => {
+    setEvents(newEvents);
+  };
+
   // Fetch events from the backend
   React.useEffect(() => {
     const fetchEvents = async () => {
@@ -112,7 +117,7 @@ export default function CalendarPage() {
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-2 sm:p-4`}>
         {/* Removed the "Календарь" heading as requested */}
-        <Calendar isMenuOpen={leftMenuOpen} />
+        <Calendar isMenuOpen={leftMenuOpen} onUpdateEvents={updateEvents} />
       </main>
       
       <Footer />
