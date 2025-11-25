@@ -108,6 +108,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
   // State for tooltip
   const [tooltipEvent, setTooltipEvent] = useState<CalendarEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+  const [windowWidth, setWindowWidth] = useState(0);
   const calendarRef = useRef<FullCalendar>(null);
   const { isAuthenticated, user } = useAuth(); // Get authentication status and user info
 
@@ -157,6 +158,25 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
     fetchEvents();
   }, [isAuthenticated, user]);
 
+  // Handle window resize to update calendar
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      if (calendarRef.current) {
+        calendarRef.current.getApi().updateSize();
+      }
+    };
+    
+    // Set initial width
+    handleResize();
+    
+    // Add event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
   // Handle calendar resize when menu opens/closes
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -166,7 +186,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
     }, 300); // Match the transition duration
 
     return () => clearTimeout(timer);
-  }, [isMenuOpen]);
+  }, [isMenuOpen, windowWidth]);
 
   const handleDateClick = (arg: { dateStr: string, jsEvent: MouseEvent }) => {
     // Close event action menu if open
@@ -538,7 +558,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
     
     return (
       <div 
-        className={`fc-event-main ${eventColor} h-[30px] flex items-center`}
+        className={`fc-event-main ${eventColor} h-[30px] sm:h-[35px] md:h-[40px] lg:h-[45px] xl:h-[50px] flex items-center px-1 py-0.5 sm:px-2 sm:py-1 overflow-hidden mb-0.5 last:mb-0`}
         style={{ color: 'black' }} // Added inline style to ensure black text
         data-id={eventInfo.event.id}
         onMouseEnter={(e) => handleEventMouseEnter({ 
@@ -547,15 +567,16 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
         })}
         onMouseLeave={handleEventMouseLeave}
       >
-        <b>{eventInfo.timeText}</b>
-        <i>{eventInfo.event.title}</i>
+        <b className="text-xs sm:text-sm md:text-sm lg:text-base mr-1 sm:mr-2 flex-shrink-0">{eventInfo.timeText}</b>
+        <i className="text-xs sm:text-sm md:text-sm lg:text-base truncate">{eventInfo.event.title}</i>
       </div>
     );
   };
 
   return (
-    <div className={`p-4 relative transition-all duration-300 ease-in-out w-full ${isMenuOpen ? 'md:pl-4' : ''}`}>
-      <div className="transition-all duration-300 ease-in-out">
+    <div className={`p-2 sm:p-4 lg:p-6 relative transition-all duration-300 ease-in-out w-full ${isMenuOpen ? 'md:pl-4' : ''}`}>
+
+      <div className="transition-all duration-300 ease-in-out min-h-[400px] sm:min-h-[500px] md:min-h-[700px] lg:min-h-[800px] xl:min-h-[900px]">
         <FullCalendar
           ref={calendarRef}
           plugins={[dayGridPlugin, interactionPlugin]}
@@ -574,6 +595,9 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
             center: 'title',
             right: 'dayGridMonth,dayGridWeek,dayGridDay'
           }}
+          height="auto"
+          contentHeight="auto"
+          aspectRatio={windowWidth <= 425 ? 0.8 : windowWidth <= 768 ? 1.1 : 1.35}
         />
       </div>
       

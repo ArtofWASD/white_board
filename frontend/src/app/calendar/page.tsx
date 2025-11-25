@@ -110,7 +110,7 @@ export default function CalendarPage() {
         onShowEventDetails={handleShowEventDetails}
       />
       
-      <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
+      <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-2 sm:p-4`}>
         {/* Removed the "Календарь" heading as requested */}
         <Calendar isMenuOpen={leftMenuOpen} />
       </main>

@@ -17,37 +17,47 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
     router.push('/login');
   };
 
+  const handleTitleClick = () => {
+    // Navigate to the main calendar page
+    router.push('/');
+  };
+
   const handleUserIconClick = () => {
     // Navigate to the dashboard page
     router.push('/dashboard');
   };
 
   return (
-    <header className="bg-gray-800 text-white py-2 px-4 flex justify-between items-center">
+    <header className="bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center">
       <button 
         onClick={onLeftMenuClick}
-        className="bg-transparent hover:bg-transparent text-white font-bold p-3 rounded-full cursor-pointer"
+        className="bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer"
         aria-label="Menu"
       >
-        <Image src="/menu.png" alt="Menu" width={40} height={40} />
+        <Image src="/menu.png" alt="Menu" width={32} height={32} className="sm:w-10 sm:h-10" />
       </button>
-      <h1 className="text-xl font-bold">My White Board</h1>
+      <h1 
+        className="text-lg sm:text-xl font-bold cursor-pointer hover:text-gray-300 transition-colors"
+        onClick={handleTitleClick}
+      >
+        My White Board
+      </h1>
       {isAuthenticated && user ? (
         <div 
-          className="flex items-center space-x-2 cursor-pointer"
+          className="flex items-center space-x-1 sm:space-x-2 cursor-pointer"
           onClick={handleUserIconClick}
         >
-          <span className="hidden md:inline">Привет, {user.name}{user.lastName ? ` ${user.lastName}` : ''}!</span>
-          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center">
-            <span className="font-bold">{user.name.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}</span>
+          <span className="hidden md:inline text-sm sm:text-base">Привет, {user.name}{user.lastName ? ` ${user.lastName}` : ''}!</span>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500 flex items-center justify-center">
+            <span className="font-bold text-sm sm:text-base">{user.name.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}</span>
           </div>
         </div>
       ) : (
         <button 
           onClick={handleLoginClick}
-          className="bg-transparent hover:bg-transparent text-white font-bold p-3 rounded-full cursor-pointer"
+          className="bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer"
         >
-          <Image src="/login.png" alt="Login" width={40} height={40} />
+          <Image src="/login.png" alt="Login" width={32} height={32} className="sm:w-10 sm:h-10" />
         </button>
       )}
     </header>
