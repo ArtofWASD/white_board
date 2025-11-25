@@ -10,6 +10,9 @@ import {
   HttpStatus,
   UsePipes,
   ValidationPipe,
+  BadRequestException,
+  NotFoundException,
+  Request,
 } from '@nestjs/common';
 import { EventsService } from '../services/events.service';
 import { CreateEventDto, UpdateEventStatusDto } from '../dtos/events.dto';
@@ -22,13 +25,26 @@ export class EventsController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe())
   async createEvent(@Body() createEventDto: CreateEventDto) {
-    return this.eventsService.createEvent(
-      createEventDto.userId,
-      createEventDto.title,
-      createEventDto.eventDate,
-      createEventDto.description,
-      createEventDto.exerciseType,
-    );
+    try {
+      return await this.eventsService.createEvent(
+        createEventDto.userId,
+        createEventDto.title,
+        createEventDto.eventDate,
+        createEventDto.description,
+        createEventDto.exerciseType,
+        createEventDto.participantIds,
+      );
+    } catch (error: unknown) {
+      // Handle specific errors
+      if (error instanceof Error && error.message === 'Invalid date format') {
+        throw new BadRequestException('Неверный формат даты');
+      }
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw NotFoundException as-is
+      }
+      // For any other errors, throw a generic bad request exception
+      throw new BadRequestException('Ошибка при создании события');
+    }
   }
 
   @Get(':userId')
@@ -60,7 +76,19 @@ export class EventsController {
 
   @Delete(':eventId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteEvent(@Param('eventId') eventId: string) {
-    await this.eventsService.deleteEvent(eventId);
+  async deleteEvent(
+    @Param('eventId') eventId: string,
+    @Body() body: { userId?: string },
+  ) {
+    console.log('Delete event request received:', { eventId, body });
+
+    const userId = body.userId;
+    if (!userId) {
+      console.log('User ID is missing from request body');
+      throw new BadRequestException('User ID is required');
+    }
+
+    console.log('Calling events service to delete event:', { eventId, userId });
+    await this.eventsService.deleteEvent(eventId, userId);
   }
 }

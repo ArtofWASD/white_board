@@ -1,9 +1,10 @@
 import {
   IsString,
   IsNotEmpty,
-  IsDate,
   IsOptional,
   IsUUID,
+  IsArray,
+  IsDateString,
 } from 'class-validator';
 
 export class CreateEventDto {
@@ -15,9 +16,9 @@ export class CreateEventDto {
   @IsNotEmpty()
   title: string;
 
-  @IsDate()
+  @IsDateString()
   @IsNotEmpty()
-  eventDate: Date;
+  eventDate: string;
 
   @IsString()
   @IsOptional()
@@ -26,6 +27,11 @@ export class CreateEventDto {
   @IsString()
   @IsOptional()
   exerciseType?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsUUID(undefined, { each: true })
+  participantIds?: string[];
 }
 
 export class UpdateEventStatusDto {

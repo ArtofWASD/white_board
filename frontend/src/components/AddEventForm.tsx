@@ -19,14 +19,54 @@ export default function AddEventForm({ userId, onEventAdded }: AddEventFormProps
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!title || !eventDate) {
-      setError('Пожалуйста, заполните обязательные поля');
+    console.log('Form submission started');
+    console.log('Title:', title);
+    console.log('Event Date:', eventDate);
+    console.log('User ID:', userId);
+    
+    if (!title.trim()) {
+      setError('Пожалуйста, введите название события');
+      return;
+    }
+    
+    if (!eventDate) {
+      setError('Пожалуйста, выберите дату события');
+      return;
+    }
+    
+    // Validate date format
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(eventDate)) {
+      setError('Пожалуйста, выберите корректную дату');
+      return;
+    }
+    
+    // Validate userId
+    if (!userId) {
+      setError('Не удалось определить пользователя');
       return;
     }
     
     try {
       setLoading(true);
       setError(null);
+      
+      // Handle date properly to avoid timezone issues
+      let eventDateToSend = '';
+      if (eventDate) {
+        // Create a date object from the input value (YYYY-MM-DD)
+        const [year, month, day] = eventDate.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day); // Month is 0-indexed
+        eventDateToSend = dateObj.toISOString();
+      }
+      
+      console.log('Sending request to /api/events with data:', {
+        userId,
+        title: title.trim(),
+        description: description.trim(),
+        eventDate: eventDateToSend,
+        exerciseType: exerciseType.trim(),
+      });
       
       const response = await fetch('/api/events', {
         method: 'POST',
@@ -35,16 +75,21 @@ export default function AddEventForm({ userId, onEventAdded }: AddEventFormProps
         },
         body: JSON.stringify({
           userId,
-          title,
-          description,
-          eventDate: new Date(eventDate).toISOString(),
-          exerciseType,
+          title: title.trim(),
+          description: description.trim(),
+          eventDate: eventDateToSend,
+          exerciseType: exerciseType.trim(),
         }),
       });
       
+      console.log('Received response from /api/events:', response);
+      
       const data = await response.json();
       
+      console.log('Response data:', data);
+      
       if (response.ok) {
+        console.log('Event created successfully:', data.event);
         // Reset form
         setTitle('');
         setDescription('');
@@ -55,10 +100,17 @@ export default function AddEventForm({ userId, onEventAdded }: AddEventFormProps
         onEventAdded(data.event);
       } else {
         setError(data.message || 'Ошибка при создании события');
+        console.error('Event creation failed:', data);
       }
     } catch (err) {
       setError('Произошла ошибка при создании события');
-      console.error(err);
+      console.error('Network error during event creation:', err);
+      // Log more detailed error information
+      if (err instanceof Error) {
+        console.error('Error name:', err.name);
+        console.error('Error message:', err.message);
+        console.error('Error stack:', err.stack);
+      }
     } finally {
       setLoading(false);
     }

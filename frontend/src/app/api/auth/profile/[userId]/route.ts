@@ -27,9 +27,8 @@ export async function PUT(
     console.log("API Route - Request body:", body)
 
     // Forward the request to the NestJS backend
-    const backendUrl = `${
-      process.env.BACKEND_URL || "http://localhost:3003"
-    }/auth/profile/${userId}`
+    const backendBaseUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const backendUrl = `${backendBaseUrl}/auth/profile/${userId}`
 
     console.log("API Route - Forwarding to backend URL:", backendUrl)
 

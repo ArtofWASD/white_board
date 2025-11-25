@@ -6,6 +6,9 @@ import {
   HttpStatus,
   Put,
   Param,
+  Get,
+  Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
@@ -33,5 +36,18 @@ export class AuthController {
     @Body() updateProfileDto: UpdateProfileDto,
   ) {
     return this.authService.updateProfile(userId, updateProfileDto);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('lookup')
+  async lookupUser(@Query('email') email: string) {
+    try {
+      return await this.authService.lookupUserByEmail(email);
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw error;
+    }
   }
 }

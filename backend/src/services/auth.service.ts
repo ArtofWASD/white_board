@@ -135,4 +135,22 @@ export class AuthService {
       } as UserResponse,
     };
   }
+
+  async lookupUserByEmail(email: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+    };
+  }
 }

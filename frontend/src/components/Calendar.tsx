@@ -12,6 +12,16 @@ import AddResultModal from './AddResultModal';
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
 import { Exercise, EventResult, CalendarEvent, CalendarProps } from '../types';
 
+// Add Event interface that matches the backend
+interface BackendEvent {
+  id: string;
+  title: string;
+  description?: string;
+  eventDate: string;
+  exerciseType?: string;
+  status: 'past' | 'future';
+}
+
 // New component for event tooltip
 const EventTooltip: React.FC<{ 
   event: CalendarEvent; 
@@ -100,6 +110,36 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   const calendarRef = useRef<FullCalendar>(null);
   const { isAuthenticated, user } = useAuth(); // Get authentication status and user info
 
+  // Fetch events from backend when component mounts or user changes
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (isAuthenticated && user) {
+        try {
+          const response = await fetch(`/api/events?userId=${user.id}`);
+          const data: BackendEvent[] = await response.json();
+          
+          if (response.ok) {
+            // Transform backend events to calendar events
+            const calendarEvents: CalendarEvent[] = data.map(event => ({
+              id: event.id,
+              title: event.title,
+              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+              exerciseType: event.exerciseType,
+              exercises: [], // We don't have exercises in this version
+              results: [], // We don't have results in this version
+              color: 'bg-blue-100' // Default color
+            }));
+            setEvents(calendarEvents);
+          }
+        } catch (error) {
+          console.error('Failed to fetch events:', error);
+        }
+      }
+    };
+
+    fetchEvents();
+  }, [isAuthenticated, user]);
+
   // Handle calendar resize when menu opens/closes
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -174,7 +214,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     }, 100);
   };
 
-  const handleAddEvent = (title: string, exerciseType: string, exercises: Exercise[]) => {
+  const handleAddEvent = async (title: string, exerciseType: string, exercises: Exercise[]) => {
     // Define an array of colors to cycle through
     const colors = [
       'bg-blue-100',
@@ -190,21 +230,80 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     // Get the next color based on the number of existing events
     const nextColor = colors[events.length % colors.length];
     
-    const newEvent: CalendarEvent = {
-      id: Date.now().toString(),
-      title,
-      date: selectedDate,
-      exerciseType,
-      exercises: exercises.map(exercise => ({
-        ...exercise,
-        weight: exercise.weight || '',
-        repetitions: exercise.repetitions || ''
-      })),
-      results: [], // Initialize with empty results array
-      color: nextColor // Assign the color to the new event
-    };
-    setEvents([...events, newEvent]);
-    setShowAddEventButton(false);
+    // Check if user is authenticated before allowing event creation
+    if (!isAuthenticated || !user) {
+      alert('Вы должны быть авторизованы для создания события');
+      return;
+    }
+    
+    try {
+      // Save event to backend
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          title,
+          description: '', // No description in this version
+          eventDate: new Date(selectedDate).toISOString(),
+          exerciseType,
+        }),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        // Transform backend event to calendar event
+        const newCalendarEvent: CalendarEvent = {
+          id: data.event.id,
+          title: data.event.title,
+          date: data.event.eventDate.split('T')[0],
+          exerciseType: data.event.exerciseType,
+          exercises: [],
+          results: [],
+          color: nextColor
+        };
+        
+        setEvents([...events, newCalendarEvent]);
+        setShowAddEventButton(false);
+        
+        // Refresh events from backend to ensure consistency
+        refreshEvents();
+      } else {
+        alert(data.message || 'Ошибка при создании события');
+      }
+    } catch (error) {
+      console.error('Error creating event:', error);
+      alert('Произошла ошибка при создании события');
+    }
+  };
+
+  // Function to refresh events from backend
+  const refreshEvents = async () => {
+    if (isAuthenticated && user) {
+      try {
+        const response = await fetch(`/api/events?userId=${user.id}`);
+        const data: BackendEvent[] = await response.json();
+        
+        if (response.ok) {
+          // Transform backend events to calendar events
+          const calendarEvents: CalendarEvent[] = data.map(event => ({
+            id: event.id,
+            title: event.title,
+            date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+            exerciseType: event.exerciseType,
+            exercises: [], // We don't have exercises in this version
+            results: [], // We don't have results in this version
+            color: 'bg-blue-100' // Default color
+          }));
+          setEvents(calendarEvents);
+        }
+      } catch (error) {
+        console.error('Failed to refresh events:', error);
+      }
+    }
   };
 
   const handleCloseAddEvent = () => {
@@ -216,7 +315,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     setSelectedEvent(null);
   };
 
-  const handleDeleteEvent = () => {
+  const handleDeleteEvent = async () => {
     // Check if user is authenticated before allowing event deletion
     if (!isAuthenticated) {
       alert('Вы должны быть авторизованы для удаления события');
@@ -225,8 +324,42 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     }
     
     if (selectedEvent) {
-      setEvents(events.filter(event => event.id !== selectedEvent.id));
-      setShowEventActionMenu(false);
+      try {
+        console.log('Attempting to delete event:', selectedEvent.id);
+        console.log('User ID:', user?.id);
+        
+        // Delete event from backend
+        // Send user ID as a query parameter instead of in the request body
+        const response = await fetch(`/api/events/${selectedEvent.id}?userId=${user?.id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        console.log('Delete response:', response.status, response.statusText);
+        
+        if (response.ok) {
+          // Remove event from local state
+          setEvents(events.filter(event => event.id !== selectedEvent.id));
+          setShowEventActionMenu(false);
+          
+          // Refresh events from backend to ensure consistency
+          refreshEvents();
+        } else {
+          const data = await response.json();
+          console.log('Delete error response:', data);
+          // Check if it's a forbidden error (user trying to delete someone else's event)
+          if (response.status === 403) {
+            alert('Вы можете удалять только свои собственные события');
+          } else {
+            alert(data.message || 'Ошибка при удалении события');
+          }
+        }
+      } catch (error) {
+        console.error('Error deleting event:', error);
+        alert('Произошла ошибка при удалении события');
+      }
     }
   };
 

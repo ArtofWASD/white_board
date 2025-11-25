@@ -1,49 +1,30 @@
 import { NextResponse } from "next/server"
 
-interface Team {
-  id: string
-  name: string
-  description: string | null
-  ownerId: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface TeamMember {
-  id: string
-  teamId: string
-  userId: string
-  role: string
-}
-
-// Mock data for teams
-const teams: Team[] = []
-const teamMembers: TeamMember[] = []
-
 // Create a new team
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { name, description } = body
 
-    // In a real implementation, you would:
-    // 1. Validate the user is authenticated and is a trainer
-    // 2. Get the user ID from the session
-    // 3. Create the team in the database
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const response = await fetch(`${backendUrl}/teams/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    })
 
-    // Mock implementation
-    const newTeam: Team = {
-      id: Date.now().toString(),
-      name,
-      description: description || null,
-      ownerId: "mock-user-id", // This would be the actual user ID
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+    const data = await response.json()
+
+    if (response.ok) {
+      return NextResponse.json(data, { status: 201 })
+    } else {
+      return NextResponse.json(
+        { message: data.message || "Failed to create team" },
+        { status: response.status },
+      )
     }
-
-    teams.push(newTeam)
-
-    return NextResponse.json(newTeam, { status: 201 })
   } catch (error) {
     console.error("Error creating team:", error)
     return NextResponse.json({ error: "Failed to create team" }, { status: 500 })
@@ -56,15 +37,29 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("userId")
 
-    // In a real implementation, you would:
-    // 1. Validate the user is authenticated
-    // 2. Get the user ID from the session
-    // 3. Fetch teams from the database
+    if (!userId) {
+      return NextResponse.json({ message: "User ID is required" }, { status: 400 })
+    }
 
-    // Mock implementation
-    const userTeams = teams.filter((team) => team.ownerId === userId)
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const response = await fetch(`${backendUrl}/teams/user/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
 
-    return NextResponse.json(userTeams)
+    const data = await response.json()
+
+    if (response.ok) {
+      return NextResponse.json(data)
+    } else {
+      return NextResponse.json(
+        { message: data.message || "Failed to fetch teams" },
+        { status: response.status },
+      )
+    }
   } catch (error) {
     console.error("Error fetching teams:", error)
     return NextResponse.json({ error: "Failed to fetch teams" }, { status: 500 })

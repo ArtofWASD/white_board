@@ -25,27 +25,25 @@ export async function GET(request: Request, { params }: { params: { userId: stri
   try {
     const { userId } = params
 
-    // In a real implementation, you would:
-    // 1. Validate the user is authenticated
-    // 2. Check if the requested user ID matches the authenticated user
-    // 3. Fetch teams from the database
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const response = await fetch(`${backendUrl}/teams/user/${userId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
 
-    // Mock implementation
-    // Get all teams where the user is the owner
-    const ownedTeams = teams.filter((team) => team.ownerId === userId)
+    const data = await response.json()
 
-    // Get all teams where the user is a member
-    const memberTeams = teamMembers
-      .filter((tm) => tm.userId === userId)
-      .map((tm) => teams.find((t) => t.id === tm.teamId))
-      .filter((team): team is Team => team !== undefined) // Remove undefined values
-
-    // Combine and deduplicate teams
-    const userTeams = [...ownedTeams, ...memberTeams].filter(
-      (team, index, self) => self.findIndex((t) => t.id === team.id) === index,
-    )
-
-    return NextResponse.json(userTeams)
+    if (response.ok) {
+      return NextResponse.json(data)
+    } else {
+      return NextResponse.json(
+        { message: data.message || "Failed to fetch user teams" },
+        { status: response.status },
+      )
+    }
   } catch (error) {
     console.error("Error fetching user teams:", error)
     return NextResponse.json({ error: "Failed to fetch user teams" }, { status: 500 })
