@@ -39,6 +39,7 @@ model Event {
   userId      String   @map("user_id")
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   participants User[]   @relation("EventParticipants")
+  results     EventResult[]
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -71,4 +72,15 @@ model TeamMember {
   
   @@unique([teamId, userId])
   @@map("team_members")
+}
+
+model EventResult {
+  id          String   @id @default(uuid())
+  time        String
+  dateAdded   DateTime @default(now()) @map("date_added")
+  username    String
+  eventId     String   @map("event_id")
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  @@map("event_results")
 }

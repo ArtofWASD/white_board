@@ -39,3 +39,17 @@ export class UpdateEventStatusDto {
   @IsNotEmpty()
   status: 'past' | 'future';
 }
+
+export class CreateEventResultDto {
+  @IsString()
+  @IsNotEmpty()
+  eventId: string;
+
+  @IsString()
+  @IsNotEmpty()
+  time: string;
+
+  @IsString()
+  @IsNotEmpty()
+  username: string;
+}

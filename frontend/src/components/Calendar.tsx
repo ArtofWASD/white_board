@@ -120,14 +120,30 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
           
           if (response.ok) {
             // Transform backend events to calendar events
-            const calendarEvents: CalendarEvent[] = data.map(event => ({
-              id: event.id,
-              title: event.title,
-              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
-              exerciseType: event.exerciseType,
-              exercises: [], // We don't have exercises in this version
-              results: [], // We don't have results in this version
-              color: 'bg-blue-100' // Default color
+            const calendarEvents: CalendarEvent[] = await Promise.all(data.map(async event => {
+              // Fetch results for each event
+              const resultsResponse = await fetch(`/api/events/${event.id}/results`);
+              let results: EventResult[] = [];
+              
+              if (resultsResponse.ok) {
+                const resultsData = await resultsResponse.json();
+                results = resultsData.map((result: { id: string; time: string; dateAdded: string; username: string }) => ({
+                  id: result.id,
+                  time: result.time,
+                  dateAdded: new Date(result.dateAdded).toLocaleDateString('ru-RU'),
+                  username: result.username,
+                }));
+              }
+              
+              return {
+                id: event.id,
+                title: event.title,
+                date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+                exerciseType: event.exerciseType,
+                exercises: [], // We don't have exercises in this version
+                results: results,
+                color: 'bg-blue-100' // Default color
+              };
             }));
             setEvents(calendarEvents);
           }
@@ -289,14 +305,30 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
         
         if (response.ok) {
           // Transform backend events to calendar events
-          const calendarEvents: CalendarEvent[] = data.map(event => ({
-            id: event.id,
-            title: event.title,
-            date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
-            exerciseType: event.exerciseType,
-            exercises: [], // We don't have exercises in this version
-            results: [], // We don't have results in this version
-            color: 'bg-blue-100' // Default color
+          const calendarEvents: CalendarEvent[] = await Promise.all(data.map(async event => {
+            // Fetch results for each event
+            const resultsResponse = await fetch(`/api/events/${event.id}/results`);
+            let results: EventResult[] = [];
+            
+            if (resultsResponse.ok) {
+              const resultsData = await resultsResponse.json();
+              results = resultsData.map((result: { id: string; time: string; dateAdded: string; username: string }) => ({
+                id: result.id,
+                time: result.time,
+                dateAdded: new Date(result.dateAdded).toLocaleDateString('ru-RU'),
+                username: result.username,
+              }));
+            }
+            
+            return {
+              id: event.id,
+              title: event.title,
+              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+              exerciseType: event.exerciseType,
+              exercises: [], // We don't have exercises in this version
+              results: results,
+              color: 'bg-blue-100' // Default color
+            };
           }));
           setEvents(calendarEvents);
         }
@@ -393,31 +425,55 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     }
   };
 
-  const handleSaveResult = (time: string) => {
+  const handleSaveResult = async (time: string) => {
     if (eventToAddResult) {
       // Get the current user's name from the component level context
       const username = user?.name || 'Anonymous';
       
-      // Create a new result object
-      const newResult: EventResult = {
-        id: Date.now().toString(),
-        time,
-        dateAdded: new Date().toLocaleDateString('ru-RU'),
-        username
-      };
-      
-      // Update the event with the new result
-      setEvents(events.map(event => 
-        event.id === eventToAddResult.id 
-          ? { 
-              ...event, 
-              results: [...(event.results || []), newResult] 
-            } 
-          : event
-      ));
-      
-      console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
-      alert(`Результат сохранен для события "${eventToAddResult?.title}": ${time}`);
+      try {
+        // Save result to backend
+        const response = await fetch(`/api/events/${eventToAddResult.id}/results`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            eventId: eventToAddResult.id,
+            time,
+            username,
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Create a new result object for local state
+          const newResult: EventResult = {
+            id: data.id,
+            time: data.time,
+            dateAdded: new Date(data.dateAdded).toLocaleDateString('ru-RU'),
+            username: data.username,
+          };
+          
+          // Update the event with the new result
+          setEvents(events.map(event => 
+            event.id === eventToAddResult.id 
+              ? { 
+                  ...event, 
+                  results: [...(event.results || []), newResult] 
+                } 
+              : event
+          ));
+          
+          console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
+          alert(`Результат сохранен для события "${eventToAddResult?.title}": ${time}`);
+        } else {
+          alert(data.message || 'Ошибка при сохранении результата');
+        }
+      } catch (error) {
+        console.error('Error saving result:', error);
+        alert('Произошла ошибка при сохранении результата');
+      }
     }
     setShowAddResultModal(false);
     setEventToAddResult(null);

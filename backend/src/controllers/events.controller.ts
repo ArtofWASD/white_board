@@ -15,7 +15,11 @@ import {
   Request,
 } from '@nestjs/common';
 import { EventsService } from '../services/events.service';
-import { CreateEventDto, UpdateEventStatusDto } from '../dtos/events.dto';
+import {
+  CreateEventDto,
+  UpdateEventStatusDto,
+  CreateEventResultDto,
+} from '../dtos/events.dto';
 
 @Controller('events')
 export class EventsController {
@@ -90,5 +94,32 @@ export class EventsController {
 
     console.log('Calling events service to delete event:', { eventId, userId });
     await this.eventsService.deleteEvent(eventId, userId);
+  }
+
+  @Post(':eventId/results')
+  @HttpCode(HttpStatus.CREATED)
+  @UsePipes(new ValidationPipe())
+  async createEventResult(
+    @Param('eventId') eventId: string,
+    @Body() createEventResultDto: CreateEventResultDto,
+  ) {
+    try {
+      return await this.eventsService.createEventResult(
+        eventId,
+        createEventResultDto.time,
+        createEventResultDto.username,
+      );
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw NotFoundException as-is
+      }
+      // For any other errors, throw a generic bad request exception
+      throw new BadRequestException('Ошибка при добавлении результата события');
+    }
+  }
+
+  @Get(':eventId/results')
+  async getEventResults(@Param('eventId') eventId: string) {
+    return this.eventsService.getEventResults(eventId);
   }
 }

@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server"
+import { NextRequest } from "next/server"
 
 // Update event status
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
   try {
     const { status } = await request.json()
-    const eventId = params.id
+    const { id: eventId } = await params
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
