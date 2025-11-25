@@ -16,6 +16,7 @@ export class EventsService {
     eventDate: string,
     description?: string,
     exerciseType?: string,
+    exercises?: any[],
     participantIds?: string[],
   ) {
     console.log('Creating event with data:', {
@@ -24,6 +25,7 @@ export class EventsService {
       eventDate,
       description,
       exerciseType,
+      exercises,
       participantIds,
     });
 
@@ -63,6 +65,7 @@ export class EventsService {
       eventDate: eventDateObj,
       description,
       exerciseType,
+      exercises: exercises || undefined, // Add exercises to the event data
       userId,
     };
 
@@ -90,6 +93,13 @@ export class EventsService {
     return (this.prisma as any).event.findMany({
       where: { userId },
       orderBy: { eventDate: 'asc' },
+      include: {
+        results: {
+          orderBy: {
+            dateAdded: 'desc',
+          },
+        },
+      },
     });
   }
 
@@ -103,6 +113,13 @@ export class EventsService {
         status: 'past',
       },
       orderBy: { eventDate: 'desc' },
+      include: {
+        results: {
+          orderBy: {
+            dateAdded: 'desc',
+          },
+        },
+      },
     });
   }
 
@@ -116,6 +133,13 @@ export class EventsService {
         status: 'future',
       },
       orderBy: { eventDate: 'asc' },
+      include: {
+        results: {
+          orderBy: {
+            dateAdded: 'desc',
+          },
+        },
+      },
     });
   }
 
@@ -227,5 +251,70 @@ export class EventsService {
       where: { eventId: eventId },
       orderBy: { dateAdded: 'desc' },
     });
+  }
+
+  async updateEvent(
+    eventId: string,
+    userId: string,
+    title: string,
+    eventDate: string,
+    description?: string,
+    exerciseType?: string,
+    exercises?: any[],
+  ) {
+    console.log('Updating event with data:', {
+      eventId,
+      userId,
+      title,
+      eventDate,
+      description,
+      exerciseType,
+      exercises,
+    });
+
+    // Check if event exists
+    const event = await (this.prisma as any).event.findUnique({
+      where: { id: eventId },
+    });
+    if (!event) {
+      console.log('Event not found:', eventId);
+      throw new NotFoundException('Event not found');
+    }
+
+    // Check if the user is the owner of the event
+    if (event.userId !== userId) {
+      console.log('User is not the owner of the event:', {
+        userId,
+        eventUserId: event.userId,
+      });
+      throw new ForbiddenException('You can only update your own events');
+    }
+
+    // Convert string date to Date object and validate
+    const eventDateObj = new Date(eventDate);
+    if (isNaN(eventDateObj.getTime())) {
+      console.log('Invalid date format:', eventDate);
+      throw new Error('Invalid date format');
+    }
+
+    console.log('Converted date object:', eventDateObj);
+
+    // Prepare event data
+    const updateData = {
+      title,
+      eventDate: eventDateObj,
+      description,
+      exerciseType,
+      exercises: exercises || undefined, // Add exercises to the event data
+    };
+
+    console.log('Updating event with data:', updateData);
+    const updatedEvent = await (this.prisma as any).event.update({
+      where: { id: eventId },
+      data: updateData,
+    });
+    console.log('Event updated successfully:', updatedEvent);
+
+    return updatedEvent;
   }
 }

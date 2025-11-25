@@ -42,7 +42,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
     
     // Sort by dateAdded (newest first) and take top 5
     return allResults
-      .sort((a, b) => new Date(b.dateAdded.split('.').reverse().join('-')).getTime() - new Date(a.dateAdded.split('.').reverse().join('-')).getTime())
+      .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
       .slice(0, 5);
   };
 

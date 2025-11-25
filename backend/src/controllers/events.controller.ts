@@ -12,6 +12,7 @@ import {
   ValidationPipe,
   BadRequestException,
   NotFoundException,
+  ForbiddenException,
   Request,
 } from '@nestjs/common';
 import { EventsService } from '../services/events.service';
@@ -29,6 +30,10 @@ export class EventsController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe())
   async createEvent(@Body() createEventDto: CreateEventDto) {
+    console.log('Received create event request:', createEventDto);
+    console.log('Exercises type:', typeof createEventDto.exercises);
+    console.log('Exercises value:', createEventDto.exercises);
+
     try {
       return await this.eventsService.createEvent(
         createEventDto.userId,
@@ -36,6 +41,7 @@ export class EventsController {
         createEventDto.eventDate,
         createEventDto.description,
         createEventDto.exerciseType,
+        createEventDto.exercises, // Add exercises parameter
         createEventDto.participantIds,
       );
     } catch (error: unknown) {
@@ -121,5 +127,38 @@ export class EventsController {
   @Get(':eventId/results')
   async getEventResults(@Param('eventId') eventId: string) {
     return this.eventsService.getEventResults(eventId);
+  }
+
+  @Put(':eventId')
+  @HttpCode(HttpStatus.OK)
+  @UsePipes(new ValidationPipe())
+  async updateEvent(
+    @Param('eventId') eventId: string,
+    @Body() updateEventDto: CreateEventDto,
+  ) {
+    try {
+      return await this.eventsService.updateEvent(
+        eventId,
+        updateEventDto.userId,
+        updateEventDto.title,
+        updateEventDto.eventDate,
+        updateEventDto.description,
+        updateEventDto.exerciseType,
+        updateEventDto.exercises, // Add exercises parameter
+      );
+    } catch (error: unknown) {
+      // Handle specific errors
+      if (error instanceof Error && error.message === 'Invalid date format') {
+        throw new BadRequestException('Неверный формат даты');
+      }
+      if (error instanceof NotFoundException) {
+        throw error; // Re-throw NotFoundException as-is
+      }
+      if (error instanceof ForbiddenException) {
+        throw error; // Re-throw ForbiddenException as-is
+      }
+      // For any other errors, throw a generic bad request exception
+      throw new BadRequestException('Ошибка при обновлении события');
+    }
   }
 }

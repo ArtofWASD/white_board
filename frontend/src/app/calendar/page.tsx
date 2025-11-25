@@ -55,7 +55,10 @@ export default function CalendarPage() {
               id: event.id,
               title: event.title,
               date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
-              results: event.results || []
+              results: event.results ? event.results.map(result => ({
+                ...result,
+                dateAdded: new Date(result.dateAdded).toLocaleDateString('ru-RU')
+              })) : []
             }));
             setEvents(transformedEvents);
           }

@@ -3,7 +3,8 @@ import { NextResponse } from "next/server"
 // Create a new event
 export async function POST(request: Request) {
   try {
-    const { userId, title, eventDate, description, exerciseType } = await request.json()
+    const { userId, title, eventDate, description, exerciseType, exercises } =
+      await request.json()
 
     console.log("Received event creation request:", {
       userId,
@@ -11,6 +12,7 @@ export async function POST(request: Request) {
       eventDate,
       description,
       exerciseType,
+      exercises,
     })
 
     // Forward the request to our NestJS backend
@@ -22,7 +24,14 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ userId, title, eventDate, description, exerciseType }),
+      body: JSON.stringify({
+        userId,
+        title,
+        eventDate,
+        description,
+        exerciseType,
+        exercises,
+      }),
     })
 
     console.log("Received response from backend:", response.status, response.statusText)

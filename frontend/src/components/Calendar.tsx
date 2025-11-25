@@ -19,6 +19,7 @@ interface BackendEvent {
   description?: string;
   eventDate: string;
   exerciseType?: string;
+  exercises?: Exercise[]; // Add exercises field
   status: 'past' | 'future';
 }
 
@@ -74,18 +75,18 @@ const EventTooltip: React.FC<{
       )}
       
       {event.results && event.results.length > 0 && (
-        <div className="mt-2 pt-2 border-t border-gray-100">
+        <div className="mt-2">
           <div className="text-xs font-medium text-gray-700 mb-1">Результаты:</div>
-          <ul className="space-y-1 max-h-20 overflow-y-auto">
-            {event.results.map((result) => (
+          <ul className="space-y-1">
+            {event.results.slice(0, 2).map((result) => (
               <li key={result.id} className="text-xs flex justify-between">
                 <span className="text-gray-600">{result.time}</span>
-                <div className="text-gray-500 text-xs">
-                  <div>{result.dateAdded}</div>
-                  <div>{result.username}</div>
-                </div>
+                <span className="text-gray-500">{result.dateAdded}</span>
               </li>
             ))}
+            {event.results.length > 2 && (
+              <li className="text-xs text-gray-500">+ {event.results.length - 2} больше...</li>
+            )}
           </ul>
         </div>
       )}
@@ -93,7 +94,7 @@ const EventTooltip: React.FC<{
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
+const Calendar: React.FC<CalendarProps> = ({ isMenuOpen }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showAddEventButton, setShowAddEventButton] = useState(false);
   const [showEventActionMenu, setShowEventActionMenu] = useState(false);
@@ -140,7 +141,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
                 title: event.title,
                 date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
                 exerciseType: event.exerciseType,
-                exercises: [], // We don't have exercises in this version
+                exercises: event.exercises || [], // Use exercises from backend
                 results: results,
                 color: 'bg-blue-100' // Default color
               };
@@ -265,6 +266,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
           description: '', // No description in this version
           eventDate: new Date(selectedDate).toISOString(),
           exerciseType,
+          exercises: exercises.length > 0 ? exercises : undefined, // Send exercises to backend
         }),
       });
       
@@ -277,7 +279,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
           title: data.event.title,
           date: data.event.eventDate.split('T')[0],
           exerciseType: data.event.exerciseType,
-          exercises: [],
+          exercises: data.event.exercises || [], // Use exercises from response
           results: [],
           color: nextColor
         };
@@ -325,7 +327,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
               title: event.title,
               date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
               exerciseType: event.exerciseType,
-              exercises: [], // We don't have exercises in this version
+              exercises: event.exercises || [], // Use exercises from backend
               results: results,
               color: 'bg-blue-100' // Default color
             };
@@ -349,44 +351,30 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
 
   const handleDeleteEvent = async () => {
     // Check if user is authenticated before allowing event deletion
-    if (!isAuthenticated) {
+    if (!isAuthenticated || !user) {
       alert('Вы должны быть авторизованы для удаления события');
-      setShowEventActionMenu(false);
       return;
     }
     
     if (selectedEvent) {
       try {
-        console.log('Attempting to delete event:', selectedEvent.id);
-        console.log('User ID:', user?.id);
-        
-        // Delete event from backend
-        // Send user ID as a query parameter instead of in the request body
-        const response = await fetch(`/api/events/${selectedEvent.id}?userId=${user?.id}`, {
+        const response = await fetch(`/api/events/${selectedEvent.id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json',
           },
+          body: JSON.stringify({ userId: user.id }),
         });
         
-        console.log('Delete response:', response.status, response.statusText);
-        
         if (response.ok) {
-          // Remove event from local state
+          // Remove the event from the local state
           setEvents(events.filter(event => event.id !== selectedEvent.id));
           setShowEventActionMenu(false);
-          
-          // Refresh events from backend to ensure consistency
-          refreshEvents();
+          setSelectedEvent(null);
+          alert('Событие успешно удалено');
         } else {
           const data = await response.json();
-          console.log('Delete error response:', data);
-          // Check if it's a forbidden error (user trying to delete someone else's event)
-          if (response.status === 403) {
-            alert('Вы можете удалять только свои собственные события');
-          } else {
-            alert(data.message || 'Ошибка при удалении события');
-          }
+          alert(data.message || 'Ошибка при удалении события');
         }
       } catch (error) {
         console.error('Error deleting event:', error);
@@ -396,13 +384,6 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleEditEvent = () => {
-    // Check if user is authenticated before allowing event editing
-    if (!isAuthenticated) {
-      alert('Вы должны быть авторизованы для редактирования события');
-      setShowEventActionMenu(false);
-      return;
-    }
-    
     if (selectedEvent) {
       setEventToEdit(selectedEvent);
       setShowEditModal(true);
@@ -411,13 +392,6 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleAddResult = () => {
-    // Check if user is authenticated before allowing adding results
-    if (!isAuthenticated) {
-      alert('Вы должны быть авторизованы для добавления результата');
-      setShowEventActionMenu(false);
-      return;
-    }
-    
     if (selectedEvent) {
       setEventToAddResult(selectedEvent);
       setShowAddResultModal(true);
@@ -426,21 +400,16 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
   };
 
   const handleSaveResult = async (time: string) => {
-    if (eventToAddResult) {
-      // Get the current user's name from the component level context
-      const username = user?.name || 'Anonymous';
-      
+    if (eventToAddResult && user) {
       try {
-        // Save result to backend
         const response = await fetch(`/api/events/${eventToAddResult.id}/results`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            eventId: eventToAddResult.id,
             time,
-            username,
+            username: user.name,
           }),
         });
         
@@ -484,15 +453,52 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     setEventToAddResult(null);
   };
 
-  const handleUpdateEvent = (title: string, exerciseType: string, exercises: Exercise[]) => {
-    if (eventToEdit) {
-      setEvents(events.map(event => 
-        event.id === eventToEdit.id 
-          ? { ...event, title, exerciseType, exercises } // Results are preserved since we're not overwriting them
-          : event
-      ));
-      setShowEditModal(false);
-      setEventToEdit(null);
+  const handleUpdateEvent = async (title: string, exerciseType: string, exercises: Exercise[]) => {
+    if (eventToEdit && user) {
+      try {
+        // Update event in backend
+        const response = await fetch(`/api/events/${eventToEdit.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            title,
+            description: '', // No description in this version
+            eventDate: new Date(eventToEdit.date).toISOString(),
+            exerciseType,
+            exercises: exercises.length > 0 ? exercises : undefined, // Send exercises to backend
+          }),
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          // Update the event in the local state
+          setEvents(events.map(event => 
+            event.id === eventToEdit.id 
+              ? { 
+                  ...event, 
+                  title, 
+                  exerciseType, 
+                  exercises,
+                  // Preserve results since we're not overwriting them
+                } 
+              : event
+          ));
+          setShowEditModal(false);
+          setEventToEdit(null);
+          
+          // Refresh events from backend to ensure consistency
+          refreshEvents();
+        } else {
+          alert(data.message || 'Ошибка при обновлении события');
+        }
+      } catch (error) {
+        console.error('Error updating event:', error);
+        alert('Произошла ошибка при обновлении события');
+      }
     }
   };
 

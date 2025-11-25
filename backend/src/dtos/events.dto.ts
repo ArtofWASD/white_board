@@ -7,6 +7,21 @@ import {
   IsDateString,
 } from 'class-validator';
 
+export class ExerciseDto {
+  @IsNotEmpty()
+  id: number;
+
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  weight: string;
+
+  @IsString()
+  repetitions: string;
+}
+
 export class CreateEventDto {
   @IsUUID()
   @IsNotEmpty()
@@ -27,6 +42,10 @@ export class CreateEventDto {
   @IsString()
   @IsOptional()
   exerciseType?: string;
+
+  @IsOptional()
+  @IsArray()
+  exercises?: ExerciseDto[]; // Exercises as array of objects
 
   @IsOptional()
   @IsArray()

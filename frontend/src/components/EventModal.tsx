@@ -322,6 +322,9 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
                 if (e.nativeEvent) {
                   e.nativeEvent.stopImmediatePropagation();
                 }
+                
+                // Call the handleSubmit function to save the event
+                handleSubmit(e as React.FormEvent);
               }}
               className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
             >
