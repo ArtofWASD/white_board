@@ -506,7 +506,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen = false }) => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showAddEventButton && 
           !(event.target as HTMLElement).closest('.add-event-button') &&
-          !(event.target as HTMLElement).closest('.fixed.inset-0')) {
+          !(event.target as HTMLElement).closest('.event-modal') &&
+          !(event.target as HTMLElement).closest('[data-event-modal="true"]')) {
         setShowAddEventButton(false);
       }
       

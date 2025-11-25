@@ -25,6 +25,8 @@ const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, d
 
   const handleCloseModal = () => {
     setShowModal(false);
+    // Always call onCancel when handleCloseModal is explicitly called
+    // The global click handler should be responsible for preventing accidental closing
     onCancel();
   };
 

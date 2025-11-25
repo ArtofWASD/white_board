@@ -91,8 +91,16 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-auto max-h-[90vh] overflow-y-auto">
+    <div 
+      className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50 event-modal"
+      onClick={(e) => e.stopPropagation()}
+      data-event-modal="true"
+    >
+      <div 
+        className="bg-white p-6 rounded-lg shadow-lg min-w-[300px] max-w-2xl w-auto max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        data-event-modal-content="true"
+      >
         <h3 className="text-lg font-semibold mb-4">
           {eventData ? 'Редактировать событие для' : 'Добавить событие для'} {date}
         </h3>
@@ -175,7 +183,18 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
                 />
                 <button
                   type="button"
-                  onClick={handleAddExercise}
+                  onClick={(e) => {
+                    // Prevent the event from bubbling up to the global click handler
+                    e.stopPropagation();
+                    e.preventDefault();
+                    
+                    // Also stop immediate propagation to ensure no other handlers are called
+                    if (e.nativeEvent) {
+                      e.nativeEvent.stopImmediatePropagation();
+                    }
+                    
+                    handleAddExercise();
+                  }}
                   className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
                 >
                   Добавить
@@ -198,7 +217,18 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
                     </div>
                     <button
                       type="button"
-                      onClick={() => handleRemoveExercise(exercise.id)}
+                      onClick={(e) => {
+                        // Prevent the event from bubbling up to the global click handler
+                        e.stopPropagation();
+                        e.preventDefault();
+                        
+                        // Also stop immediate propagation to ensure no other handlers are called
+                        if (e.nativeEvent) {
+                          e.nativeEvent.stopImmediatePropagation();
+                        }
+                        
+                        handleRemoveExercise(exercise.id);
+                      }}
                       className="text-red-500 hover:text-red-700"
                     >
                       Удалить
@@ -217,7 +247,16 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
                   Результаты
                 </label>
                 <button 
-                  onClick={() => {
+                  onClick={(e) => {
+                    // Prevent the event from bubbling up to the global click handler
+                    e.stopPropagation();
+                    e.preventDefault();
+                    
+                    // Also stop immediate propagation to ensure no other handlers are called
+                    if (e.nativeEvent) {
+                      e.nativeEvent.stopImmediatePropagation();
+                    }
+                    
                     // Sort results by time
                     const sorted = [...(isSorted ? eventData.results! : sortedResults)].sort((a, b) => {
                       // Convert time strings to numbers for comparison (assuming format like "10:30")
@@ -255,7 +294,16 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
           <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={() => {
+              onClick={(e) => {
+                // Prevent the event from bubbling up to the global click handler
+                e.stopPropagation();
+                e.preventDefault();
+                
+                // Also stop immediate propagation to ensure no other handlers are called
+                if (e.nativeEvent) {
+                  e.nativeEvent.stopImmediatePropagation();
+                }
+                
                 resetForm();
                 onClose();
               }}
@@ -265,6 +313,16 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
             </button>
             <button
               type="submit"
+              onClick={(e) => {
+                // Prevent the event from bubbling up to the global click handler
+                e.stopPropagation();
+                e.preventDefault();
+                
+                // Also stop immediate propagation to ensure no other handlers are called
+                if (e.nativeEvent) {
+                  e.nativeEvent.stopImmediatePropagation();
+                }
+              }}
               className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none"
             >
               {eventData ? 'Сохранить изменения' : 'Сохранить'}
