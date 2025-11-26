@@ -8,6 +8,15 @@ export interface User {
   weight?: number
 }
 
+export interface Team {
+  id: string
+  name: string
+  description?: string
+  ownerId: string
+  created_at: string
+  updated_at: string
+}
+
 export interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<boolean>

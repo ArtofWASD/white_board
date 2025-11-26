@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { Team } from '../../types';
+import EditTeamModal from '../../components/EditTeamModal';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -13,6 +15,47 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [loadingTeams, setLoadingTeams] = useState(true);
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [editingTeamName, setEditingTeamName] = useState<string>('');
+
+  // Fetch user's teams
+  useEffect(() => {
+    const fetchTeams = async () => {
+      if (!user || user.role !== 'trainer') {
+        setLoadingTeams(false);
+        return;
+      }
+      
+      try {
+        setLoadingTeams(true);
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`/api/teams?userId=${user.id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token && { 'Authorization': `Bearer ${token}` }),
+          },
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Fetched teams:', data);
+          setTeams(data);
+        } else {
+          console.error('Failed to fetch teams');
+        }
+      } catch (err) {
+        console.error('Error fetching teams:', err);
+      } finally {
+        setLoadingTeams(false);
+      }
+    };
+
+    fetchTeams();
+  }, [user]);
 
   if (!user) {
     return (
@@ -68,6 +111,10 @@ export default function DashboardPage() {
         setTeamDescription('');
         setSuccess('Команда успешно создана!');
         
+        // Refresh teams list
+        const data = await response.json();
+        setTeams(prev => [...prev, data]);
+        
         // Clear success message after 3 seconds
         setTimeout(() => setSuccess(null), 3000);
       } else {
@@ -84,6 +131,60 @@ export default function DashboardPage() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteTeam = async (teamId: string) => {
+    if (!confirm('Вы уверены, что хотите удалить эту команду?')) return;
+    
+    try {
+      const token = localStorage.getItem('token');
+      
+      // For now, we'll implement a basic delete by calling a non-existent endpoint
+      // In a real implementation, you would need to add DELETE endpoint to the backend
+      alert('Функция удаления еще не реализована на бэкенде');
+      
+      // This is a placeholder for when the backend DELETE endpoint is implemented:
+      /*
+      const response = await fetch(`/api/teams/${teamId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+      
+      if (response.ok) {
+        setTeams(prev => prev.filter(team => team.id !== teamId));
+      } else {
+        const errorData = await response.json();
+        alert(errorData.message || 'Не удалось удалить команду');
+      }
+      */
+    } catch (err) {
+      console.error('Error deleting team:', err);
+      alert('Ошибка при удалении команды');
+    }
+  };
+
+  const handleEditTeam = (teamId: string) => {
+    console.log('Editing team with ID:', teamId);
+    console.log('Available teams:', teams);
+    const team = teams.find(t => t.id === teamId);
+    if (team) {
+      console.log('Found team:', team);
+      console.log('Team ID type:', typeof teamId);
+      console.log('Matching team ID type:', typeof team.id);
+      setEditingTeamId(teamId);
+      setEditingTeamName(team.name);
+    } else {
+      console.error('Team not found with ID:', teamId);
+      console.error('Available team IDs:', teams.map(t => t.id));
+      // Let's also check if there's a type mismatch
+      const matchingTeam = teams.find(t => t.id == teamId); // Using == instead of ===
+      if (matchingTeam) {
+        console.log('Found team with loose equality:', matchingTeam);
+      }
     }
   };
 
@@ -228,12 +329,85 @@ export default function DashboardPage() {
                 </form>
               </div>
             )}
+            
+            {/* Display Teams */}
+            <div className="mt-8">
+              <h4 className="text-lg font-semibold mb-4 text-gray-800">Ваши команды</h4>
+              {loadingTeams ? (
+                <p className="text-gray-600">Загрузка команд...</p>
+              ) : teams.length === 0 ? (
+                <p className="text-gray-600">У вас пока нет команд</p>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {teams.map((team) => (
+                    <div key={team.id} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
+                      <div>
+                        <h5 className="font-medium text-gray-900">{team.name}</h5>
+                        {team.description && (
+                          <p className="text-sm text-gray-600 mt-1">{team.description}</p>
+                        )}
+                      </div>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEditTeam(team.id)}
+                          className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 text-sm"
+                        >
+                          Редактировать
+                        </button>
+                        <button
+                          onClick={() => handleDeleteTeam(team.id)}
+                          className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                        >
+                          Удалить
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
         
-        <div className="bg-white rounded-lg shadow-xl p-6">
-          <h3 className="text-xl font-semibold mb-4">Последние действия</h3>
-        </div>
+        {/* Edit Team Modal */}
+        {editingTeamId && (
+          <EditTeamModal
+            teamId={editingTeamId}
+            teamName={editingTeamName}
+            isOpen={!!editingTeamId}
+            onClose={() => setEditingTeamId(null)}
+            onTeamUpdated={() => {
+              // Refresh teams list when team is updated
+              const fetchTeams = async () => {
+                if (!user || user.role !== 'trainer') return;
+                
+                try {
+                  setLoadingTeams(true);
+                  const token = localStorage.getItem('token');
+                  
+                  const response = await fetch(`/api/teams?userId=${user.id}`, {
+                    method: 'GET',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(token && { 'Authorization': `Bearer ${token}` }),
+                    },
+                  });
+                  
+                  if (response.ok) {
+                    const data = await response.json();
+                    setTeams(data);
+                  }
+                } catch (err) {
+                  console.error('Error fetching teams:', err);
+                } finally {
+                  setLoadingTeams(false);
+                }
+              };
+              
+              fetchTeams();
+            }}
+          />
+        )}
       </div>
     </div>
   );

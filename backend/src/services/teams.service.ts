@@ -167,7 +167,12 @@ export class TeamsService {
       throw new NotFoundException('User not found');
     }
 
-    // Get all teams the user belongs to
+    // Get all teams where the user is the owner
+    const ownedTeams = await (this.prisma as any).team.findMany({
+      where: { ownerId: userId },
+    });
+
+    // Get all teams the user belongs to as a member
     const teamMemberships = await (this.prisma as any).teamMember.findMany({
       where: { userId: userId },
       include: {
@@ -175,6 +180,15 @@ export class TeamsService {
       },
     });
 
-    return teamMemberships.map((tm: any) => tm.team);
+    // Combine both arrays and remove duplicates
+    const memberTeams = teamMemberships.map((tm: any) => tm.team);
+    const allTeams = [...ownedTeams, ...memberTeams];
+
+    // Remove duplicates by id
+    const uniqueTeams = allTeams.filter(
+      (team, index, self) => index === self.findIndex((t) => t.id === team.id),
+    );
+
+    return uniqueTeams;
   }
 }
