@@ -37,10 +37,10 @@ export default function Home() {
             <h1 className={`text-4xl font-bold mb-6 transition-all duration-300 ${
               hoveredSection === 'blog' ? 'text-5xl' : ''
             } text-gray-800`}>
-              Блог
+              Тренды и Тренировки
             </h1>
             <p className="text-xl text-gray-600">
-              Читайте последние статьи и новости
+              Актуальные тренды и эффективные тренировки
             </p>
           </div>
         </Link>

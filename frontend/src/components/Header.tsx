@@ -37,7 +37,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) =>
         <Image src="/menu.png" alt="Menu" width={32} height={32} className="sm:w-10 sm:h-10" />
       </button>
       <h1 
-        className="text-lg sm:text-xl font-bold cursor-pointer hover:text-gray-300 transition-colors"
+        className="text-lg sm:text-xl font-bold cursor-pointer hover:text-gray-300 transition-colors absolute left-1/2 transform -translate-x-1/2"
         onClick={handleTitleClick}
       >
         My White Board

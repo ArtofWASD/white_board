@@ -225,7 +225,7 @@ export default function BlogPage() {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {newsItems.slice(0, 2).map((item) => (
+            {newsItems.map((item) => (
               <article 
                 key={item.id} 
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
@@ -246,6 +246,15 @@ export default function BlogPage() {
                 </div>
               </article>
             ))}
+          </div>
+          
+          <div className="mt-8 flex justify-center">
+            <Link 
+              href="/" 
+              className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
+            >
+              На главную
+            </Link>
           </div>
         </div>
       </main>
