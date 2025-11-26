@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import Header from '../../components/Header';
 import LeftMenu from '../../components/LeftMenu';
 import { useAuth } from '../../contexts/AuthContext';
@@ -14,6 +15,26 @@ interface BlogPost {
   excerpt: string;
   date: string;
   readTime: string;
+}
+
+// Define types for news
+interface NewsItem {
+  id: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  readTime: string;
+  content: string;
+}
+
+// Define types for workouts
+interface WorkoutItem {
+  id: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  difficulty: string;
+  content: string;
 }
 
 // Define types for events and results
@@ -96,35 +117,59 @@ export default function BlogPage() {
     setSelectedEvent(null);
   };
 
-  // Sample blog posts data
-  const blogPosts: BlogPost[] = [
+  // Sample news data
+  const newsItems: NewsItem[] = [
     {
       id: '1',
-      title: 'Как эффективно планировать тренировки',
-      excerpt: 'Узнайте основные принципы составления эффективного плана тренировок, которые помогут вам достигать лучших результатов.',
+      title: 'Новые возможности тренировочного календаря',
+      excerpt: 'Мы добавили новые функции в наш тренировочный календарь, которые помогут вам лучше планировать свои занятия.',
       date: '15 ноября 2025',
-      readTime: '5 мин чтения'
+      readTime: '5 мин чтения',
+      content: 'В новом обновлении мы добавили возможность планирования групповых тренировок, интеграцию с популярными фитнес-приложениями и улучшенную систему напоминаний о предстоящих занятиях. Теперь вы можете легко делиться своими тренировками с друзьями и отслеживать прогресс всей команды.'
     },
     {
       id: '2',
-      title: 'Питание спортсмена: что есть перед тренировкой',
-      excerpt: 'Правильное питание перед тренировкой может значительно повлиять на вашу производительность и результаты.',
+      title: 'Советы по питанию для спортсменов',
+      excerpt: 'Правильное питание играет ключевую роль в достижении спортивных результатов. Узнайте больше о важных аспектах спортивного питания.',
       date: '10 ноября 2025',
-      readTime: '7 мин чтения'
+      readTime: '7 мин чтения',
+      content: 'Спортивное питание должно быть сбалансированным и содержать все необходимые макро- и микроэлементы. Мы подготовили подробное руководство по питанию до, во время и после тренировок, которое поможет вам оптимизировать ваши спортивные результаты и ускорить восстановление.'
     },
     {
       id: '3',
-      title: 'Восстановление после интенсивных тренировок',
-      excerpt: 'Восстановление так же важно, как и сама тренировка. Рассказываем, как правильно восстанавливаться.',
+      title: 'Как избежать перетренированности',
+      excerpt: 'Перетренированность - частая проблема среди активных спортсменов. Узнайте, как распознать признаки и предотвратить это состояние.',
       date: '5 ноября 2025',
-      readTime: '6 мин чтения'
+      readTime: '6 мин чтения',
+      content: 'Перетренированность может серьезно повлиять на ваш спортивный прогресс и общее состояние здоровья. В этой статье мы рассмотрим основные симптомы перетренированности, методы диагностики и рекомендации по восстановлению. Также вы узнаете, как правильно планировать тренировочный процесс с учетом периодов отдыха и восстановления.'
+    }
+  ];
+
+  // Sample workout data
+  const workoutItems: WorkoutItem[] = [
+    {
+      id: '1',
+      title: 'HIIT тренировка для начинающих',
+      excerpt: 'Интенсивная интервальная тренировка для тех, кто только начинает свой путь в фитнесе.',
+      date: '15 ноября 2025',
+      difficulty: 'Начинающий',
+      content: 'Эта HIIT тренировка состоит из 8 упражнений, выполняемых по 30 секунд с 15-секундным отдыхом между ними. Цикл повторяется 3 раза с минутным перерывом между циклами. Тренировка включает приседания, отжимания, берпи, скакалку, планку, выпады, бег на месте и прыжки. Подходит для новичков и не требует специального оборудования.'
     },
     {
-      id: '4',
-      title: 'Новые функции нашего календаря',
-      excerpt: 'Мы добавили новые возможности в календарь, которые помогут вам лучше планировать свои тренировки.',
-      date: '1 ноября 2025',
-      readTime: '3 мин чтения'
+      id: '2',
+      title: 'Силовая тренировка для спины',
+      excerpt: 'Комплекс упражнений для укрепления мышц спины и улучшения осанки.',
+      date: '10 ноября 2025',
+      difficulty: 'Средний',
+      content: 'Тренировка направлена на развитие всех групп мышц спины: трапеций, широчайших, ромбовидных и поясничных мышц. В комплекс входят становая тяга, подтягивания, гиперэкстензия, тяга штанги в наклоне, обратные разведения в тренажере и планка. Рекомендуется выполнять 3-4 подхода по 8-12 повторений с рабочим весом 60-80% от одноповторного максимума.'
+    },
+    {
+      id: '3',
+      title: 'Кардио тренировка на улице',
+      excerpt: 'Эффективная кардио тренировка, которую можно провести на свежем воздухе без специального оборудования.',
+      date: '5 ноября 2025',
+      difficulty: 'Начинающий',
+      content: 'Прогулка на свежем воздухе может быть отличной кардио тренировкой. Мы предлагаем маршрут длиной 5 км с элементами интервальной нагрузки: чередование быстрой ходьбы и легкого бега трусцой. Также включены упражнения на каждой остановке: приседания, отжимания от стены, прыжки и растяжка. Общая продолжительность тренировки 45 минут.'
     }
   ];
 
@@ -146,33 +191,61 @@ export default function BlogPage() {
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 text-center">Блог</h1>
+          {/* Two large links for News and Workouts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <Link 
+              href="/blog/news" 
+              className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
+            >
+              <div className="flex flex-col h-full justify-center items-center">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Новости</h2>
+                <div className="w-26 h-0.5 bg-black mt-2"></div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    Читайте последние новости и обновления
+                  </span>
+                </div>
+              </div>
+            </Link>
+            
+            <Link 
+              href="/blog/workouts" 
+              className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
+            >
+              <div className="flex flex-col h-full justify-center items-center">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Воркауты</h2>
+                <div className="w-28 h-0.5 bg-black mt-2"></div>
+                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    Откройте для себя новые тренировки
+                  </span>
+                </div>
+              </div>
+            </Link>
+          </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {blogPosts.map((post) => (
+            {newsItems.slice(0, 2).map((item) => (
               <article 
-                key={post.id} 
+                key={item.id} 
                 className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
               >
                 <div className="p-6">
-                  <h2 className="text-xl font-bold mb-3 text-gray-800">{post.title}</h2>
-                  <p className="text-gray-600 mb-4">{post.excerpt}</p>
+                  <h2 className="text-xl font-bold mb-3 text-gray-800">{item.title}</h2>
+                  <p className="text-gray-600 mb-4">{item.excerpt}</p>
                   <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>{post.date}</span>
-                    <span>{post.readTime}</span>
+                    <span>{item.date}</span>
+                    <span>{item.readTime}</span>
                   </div>
-                  <button className="mt-4 text-indigo-600 font-medium hover:text-indigo-800 transition-colors">
+                  <Link 
+                    href={`/blog/news/${item.id}`}
+                    className="mt-4 text-indigo-600 font-medium hover:text-indigo-800 transition-colors inline-block"
+                  >
                     Читать далее →
-                  </button>
+                  </Link>
                 </div>
               </article>
             ))}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <button className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
-              Загрузить еще
-            </button>
           </div>
         </div>
       </main>
