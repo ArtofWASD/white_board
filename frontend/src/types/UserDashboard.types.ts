@@ -1,3 +1,5 @@
+import { Exercise } from './index';
+
 export interface UserDashboardProps {
   onClose?: () => void
 }
@@ -8,5 +10,7 @@ export interface DashboardEvent {
   description: string;
   eventDate: string;
   exerciseType?: string;
+  exercises?: Exercise[];
   status: 'past' | 'future';
+  userId?: string;
 }

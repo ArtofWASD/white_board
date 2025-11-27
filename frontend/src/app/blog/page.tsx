@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Header from '../../components/Header';
-import LeftMenu from '../../components/LeftMenu';
+import Header from '../../components/layout/Header';
+import LeftMenu from '../../components/layout/LeftMenu';
 import { useAuth } from '../../contexts/AuthContext';
-import Footer from '../../components/Footer';
+import Footer from '../../components/layout/Footer';
 
 // Define types for news
 interface NewsItem {
