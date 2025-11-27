@@ -44,8 +44,9 @@ export default function RegisterPage() {
         // Registration successful, redirect to login or dashboard
         router.push('/login');
       }
-    } catch (err) {
-      setError('Произошла ошибка. Попробуйте еще раз.');
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Произошла ошибка при регистрации');
     } finally {
       setLoading(false);
     }

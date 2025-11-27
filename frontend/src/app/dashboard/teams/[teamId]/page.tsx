@@ -45,6 +45,7 @@ export default function EditTeamPage() {
       fetchTeamMembers();
       fetchAvailableAthletes();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
 
   const fetchTeamDetails = async () => {

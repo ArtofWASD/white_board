@@ -1,13 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Calendar from '../../components/Calendar';
 import Header from '../../components/Header';
 import LeftMenu from '../../components/LeftMenu';
 import { useAuth } from '../../contexts/AuthContext';
-import AuthForms from '../../components/AuthForms';
 import Footer from '../../components/Footer';
-import { useState } from 'react';
 
 // Define types for our events and results
 interface EventResult {
@@ -47,7 +45,7 @@ export default function CalendarPage() {
   };
 
   // Fetch events from the backend
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchEvents = async () => {
       if (isAuthenticated && user) {
         try {

@@ -1,11 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 import Header from '../../../components/Header';
 import LeftMenu from '../../../components/LeftMenu';
-import { useAuth } from '../../../contexts/AuthContext';
-import AuthForms from '../../../components/AuthForms';
 import Footer from '../../../components/Footer';
 
 // Define types for workouts
@@ -25,8 +23,6 @@ export default function WorkoutsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
-  
-  const { isAuthenticated } = useAuth();
 
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
@@ -37,7 +33,7 @@ export default function WorkoutsPage() {
   };
 
   // Sample workout data (in a real app, this would come from an API)
-  const allWorkoutItems: WorkoutItem[] = [
+  const allWorkoutItems: WorkoutItem[] = useMemo(() => [
     {
       id: '1',
       title: 'HIIT тренировка для начинающих',
@@ -86,7 +82,7 @@ export default function WorkoutsPage() {
       difficulty: 'Начинающий',
       content: 'Растяжка после тренировки помогает улучшить гибкость, снизить мышечное напряжение и ускорить восстановление. В комплекс входят растяжка мышц спины, ног, плеч и шеи. Каждое упражнение выполняется по 30-60 секунд. Особое внимание уделяется глубокому дыханию и расслаблению.'
     }
-  ];
+  ], []);
 
   // Simulate fetching data with pagination
   const loadWorkouts = useCallback(() => {
@@ -104,7 +100,7 @@ export default function WorkoutsPage() {
       setHasMore(startIndex + 3 < allWorkoutItems.length);
       setLoading(false);
     }, 500);
-  }, [page, hasMore, loading]);
+  }, [page, hasMore, loading, allWorkoutItems]);
 
   // Load initial data
   useEffect(() => {
@@ -122,7 +118,7 @@ export default function WorkoutsPage() {
     };
     
     initialLoad();
-  }, [displayedWorkouts.length]);
+  }, [displayedWorkouts.length, allWorkoutItems]);
 
   // Handle scroll for infinite loading
   useEffect(() => {

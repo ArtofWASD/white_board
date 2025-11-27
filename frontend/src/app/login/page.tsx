@@ -32,8 +32,9 @@ export default function LoginPage() {
       } else {
         setError('Не удалось войти. Пожалуйста, проверьте учетные данные.');
       }
-    } catch (err) {
-      setError('Произошла ошибка. Попробуйте еще раз.');
+    } catch (error) {
+      console.error('Login error:', error);
+      setError('Произошла ошибка при входе');
     } finally {
       setLoading(false);
     }

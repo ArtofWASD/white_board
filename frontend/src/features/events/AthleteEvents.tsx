@@ -1,13 +1,14 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
-import { Event } from '../types';
 import AddEventForm from './AddEventForm';
-import { AthleteEventsProps } from '../types/AthleteEvents.types';
+import { DashboardEvent } from '../../types/UserDashboard.types';
+
+interface AthleteEventsProps {
+  userId: string;
+}
 
 export default function AthleteEvents({ userId }: AthleteEventsProps) {
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<DashboardEvent[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export default function AthleteEvents({ userId }: AthleteEventsProps) {
     }
   };
 
-  const handleEventAdded = (newEvent: Event) => {
+  const handleEventAdded = (newEvent: DashboardEvent) => {
     setEvents([newEvent, ...events]);
   };
 
@@ -83,8 +84,18 @@ export default function AthleteEvents({ userId }: AthleteEventsProps) {
   return (
     <div className="space-y-6">
       <AddEventForm user={user} onSubmit={(title, exerciseType, exercises) => {
-        // Handle form submission
-        // This is a simplified version - you might want to implement proper event creation logic here
+        // Create a temporary event object to update UI immediately
+        const newEvent: DashboardEvent = {
+          id: Date.now().toString(), // Temporary ID
+          title,
+          description: '',
+          eventDate: new Date().toISOString(),
+          exerciseType,
+          exercises,
+          status: 'future',
+          userId: user.id
+        };
+        handleEventAdded(newEvent);
       }} />
       
       <div>

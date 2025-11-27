@@ -27,7 +27,7 @@ export default function ProfilePage() {
         
         // Remove undefined values
         const cleanData = Object.fromEntries(
-          Object.entries(requestData).filter(([_, v]) => v !== undefined)
+          Object.entries(requestData).filter(([, v]) => v !== undefined)
         );
         
         console.log('Clean data being sent:', cleanData);

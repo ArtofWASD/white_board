@@ -1,25 +1,5 @@
 import { NextResponse } from "next/server"
 
-interface Team {
-  id: string
-  name: string
-  description: string | null
-  ownerId: string
-  createdAt: string
-  updatedAt: string
-}
-
-interface TeamMember {
-  id: string
-  teamId: string
-  userId: string
-  role: string
-}
-
-// Mock data for teams and members
-const teams: Team[] = []
-const teamMembers: TeamMember[] = []
-
 // Get all teams for a user
 export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   try {

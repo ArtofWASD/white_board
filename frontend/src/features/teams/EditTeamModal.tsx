@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
-import { EditTeamModalProps, TeamMember, EditTeamModalUser as User } from '../types/EditTeamModal.types';
+import { EditTeamModalProps, TeamMember, EditTeamModalUser as User } from '../../types/EditTeamModal.types';
 
 export default function EditTeamModal({ 
   teamId, 
@@ -21,17 +21,7 @@ export default function EditTeamModal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch team members and available athletes when modal opens
-  useEffect(() => {
-    if (isOpen && teamId && typeof teamId === 'string' && teamId !== 'undefined') {
-      fetchTeamMembers();
-      fetchAvailableAthletes();
-    } else if (isOpen) {
-      console.warn('EditTeamModal open but invalid teamId:', teamId);
-    }
-  }, [isOpen, teamId]);
-
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = useCallback(async () => {
     try {
       // Validate teamId format
       if (!teamId || typeof teamId !== 'string' || teamId === 'undefined') {
@@ -108,9 +98,9 @@ export default function EditTeamModal({
     } finally {
       setLoading(false);
     }
-  };
+  }, [teamId]);
 
-  const fetchAvailableAthletes = async () => {
+  const fetchAvailableAthletes = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       
@@ -147,7 +137,17 @@ export default function EditTeamModal({
       console.error('Exception fetching athletes:', err);
       setAthletes([]);
     }
-  };
+  }, []);
+
+  // Fetch team members and available athletes when modal opens
+  useEffect(() => {
+    if (isOpen && teamId && typeof teamId === 'string' && teamId !== 'undefined') {
+      fetchTeamMembers();
+      fetchAvailableAthletes();
+    } else if (isOpen) {
+      console.warn('EditTeamModal open but invalid teamId:', teamId);
+    }
+  }, [isOpen, teamId, fetchTeamMembers, fetchAvailableAthletes]);
 
   const addTeamMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -180,7 +180,7 @@ export default function EditTeamModal({
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           errorMessage = response.statusText || 'Failed to add member';
         }
         setError(errorMessage);
@@ -220,7 +220,7 @@ export default function EditTeamModal({
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           errorMessage = response.statusText || 'Failed to remove member';
         }
         setError(errorMessage);

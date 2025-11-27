@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
-import { CreateTeamModalProps } from '../types/CreateTeamModal.types';
+import { CreateTeamModalProps } from '../../types/CreateTeamModal.types';
 
 export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: CreateTeamModalProps) {
   const { user } = useAuth();

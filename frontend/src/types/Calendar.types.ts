@@ -1,4 +1,6 @@
-import { Exercise, CalendarEvent } from './index';
+import { Exercise, CalendarEvent, EventResult } from './index';
+
+export type { CalendarEvent, EventResult };
 
 export interface BackendEvent {
   id: string;

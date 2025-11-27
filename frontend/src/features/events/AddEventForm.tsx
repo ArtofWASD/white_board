@@ -1,15 +1,14 @@
-
 'use client';
 
 import React, { useState } from 'react';
-import { Event, Exercise } from '../types';
-import { AddEventFormProps } from '../types/AddEventForm.types';
+import { AddEventFormProps } from '../../types/AddEventForm.types';
+import { Exercise } from '../../types';
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
   const [title, setTitle] = useState('');
   const [exerciseType, setExerciseType] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

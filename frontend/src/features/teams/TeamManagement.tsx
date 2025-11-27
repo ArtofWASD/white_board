@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
-import { TeamManagementUser as User, TeamMember, Team } from '../types/TeamManagement.types';
+import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
 
 export default function TeamManagement() {
   const { user } = useAuth();
@@ -17,21 +17,7 @@ export default function TeamManagement() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch user's teams
-  useEffect(() => {
-    if (user) {
-      fetchUserTeams();
-    }
-  }, [user]);
-
-  // Fetch team members when a team is selected
-  useEffect(() => {
-    if (selectedTeam) {
-      fetchTeamMembers(selectedTeam);
-    }
-  }, [selectedTeam]);
-
-  const fetchUserTeams = async () => {
+  const fetchUserTeams = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/teams/user/${user?.id}`);
@@ -43,9 +29,9 @@ export default function TeamManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id]);
 
-  const fetchTeamMembers = async (teamId: string) => {
+  const fetchTeamMembers = useCallback(async (teamId: string) => {
     try {
       const response = await fetch(`/api/teams/${teamId}/members`);
       if (response.ok) {
@@ -57,7 +43,7 @@ export default function TeamManagement() {
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           // If JSON parsing fails, use the status text or a generic message
           errorMessage = response.statusText || 'Failed to fetch team members';
         }
@@ -67,7 +53,21 @@ export default function TeamManagement() {
       setError('Failed to fetch team members');
       console.error(err);
     }
-  };
+  }, []);
+
+  // Fetch user's teams
+  useEffect(() => {
+    if (user) {
+      fetchUserTeams();
+    }
+  }, [user, fetchUserTeams]);
+
+  // Fetch team members when a team is selected
+  useEffect(() => {
+    if (selectedTeam) {
+      fetchTeamMembers(selectedTeam);
+    }
+  }, [selectedTeam, fetchTeamMembers]);
 
   const createTeam = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,7 +162,7 @@ export default function TeamManagement() {
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           errorMessage = response.statusText || 'Failed to add member';
         }
         setError(errorMessage);
@@ -200,7 +200,7 @@ export default function TeamManagement() {
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch (parseError) {
+        } catch {
           errorMessage = response.statusText || 'Failed to remove member';
         }
         setError(errorMessage);

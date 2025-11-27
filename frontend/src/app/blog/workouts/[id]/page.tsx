@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Header from '../../../../components/Header';
 import LeftMenu from '../../../../components/LeftMenu';
-import { useAuth } from '../../../../contexts/AuthContext';
-import AuthForms from '../../../../components/AuthForms';
 import Footer from '../../../../components/Footer';
 
 // Define types for workouts
@@ -21,8 +19,6 @@ interface WorkoutItem {
 export default function WorkoutDetailPage({ params }: { params: { id: string } }) {
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-  
-  const { isAuthenticated } = useAuth();
 
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
