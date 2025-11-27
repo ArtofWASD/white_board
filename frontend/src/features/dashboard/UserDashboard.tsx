@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserDashboardProps, DashboardEvent } from '../../types/UserDashboard.types';
+import Button from '../../components/ui/Button';
 import AthleteEvents from '../events/AthleteEvents';
 import CreateTeamModal from '../teams/CreateTeamModal';
 
@@ -44,19 +45,19 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
         <h2 className="text-2xl font-bold">Добро пожаловать, {user.name}{user.lastName ? ` ${user.lastName}` : ''} ({user.role === 'athlete' ? 'Атлет' : 'Тренер'})!</h2>
         <div className="flex space-x-2">
           {onClose && (
-            <button
+            <Button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition duration-300"
+              variant="outline"
             >
               Закрыть и вернуться к календарю
-            </button>
+            </Button>
           )}
-          <button
+          <Button
             onClick={logout}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300"
+            variant="outline"
           >
             Выйти
-          </button>
+          </Button>
         </div>
       </div>
       
@@ -84,12 +85,12 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
       {/* Create Team Button for Trainers */}
       {user.role === 'trainer' && (
         <div className="mt-8">
-          <button
+          <Button
             onClick={() => setIsCreateTeamModalOpen(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+            variant="outline"
           >
             Создать команду
-          </button>
+          </Button>
         </div>
       )}
       

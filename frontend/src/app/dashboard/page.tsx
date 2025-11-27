@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Team } from '../../types';
+import Button from '../../components/ui/Button';
 
 
 export default function DashboardPage() {
@@ -64,18 +65,19 @@ export default function DashboardPage() {
       <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
         <h2 className="text-2xl font-bold mb-4">Доступ запрещен</h2>
         <p className="mb-4">Вы должны войти в систему, чтобы просматривать эту страницу.</p>
-        <button 
+        <Button 
           onClick={() => router.push('/')}
+          variant="outline"
           className="text-blue-500 hover:text-blue-700 font-medium"
         >
           Вернуться на главную страницу
-        </button>
+        </Button>
       </div>
     );
   }
 
   const handleReturnToCalendar = () => {
-    router.push('/');
+    router.push('/calendar');
   };
 
   const handleGoToProfile = () => {
@@ -159,18 +161,18 @@ export default function DashboardPage() {
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">Панель управления</h1>
           <div className="flex space-x-3">
-            <button
+            <Button
               onClick={handleReturnToCalendar}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition duration-300"
+              variant="outline"
             >
               Вернуться к календарю
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={logout}
-              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition duration-300"
+              variant="outline"
             >
               Выйти
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -186,12 +188,12 @@ export default function DashboardPage() {
                 <p className="text-sm text-gray-500">Роль: {user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
               </div>
             </div>
-            <button
+            <Button
               onClick={handleGoToProfile}
-              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition duration-300"
+              variant="outline"
             >
               Редактировать профиль
-            </button>
+            </Button>
           </div>
         </div>
         
@@ -201,12 +203,12 @@ export default function DashboardPage() {
             <h3 className="text-xl font-semibold mb-2 text-indigo-600">Создать команду</h3>
             <p className="text-gray-700 mb-4">Создайте новую команду для управления спортсменами</p>
             {!showCreateTeamForm ? (
-              <button 
+              <Button 
                 onClick={() => setShowCreateTeamForm(true)}
-                className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-md hover:bg-indigo-200 transition duration-300"
+                variant="outline"
               >
                 Создать команду
-              </button>
+              </Button>
             ) : (
               <div className="mt-4">
                 {error && (
@@ -248,14 +250,14 @@ export default function DashboardPage() {
                   </div>
                   
                   <div className="flex space-x-3">
-                    <button
+                    <Button
                       type="submit"
                       disabled={loading}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                      variant="outline"
                     >
                       {loading ? 'Создание...' : 'Создать команду'}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => {
                         setShowCreateTeamForm(false);
@@ -265,10 +267,10 @@ export default function DashboardPage() {
                         setError(null);
                         setSuccess(null);
                       }}
-                      className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      variant="outline"
                     >
                       Отмена
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </div>
@@ -287,7 +289,7 @@ export default function DashboardPage() {
               ) : teams.length === 0 ? (
                 <p className="text-gray-600">У вас пока нет команд</p>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   {teams.map((team) => (
                     <div key={team.id} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
                       <div>
@@ -297,18 +299,20 @@ export default function DashboardPage() {
                         )}
                       </div>
                       <div className="flex space-x-2">
-                        <button
+                        <Button
                           onClick={() => handleEditTeam(team.id)}
-                          className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-md hover:bg-yellow-200 text-sm"
+                          size="sm"
+                          variant="outline"
                         >
                           Редактировать
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => handleDeleteTeam(team.id)}
-                          className="px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 text-sm"
+                          size="sm"
+                          variant="outline"
                         >
                           Удалить
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   ))}
