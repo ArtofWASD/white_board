@@ -41,6 +41,10 @@ model Event {
   results      EventResult[]
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   participants User[]        @relation("EventParticipants")
+  timeCap      String?       @map("time_cap")
+  rounds       String?
+  teamId       String?       @map("team_id")
+  team         Team?         @relation(fields: [teamId], references: [id])
 
   @@map("events")
 }
@@ -54,6 +58,7 @@ model Team {
   updatedAt   DateTime     @updatedAt @map("updated_at")
   members     TeamMember[]
   owner       User         @relation("OwnedTeams", fields: [ownerId], references: [id])
+  events      Event[]
 
   @@map("teams")
 }

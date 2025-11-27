@@ -45,6 +45,10 @@ export interface Exercise {
   name: string
   weight: string
   repetitions: string
+  rxWeight?: string
+  rxReps?: string
+  scWeight?: string
+  scReps?: string
 }
 
 export interface EventResult {
@@ -62,6 +66,9 @@ export interface CalendarEvent {
   exercises?: Exercise[]
   results?: EventResult[]
   color?: string
+  teamId?: string
+  timeCap?: string
+  rounds?: string
 }
 
 export interface Event {
@@ -74,4 +81,6 @@ export interface Event {
   userId: string
   createdAt: string
   updatedAt: string
+  timeCap?: string
+  rounds?: string
 }

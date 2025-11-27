@@ -14,6 +14,7 @@ import {
   NotFoundException,
   ForbiddenException,
   Request,
+  Query,
 } from '@nestjs/common';
 import { EventsService } from '../services/events.service';
 import {
@@ -33,6 +34,7 @@ export class EventsController {
     console.log('Received create event request:', createEventDto);
     console.log('Exercises type:', typeof createEventDto.exercises);
     console.log('Exercises value:', createEventDto.exercises);
+    console.log('Controller calling service with teamId:', createEventDto.teamId);
 
     try {
       return await this.eventsService.createEvent(
@@ -43,6 +45,9 @@ export class EventsController {
         createEventDto.exerciseType,
         createEventDto.exercises, // Add exercises parameter
         createEventDto.participantIds,
+        createEventDto.timeCap,
+        createEventDto.rounds,
+        createEventDto.teamId,
       );
     } catch (error: unknown) {
       // Handle specific errors
@@ -58,8 +63,11 @@ export class EventsController {
   }
 
   @Get(':userId')
-  async getEventsByUserId(@Param('userId') userId: string) {
-    return this.eventsService.getEventsByUserId(userId);
+  async getEventsByUserId(
+    @Param('userId') userId: string,
+    @Query('teamId') teamId?: string,
+  ) {
+    return this.eventsService.getEventsByUserId(userId, teamId);
   }
 
   @Get(':userId/past')
@@ -145,6 +153,9 @@ export class EventsController {
         updateEventDto.description,
         updateEventDto.exerciseType,
         updateEventDto.exercises, // Add exercises parameter
+        updateEventDto.timeCap,
+        updateEventDto.rounds,
+        updateEventDto.teamId,
       );
     } catch (error: unknown) {
       // Handle specific errors

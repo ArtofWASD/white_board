@@ -18,6 +18,9 @@ export class EventsService {
     exerciseType?: string,
     exercises?: any[],
     participantIds?: string[],
+    timeCap?: string,
+    rounds?: string,
+    teamId?: string,
   ) {
     console.log('Creating event with data:', {
       userId,
@@ -27,6 +30,9 @@ export class EventsService {
       exerciseType,
       exercises,
       participantIds,
+      timeCap,
+      rounds,
+      teamId,
     });
 
     // Check if user exists
@@ -67,6 +73,9 @@ export class EventsService {
       exerciseType,
       exercises: exercises || undefined, // Add exercises to the event data
       userId,
+      timeCap,
+      rounds,
+      teamId,
     };
 
     // Add participants if provided
@@ -89,18 +98,55 @@ export class EventsService {
     return event;
   }
 
-  async getEventsByUserId(userId: string) {
-    return (this.prisma as any).event.findMany({
-      where: { userId },
-      orderBy: { eventDate: 'asc' },
-      include: {
-        results: {
-          orderBy: {
-            dateAdded: 'desc',
+  async getEventsByUserId(userId: string, teamId?: string) {
+    if (teamId) {
+      // If teamId is provided, fetch events for that team OR personal events for the user
+      return (this.prisma as any).event.findMany({
+        where: {
+          OR: [
+            { teamId: teamId },
+            {
+              userId: userId,
+              teamId: null,
+            },
+          ],
+        },
+        orderBy: { eventDate: 'asc' },
+        include: {
+          results: {
+            orderBy: {
+              dateAdded: 'desc',
+            },
           },
         },
-      },
-    });
+      });
+    } else {
+      // If no teamId, fetch all events for the user (personal + all teams they belong to)
+      // First find all teams the user belongs to
+      const userTeams = await (this.prisma as any).teamMember.findMany({
+        where: { userId },
+        select: { teamId: true },
+      });
+      
+      const teamIds = userTeams.map((t: any) => t.teamId);
+
+      return (this.prisma as any).event.findMany({
+        where: {
+          OR: [
+            { userId: userId }, // Personal events (and events created by user for teams)
+            { teamId: { in: teamIds } }, // Events for teams the user is in
+          ],
+        },
+        orderBy: { eventDate: 'asc' },
+        include: {
+          results: {
+            orderBy: {
+              dateAdded: 'desc',
+            },
+          },
+        },
+      });
+    }
   }
 
   async getPastEventsByUserId(userId: string) {
@@ -261,6 +307,9 @@ export class EventsService {
     description?: string,
     exerciseType?: string,
     exercises?: any[],
+    timeCap?: string,
+    rounds?: string,
+    teamId?: string,
   ) {
     console.log('Updating event with data:', {
       eventId,
@@ -270,6 +319,9 @@ export class EventsService {
       description,
       exerciseType,
       exercises,
+      timeCap,
+      rounds,
+      teamId,
     });
 
     // Check if event exists
@@ -306,6 +358,9 @@ export class EventsService {
       description,
       exerciseType,
       exercises: exercises || undefined, // Add exercises to the event data
+      timeCap,
+      rounds,
+      teamId,
     };
 
     console.log('Updating event with data:', updateData);

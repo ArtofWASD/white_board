@@ -1,87 +1,121 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Exercise, EventResult } from '../../types';
+import { Exercise, EventResult, Team } from '../../types';
 import { EventModalProps } from '../../types/EventModal.types';
+import { useAuth } from '../../contexts/AuthContext';
 
-const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, eventData }) => {
+const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, eventData, initialTeamId }) => {
+  const { user } = useAuth();
   const [eventTitle, setEventTitle] = useState(eventData?.title || '');
   const [exerciseType, setExerciseType] = useState(eventData?.exerciseType || '');
-  const [rounds, setRounds] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>(eventData?.exercises || []);
-  const [exerciseInput, setExerciseInput] = useState('');
-  const [weightInput, setWeightInput] = useState('');
-  const [repetitionsInput, setRepetitionsInput] = useState('');
+  const [timeCap, setTimeCap] = useState(eventData?.timeCap || '');
+  const [rounds, setRounds] = useState(eventData?.rounds || '');
+  
+  // Exercise input state
+  const [exerciseName, setExerciseName] = useState('');
+  const [rxWeight, setRxWeight] = useState('');
+  const [rxReps, setRxReps] = useState('');
+  const [scWeight, setScWeight] = useState('');
+  const [scReps, setScReps] = useState('');
+  
   const [sortedResults, setSortedResults] = useState<EventResult[]>(eventData?.results || []);
   const [isSorted, setIsSorted] = useState(false);
+  
+  // Team state
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(eventData?.teamId || initialTeamId || '');
 
-  // Handle form initialization and updates without directly calling setState in effects
+  // Fetch teams
   useEffect(() => {
-    let isMounted = true;
-    
-    // Use requestAnimationFrame to defer state updates
-    const updateState = () => {
-      if (!isMounted) return;
-      
-      if (isOpen && eventData) {
-        setEventTitle(eventData.title || '');
-        setExerciseType(eventData.exerciseType || '');
-        setExercises(eventData.exercises || []);
-        setSortedResults(eventData.results || []);
-      } else if (isOpen) {
-        // Reset form when opening without eventData
-        setEventTitle('');
-        setExerciseType('');
-        setExercises([]);
-        setRounds('');
-        setExerciseInput('');
-        setWeightInput('');
-        setRepetitionsInput('');
-        setSortedResults([]);
-        setIsSorted(false);
+    const fetchTeams = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`/api/teams?userId=${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setTeams(data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch teams:', error);
+        }
       }
     };
-    
-    const rafId = requestAnimationFrame(updateState);
-    
-    return () => {
-      isMounted = false;
-      cancelAnimationFrame(rafId);
-    };
-  }, [isOpen, eventData]);
+    fetchTeams();
+  }, [user]);
+
+  // Handle form initialization and updates
+  useEffect(() => {
+    if (isOpen && eventData) {
+      setEventTitle(eventData.title || '');
+      setExerciseType(eventData.exerciseType || '');
+      setExercises(eventData.exercises || []);
+      setSortedResults(eventData.results || []);
+      setSelectedTeamId(eventData.teamId || '');
+      setTimeCap(eventData.timeCap || '');
+      setRounds(eventData.rounds || '');
+    } else if (isOpen) {
+      // Reset form when opening without eventData
+      setEventTitle('');
+      setExerciseType('');
+      setExercises([]);
+      setExerciseName('');
+      setRxWeight('');
+      setRxReps('');
+      setScWeight('');
+      setScReps('');
+      setSortedResults([]);
+      setIsSorted(false);
+      setSelectedTeamId(initialTeamId || '');
+      setTimeCap('');
+      setRounds('');
+    }
+  }, [isOpen, eventData, initialTeamId]);
 
   const resetForm = () => {
     setEventTitle(eventData?.title || '');
     setExerciseType(eventData?.exerciseType || '');
     setExercises(eventData?.exercises || []);
-    setRounds('');
-    setExerciseInput('');
-    setWeightInput('');
-    setRepetitionsInput('');
+    setExerciseName('');
+    setRxWeight('');
+    setRxReps('');
+    setScWeight('');
+    setScReps('');
     setSortedResults(eventData?.results || []);
     setIsSorted(false);
+    setSelectedTeamId(eventData?.teamId || initialTeamId || '');
+    setTimeCap(eventData?.timeCap || '');
+    setRounds(eventData?.rounds || '');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('EventModal handleSubmit - selectedTeamId:', selectedTeamId);
     if (eventTitle.trim()) {
-      onSave(eventTitle, exerciseType, exercises);
+      onSave(eventTitle, exerciseType, exercises, selectedTeamId || undefined, timeCap, rounds);
       resetForm();
     }
   };
 
   const handleAddExercise = () => {
-    if (exerciseInput.trim()) {
+    if (exerciseName.trim()) {
       const newExercise: Exercise = {
         id: Date.now(),
-        name: exerciseInput.trim(),
-        weight: weightInput.trim(),
-        repetitions: repetitionsInput.trim()
+        name: exerciseName.trim(),
+        weight: rxWeight, // Default to Rx values
+        repetitions: rxReps,
+        rxWeight,
+        rxReps,
+        scWeight,
+        scReps
       };
       setExercises([...exercises, newExercise]);
-      setExerciseInput('');
-      setWeightInput('');
-      setRepetitionsInput('');
+      setExerciseName('');
+      setRxWeight('');
+      setRxReps('');
+      setScWeight('');
+      setScReps('');
     }
   };
 
@@ -121,127 +155,179 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
             />
           </div>
           
-          <div className="border-t border-dotted border-gray-300 pt-4 mb-4"></div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label htmlFor="exerciseType" className="block text-sm font-medium text-gray-700 mb-1">
-                Тип упражнения
-              </label>
-              <input
-                type="text"
-                id="exerciseType"
-                value={exerciseType}
-                onChange={(e) => setExerciseType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Введите тип упражнения"
-              />
-            </div>
-            <div>
-              <label htmlFor="rounds" className="block text-sm font-medium text-gray-700 mb-1">
-                Количество раундов
-              </label>
-              <input
-                type="number"
-                id="rounds"
-                value={rounds}
-                onChange={(e) => setRounds(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Введите количество раундов"
-                min="1"
-              />
-            </div>
-          </div>
-          
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Упражнения
+            <label htmlFor="team" className="block text-sm font-medium text-gray-700 mb-1">
+              Команда (необязательно)
             </label>
-            <div className="space-y-2 mb-2">
-              <div className="flex flex-col sm:flex-row gap-2">
+            <select
+              id="team"
+              value={selectedTeamId}
+              onChange={(e) => setSelectedTeamId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Личное событие</option>
+              {teams.map((team) => (
+                <option key={team.id} value={team.id}>
+                  {team.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="exerciseType" className="block text-sm font-medium text-gray-700 mb-1">
+              Тип задания
+            </label>
+            <select
+              id="exerciseType"
+              value={exerciseType}
+              onChange={(e) => setExerciseType(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">Выберите тип</option>
+              <option value="For Time">For Time (На время)</option>
+              <option value="AMRAP">AMRAP (Макс. раундов)</option>
+              <option value="EMOM">EMOM (Каждую минуту)</option>
+              <option value="Not for Time">Не на время</option>
+            </select>
+          </div>
+
+          {(exerciseType === 'For Time' || exerciseType === 'AMRAP' || exerciseType === 'EMOM') && (
+            <div className="mb-4 grid grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="timeCap" className="block text-sm font-medium text-gray-700 mb-1">
+                  Time Cap (Лимит времени)
+                </label>
                 <input
                   type="text"
-                  value={exerciseInput}
-                  onChange={(e) => setExerciseInput(e.target.value)}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Введите упражнение"
+                  id="timeCap"
+                  value={timeCap}
+                  onChange={(e) => setTimeCap(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Например: 15:00"
                 />
-                <div className="flex gap-2">
+              </div>
+              {exerciseType === 'EMOM' && (
+                <div>
+                  <label htmlFor="rounds" className="block text-sm font-medium text-gray-700 mb-1">
+                    Количество раундов
+                  </label>
                   <input
                     type="text"
-                    value={weightInput}
-                    onChange={(e) => setWeightInput(e.target.value)}
-                    className="w-16 sm:w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Вес"
-                    maxLength={3}
-                  />
-                  <input
-                    type="text"
-                    value={repetitionsInput}
-                    onChange={(e) => setRepetitionsInput(e.target.value)}
-                    className="w-16 sm:w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Повт."
-                    maxLength={3}
+                    id="rounds"
+                    value={rounds}
+                    onChange={(e) => setRounds(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Например: 10"
                   />
                 </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    // Prevent the event from bubbling up to the global click handler
-                    e.stopPropagation();
-                    e.preventDefault();
-                    
-                    // Also stop immediate propagation to ensure no other handlers are called
-                    if (e.nativeEvent) {
-                      e.nativeEvent.stopImmediatePropagation();
-                    }
-                    
-                    handleAddExercise();
-                  }}
-                  className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none"
-                >
-                  Добавить
-                </button>
+              )}
+            </div>
+          )}
+
+          <div className="mb-4 border p-4 rounded-md bg-gray-50">
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Упражнения
+            </label>
+            
+            <div className="grid grid-cols-1 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Название</label>
+                <input
+                  type="text"
+                  value={exerciseName}
+                  onChange={(e) => setExerciseName(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  placeholder="Например: Трастеры"
+                />
               </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-3 rounded">
+                  <div className="text-center font-semibold text-blue-800 mb-2 text-sm">Rx</div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={rxWeight}
+                      onChange={(e) => setRxWeight(e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      placeholder="Вес (кг)"
+                    />
+                    <input
+                      type="text"
+                      value={rxReps}
+                      onChange={(e) => setRxReps(e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      placeholder="Повторы"
+                    />
+                  </div>
+                </div>
+                
+                <div className="bg-green-50 p-3 rounded">
+                  <div className="text-center font-semibold text-green-800 mb-2 text-sm">Sc</div>
+                  <div className="space-y-2">
+                    <input
+                      type="text"
+                      value={scWeight}
+                      onChange={(e) => setScWeight(e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      placeholder="Вес (кг)"
+                    />
+                    <input
+                      type="text"
+                      value={scReps}
+                      onChange={(e) => setScReps(e.target.value)}
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                      placeholder="Повторы"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleAddExercise();
+                }}
+                className="w-full py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition text-sm"
+              >
+                Добавить упражнение
+              </button>
             </div>
             
             {exercises.length > 0 && (
-              <ul className="border border-gray-200 rounded-md max-h-40 overflow-y-auto">
+              <ul className="border border-gray-200 rounded-md max-h-40 overflow-y-auto bg-white">
                 {exercises.map((exercise) => (
                   <li 
                     key={exercise.id} 
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 py-2 border-b border-gray-100 last:border-b-0 gap-2"
+                    className="flex justify-between items-center px-3 py-2 border-b border-gray-100 last:border-b-0"
                   >
-                    <div className="flex-1">
-                      <span className="font-medium">{exercise.name}</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      {exercise.weight || '0'} kg × {exercise.repetitions || '0'}
+                    <div>
+                      <div className="font-medium text-sm">{exercise.name}</div>
+                      <div className="text-xs text-gray-500">
+                        Rx: {exercise.rxWeight || '-'} / {exercise.rxReps || '-'} | 
+                        Sc: {exercise.scWeight || '-'} / {exercise.scReps || '-'}
+                      </div>
                     </div>
                     <button
                       type="button"
                       onClick={(e) => {
-                        // Prevent the event from bubbling up to the global click handler
                         e.stopPropagation();
                         e.preventDefault();
-                        
-                        // Also stop immediate propagation to ensure no other handlers are called
-                        if (e.nativeEvent) {
-                          e.nativeEvent.stopImmediatePropagation();
-                        }
-                        
                         handleRemoveExercise(exercise.id);
                       }}
-                      className="text-red-500 hover:text-red-700 text-sm"
+                      className="text-red-500 hover:text-red-700 text-sm px-2"
                     >
-                      Удалить
+                      ✕
                     </button>
                   </li>
                 ))}
               </ul>
             )}
           </div>
-          
+
           {/* Results section */}
           {eventData?.results && eventData.results.length > 0 && (
             <div className="mb-4 pt-4 border-t border-dotted border-gray-300">
@@ -251,18 +337,10 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
                 </label>
                 <button 
                   onClick={(e) => {
-                    // Prevent the event from bubbling up to the global click handler
                     e.stopPropagation();
                     e.preventDefault();
                     
-                    // Also stop immediate propagation to ensure no other handlers are called
-                    if (e.nativeEvent) {
-                      e.nativeEvent.stopImmediatePropagation();
-                    }
-                    
-                    // Sort results by time
                     const sorted = [...(isSorted ? eventData.results! : sortedResults)].sort((a, b) => {
-                      // Convert time strings to numbers for comparison (assuming format like "10:30")
                       const [aMinutes, aSeconds] = a.time.split(':').map(Number);
                       const [bMinutes, bSeconds] = b.time.split(':').map(Number);
                       const aTotalSeconds = aMinutes * 60 + (aSeconds || 0);
@@ -298,15 +376,8 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
             <button
               type="button"
               onClick={(e) => {
-                // Prevent the event from bubbling up to the global click handler
                 e.stopPropagation();
                 e.preventDefault();
-                
-                // Also stop immediate propagation to ensure no other handlers are called
-                if (e.nativeEvent) {
-                  e.nativeEvent.stopImmediatePropagation();
-                }
-                
                 resetForm();
                 onClose();
               }}
@@ -317,16 +388,8 @@ const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, 
             <button
               type="submit"
               onClick={(e) => {
-                // Prevent the event from bubbling up to the global click handler
                 e.stopPropagation();
                 e.preventDefault();
-                
-                // Also stop immediate propagation to ensure no other handlers are called
-                if (e.nativeEvent) {
-                  e.nativeEvent.stopImmediatePropagation();
-                }
-                
-                // Call the handleSubmit function to save the event
                 handleSubmit(e as React.FormEvent);
               }}
               className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none w-full sm:w-auto"

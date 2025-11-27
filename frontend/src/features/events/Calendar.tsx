@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -16,6 +16,7 @@ import { EventContentArg } from '@fullcalendar/core';
 interface CalendarProps {
   isMenuOpen: boolean;
   onUpdateEvents?: (events: CalendarEvent[]) => void;
+  teamId?: string;
 }
 
 interface EventTooltipProps {
@@ -25,7 +26,6 @@ interface EventTooltipProps {
 }
 
 const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onClose }) => {
-  // Close tooltip when clicking outside
   useEffect(() => {
     const handleClickOutside = () => {
       onClose();
@@ -90,7 +90,7 @@ const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onClose })
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
+const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [showAddEventButton, setShowAddEventButton] = useState(false);
   const [showEventActionMenu, setShowEventActionMenu] = useState(false);
@@ -101,215 +101,24 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [showAddResultModal, setShowAddResultModal] = useState(false);
   const [eventToAddResult, setEventToAddResult] = useState<CalendarEvent | null>(null);
-  // State for tooltip
   const [tooltipEvent, setTooltipEvent] = useState<CalendarEvent | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [windowWidth, setWindowWidth] = useState(0);
   const calendarRef = useRef<FullCalendar>(null);
-  const { isAuthenticated, user } = useAuth(); // Get authentication status and user info
+  const { isAuthenticated, user } = useAuth();
 
-  // Fetch events from backend when component mounts or user changes
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (isAuthenticated && user) {
-        try {
-          const response = await fetch(`/api/events?userId=${user.id}`);
-          const data: BackendEvent[] = await response.json();
-          
-          if (response.ok) {
-            // Transform backend events to calendar events
-            const calendarEvents: CalendarEvent[] = await Promise.all(data.map(async event => {
-              // Fetch results for each event
-              const resultsResponse = await fetch(`/api/events/${event.id}/results`);
-              let results: EventResult[] = [];
-              
-              if (resultsResponse.ok) {
-                const resultsData = await resultsResponse.json();
-                results = resultsData.map((result: { id: string; time: string; dateAdded: string; username: string }) => ({
-                  id: result.id,
-                  time: result.time,
-                  dateAdded: new Date(result.dateAdded).toLocaleDateString('ru-RU'),
-                  username: result.username,
-                }));
-              }
-              
-              return {
-                id: event.id,
-                title: event.title,
-                date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
-                exerciseType: event.exerciseType,
-                exercises: event.exercises || [], // Use exercises from backend
-                results: results,
-                color: 'bg-blue-100' // Default color
-              };
-            }));
-            setEvents(calendarEvents);
-          }
-        } catch (error) {
-          console.error('Failed to fetch events:', error);
-        }
-      }
-    };
-
-    fetchEvents();
-  }, [isAuthenticated, user]);
-
-  // Handle window resize to update calendar
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowWidth(window.innerWidth);
-      if (calendarRef.current) {
-        calendarRef.current.getApi().updateSize();
-      }
-    };
-    
-    // Set initial width
-    handleResize();
-    
-    // Add event listener
-    window.addEventListener('resize', handleResize);
-    
-    // Clean up
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-  
-  // Handle calendar resize when menu opens/closes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (calendarRef.current) {
-        calendarRef.current.getApi().updateSize();
-      }
-    }, 300); // Match the transition duration
-
-    return () => clearTimeout(timer);
-  }, [isMenuOpen, windowWidth]);
-
-  const handleDateClick = (arg: { dateStr: string, jsEvent: MouseEvent }) => {
-    // Close event action menu if open
-    setShowEventActionMenu(false);
-    // Close tooltip if open
-    setTooltipEvent(null);
-    
-    const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
-    setButtonPosition({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX
-    });
-    setSelectedDate(arg.dateStr);
-    setShowAddEventButton(true);
-  };
-
-  const handleEventClick = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
-    // Close add event button if open
-    setShowAddEventButton(false);
-    // Close tooltip if open
-    setTooltipEvent(null);
-    
-    const eventId = arg.event.id;
-    const event = events.find(e => e.id === eventId) || null;
-    
-    if (event) {
-      const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
-      
-      setButtonPosition({
-        top: rect.top + window.scrollY + rect.height / 2,
-        left: rect.left + window.scrollX + rect.width / 2
-      });
-      setSelectedEvent(event);
-      setShowEventActionMenu(true);
-    }
-  };
-
-  // Handle mouse enter event for tooltip
-  const handleEventMouseEnter = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
-    // Close action menu if open
-    setShowEventActionMenu(false);
-    
-    const eventId = arg.event.id;
-    const event = events.find(e => e.id === eventId) || null;
-    
-    if (event) {
-      const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
-      
-      setTooltipPosition({
-        x: rect.left + window.scrollX,
-        y: rect.top + window.scrollY
-      });
-      setTooltipEvent(event);
-    }
-  };
-
-  // Handle mouse leave event for tooltip
-  const handleEventMouseLeave = () => {
-    // Add a small delay to prevent flickering
-    setTimeout(() => {
-      setTooltipEvent(null);
-    }, 100);
-  };
-
-  const handleAddEvent = async (title: string, exerciseType: string, exercises: Exercise[]) => {
-    if (user) {
-      try {
-        const response = await fetch('/api/events', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            title,
-            description: '',
-            eventDate: selectedDate,
-            exerciseType,
-            exercises: exercises.length > 0 ? exercises : undefined,
-          }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Add the new event to the local state
-          const newEvent: CalendarEvent = {
-            id: data.id,
-            title: data.title,
-            date: data.eventDate.split('T')[0],
-            exerciseType: data.exerciseType,
-            exercises: data.exercises || [],
-            results: [], // New event has no results initially
-            color: 'bg-blue-100'
-          };
-          
-          const updatedEvents = [...events, newEvent];
-          setEvents(updatedEvents);
-          
-          // Call the callback to update events in the parent component
-          if (onUpdateEvents) {
-            onUpdateEvents(updatedEvents);
-          }
-          
-          setShowAddEventButton(false);
-          alert('Событие успешно создано');
-        } else {
-          alert(data.message || 'Ошибка при создании события');
-        }
-      } catch (error) {
-        console.error('Error creating event:', error);
-        alert('Произошла ошибка при создании события');
-      }
-    }
-  };
-
-  // Function to refresh events from backend
-  const refreshEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     if (isAuthenticated && user) {
       try {
-        const response = await fetch(`/api/events?userId=${user.id}`);
+        const queryParams = new URLSearchParams({ userId: user.id });
+        if (teamId) {
+          queryParams.append('teamId', teamId);
+        }
+        const response = await fetch(`/api/events?${queryParams.toString()}`);
         const data: BackendEvent[] = await response.json();
         
         if (response.ok) {
-          // Transform backend events to calendar events
           const calendarEvents: CalendarEvent[] = await Promise.all(data.map(async event => {
-            // Fetch results for each event
             const resultsResponse = await fetch(`/api/events/${event.id}/results`);
             let results: EventResult[] = [];
             
@@ -326,28 +135,194 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
             return {
               id: event.id,
               title: event.title,
-              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+              date: event.eventDate.split('T')[0],
               exerciseType: event.exerciseType,
-              exercises: event.exercises || [], // Use exercises from backend
+              exercises: event.exercises || [],
               results: results,
-              color: 'bg-blue-100' // Default color
+              color: 'bg-blue-100',
+              teamId: event.teamId,
+              timeCap: event.timeCap,
+              rounds: event.rounds
             };
           }));
           setEvents(calendarEvents);
-          
-          // Call the callback to update events in the parent component
           if (onUpdateEvents) {
             onUpdateEvents(calendarEvents);
           }
         }
       } catch (error) {
-        console.error('Failed to refresh events:', error);
+        console.error('Failed to fetch events:', error);
+      }
+    }
+  }, [isAuthenticated, user, teamId, onUpdateEvents]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+      if (calendarRef.current) {
+        calendarRef.current.getApi().updateSize();
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (calendarRef.current) {
+        calendarRef.current.getApi().updateSize();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [isMenuOpen, windowWidth]);
+
+  const handleDateClick = (arg: { dateStr: string, jsEvent: MouseEvent }) => {
+    setShowEventActionMenu(false);
+    setTooltipEvent(null);
+    const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
+    setButtonPosition({
+      top: rect.top + window.scrollY,
+      left: rect.left + window.scrollX
+    });
+    setSelectedDate(arg.dateStr);
+    setShowAddEventButton(true);
+  };
+
+  const handleEventClick = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
+    setShowAddEventButton(false);
+    setTooltipEvent(null);
+    const eventId = arg.event.id;
+    const event = events.find(e => e.id === eventId) || null;
+    if (event) {
+      const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
+      setButtonPosition({
+        top: rect.top + window.scrollY + rect.height / 2,
+        left: rect.left + window.scrollX + rect.width / 2
+      });
+      setSelectedEvent(event);
+      setShowEventActionMenu(true);
+    }
+  };
+
+  const handleEventMouseEnter = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
+    setShowEventActionMenu(false);
+    const eventId = arg.event.id;
+    const event = events.find(e => e.id === eventId) || null;
+    if (event) {
+      const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
+      setTooltipPosition({
+        x: rect.left + window.scrollX,
+        y: rect.top + window.scrollY
+      });
+      setTooltipEvent(event);
+    }
+  };
+
+  const handleEventMouseLeave = () => {
+    setTimeout(() => {
+      setTooltipEvent(null);
+    }, 100);
+  };
+
+  const handleAddEvent = async (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => {
+    console.log('Calendar handleAddEvent - teamId:', teamId);
+    if (user) {
+      try {
+        const response = await fetch('/api/events', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            title,
+            description: '',
+            eventDate: selectedDate ? new Date(selectedDate).toISOString() : new Date().toISOString(),
+            exerciseType,
+            exercises,
+            teamId: teamId || undefined,
+            timeCap: timeCap || undefined,
+            rounds: rounds || undefined,
+          }),
+        });
+        
+        if (response.ok) {
+          setShowAddEventButton(false);
+          fetchEvents();
+        }
+      } catch (error) {
+        console.error('Error adding event:', error);
       }
     }
   };
 
-  const handleCloseAddEvent = () => {
-    setShowAddEventButton(false);
+  const handleUpdateEvent = async (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => {
+    if (eventToEdit && user) {
+      try {
+        const response = await fetch(`/api/events/${eventToEdit.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: user.id,
+            title,
+            description: '',
+            eventDate: new Date(eventToEdit.date).toISOString(),
+            exerciseType,
+            exercises: exercises.length > 0 ? exercises : undefined,
+            teamId: teamId || undefined,
+            timeCap: timeCap || undefined,
+            rounds: rounds || undefined,
+          }),
+        });
+        
+        if (response.ok) {
+          setShowEditModal(false);
+          setEventToEdit(null);
+          fetchEvents();
+        } else {
+          alert('Ошибка при обновлении события');
+        }
+      } catch (error) {
+        console.error('Error updating event:', error);
+        alert('Произошла ошибка при обновлении события');
+      }
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (confirm('Вы уверены, что хотите удалить это событие?')) {
+      try {
+        const response = await fetch(`/api/events/${eventId}`, {
+          method: 'DELETE',
+        });
+        if (response.ok) {
+          setShowEventActionMenu(false);
+          setSelectedEvent(null);
+          fetchEvents();
+        }
+      } catch (error) {
+        console.error('Error deleting event:', error);
+      }
+    }
+  };
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    setEventToEdit(event);
+    setShowEditModal(true);
+    setShowEventActionMenu(false);
+  };
+
+  const handleAddResult = (event: CalendarEvent) => {
+    setEventToAddResult(event);
+    setShowAddResultModal(true);
+    setShowEventActionMenu(false);
   };
 
   const handleCloseEventActionMenu = () => {
@@ -355,61 +330,18 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
     setSelectedEvent(null);
   };
 
-  const handleDeleteEvent = async () => {
-    // Check if user is authenticated before allowing event deletion
-    if (!isAuthenticated || !user) {
-      alert('Вы должны быть авторизованы для удаления события');
-      return;
-    }
-    
-    if (selectedEvent) {
-      try {
-        const response = await fetch(`/api/events/${selectedEvent.id}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: user.id }),
-        });
-        
-        if (response.ok) {
-          // Remove the event from the local state
-          const updatedEvents = events.filter(event => event.id !== selectedEvent.id);
-          setEvents(updatedEvents);
-          
-          // Call the callback to update events in the parent component
-          if (onUpdateEvents) {
-            onUpdateEvents(updatedEvents);
-          }
-          
-          setShowEventActionMenu(false);
-          setSelectedEvent(null);
-          alert('Событие успешно удалено');
-        } else {
-          const data = await response.json();
-          alert(data.message || 'Ошибка при удалении события');
-        }
-      } catch (error) {
-        console.error('Error deleting event:', error);
-        alert('Произошла ошибка при удалении события');
-      }
-    }
+  const handleCloseAddEvent = () => {
+    setShowAddEventButton(false);
   };
 
-  const handleEditEvent = () => {
-    if (selectedEvent) {
-      setEventToEdit(selectedEvent);
-      setShowEditModal(true);
-      setShowEventActionMenu(false);
-    }
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+    setEventToEdit(null);
   };
 
-  const handleAddResult = () => {
-    if (selectedEvent) {
-      setEventToAddResult(selectedEvent);
-      setShowAddResultModal(true);
-      setShowEventActionMenu(false);
-    }
+  const handleCloseAddResultModal = () => {
+    setShowAddResultModal(false);
+    setEventToAddResult(null);
   };
 
   const handleSaveResult = async (time: string) => {
@@ -421,121 +353,23 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            userId: user.id,
             time,
-            username: user.name,
+            dateAdded: new Date().toISOString(),
           }),
         });
-        
-        const data = await response.json();
-        
+
         if (response.ok) {
-          // Create a new result object for local state
-          const newResult: EventResult = {
-            id: data.id,
-            time: data.time,
-            dateAdded: new Date(data.dateAdded).toLocaleDateString('ru-RU'),
-            username: data.username,
-          };
-          
-          // Update the event with the new result
-          const updatedEvents = events.map(event => 
-            event.id === eventToAddResult.id 
-              ? { 
-                  ...event, 
-                  results: [...(event.results || []), newResult] 
-                } 
-              : event
-          );
-          
-          setEvents(updatedEvents);
-          
-          // Call the callback to update events in the parent component
-          if (onUpdateEvents) {
-            onUpdateEvents(updatedEvents);
-          }
-          
-          console.log(`Saving result for event ${eventToAddResult?.title}: ${time}`);
-          alert(`Результат сохранен для события "${eventToAddResult?.title}": ${time}`);
-        } else {
-          alert(data.message || 'Ошибка при сохранении результата');
+          setShowAddResultModal(false);
+          setEventToAddResult(null);
+          fetchEvents();
         }
       } catch (error) {
         console.error('Error saving result:', error);
-        alert('Произошла ошибка при сохранении результата');
-      }
-    }
-    setShowAddResultModal(false);
-    setEventToAddResult(null);
-  };
-
-  const handleCloseAddResultModal = () => {
-    setShowAddResultModal(false);
-    setEventToAddResult(null);
-  };
-
-  const handleUpdateEvent = async (title: string, exerciseType: string, exercises: Exercise[]) => {
-    if (eventToEdit && user) {
-      try {
-        // Update event in backend
-        const response = await fetch(`/api/events/${eventToEdit.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            title,
-            description: '', // No description in this version
-            eventDate: new Date(eventToEdit.date).toISOString(),
-            exerciseType,
-            exercises: exercises.length > 0 ? exercises : undefined, // Send exercises to backend
-          }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
-          // Update the event in the local state
-          const updatedEvents = events.map(event => 
-            event.id === eventToEdit.id 
-              ? { 
-                  ...event, 
-                  title, 
-                  exerciseType, 
-                  exercises,
-                  // Preserve results since we're not overwriting them
-                } 
-              : event
-          );
-          
-          setEvents(updatedEvents);
-          
-          // Call the callback to update events in the parent component
-          if (onUpdateEvents) {
-            onUpdateEvents(updatedEvents);
-          }
-          
-          setShowEditModal(false);
-          setEventToEdit(null);
-          
-          // Refresh events from backend to ensure consistency
-          refreshEvents();
-        } else {
-          alert(data.message || 'Ошибка при обновлении события');
-        }
-      } catch (error) {
-        console.error('Error updating event:', error);
-        alert('Произошла ошибка при обновлении события');
       }
     }
   };
 
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
-    setEventToEdit(null);
-  };
-
-  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showAddEventButton && 
@@ -559,15 +393,14 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
     };
   }, [showAddEventButton, showEventActionMenu, selectedEvent]);
 
-  // Custom event rendering to add data-id attribute and styling
   const renderEventContent = (eventInfo: EventContentArg) => {
     const event = events.find(e => e.id === eventInfo.event.id);
-    const eventColor = event?.color || 'bg-blue-100'; // Default color if not set
+    const eventColor = event?.color || 'bg-blue-100';
     
     return (
       <div 
         className={`fc-event-main ${eventColor} h-[30px] sm:h-[35px] md:h-[40px] lg:h-[45px] xl:h-[50px] flex items-center px-1 py-0.5 sm:px-2 sm:py-1 overflow-hidden mb-0.5 last:mb-0`}
-        style={{ color: 'black' }} // Added inline style to ensure black text
+        style={{ color: 'black' }}
         data-id={eventInfo.event.id}
         onMouseEnter={(e) => handleEventMouseEnter({ 
           event: { id: eventInfo.event.id }, 
@@ -615,14 +448,15 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
           onCancel={handleCloseAddEvent}
           date={selectedDate}
           position={buttonPosition}
+          teamId={teamId}
         />
       )}
       
       {showEventActionMenu && selectedEvent && (
         <EventActionMenu
-          onDelete={handleDeleteEvent}
-          onEdit={handleEditEvent}
-          onAddResult={handleAddResult}
+          onDelete={() => handleDeleteEvent(selectedEvent.id)}
+          onEdit={() => handleEditEvent(selectedEvent)}
+          onAddResult={() => handleAddResult(selectedEvent)}
           position={buttonPosition}
           onClose={handleCloseEventActionMenu}
         />
@@ -638,7 +472,10 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents }) => {
             title: eventToEdit.title,
             exerciseType: eventToEdit.exerciseType || '',
             exercises: eventToEdit.exercises || [],
-            results: eventToEdit.results || []
+            results: eventToEdit.results || [],
+            teamId: eventToEdit.teamId,
+            timeCap: eventToEdit.timeCap,
+            rounds: eventToEdit.rounds
           }}
         />
       )}

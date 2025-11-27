@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Exercise } from '../../types';
 import { AddEventButtonProps } from '../../types/AddEventButton.types';
 
-const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, date, position }) => {
+const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, date, position, teamId }) => {
   const [showModal, setShowModal] = useState(false);
   const { isAuthenticated } = useAuth();
 
@@ -21,8 +21,8 @@ const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, d
     setShowModal(true);
   };
 
-  const handleSave = (title: string, exerciseType: string, exercises: Exercise[]) => {
-    onAddEvent(title, exerciseType, exercises);
+  const handleSave = (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => {
+    onAddEvent(title, exerciseType, exercises, teamId, timeCap, rounds);
     setShowModal(false);
   };
 
@@ -64,6 +64,7 @@ const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, d
         onClose={handleCloseModal}
         onSave={handleSave}
         date={date}
+        initialTeamId={teamId}
       />
     </>
   );

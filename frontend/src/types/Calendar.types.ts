@@ -10,6 +10,7 @@ export interface BackendEvent {
   exerciseType?: string;
   exercises?: Exercise[];
   status: 'past' | 'future';
+  teamId?: string;
 }
 
 export interface CalendarProps {

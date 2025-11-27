@@ -1,14 +1,66 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AddEventFormProps } from '../../types/AddEventForm.types';
-import { Exercise } from '../../types';
+import { Exercise, Team } from '../../types';
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
   const [title, setTitle] = useState('');
   const [exerciseType, setExerciseType] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+
+  // Exercise input state
+  const [exerciseName, setExerciseName] = useState('');
+  const [rxWeight, setRxWeight] = useState('');
+  const [rxReps, setRxReps] = useState('');
+  const [scWeight, setScWeight] = useState('');
+  const [scReps, setScReps] = useState('');
+
+  useEffect(() => {
+    const fetchTeams = async () => {
+      if (user) {
+        try {
+          const response = await fetch(`/api/teams?userId=${user.id}`);
+          if (response.ok) {
+            const data = await response.json();
+            setTeams(data);
+          }
+        } catch (error) {
+          console.error('Failed to fetch teams:', error);
+        }
+      }
+    };
+    fetchTeams();
+  }, [user]);
+
+  const handleAddExercise = () => {
+    if (!exerciseName) return;
+    
+    const newExercise: Exercise = {
+      id: Date.now(),
+      name: exerciseName,
+      weight: rxWeight, // Default to Rx values for backward compatibility
+      repetitions: rxReps,
+      rxWeight,
+      rxReps,
+      scWeight,
+      scReps
+    };
+
+    setExercises([...exercises, newExercise]);
+    setExerciseName('');
+    setRxWeight('');
+    setRxReps('');
+    setScWeight('');
+    setScReps('');
+  };
+
+  const removeExercise = (id: number) => {
+    setExercises(exercises.filter(ex => ex.id !== id));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,6 +73,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
           },
           body: JSON.stringify({
             userId: user?.id,
+            teamId: selectedTeamId || undefined,
             title,
             description: '',
             eventDate: selectedDate,
@@ -36,6 +89,12 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
           setTitle('');
           setExerciseType('');
           setExercises([]);
+          setSelectedTeamId('');
+          setExerciseName('');
+          setRxWeight('');
+          setRxReps('');
+          setScWeight('');
+          setScReps('');
           if (onClose) onClose();
         } else {
           alert(data.message || 'Ошибка при создании события');
@@ -64,6 +123,25 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
             placeholder="Введите название события"
           />
         </div>
+        
+        <div>
+          <label htmlFor="team" className="block text-sm font-medium text-gray-700 mb-1">
+            Команда (необязательно)
+          </label>
+          <select
+            id="team"
+            value={selectedTeamId}
+            onChange={(e) => setSelectedTeamId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Личное событие</option>
+            {teams.map((team) => (
+              <option key={team.id} value={team.id}>
+                {team.name}
+              </option>
+            ))}
+          </select>
+        </div>
         <div>
           <label htmlFor="exerciseType" className="block text-sm font-medium text-gray-700 mb-1">
             Тип упражнения
@@ -82,6 +160,97 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
             <option value="yoga">Йога</option>
             <option value="other">Другое</option>
           </select>
+        </div>
+
+        <div className="border p-4 rounded-md bg-gray-50">
+          <h4 className="font-medium mb-3">Упражнения</h4>
+          
+          <div className="grid grid-cols-1 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Название упражнения</label>
+              <input
+                type="text"
+                value={exerciseName}
+                onChange={(e) => setExerciseName(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                placeholder="Например: Трастеры"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-blue-50 p-3 rounded">
+                <div className="text-center font-semibold text-blue-800 mb-2">Rx</div>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={rxWeight}
+                    onChange={(e) => setRxWeight(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Вес (кг)"
+                  />
+                  <input
+                    type="text"
+                    value={rxReps}
+                    onChange={(e) => setRxReps(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Повторы"
+                  />
+                </div>
+              </div>
+              
+              <div className="bg-green-50 p-3 rounded">
+                <div className="text-center font-semibold text-green-800 mb-2">Sc</div>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    value={scWeight}
+                    onChange={(e) => setScWeight(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Вес (кг)"
+                  />
+                  <input
+                    type="text"
+                    value={scReps}
+                    onChange={(e) => setScReps(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Повторы"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <button
+              type="button"
+              onClick={handleAddExercise}
+              className="w-full py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition"
+            >
+              Добавить упражнение
+            </button>
+          </div>
+
+          {exercises.length > 0 && (
+            <div className="space-y-2">
+              <h5 className="text-sm font-medium text-gray-700">Список упражнений:</h5>
+              {exercises.map((ex) => (
+                <div key={ex.id} className="flex justify-between items-center bg-white p-2 rounded border">
+                  <div>
+                    <span className="font-medium">{ex.name}</span>
+                    <div className="text-xs text-gray-500">
+                      Rx: {ex.rxWeight || '-'}кг / {ex.rxReps || '-'} повт. | 
+                      Sc: {ex.scWeight || '-'}кг / {ex.scReps || '-'} повт.
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => removeExercise(ex.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         <div>
           <label htmlFor="eventDate" className="block text-sm font-medium text-gray-700 mb-1">

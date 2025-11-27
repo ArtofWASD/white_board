@@ -20,6 +20,22 @@ export class ExerciseDto {
 
   @IsString()
   repetitions: string;
+
+  @IsOptional()
+  @IsString()
+  rxWeight?: string;
+
+  @IsOptional()
+  @IsString()
+  rxReps?: string;
+
+  @IsOptional()
+  @IsString()
+  scWeight?: string;
+
+  @IsOptional()
+  @IsString()
+  scReps?: string;
 }
 
 export class CreateEventDto {
@@ -51,6 +67,18 @@ export class CreateEventDto {
   @IsArray()
   @IsUUID(undefined, { each: true })
   participantIds?: string[];
+
+  @IsOptional()
+  @IsString()
+  timeCap?: string;
+
+  @IsOptional()
+  @IsString()
+  rounds?: string;
+
+  @IsOptional()
+  @IsString()
+  teamId?: string;
 }
 
 export class UpdateEventStatusDto {
