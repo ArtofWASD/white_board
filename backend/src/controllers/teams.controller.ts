@@ -78,4 +78,11 @@ export class TeamsController {
     const result = await this.teamsService.getUserTeams(userId);
     return result;
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get(':teamId')
+  async getTeam(@Param('teamId') teamId: string) {
+    const result = await this.teamsService.getTeamById(teamId);
+    return result;
+  }
 }

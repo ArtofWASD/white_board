@@ -104,12 +104,11 @@ export default function TeamManagement() {
 
   const lookupUserByEmail = async (email: string): Promise<User | null> => {
     try {
-      const response = await fetch('/api/users/lookup', {
-        method: 'POST',
+      const response = await fetch(`/api/auth/lookup?email=${encodeURIComponent(email)}`, {
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
       });
       
       if (response.ok) {

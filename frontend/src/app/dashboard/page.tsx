@@ -175,42 +175,21 @@ export default function DashboardPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-xl p-6 mb-8">
-          <div className="flex items-center mb-6">
-            <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mr-4">
-              <span className="text-2xl font-bold text-white">{user.name.charAt(0)}</span>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center">
+              <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mr-4">
+                <span className="text-2xl font-bold text-white">{user.name.charAt(0)}</span>
+              </div>
+              <div>
+                <h2 className="text-2xl font-semibold">{user.name}</h2>
+                <p className="text-gray-600">{user.email}</p>
+                <p className="text-sm text-gray-500">Роль: {user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-2xl font-semibold">{user.name}</h2>
-              <p className="text-gray-600">{user.email}</p>
-              <p className="text-sm text-gray-500">Роль: {user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-2 text-blue-600">Ваши события</h3>
-            <p className="text-gray-700 mb-4">Управляйте своими событиями и задачами</p>
-            <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200 transition duration-300">
-              Перейти к событиям
-            </button>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h3 className="text-xl font-semibold mb-2 text-green-600">Календарь</h3>
-            <p className="text-gray-700 mb-4">Просматривайте и планируйте события</p>
-            <button 
-              onClick={handleReturnToCalendar}
-              className="px-4 py-2 bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition duration-300"
+            <button
+              onClick={handleGoToProfile}
+              className="px-4 py-2 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition duration-300"
             >
-              Открыть календарь
-            </button>
-          </div>
-          
-          <div className="bg-white p-6 rounded-lg shadow-md hover:bg-gray-50 transition duration-300 cursor-pointer" onClick={handleGoToProfile}>
-            <h3 className="text-xl font-semibold mb-2 text-purple-600">Профиль</h3>
-            <p className="text-gray-700 mb-4">Настройте ваш профиль и предпочтения</p>
-            <button className="px-4 py-2 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition duration-300">
               Редактировать профиль
             </button>
           </div>
@@ -338,8 +317,6 @@ export default function DashboardPage() {
             </div>
           </div>
         )}
-        
-        {/* Edit Team Modal */}
         
       </div>
     </div>

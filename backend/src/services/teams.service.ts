@@ -152,6 +152,7 @@ export class TeamsService {
           select: {
             id: true,
             name: true,
+            lastName: true,
             email: true,
             role: true,
           },
@@ -195,5 +196,17 @@ export class TeamsService {
     );
 
     return uniqueTeams;
+  }
+
+  async getTeamById(teamId: string) {
+    const team = await (this.prisma as any).team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new NotFoundException('Team not found');
+    }
+
+    return team;
   }
 }
