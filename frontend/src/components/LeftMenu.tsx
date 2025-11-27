@@ -3,15 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { CalendarEvent, EventResult } from '../types';
-
-interface LeftMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-  showAuth: boolean;
-  toggleAuth: () => void;
-  events: CalendarEvent[];
-  onShowEventDetails: (event: CalendarEvent) => void;
-}
+import { LeftMenuProps } from '../types/LeftMenu.types';
 
 const LeftMenu: React.FC<LeftMenuProps> = ({ 
   isOpen, 

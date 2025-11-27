@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { AddResultModalProps } from '../types';
+import { AddResultModalProps } from '../types/AddResultModal.types';
 
 const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave, eventName }) => {
   const [time, setTime] = useState('');

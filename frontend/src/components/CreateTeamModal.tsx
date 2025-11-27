@@ -3,11 +3,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-interface CreateTeamModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onTeamCreated: () => void;
-}
+import { CreateTeamModalProps } from '../types/CreateTeamModal.types';
 
 export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: CreateTeamModalProps) {
   const { user } = useAuth();

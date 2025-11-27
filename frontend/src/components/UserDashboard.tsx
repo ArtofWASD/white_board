@@ -3,19 +3,9 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '../contexts/AuthContext';
-import { UserDashboardProps } from '../types';
+import { UserDashboardProps, DashboardEvent as Event } from '../types/UserDashboard.types';
 import AthleteEvents from './AthleteEvents';
 import CreateTeamModal from './CreateTeamModal';
-
-// Define the Event type
-interface Event {
-  id: string;
-  title: string;
-  description: string;
-  eventDate: string;
-  exerciseType?: string;
-  status: 'past' | 'future';
-}
 
 export default function UserDashboard({ onClose }: UserDashboardProps) {
   const { user, logout } = useAuth();

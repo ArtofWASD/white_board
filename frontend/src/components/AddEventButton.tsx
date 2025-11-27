@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import EventModal from './EventModal';
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
-import { Exercise, AddEventButtonProps } from '../types';
+import { Exercise } from '../types';
+import { AddEventButtonProps } from '../types/AddEventButton.types';
 
 const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, date, position }) => {
   const [showModal, setShowModal] = useState(false);

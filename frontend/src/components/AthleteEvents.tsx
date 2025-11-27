@@ -3,10 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Event } from '../types';
 import AddEventForm from './AddEventForm';
-
-interface AthleteEventsProps {
-  userId: string;
-}
+import { AthleteEventsProps } from '../types/AthleteEvents.types';
 
 export default function AthleteEvents({ userId }: AthleteEventsProps) {
   const [events, setEvents] = useState<Event[]>([]);

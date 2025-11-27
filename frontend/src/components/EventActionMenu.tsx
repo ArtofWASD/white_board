@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
-import { EventActionMenuProps } from '../types';
+import { EventActionMenuProps } from '../types/EventActionMenu.types';
 
 const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, onAddResult, position, onClose }) => {
   const menuRef = React.useRef<HTMLDivElement>(null);

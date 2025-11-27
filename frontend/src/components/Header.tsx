@@ -2,11 +2,7 @@ import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-
-interface HeaderProps {
-  onLeftMenuClick: () => void;
-  onRightMenuClick: () => void;
-}
+import { HeaderProps } from '../types/Header.types';
 
 const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick }) => {
   const { user, isAuthenticated } = useAuth();

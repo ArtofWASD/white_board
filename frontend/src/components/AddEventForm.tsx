@@ -1,20 +1,9 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import { Event, Exercise } from '../types';
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  // Add other user properties as needed
-}
-
-interface AddEventFormProps {
-  user: User;
-  onSubmit?: (title: string, exerciseType: string, exercises: Exercise[]) => void;
-  onClose?: () => void;
-}
+import { AddEventFormProps } from '../types/AddEventForm.types';
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
   const [title, setTitle] = useState('');

@@ -130,10 +130,15 @@ export class TeamsService {
   }
 
   async getTeamMembers(teamId: string) {
+    console.log('Getting team members for team ID:', teamId);
+    console.log('Team ID type:', typeof teamId);
+
     // Check if team exists
     const team = await (this.prisma as any).team.findUnique({
       where: { id: teamId },
     });
+
+    console.log('Team lookup result:', team);
 
     if (!team) {
       throw new NotFoundException('Team not found');

@@ -158,4 +158,25 @@ export class AuthService {
       role: user.role,
     };
   }
+
+  async getAthletes() {
+    try {
+      console.log('Fetching all users as athletes...');
+      const users = await (this.prisma as any).user.findMany({
+        where: { role: 'athlete' },
+        select: {
+          id: true,
+          name: true,
+          lastName: true,
+          email: true,
+          role: true,
+        },
+      });
+      console.log(`Found ${users.length} users.`);
+      return users;
+    } catch (error) {
+      console.error('Error fetching athletes:', error);
+      throw error;
+    }
+  }
 }

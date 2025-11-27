@@ -21,9 +21,9 @@ const teams: Team[] = []
 const teamMembers: TeamMember[] = []
 
 // Get all teams for a user
-export async function GET(request: Request, { params }: { params: { userId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   try {
-    const { userId } = params
+    const { userId } = await params
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"

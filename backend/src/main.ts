@@ -25,9 +25,10 @@ async function bootstrap() {
     ],
     credentials: true,
   });
-  // Use PORT environment variable or default to 3001
+  // Use PORT environment variable or default to 3001 (to match frontend configuration)
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
-  await app.listen(port);
-  console.log(`Application is running on: http://localhost:${port}`);
+  // Bind to all interfaces
+  await app.listen(port, '0.0.0.0');
+  console.log(`Application is running on: http://0.0.0.0:${port}`);
 }
 bootstrap();

@@ -9,25 +9,9 @@ import AddEventButton from './AddEventButton';
 import EventActionMenu from './EventActionMenu';
 import EventModal from './EventModal';
 import AddResultModal from './AddResultModal';
-import { useAuth } from '../contexts/AuthContext'; // Import useAuth hook
+import { useAuth } from '../contexts/AuthContext';
 import { Exercise, EventResult, CalendarEvent } from '../types';
-
-// Add Event interface that matches the backend
-interface BackendEvent {
-  id: string;
-  title: string;
-  description?: string;
-  eventDate: string;
-  exerciseType?: string;
-  exercises?: Exercise[]; // Add exercises field
-  status: 'past' | 'future';
-}
-
-// Define the CalendarProps interface to include the onUpdateEvents callback
-interface CalendarProps {
-  isMenuOpen: boolean;
-  onUpdateEvents?: (events: CalendarEvent[]) => void; // Add callback for updating events in the parent component
-}
+import { BackendEvent, CalendarProps } from '../types/Calendar.types';
 
 // New component for event tooltip
 const EventTooltip: React.FC<{ 

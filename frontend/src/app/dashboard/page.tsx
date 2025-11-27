@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Team } from '../../types';
-import EditTeamModal from '../../components/EditTeamModal';
+
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -17,8 +17,6 @@ export default function DashboardPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loadingTeams, setLoadingTeams] = useState(true);
-  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
-  const [editingTeamName, setEditingTeamName] = useState<string>('');
 
   // Fetch user's teams
   useEffect(() => {
@@ -45,10 +43,14 @@ export default function DashboardPage() {
           console.log('Fetched teams:', data);
           setTeams(data);
         } else {
-          console.error('Failed to fetch teams');
+          const errorData = await response.json().catch(() => ({}));
+          console.error('Failed to fetch teams:', response.status, errorData);
+          setError(errorData.message || errorData.error || `Failed to fetch teams (${response.status})`);
         }
       } catch (err) {
         console.error('Error fetching teams:', err);
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
+        setError(`Error fetching teams: ${errorMessage}`);
       } finally {
         setLoadingTeams(false);
       }
@@ -138,29 +140,9 @@ export default function DashboardPage() {
     if (!confirm('Вы уверены, что хотите удалить эту команду?')) return;
     
     try {
-      const token = localStorage.getItem('token');
-      
       // For now, we'll implement a basic delete by calling a non-existent endpoint
       // In a real implementation, you would need to add DELETE endpoint to the backend
       alert('Функция удаления еще не реализована на бэкенде');
-      
-      // This is a placeholder for when the backend DELETE endpoint is implemented:
-      /*
-      const response = await fetch(`/api/teams/${teamId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-      
-      if (response.ok) {
-        setTeams(prev => prev.filter(team => team.id !== teamId));
-      } else {
-        const errorData = await response.json();
-        alert(errorData.message || 'Не удалось удалить команду');
-      }
-      */
     } catch (err) {
       console.error('Error deleting team:', err);
       alert('Ошибка при удалении команды');
@@ -168,24 +150,7 @@ export default function DashboardPage() {
   };
 
   const handleEditTeam = (teamId: string) => {
-    console.log('Editing team with ID:', teamId);
-    console.log('Available teams:', teams);
-    const team = teams.find(t => t.id === teamId);
-    if (team) {
-      console.log('Found team:', team);
-      console.log('Team ID type:', typeof teamId);
-      console.log('Matching team ID type:', typeof team.id);
-      setEditingTeamId(teamId);
-      setEditingTeamName(team.name);
-    } else {
-      console.error('Team not found with ID:', teamId);
-      console.error('Available team IDs:', teams.map(t => t.id));
-      // Let's also check if there's a type mismatch
-      const matchingTeam = teams.find(t => t.id == teamId); // Using == instead of ===
-      if (matchingTeam) {
-        console.log('Found team with loose equality:', matchingTeam);
-      }
-    }
+    router.push(`/dashboard/teams/${teamId}`);
   };
 
   return (
@@ -333,6 +298,11 @@ export default function DashboardPage() {
             {/* Display Teams */}
             <div className="mt-8">
               <h4 className="text-lg font-semibold mb-4 text-gray-800">Ваши команды</h4>
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                  {error}
+                </div>
+              )}
               {loadingTeams ? (
                 <p className="text-gray-600">Загрузка команд...</p>
               ) : teams.length === 0 ? (
@@ -370,44 +340,7 @@ export default function DashboardPage() {
         )}
         
         {/* Edit Team Modal */}
-        {editingTeamId && (
-          <EditTeamModal
-            teamId={editingTeamId}
-            teamName={editingTeamName}
-            isOpen={!!editingTeamId}
-            onClose={() => setEditingTeamId(null)}
-            onTeamUpdated={() => {
-              // Refresh teams list when team is updated
-              const fetchTeams = async () => {
-                if (!user || user.role !== 'trainer') return;
-                
-                try {
-                  setLoadingTeams(true);
-                  const token = localStorage.getItem('token');
-                  
-                  const response = await fetch(`/api/teams?userId=${user.id}`, {
-                    method: 'GET',
-                    headers: {
-                      'Content-Type': 'application/json',
-                      ...(token && { 'Authorization': `Bearer ${token}` }),
-                    },
-                  });
-                  
-                  if (response.ok) {
-                    const data = await response.json();
-                    setTeams(data);
-                  }
-                } catch (err) {
-                  console.error('Error fetching teams:', err);
-                } finally {
-                  setLoadingTeams(false);
-                }
-              };
-              
-              fetchTeams();
-            }}
-          />
-        )}
+        
       </div>
     </div>
   );

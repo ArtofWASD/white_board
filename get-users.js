@@ -14,7 +14,7 @@ async function getUsers() {
     await client.connect()
     console.log("Connected to database")
 
-    const result = await client.query("SELECT id, name, email, height, weight FROM users")
+    const result = await client.query("SELECT id, name, email, role, height, weight FROM users")
     console.log("Users in database:")
     console.log(result.rows)
   } catch (error) {

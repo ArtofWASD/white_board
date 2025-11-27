@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Exercise, EventResult, EventModalProps } from '../types';
+import { Exercise, EventResult } from '../types';
+import { EventModalProps } from '../types/EventModal.types';
 
 const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, eventData }) => {
   const [eventTitle, setEventTitle] = useState(eventData?.title || '');

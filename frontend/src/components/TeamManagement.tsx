@@ -3,28 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface TeamMember {
-  id: string;
-  userId: string;
-  role: string;
-  user: User;
-}
-
-interface Team {
-  id: string;
-  name: string;
-  description: string | null;
-  ownerId: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { TeamManagementUser as User, TeamMember, Team } from '../types/TeamManagement.types';
 
 export default function TeamManagement() {
   const { user } = useAuth();
@@ -69,8 +48,21 @@ export default function TeamManagement() {
   const fetchTeamMembers = async (teamId: string) => {
     try {
       const response = await fetch(`/api/teams/${teamId}/members`);
-      const data = await response.json();
-      setTeamMembers(prev => ({...prev, [teamId]: data}));
+      if (response.ok) {
+        const data = await response.json();
+        setTeamMembers(prev => ({...prev, [teamId]: data}));
+      } else {
+        // Try to parse error response as JSON, but handle case where it's not JSON
+        let errorMessage = 'Failed to fetch team members';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          // If JSON parsing fails, use the status text or a generic message
+          errorMessage = response.statusText || 'Failed to fetch team members';
+        }
+        setError(errorMessage);
+      }
     } catch (err) {
       setError('Failed to fetch team members');
       console.error(err);
@@ -165,8 +157,15 @@ export default function TeamManagement() {
         setNewMemberEmail('');
         alert('Member added successfully!');
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to add member');
+        // Try to parse error response as JSON, but handle case where it's not JSON
+        let errorMessage = 'Failed to add member';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          errorMessage = response.statusText || 'Failed to add member';
+        }
+        setError(errorMessage);
       }
     } catch (err) {
       setError('Failed to add member');
@@ -196,8 +195,15 @@ export default function TeamManagement() {
         fetchTeamMembers(teamId);
         alert('Member removed successfully!');
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to remove member');
+        // Try to parse error response as JSON, but handle case where it's not JSON
+        let errorMessage = 'Failed to remove member';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          errorMessage = response.statusText || 'Failed to remove member';
+        }
+        setError(errorMessage);
       }
     } catch (err) {
       setError('Failed to remove member');

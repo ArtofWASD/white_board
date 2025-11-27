@@ -3,27 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
-}
-
-interface TeamMember {
-  id: string;
-  userId: string;
-  role: string;
-  user: User;
-}
-
-interface EditTeamModalProps {
-  teamId: string;
-  teamName: string;
-  isOpen: boolean;
-  onClose: () => void;
-  onTeamUpdated: () => void;
-}
+import { EditTeamModalProps, TeamMember, EditTeamModalUser as User } from '../types/EditTeamModal.types';
 
 export default function EditTeamModal({ 
   teamId, 
@@ -43,19 +23,24 @@ export default function EditTeamModal({
 
   // Fetch team members and available athletes when modal opens
   useEffect(() => {
-    if (isOpen && teamId) {
-      console.log('Fetching team members for team ID:', teamId);
-      console.log('Team ID type:', typeof teamId);
+    if (isOpen && teamId && typeof teamId === 'string' && teamId !== 'undefined') {
       fetchTeamMembers();
       fetchAvailableAthletes();
+    } else if (isOpen) {
+      console.warn('EditTeamModal open but invalid teamId:', teamId);
     }
   }, [isOpen, teamId]);
 
   const fetchTeamMembers = async () => {
     try {
+      // Validate teamId format
+      if (!teamId || typeof teamId !== 'string' || teamId === 'undefined') {
+        console.warn('Invalid team ID received:', teamId);
+        setTeamMembers([]);
+        return;
+      }
+
       setLoading(true);
-      console.log('Fetching team members for team ID:', teamId);
-      console.log('Team ID type:', typeof teamId);
       
       // Log the URL being constructed
       const url = `/api/teams/${teamId}/members`;
@@ -70,28 +55,55 @@ export default function EditTeamModal({
       });
       
       console.log('Response status:', response.status);
-      console.log('Response URL:', response.url);
       
       if (response.ok) {
-        const data = await response.json();
-        console.log('Team members data:', data);
-        // Ensure data is an array
-        if (Array.isArray(data)) {
-          setTeamMembers(data);
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          // Ensure data is an array
+          if (Array.isArray(data)) {
+            setTeamMembers(data);
+          } else {
+            console.error('Unexpected data format:', data);
+            setTeamMembers([]);
+          }
         } else {
-          console.error('Unexpected data format:', data);
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          setError('Received unexpected response format from server');
           setTeamMembers([]);
         }
       } else {
-        const errorData = await response.json();
-        console.error('Error fetching team members:', errorData);
-        // Show the specific error message from the backend
-        setError(errorData.message || errorData.error || 'Failed to fetch team members');
+        // Handle error responses
+        const contentType = response.headers.get('content-type');
+        
+        if (contentType && contentType.includes('application/json')) {
+          try {
+            const errorData = await response.json();
+            console.error('Error fetching team members (JSON):', errorData);
+            // Show the specific error message from the backend
+            const errorMessage = errorData.message || errorData.error || `Server error: ${response.status} ${response.statusText}`;
+            setError(errorMessage);
+          } catch (parseError) {
+            console.error('Failed to parse error response as JSON:', parseError);
+            setError(`Server error: ${response.status} ${response.statusText}`);
+          }
+        } else {
+          try {
+            const errorText = await response.text();
+            console.error('Error fetching team members (text):', errorText);
+            setError(errorText || `Server error: ${response.status} ${response.statusText}`);
+          } catch (textError) {
+            console.error('Failed to read error response as text:', textError);
+            setError(`Server error: ${response.status} ${response.statusText}`);
+          }
+        }
         setTeamMembers([]);
       }
     } catch (err) {
-      setError('Failed to fetch team members');
       console.error('Exception fetching team members:', err);
+      setError('Failed to fetch team members: ' + (err instanceof Error ? err.message : 'Unknown error'));
       setTeamMembers([]);
     } finally {
       setLoading(false);
@@ -102,25 +114,38 @@ export default function EditTeamModal({
     try {
       const token = localStorage.getItem('token');
       
-      // For now, we'll use mock data since there's no API to fetch all athletes
-      // In a real implementation, you would need an API endpoint to get all users with role 'athlete'
-      const mockAthletes: User[] = [
-        { id: '1', name: 'John Doe', email: 'john@example.com', role: 'athlete' },
-        { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'athlete' },
-        { id: '3', name: 'Mike Johnson', email: 'mike@example.com', role: 'athlete' },
-        { id: '4', name: 'Sarah Williams', email: 'sarah@example.com', role: 'athlete' },
-        { id: '5', name: 'David Brown', email: 'david@example.com', role: 'athlete' },
-      ];
-      setAthletes(mockAthletes);
+      // Fetch athletes from the API
+      const response = await fetch('/api/auth/athletes', {
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      console.log('Fetch Athletes Status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setAthletes(data);
+        } else {
+          console.error('Unexpected athletes data format:', data);
+          setAthletes([]);
+        }
+      } else {
+        console.error('Failed to fetch athletes. Status:', response.status);
+        try {
+          const errorData = await response.json();
+          console.error('Error details:', errorData);
+        } catch (e) {
+          console.error('Could not parse error response:', e);
+        }
+        setAthletes([]);
+      }
     } catch (err) {
-      // Fallback to mock data on error
-      const mockAthletes: User[] = [
-        { id: '1', name: 'John Doe', email: 'john@example.com', role: 'athlete' },
-        { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'athlete' },
-        { id: '3', name: 'Mike Johnson', email: 'mike@example.com', role: 'athlete' },
-      ];
-      setAthletes(mockAthletes);
-      console.error('Failed to fetch athletes, using mock data:', err);
+      console.error('Exception fetching athletes:', err);
+      setAthletes([]);
     }
   };
 
@@ -150,8 +175,15 @@ export default function EditTeamModal({
         setSelectedAthlete('');
         onTeamUpdated();
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to add member');
+        // Try to parse error response as JSON, but handle case where it's not JSON
+        let errorMessage = 'Failed to add member';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          errorMessage = response.statusText || 'Failed to add member';
+        }
+        setError(errorMessage);
       }
     } catch (err) {
       setError('Failed to add member');
@@ -183,8 +215,15 @@ export default function EditTeamModal({
         fetchTeamMembers();
         onTeamUpdated();
       } else {
-        const errorData = await response.json();
-        setError(errorData.error || 'Failed to remove member');
+        // Try to parse error response as JSON, but handle case where it's not JSON
+        let errorMessage = 'Failed to remove member';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+        } catch (parseError) {
+          errorMessage = response.statusText || 'Failed to remove member';
+        }
+        setError(errorMessage);
       }
     } catch (err) {
       setError('Failed to remove member');
@@ -235,7 +274,7 @@ export default function EditTeamModal({
                   <option value="">Выберите спортсмена</option>
                   {athletes.map((athlete) => (
                     <option key={athlete.id} value={athlete.id}>
-                      {athlete.name} ({athlete.email})
+                      {athlete.name} {athlete.lastName ? athlete.lastName : ''} ({athlete.email})
                     </option>
                   ))}
                 </select>
@@ -281,7 +320,7 @@ export default function EditTeamModal({
                     {teamMembers && teamMembers.map((member) => (
                       <tr key={member.id}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          {member.user.name}
+                          {member.user.name} {member.user.lastName}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {member.user.email}

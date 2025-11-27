@@ -50,4 +50,10 @@ export class AuthController {
       throw error;
     }
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('athletes')
+  async getAthletes() {
+    return this.authService.getAthletes();
+  }
 }

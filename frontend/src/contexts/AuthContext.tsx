@@ -1,25 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-
-interface User {
-  id: string;
-  name: string;
-  lastName?: string; // Adding lastName field
-  email: string;
-  role: 'trainer' | 'athlete'; // Added role property
-  height?: number;
-  weight?: number;
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (name: string, email: string, password: string, role: 'trainer' | 'athlete', lastName?: string) => Promise<boolean>; // Updated signature
-  logout: () => void;
-  isAuthenticated: boolean;
-}
+import { User, AuthContextType } from '../types';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
