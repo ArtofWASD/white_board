@@ -1,8 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { EventResult } from '../../types';
+import { useTeam } from '../../contexts/TeamContext';
+import { EventResult, TeamMember } from '../../types';
 import { LeftMenuProps } from '../../types/LeftMenu.types';
 
 const LeftMenu: React.FC<LeftMenuProps> = ({ 
@@ -14,6 +15,40 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   onShowEventDetails
 }) => {
   const { isAuthenticated, user } = useAuth();
+  const { selectedTeam } = useTeam();
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
+  // Fetch team members when selected team changes
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      if (selectedTeam) {
+        try {
+          const token = localStorage.getItem('token');
+          const response = await fetch(`/api/teams/${selectedTeam.id}/members`, {
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            },
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+              setTeamMembers(data);
+            } else {
+              setTeamMembers([]);
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch team members:', error);
+        }
+      } else {
+        setTeamMembers([]);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [selectedTeam]);
 
   // Extract recent results from all events
   const getRecentResults = () => {
@@ -81,6 +116,35 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
                   <p className="text-gray-700"><span className="font-medium">Рост:</span> {user.height ? `${user.height} см` : 'Не указан'}</p>
                   <p className="text-gray-700"><span className="font-medium">Вес:</span> {user.weight ? `${user.weight} кг` : 'Не указан'}</p>
                 </div>
+
+                {/* Team Members Section */}
+                {selectedTeam && (
+                  <div className="mt-4 bg-gray-50 p-4 rounded-lg">
+                    <h3 className="font-bold text-lg mb-2">Состав команды</h3>
+                    {teamMembers.length > 0 ? (
+                      <ul className="space-y-2">
+                        {teamMembers.map((member) => (
+                          <li key={member.id} className="border-b border-gray-200 pb-2 last:border-b-0">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-gray-800">
+                                {member.user.name} {member.user.lastName}
+                              </span>
+                              <span className={`text-xs px-2 py-1 rounded-full ${
+                                member.role === 'trainer' 
+                                  ? 'bg-purple-100 text-purple-800' 
+                                  : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {member.role === 'trainer' ? 'Тренер' : 'Спортсмен'}
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-gray-500 text-sm">В команде пока нет участников</p>
+                    )}
+                  </div>
+                )}
                 
                 {/* Upcoming Events Section */}
                 <div className="mt-4 bg-gray-50 p-4 rounded-lg">

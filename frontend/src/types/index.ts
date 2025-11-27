@@ -18,6 +18,13 @@ export interface User {
   weight?: number
 }
 
+export interface TeamMember {
+  id: string
+  userId: string
+  role: string
+  user: User
+}
+
 export interface AuthContextType {
   user: User | null
   token: string | null
