@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import Header from '../../../components/Header';
-import LeftMenu from '../../../components/LeftMenu';
+import Header from '../../../components/layout/Header';
+import LeftMenu from '../../../components/layout/LeftMenu';
 import { useAuth } from '../../../contexts/AuthContext';
-import AuthForms from '../../../components/AuthForms';
-import Footer from '../../../components/Footer';
+import Footer from '../../../components/layout/Footer';
 
 // Define types for news
 interface NewsItem {
@@ -26,8 +25,6 @@ export default function NewsPage() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   
-  const { isAuthenticated } = useAuth();
-
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
   };
