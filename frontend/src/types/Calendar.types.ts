@@ -11,6 +11,8 @@ export interface BackendEvent {
   exercises?: Exercise[];
   status: 'past' | 'future';
   teamId?: string;
+  timeCap?: string;
+  rounds?: string;
 }
 
 export interface CalendarProps {

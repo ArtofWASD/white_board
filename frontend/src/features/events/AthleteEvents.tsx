@@ -78,8 +78,9 @@ export default function AthleteEvents({ userId }: AthleteEventsProps) {
   // Create a minimal user object for AddEventForm
   const user = { id: userId, name: '', email: '' };
 
-  const futureEvents = events.filter(event => event.status === 'future');
-  const pastEvents = events.filter(event => event.status === 'past');
+  // Filter events to show only personal events (no teamId)
+  const futureEvents = events.filter(event => event.status === 'future' && !event.teamId);
+  const pastEvents = events.filter(event => event.status === 'past' && !event.teamId);
 
   return (
     <div className="space-y-6">

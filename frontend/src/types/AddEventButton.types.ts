@@ -5,4 +5,5 @@ export interface AddEventButtonProps {
   onCancel: () => void
   date: string
   position: { top: number; left: number }
+  teamId?: string
 }

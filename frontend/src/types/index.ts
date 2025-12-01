@@ -14,6 +14,7 @@ export interface User {
   lastName?: string
   email: string
   role: "trainer" | "athlete"
+  isAdmin: boolean
   height?: number
   weight?: number
 }

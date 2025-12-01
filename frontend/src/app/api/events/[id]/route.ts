@@ -93,7 +93,7 @@ export async function PUT(
       return NextResponse.json({ message: "Event ID is required" }, { status: 400 })
     }
 
-    const { userId, title, eventDate, description, exerciseType, exercises } =
+    const { userId, title, eventDate, description, exerciseType, exercises, teamId } =
       await request.json()
 
     console.log("Extracted user ID from request body:", userId)
@@ -108,6 +108,8 @@ export async function PUT(
       eventId,
       "and userId:",
       userId,
+      "and teamId:",
+      teamId,
     )
 
     // Forward the request to our NestJS backend
@@ -124,6 +126,7 @@ export async function PUT(
         description,
         exerciseType,
         exercises,
+        teamId,
       }),
     })
 

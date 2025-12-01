@@ -145,9 +145,27 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
               rounds: event.rounds
             };
           }));
-          setEvents(calendarEvents);
+
+          // Filter events based on the current view (teamId)
+          // 1. If we are on a Team Board (teamId is present):
+          //    - Show events that belong to THIS team (event.teamId === teamId)
+          //    - Show personal events (event.teamId is undefined/null)
+          // 2. If we are on Personal Board (teamId is undefined):
+          //    - Show ONLY personal events (event.teamId is undefined/null)
+          
+          const filteredEvents = calendarEvents.filter(event => {
+            if (teamId) {
+              // Team Board
+              return event.teamId === teamId || !event.teamId;
+            } else {
+              // Personal Board
+              return !event.teamId;
+            }
+          });
+
+          setEvents(filteredEvents);
           if (onUpdateEvents) {
-            onUpdateEvents(calendarEvents);
+            onUpdateEvents(filteredEvents);
           }
         }
       } catch (error) {
@@ -210,7 +228,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
   };
 
   const handleEventMouseEnter = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
-    setShowEventActionMenu(false);
+    // setShowEventActionMenu(false);
     const eventId = arg.event.id;
     const event = events.find(e => e.id === eventId) || null;
     if (event) {
@@ -297,10 +315,14 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (confirm('Вы уверены, что хотите удалить это событие?')) {
+    if (confirm('Вы уверены, что хотите удалить это событие?') && user) {
       try {
         const response = await fetch(`/api/events/${eventId}`, {
           method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: user.id }),
         });
         if (response.ok) {
           setShowEventActionMenu(false);

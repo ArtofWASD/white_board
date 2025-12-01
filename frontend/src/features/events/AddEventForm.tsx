@@ -64,45 +64,65 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onSubmit) {
-      try {
-        const response = await fetch('/api/events', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user?.id,
-            teamId: selectedTeamId || undefined,
-            title,
-            description: '',
-            eventDate: selectedDate,
-            exerciseType,
-            exercises: exercises.length > 0 ? exercises : undefined,
-          }),
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok) {
+    
+    console.log('Submitting event form...', {
+      userId: user?.id,
+      teamId: selectedTeamId,
+      title,
+      date: selectedDate
+    });
+
+    if (!user?.id) {
+      alert('Ошибка: Пользователь не идентифицирован');
+      return;
+    }
+
+    try {
+      const payload = {
+        userId: user.id,
+        teamId: selectedTeamId || undefined,
+        title,
+        description: '',
+        eventDate: selectedDate,
+        exerciseType,
+        exercises: exercises.length > 0 ? exercises : undefined,
+      };
+
+      console.log('Sending payload:', payload);
+
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      
+      const data = await response.json();
+      console.log('Response:', response.status, data);
+      
+      if (response.ok) {
+        console.log('Event created successfully');
+        if (onSubmit) {
           onSubmit(title, exerciseType, exercises);
-          setTitle('');
-          setExerciseType('');
-          setExercises([]);
-          setSelectedTeamId('');
-          setExerciseName('');
-          setRxWeight('');
-          setRxReps('');
-          setScWeight('');
-          setScReps('');
-          if (onClose) onClose();
-        } else {
-          alert(data.message || 'Ошибка при создании события');
         }
-      } catch (error) {
-        console.error('Error creating event:', error);
-        alert('Произошла ошибка при создании события');
+        setTitle('');
+        setExerciseType('');
+        setExercises([]);
+        setSelectedTeamId('');
+        setExerciseName('');
+        setRxWeight('');
+        setRxReps('');
+        setScWeight('');
+        setScReps('');
+        if (onClose) onClose();
+      } else {
+        console.error('Server returned error:', data);
+        alert(data.message || 'Ошибка при создании события');
       }
+    } catch (error) {
+      console.error('Error creating event:', error);
+      alert('Произошла ошибка при создании события');
     }
   };
 

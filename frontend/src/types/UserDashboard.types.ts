@@ -13,4 +13,5 @@ export interface DashboardEvent {
   exercises?: Exercise[];
   status: 'past' | 'future';
   userId?: string;
+  teamId?: string;
 }

@@ -5,6 +5,7 @@ import Calendar from '../../features/events/Calendar';
 import Header from '../../components/layout/Header';
 import LeftMenu from '../../components/layout/LeftMenu';
 import { useAuth } from '../../contexts/AuthContext';
+import { useTeam } from '../../contexts/TeamContext';
 import Footer from '../../components/layout/Footer';
 
 // Define types for our events and results
@@ -31,21 +32,15 @@ interface ApiEvent {
   teamId?: string;
 }
 
-interface Team {
-  id: string;
-  name: string;
-}
-
 export default function CalendarPage() {
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [events, setEvents] = useState<CalendarEvent[]>([]); // Store events for displaying results
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // For showing event details
   const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   
   const { isAuthenticated, user } = useAuth();
+  const { selectedTeam } = useTeam();
 
   // Function to update events in the calendar page
   const updateEvents = useCallback((newEvents: CalendarEvent[]) => {
@@ -90,24 +85,6 @@ export default function CalendarPage() {
   }, [isAuthenticated, user, selectedTeamId]);
   */
 
-  // Fetch user's teams
-  useEffect(() => {
-    const fetchTeams = async () => {
-      if (isAuthenticated && user) {
-        try {
-          const response = await fetch(`/api/teams?userId=${user.id}`);
-          if (response.ok) {
-            const data = await response.json();
-            setTeams(data);
-          }
-        } catch (error) {
-          console.error('Failed to fetch teams:', error);
-        }
-      }
-    };
-    fetchTeams();
-  }, [isAuthenticated, user]);
-
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
   };
@@ -148,24 +125,10 @@ export default function CalendarPage() {
       />
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-2 sm:p-4`}>
-        <div className="mb-4 flex justify-end">
-          <select
-            value={selectedTeamId}
-            onChange={(e) => setSelectedTeamId(e.target.value)}
-            className="block w-64 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-          >
-            <option value="">Все события</option>
-            {teams.map((team) => (
-              <option key={team.id} value={team.id}>
-                {team.name}
-              </option>
-            ))}
-          </select>
-        </div>
         <Calendar 
           isMenuOpen={leftMenuOpen} 
           onUpdateEvents={updateEvents} 
-          teamId={selectedTeamId || undefined}
+          teamId={selectedTeam?.id}
         />
       </main>
       
