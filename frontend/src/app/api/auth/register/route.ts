@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 
 export async function POST(request: Request) {
   try {
-    const { name, email, password, role } = await request.json()
+    const { name, lastName, email, password, role, gender, registrationType } = await request.json()
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, email, password, role }),
+      body: JSON.stringify({ name, lastName, email, password, role, gender, registrationType }),
     })
 
     const data = await response.json()

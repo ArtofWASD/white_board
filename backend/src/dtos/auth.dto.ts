@@ -41,6 +41,14 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   role: 'trainer' | 'athlete';
+
+  @IsString()
+  @IsOptional()
+  gender?: string;
+
+  @IsString()
+  @IsOptional()
+  registrationType?: string;
 }
 
 export class UpdateProfileDto {

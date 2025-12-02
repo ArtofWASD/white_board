@@ -15,6 +15,8 @@ export interface User {
   email: string
   role: "trainer" | "athlete"
   isAdmin: boolean
+  gender?: string
+  registrationType?: string
   height?: number
   weight?: number
 }
@@ -35,6 +37,8 @@ export interface AuthContextType {
     email: string,
     password: string,
     role: "trainer" | "athlete",
+    gender?: string,
+    registrationType?: string,
     lastName?: string,
   ) => Promise<boolean>
   logout: () => void

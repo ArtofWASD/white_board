@@ -74,6 +74,11 @@ export class AuthService {
         email: registerDto.email,
         password: hashedPassword,
         role: registerDto.role, // Use the provided role
+        gender: registerDto.gender,
+        registrationType: registerDto.registrationType,
+        isAdmin:
+          registerDto.role === 'trainer' ||
+          registerDto.registrationType === 'organization',
       },
     });
 

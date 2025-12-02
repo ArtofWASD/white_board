@@ -54,14 +54,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (name: string, email: string, password: string, role: 'trainer' | 'athlete', lastName?: string): Promise<boolean> => {
+  const register = async (name: string, email: string, password: string, role: 'trainer' | 'athlete', gender?: string, registrationType?: string, lastName?: string): Promise<boolean> => {
     try {
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, lastName, email, password, role }), // Include role and lastName in request
+        body: JSON.stringify({ name, lastName, email, password, role, gender, registrationType }), // Include role and lastName in request
       });
       
       const data = await response.json();
