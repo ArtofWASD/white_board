@@ -89,3 +89,9 @@ export interface Event {
   timeCap?: string
   rounds?: string
 }
+
+export interface NavItem {
+  label: string;
+  href: string;
+  onClick?: () => void;
+}

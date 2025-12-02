@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useTeam } from '../../contexts/TeamContext';
 import { EventResult, TeamMember } from '../../types';
 import { LeftMenuProps } from '../../types/LeftMenu.types';
+import Link from 'next/link';
 
 const LeftMenu: React.FC<LeftMenuProps> = ({ 
   isOpen, 
@@ -12,7 +13,8 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
   showAuth, 
   toggleAuth, 
   events,
-  onShowEventDetails
+  onShowEventDetails,
+  navItems
 }) => {
   const { isAuthenticated, user } = useAuth();
   const { selectedTeam } = useTeam();
@@ -98,7 +100,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
       >
         <div className="p-2 sm:p-4">
           <div className="flex justify-between items-center mb-2 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-bold">Данные</h2>
+            <h2 className="text-lg sm:text-xl font-bold">Меню</h2>
             <button 
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
@@ -108,6 +110,39 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
               </svg>
             </button>
           </div>
+          
+          {/* Navigation Items (Mobile) */}
+          {navItems && (
+            <div className="mb-6">
+              <ul className="space-y-2">
+                {navItems.map((item) => (
+                  <li key={item.label}>
+                    {item.onClick ? (
+                      <button
+                        onClick={() => {
+                          item.onClick?.();
+                          onClose();
+                        }}
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-lg font-medium bg-transparent border-none cursor-pointer"
+                      >
+                        {item.label}
+                      </button>
+                    ) : (
+                      <Link 
+                        href={item.href}
+                        className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-lg font-medium"
+                        onClick={onClose}
+                      >
+                        {item.label}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+              <hr className="my-4 border-gray-200" />
+            </div>
+          )}
+
           <div className="mt-4">
             {isAuthenticated && user ? (
               <div className="mb-4">

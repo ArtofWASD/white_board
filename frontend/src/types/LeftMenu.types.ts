@@ -1,4 +1,4 @@
-import { CalendarEvent } from './index';
+import { CalendarEvent, NavItem } from './index';
 
 export interface LeftMenuProps {
   isOpen: boolean;
@@ -7,4 +7,5 @@ export interface LeftMenuProps {
   toggleAuth: () => void;
   events: CalendarEvent[];
   onShowEventDetails: (event: CalendarEvent) => void;
+  navItems?: NavItem[];
 }
