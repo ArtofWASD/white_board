@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../contexts/AuthContext';
+import { Button } from '../../components/ui/Button';
+import Image from 'next/image';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -45,64 +48,101 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full bg-white p-8 rounded-lg shadow-xl">
-        <h2 className="text-3xl font-bold text-center mb-6">Вход</h2>
-        
-        {error && (
-          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
-              Пароль
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-md transition duration-300 disabled:opacity-50"
-          >
-            {loading ? 'Обработка...' : 'Войти'}
-          </button>
-        </form>
-        
-        <div className="mt-4 text-center">
-          <p className="text-gray-600">
-            Нет аккаунта?{' '}
-            <button
-              onClick={() => router.push('/register')}
-              className="text-blue-500 hover:text-blue-700 font-medium"
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
+        {/* Left Side - Image (Visible on md+) */}
+        <div className="hidden md:block md:w-1/2 relative min-h-[500px] rounded-2xl overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0"
             >
-              Зарегистрируйтесь
-            </button>
-          </p>
+              <Image
+                src="/register_pic_1.jpg"
+                alt="Login"
+                fill
+                className="object-cover"
+                priority
+              />
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* Right Side - Form */}
+        <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
+          <h2 className="text-3xl font-bold text-center mb-6">Вход</h2>
+          
+          <div className="text-center mb-6">
+            <p className="text-gray-600 text-sm">Добро пожаловать обратно! Пожалуйста, войдите в свой аккаунт.</p>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
+              {error}
+            </div>
+          )}
+          
+          <form onSubmit={handleSubmit}>
+            <motion.div
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="space-y-4"
+            >
+              <div>
+                <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
+                  Пароль
+                </label>
+                <input
+                  type="password"
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  required
+                />
+              </div>
+              
+              <Button
+                type="submit"
+                disabled={loading}
+                variant="primary"
+                className="w-full mt-6"
+              >
+                {loading ? 'Обработка...' : 'Войти'}
+              </Button>
+            </motion.div>
+          </form>
+          
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Нет аккаунта?{' '}
+              <Button
+                href="/register"
+                variant="link"
+                className="font-medium p-0 h-auto"
+              >
+                Зарегистрируйтесь
+              </Button>
+            </p>
+          </div>
         </div>
       </div>
     </div>

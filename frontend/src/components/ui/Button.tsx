@@ -79,10 +79,12 @@ export const Button: React.FC<ButtonProps> = ({
   const content = (
     <>
       <span className="flex flex-col items-center justify-center w-full h-full">
-        <span>{children}</span>
-        {showUnderline && (
-          <span className={`${underlineStyles} ${underlineWidths[size]} block`}></span>
-        )}
+        <span className="flex flex-col items-center">
+          <span>{children}</span>
+          {showUnderline && (
+            <span className={`${underlineStyles} ${underlineWidths[size]} block`}></span>
+          )}
+        </span>
       </span>
       
       {tooltip && (
