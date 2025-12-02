@@ -375,9 +375,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            userId: user.id,
+            username: user.name,
             time,
-            dateAdded: new Date().toISOString(),
           }),
         });
 
