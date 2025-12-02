@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/layout/Header';
@@ -12,12 +13,14 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, logout, isLoading } = useAuth();
   const router = useRouter();
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavItem[]>([]);
 
   useEffect(() => {
+    if (isLoading) return;
+
     if (!isAuthenticated) {
       router.push('/login');
       return;
@@ -25,26 +28,57 @@ export default function DashboardLayout({
 
     if (user) {
       const items: NavItem[] = [
-        { label: 'Главная', href: '/dashboard' },
+        { 
+          label: 'Главная', 
+          href: '/dashboard',
+          icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
+          tooltip: 'Главная'
+        },
       ];
 
       if (user.role === 'trainer') {
         items.push(
-          { label: 'Команды', href: '/dashboard/teams' },
-          { label: 'Атлеты', href: '/dashboard/athletes' },
-          { label: 'Занятия', href: '/dashboard/activities' }
+          { 
+            label: 'Команды', 
+            href: '/dashboard/teams',
+            icon: <Image src="/teams_icon.png" alt="Teams" width={32} height={32} />,
+            tooltip: 'Команды'
+          },
+          { 
+            label: 'Атлеты', 
+            href: '/dashboard/athletes',
+            icon: <Image src="/athlet_icon.png" alt="Athletes" width={32} height={32} />,
+            tooltip: 'Атлеты'
+          },
+          { 
+            label: 'Занятия', 
+            href: '/dashboard/activities',
+            icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
+            tooltip: 'Занятия'
+          }
         );
       }
 
       // Add common items for all users
       items.push(
-        { label: 'Календарь', href: '/calendar' },
+        { 
+          label: 'Календарь', 
+          href: '/calendar',
+          icon: <Image src="/calendar_icon.png" alt="Calendar" width={32} height={32} />,
+          tooltip: 'Календарь'
+        },
         { 
           label: 'Выйти', 
           href: '#', 
           onClick: () => {
             logout();
-          } 
+          },
+          icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+            </svg>
+          ),
+          tooltip: 'Выйти'
         }
       );
 

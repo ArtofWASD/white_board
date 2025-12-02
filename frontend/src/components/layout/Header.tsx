@@ -4,6 +4,7 @@ import { useTeam } from '../../contexts/TeamContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import Button from '../ui/Button';
 import { HeaderProps } from '../../types/Header.types';
 
 
@@ -40,24 +41,38 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, navItems }) => {
       
       <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-full max-w-2xl">
         {navItems ? (
-          <nav className="hidden md:flex space-x-6">
+          <nav className="hidden md:flex space-x-10">
             {navItems.map((item) => (
-              item.onClick ? (
-                <button
+              item.icon ? (
+                <Button
                   key={item.label}
                   onClick={item.onClick}
-                  className="text-white hover:text-blue-300 font-medium transition-colors bg-transparent border-none cursor-pointer text-base"
+                  href={item.href !== '#' ? item.href : undefined}
+                  variant="ghost"
+                  isIcon={true}
+                  tooltip={item.tooltip}
+                  className="text-white hover:text-blue-300"
                 >
-                  {item.label}
-                </button>
+                  {item.icon}
+                </Button>
               ) : (
-                <Link 
-                  key={item.href} 
-                  href={item.href}
-                  className="text-white hover:text-blue-300 font-medium transition-colors"
-                >
-                  {item.label}
-                </Link>
+                item.onClick ? (
+                  <button
+                    key={item.label}
+                    onClick={item.onClick}
+                    className="text-white hover:text-blue-300 font-medium transition-colors bg-transparent border-none cursor-pointer text-base"
+                  >
+                    {item.label}
+                  </button>
+                ) : (
+                  <Link 
+                    key={item.href} 
+                    href={item.href}
+                    className="text-white hover:text-blue-300 font-medium transition-colors"
+                  >
+                    {item.label}
+                  </Link>
+                )
               )
             ))}
           </nav>

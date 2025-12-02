@@ -9,6 +9,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Check if user is logged in on initial load
   useEffect(() => {
@@ -20,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setToken(storedToken);
         setIsAuthenticated(true);
       }
+      setIsLoading(false);
     };
     
     initializeAuth();
@@ -100,6 +102,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         isAuthenticated,
+        isLoading,
       }}
     >
       {children}

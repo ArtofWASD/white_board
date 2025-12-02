@@ -43,6 +43,7 @@ export interface AuthContextType {
   ) => Promise<boolean>
   logout: () => void
   isAuthenticated: boolean
+  isLoading: boolean
 }
 
 export interface Exercise {
@@ -94,4 +95,6 @@ export interface NavItem {
   label: string;
   href: string;
   onClick?: () => void;
+  icon?: React.ReactNode;
+  tooltip?: string;
 }

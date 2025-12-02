@@ -6,7 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isAuthenticated, login } = useAuth();
+  const { isAuthenticated, login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -14,10 +14,10 @@ export default function LoginPage() {
 
   // Redirect to calendar if already logged in
   useEffect(() => {
-    if (isAuthenticated) {
+    if (!isLoading && isAuthenticated) {
       router.push('/'); // Redirect to home page which shows calendar
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +40,7 @@ export default function LoginPage() {
     }
   };
 
-  if (isAuthenticated) {
+  if (isLoading || isAuthenticated) {
     return null; // or a loading spinner
   }
 

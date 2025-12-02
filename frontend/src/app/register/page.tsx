@@ -10,7 +10,7 @@ import { SuccessModal } from '../../components/auth/SuccessModal';
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { isAuthenticated, register } = useAuth();
+  const { isAuthenticated, register, isLoading } = useAuth();
   
   // Form State
   const [step, setStep] = useState(1);
@@ -29,10 +29,10 @@ export default function RegisterPage() {
 
   // Redirect to dashboard if already logged in
   useEffect(() => {
-    if (isAuthenticated && !showSuccessModal) {
+    if (!isLoading && isAuthenticated && !showSuccessModal) {
       router.push('/');
     }
-  }, [isAuthenticated, router, showSuccessModal]);
+  }, [isAuthenticated, router, showSuccessModal, isLoading]);
 
   const validateStep1 = () => {
     if (!email || !password || !confirmPassword) {
@@ -104,7 +104,7 @@ export default function RegisterPage() {
     }
   };
 
-  if (isAuthenticated && !showSuccessModal) {
+  if (isLoading || (isAuthenticated && !showSuccessModal)) {
     return null;
   }
 
