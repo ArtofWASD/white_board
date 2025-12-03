@@ -26,8 +26,32 @@ model User {
   teamMemberships    TeamMember[]
   ownedTeams         Team[]       @relation("OwnedTeams")
   participatedEvents Event[]      @relation("EventParticipants")
+  exercises          Exercise[]
 
   @@map("users")
+}
+
+model Exercise {
+  id        String           @id @default(uuid())
+  name      String
+  userId    String           @map("user_id")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records   ExerciseRecord[]
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  @@map("exercises")
+}
+
+model ExerciseRecord {
+  id         String   @id @default(uuid())
+  weight     Float
+  date       DateTime @default(now())
+  exerciseId String   @map("exercise_id")
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("exercise_records")
 }
 
 model Event {
