@@ -89,6 +89,9 @@ export interface Event {
   updatedAt: string
   timeCap?: string
   rounds?: string
+  teamId?: string
+  exercises?: Exercise[]
+  results?: EventResult[]
 }
 
 export interface NavItem {

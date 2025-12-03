@@ -36,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, navItems }) => {
         className={`bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer ${navItems ? 'md:hidden' : ''}`}
         aria-label="Menu"
       >
-        <Image src="/menu.png" alt="Menu" width={32} height={32} className="sm:w-10 sm:h-10" />
+        <Image src="/menu.png" alt="Menu" width={27} height={27} className="sm:w-[35px] sm:h-[35px]" />
       </button>
       
       <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center w-full max-w-2xl">
@@ -122,7 +122,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, navItems }) => {
           onClick={handleUserIconClick}
         >
           <span className="hidden md:inline text-sm sm:text-base">Привет, {user.name}{user.lastName ? ` ${user.lastName}` : ''}!</span>
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-500 flex items-center justify-center">
+          <div className="w-[27px] h-[27px] sm:w-[35px] sm:h-[35px] rounded-full bg-blue-500 flex items-center justify-center">
             <span className="font-bold text-sm sm:text-base">{user.name.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}</span>
           </div>
         </div>
@@ -131,7 +131,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, navItems }) => {
           onClick={handleLoginClick}
           className="bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer ml-auto"
         >
-          <Image src="/login.png" alt="Login" width={32} height={32} className="sm:w-10 sm:h-10" />
+          <Image src="/login.png" alt="Login" width={27} height={27} className="sm:w-[35px] sm:h-[35px]" />
         </button>
       )}
     </header>
