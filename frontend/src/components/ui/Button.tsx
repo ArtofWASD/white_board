@@ -3,7 +3,7 @@ import Link from 'next/link';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'primary' | 'outline' | 'ghost' | 'link';
+  variant?: 'primary' | 'outline' | 'ghost' | 'link' | 'destructive';
   tooltip?: string;
   href?: string;
   isIcon?: boolean;
@@ -35,6 +35,7 @@ export const Button: React.FC<ButtonProps> = ({
     outline: "text-black bg-white border border-black hover:bg-gray-100 rounded-lg", // Frame style
     ghost: "text-gray-600 hover:text-black bg-transparent border-none",
     link: "text-blue-500 hover:text-blue-700 underline-offset-4 hover:underline bg-transparent border-none",
+    destructive: "text-white bg-red-600 hover:bg-red-700 border-none rounded-lg",
   };
 
   // Underline styles
@@ -71,7 +72,12 @@ export const Button: React.FC<ButtonProps> = ({
         sm: isIcon ? "bottom-[-8px]" : "bottom-[2px]",
         md: isIcon ? "bottom-[-8px]" : "bottom-[8px]",
         lg: isIcon ? "bottom-[-8px]" : "bottom-[12px]",
-    }
+    },
+    destructive: {
+      sm: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
+      md: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
+      lg: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
+    },
   };
 
   const combinedClassName = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`;

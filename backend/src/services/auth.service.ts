@@ -125,6 +125,36 @@ export class AuthService {
       updateData.weight = updateProfileDto.weight;
     }
 
+    // Handle Email Update
+    if (updateProfileDto.email && updateProfileDto.email !== user.email) {
+      const existingUser = await (this.prisma as any).user.findUnique({
+        where: { email: updateProfileDto.email },
+      });
+      if (existingUser) {
+        throw new UnauthorizedException('Email already in use');
+      }
+      updateData.email = updateProfileDto.email;
+    }
+
+    // Handle Password Update
+    if (updateProfileDto.password) {
+      if (!updateProfileDto.currentPassword) {
+        throw new UnauthorizedException('Current password is required to set a new password');
+      }
+      
+      const isPasswordValid = await bcrypt.compare(
+        updateProfileDto.currentPassword,
+        user.password,
+      );
+
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid current password');
+      }
+
+      const hashedPassword = await bcrypt.hash(updateProfileDto.password, 10);
+      updateData.password = hashedPassword;
+    }
+
     // Update user with new data
     const updatedUser = await (this.prisma as any).user.update({
       where: { id: userId },

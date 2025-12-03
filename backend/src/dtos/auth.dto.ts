@@ -63,6 +63,19 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsNumber()
   weight?: number;
+
+  @IsOptional()
+  @IsEmail()
+  email?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  currentPassword?: string;
 }
 
 // Team DTOs

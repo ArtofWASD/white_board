@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ExerciseCard } from './ExerciseCard';
 import { ListFilters, ViewMode } from '../ui/ListFilters';
 import Button from '../ui/Button';
-import { useAuth } from '../../contexts/AuthContext';
 
 interface Exercise {
   id: string;
@@ -11,78 +10,37 @@ interface Exercise {
   records: any[];
 }
 
-export function ExerciseTracker() {
-  const { user } = useAuth();
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+interface ExerciseTrackerProps {
+  exercises: Exercise[];
+  isLoading: boolean;
+  onCreateExercise: (name: string, initialWeight?: number) => Promise<void>;
+  onAddRecord: (exerciseId: string, weight: number) => Promise<void>;
+}
+
+export function ExerciseTracker({ 
+  exercises, 
+  isLoading, 
+  onCreateExercise, 
+  onAddRecord 
+}: ExerciseTrackerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [initialWeight, setInitialWeight] = useState('');
 
-  useEffect(() => {
-    if (user) {
-      fetchExercises();
-    }
-  }, [user]);
-
-  const fetchExercises = async () => {
-    if (!user) return;
-    try {
-      const response = await fetch(`/api/exercises?userId=${user.id}`);
-      if (response.ok) {
-        const data = await response.json();
-        setExercises(data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch exercises:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newExerciseName.trim() || !user) return;
+    if (!newExerciseName.trim()) return;
 
-    try {
-      const body: any = { name: newExerciseName, userId: user.id };
-      if (initialWeight) {
-        body.initialWeight = parseFloat(initialWeight);
-      }
-
-      const response = await fetch('/api/exercises', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        setNewExerciseName('');
-        setInitialWeight('');
-        setIsCreating(false);
-        fetchExercises();
-      }
-    } catch (error) {
-      console.error('Failed to create exercise:', error);
-    }
-  };
-
-  const handleAddRecord = async (exerciseId: string, weight: number) => {
-    try {
-      const response = await fetch(`/api/exercises/${exerciseId}/records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weight }),
-      });
-
-      if (response.ok) {
-        fetchExercises(); // Refresh to update max weight and history
-      }
-    } catch (error) {
-      console.error('Failed to add record:', error);
-    }
+    await onCreateExercise(
+      newExerciseName, 
+      initialWeight ? parseFloat(initialWeight) : undefined
+    );
+    
+    setNewExerciseName('');
+    setInitialWeight('');
+    setIsCreating(false);
   };
 
   const filteredExercises = exercises.filter((ex) =>
@@ -90,7 +48,7 @@ export function ExerciseTracker() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 h-full flex flex-col">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">Прогресс упражнений</h2>
         <Button onClick={() => setIsCreating(!isCreating)}>
@@ -131,25 +89,27 @@ export function ExerciseTracker() {
         searchPlaceholder="Фильтр упражнений..."
       />
 
-      {isLoading ? (
-        <div className="text-center py-10">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
-        </div>
-      ) : filteredExercises.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-          <p className="text-gray-500">Упражнения не найдены. Начните с добавления нового!</p>
-        </div>
-      ) : (
-        <div className={viewMode === 'list' ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
-          {filteredExercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              onAddRecord={handleAddRecord}
-            />
-          ))}
-        </div>
-      )}
+      <div className="flex-1 overflow-y-auto min-h-0 pr-2">
+        {isLoading ? (
+          <div className="text-center py-10">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
+          </div>
+        ) : filteredExercises.length === 0 ? (
+          <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+            <p className="text-gray-500">Упражнения не найдены. Начните с добавления нового!</p>
+          </div>
+        ) : (
+          <div className={viewMode === 'list' ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
+            {filteredExercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.id}
+                exercise={exercise}
+                onAddRecord={onAddRecord}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
