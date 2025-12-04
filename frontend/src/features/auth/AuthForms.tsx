@@ -1,3 +1,18 @@
+import React, { useState } from 'react';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+
+export default function AuthForms() {
+  const { login, register } = useAuthStore();
+  const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [role, setRole] = useState<'trainer' | 'athlete'>('athlete');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');

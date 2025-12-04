@@ -1,3 +1,18 @@
+import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import Button from '../../components/ui/Button';
+import AthleteEvents from '../events/AthleteEvents';
+import CreateTeamModal from '../teams/CreateTeamModal';
+import { DashboardEvent } from '../../types/UserDashboard.types';
+
+interface UserDashboardProps {
+  onClose?: () => void;
+}
+
+export default function UserDashboard({ onClose }: UserDashboardProps) {
+  const { user, logout } = useAuthStore();
+  const [events, setEvents] = useState<DashboardEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
 
