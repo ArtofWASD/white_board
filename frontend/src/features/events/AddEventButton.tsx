@@ -1,19 +1,34 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 import EventModal from './EventModal';
-import { useAuth } from '../../contexts/AuthContext';
-import { Exercise } from '../../types';
-import { AddEventButtonProps } from '../../types/AddEventButton.types';
+
+interface Exercise {
+  id: number;
+  name: string;
+  weight?: string;
+  repetitions?: string;
+  rxWeight?: string;
+  rxReps?: string;
+  scWeight?: string;
+  scReps?: string;
+}
+
+interface AddEventButtonProps {
+  onAddEvent: (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => void;
+  onCancel: () => void;
+  date: string;
+  position: { top: number; left: number };
+  teamId?: string;
+}
 
 const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, date, position, teamId }) => {
+  const { isAuthenticated } = useAuthStore();
   const [showModal, setShowModal] = useState(false);
-  const { isAuthenticated } = useAuth();
 
   const handleAddEventClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent click from bubbling to calendar
-    
-    // Check if user is authenticated before allowing event creation
+    e.stopPropagation();
     if (!isAuthenticated) {
       alert('Вы должны быть авторизованы для создания события');
       return;

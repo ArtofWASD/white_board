@@ -1,21 +1,3 @@
-'use client';
-
-import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-
-export default function AuthForms() {
-  const [isLogin, setIsLogin] = useState(false); // Default to registration form
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [name, setName] = useState('');
-  const [lastName, setLastName] = useState(''); // Adding last name state
-  const [role, setRole] = useState<'athlete' | 'trainer'>('athlete'); // Adding role state
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  
-  const { login, register } = useAuth();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');

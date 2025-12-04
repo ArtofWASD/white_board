@@ -4,8 +4,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Calendar from '../../features/events/Calendar';
 import Header from '../../components/layout/Header';
 import LeftMenu from '../../components/layout/LeftMenu';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTeam } from '../../contexts/TeamContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useTeamStore } from '../../lib/store/useTeamStore';
 import Footer from '../../components/layout/Footer';
 
 // Define types for our events and results
@@ -39,8 +39,8 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // For showing event details
   const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
   
-  const { isAuthenticated, user } = useAuth();
-  const { selectedTeam } = useTeam();
+  const { isAuthenticated, user } = useAuthStore();
+  const { selectedTeam } = useTeamStore();
 
   // Function to update events in the calendar page
   const updateEvents = useCallback((newEvents: CalendarEvent[]) => {

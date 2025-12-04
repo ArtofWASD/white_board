@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Header from '../../../components/layout/Header';
 import LeftMenu from '../../../components/layout/LeftMenu';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuthStore } from '../../../lib/store/useAuthStore';
 import Footer from '../../../components/layout/Footer';
 
 // Define types for news

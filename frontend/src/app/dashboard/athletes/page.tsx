@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useTeam } from '../../../contexts/TeamContext';
+import { useTeamStore } from '../../../lib/store/useTeamStore';
 import { Team } from '../../../types';
 import { TeamMember } from '../../../types/TeamManagement.types';
 import { ListFilters, ViewMode } from '../../../components/ui/ListFilters';
@@ -14,7 +14,7 @@ interface AthleteWithTeams {
 }
 
 export default function AthletesPage() {
-  const { teams } = useTeam();
+  const { teams } = useTeamStore();
   const [athletes, setAthletes] = useState<AthleteWithTeams[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../../contexts/AuthContext';
+import { useAuthStore } from '../../../../lib/store/useAuthStore';
 import { useParams, useRouter } from 'next/navigation';
 
 interface User {
@@ -26,7 +26,7 @@ interface Team {
 }
 
 export default function EditTeamPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuthStore();
   const params = useParams();
   const router = useRouter();
   const teamId = params.teamId as string;
@@ -50,7 +50,7 @@ export default function EditTeamPage() {
 
   const fetchTeamDetails = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(`/api/teams/${teamId}`, {
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export default function EditTeamPage() {
   const fetchTeamMembers = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(`/api/teams/${teamId}/members`, {
         headers: {
           'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ export default function EditTeamPage() {
 
   const fetchAvailableAthletes = async () => {
     try {
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch('/api/auth/athletes', {
         cache: 'no-store',
         headers: {
@@ -134,7 +134,7 @@ export default function EditTeamPage() {
     try {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       
       const response = await fetch(`/api/teams/${teamId}/members`, {
         method: 'POST',
@@ -170,7 +170,7 @@ export default function EditTeamPage() {
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(`/api/teams/${teamId}/members`, {
         method: 'DELETE',
         headers: {

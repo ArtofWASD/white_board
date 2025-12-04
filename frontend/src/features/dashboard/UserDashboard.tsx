@@ -1,14 +1,3 @@
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useAuth } from '../../contexts/AuthContext';
-import { UserDashboardProps, DashboardEvent } from '../../types/UserDashboard.types';
-import Button from '../../components/ui/Button';
-import AthleteEvents from '../events/AthleteEvents';
-import CreateTeamModal from '../teams/CreateTeamModal';
-
-export default function UserDashboard({ onClose }: UserDashboardProps) {
-  const { user, logout } = useAuth();
-  const [events, setEvents] = useState<DashboardEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
 

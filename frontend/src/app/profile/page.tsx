@@ -2,14 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../../components/ui/Button';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
+import Button from '../../components/ui/Button';
 import { Switch } from '../../components/ui/Switch';
-import { useFeatureFlags } from '../../contexts/FeatureFlagContext';
 
 export default function ProfilePage() {
-  const { user, logout } = useAuth();
-  const { flags, toggleFlag } = useFeatureFlags();
+  const { user, updateUser } = useAuthStore();
+  const { flags, toggleFlag } = useFeatureFlagStore();
   
   // Email state
   const [email, setEmail] = useState(user?.email || '');
@@ -39,7 +39,7 @@ export default function ProfilePage() {
       const data = await response.json();
 
       if (response.ok && data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+        updateUser(data.user);
         setIsEmailEditing(false);
         alert('Email успешно обновлен');
       } else {
@@ -112,172 +112,151 @@ export default function ProfilePage() {
           <Button variant="outline">Назад в панель управления</Button>
         </Link>
       </div>
-      
-      {/* Profile Header Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 flex items-center space-x-6">
-        <div className="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg">
-          {user.name.charAt(0)}{user.lastName ? user.lastName.charAt(0) : ''}
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">{user.name} {user.lastName}</h2>
-          <p className="text-gray-500">{user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
-          <div className="mt-4">
+
+      {/* Email Settings */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-gray-900">Email</h3>
+          {!isEmailEditing && (
             <Button 
-              variant="destructive" 
-              onClick={logout}
-              className="text-sm"
+              variant="ghost" 
+              onClick={() => setIsEmailEditing(true)}
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
             >
-              Выйти
+              Изменить
             </Button>
-          </div>
+          )}
         </div>
+
+        {isEmailEditing ? (
+          <form onSubmit={handleUpdateEmail} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Новый Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                required
+              />
+            </div>
+            <div className="flex space-x-3">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+              </Button>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => {
+                  setIsEmailEditing(false);
+                  setEmail(user.email);
+                }}
+              >
+                Отмена
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-gray-600">{user.email}</p>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Feature Flags Settings */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:col-span-2">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса (Feature Flags)</h3>
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="font-medium text-gray-900">Упражнения и максимальный вес</h4>
-                <p className="text-sm text-gray-500">Включает отображение блока с упражнениями на главной странице</p>
-              </div>
-              <Switch 
-                checked={flags.showExerciseTracker} 
-                onChange={() => toggleFlag('showExerciseTracker')} 
-              />
-            </div>
-            <div className="flex items-center justify-between border-t border-gray-100 pt-6">
-              <div>
-                <h4 className="font-medium text-gray-900">Вес и прогресс</h4>
-                <p className="text-sm text-gray-500">Включает отображение блока с весом и прогрессом пользователя</p>
-              </div>
-              <Switch 
-                checked={flags.showWeightTracker} 
-                onChange={() => toggleFlag('showWeightTracker')} 
-              />
-            </div>
-          </div>
-        </div>
-        {/* Email Settings */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Email адрес</h3>
-            {!isEmailEditing && (
-              <Button 
-                variant="ghost" 
-                onClick={() => setIsEmailEditing(true)}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                Изменить
-              </Button>
-            )}
-          </div>
-
-          {isEmailEditing ? (
-            <form onSubmit={handleUpdateEmail} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Новый Email адрес</label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                  required
-                />
-              </div>
-              <div className="flex space-x-3">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  onClick={() => {
-                    setIsEmailEditing(false);
-                    setEmail(user.email);
-                  }}
-                >
-                  Отмена
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <p className="text-gray-600">{user.email}</p>
+      {/* Password Settings */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold text-gray-900">Пароль</h3>
+          {!isPasswordEditing && (
+            <Button 
+              variant="ghost" 
+              onClick={() => setIsPasswordEditing(true)}
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+            >
+              Изменить
+            </Button>
           )}
         </div>
 
-        {/* Password Settings */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Пароль</h3>
-            {!isPasswordEditing && (
-              <Button 
-                variant="ghost" 
-                onClick={() => setIsPasswordEditing(true)}
-                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-              >
-                Изменить
+        {isPasswordEditing ? (
+          <form onSubmit={handleUpdatePassword} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Текущий пароль</label>
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Новый пароль</label>
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                required
+                minLength={6}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Подтвердите новый пароль</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="flex space-x-3">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Обновление...' : 'Обновить пароль'}
               </Button>
-            )}
-          </div>
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => {
+                  setIsPasswordEditing(false);
+                  setCurrentPassword('');
+                  setNewPassword('');
+                  setConfirmPassword('');
+                }}
+              >
+                Отмена
+              </Button>
+            </div>
+          </form>
+        ) : (
+          <p className="text-gray-600">••••••••••••</p>
+        )}
+      </div>
 
-          {isPasswordEditing ? (
-            <form onSubmit={handleUpdatePassword} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Текущий пароль</label>
-                <input
-                  type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Новый пароль</label>
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                  required
-                  minLength={6}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Подтвердите новый пароль</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                  required
-                  minLength={6}
-                />
-              </div>
-              <div className="flex space-x-3">
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Обновление...' : 'Обновить пароль'}
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  onClick={() => {
-                    setIsPasswordEditing(false);
-                    setCurrentPassword('');
-                    setNewPassword('');
-                    setConfirmPassword('');
-                  }}
-                >
-                  Отмена
-                </Button>
-              </div>
-            </form>
-          ) : (
-            <p className="text-gray-600">••••••••••••</p>
-          )}
+      {/* Feature Flags */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900">Прогресс упражнений</h4>
+              <p className="text-sm text-gray-500">Показывать блок с максимальными весами в упражнениях</p>
+            </div>
+            <Switch
+              checked={flags.showExerciseTracker}
+              onChange={() => toggleFlag('showExerciseTracker')}
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900">Трекер веса</h4>
+              <p className="text-sm text-gray-500">Показывать график изменения веса тела</p>
+            </div>
+            <Switch
+              checked={flags.showWeightTracker}
+              onChange={() => toggleFlag('showWeightTracker')}
+            />
+          </div>
         </div>
       </div>
     </div>

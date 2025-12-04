@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 
 interface AddResultModalProps {
   isOpen: boolean;
@@ -11,12 +11,11 @@ interface AddResultModalProps {
 }
 
 const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave, eventName }) => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuthStore();
   const [time, setTime] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Check if user is authenticated before allowing to save result
     if (!isAuthenticated) {
       alert('Вы должны быть авторизованы для добавления результата');
       return;

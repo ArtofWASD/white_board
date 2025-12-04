@@ -1,21 +1,20 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../../components/ui/Button';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import Button from '../../components/ui/Button';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { isAuthenticated, login, isLoading } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { login, isAuthenticated, isLoading } = useAuthStore();
+  const router = useRouter();
 
-  // Redirect to calendar if already logged in
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
       router.push('/'); // Redirect to home page which shows calendar

@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 
 import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
 
 export default function TeamManagement() {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamMembers, setTeamMembers] = useState<{[key: string]: TeamMember[]}>({});
   const [newTeamName, setNewTeamName] = useState('');

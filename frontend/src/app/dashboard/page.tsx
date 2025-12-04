@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Button from '../../components/ui/Button';
 import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
-import { useFeatureFlags } from '../../contexts/FeatureFlagContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
 
 interface Exercise {
   id: string;
@@ -24,8 +24,8 @@ interface Event {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth();
-  const { flags } = useFeatureFlags();
+  const { user } = useAuthStore();
+  const { flags } = useFeatureFlagStore();
   const router = useRouter();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [events, setEvents] = useState<Event[]>([]);

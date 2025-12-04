@@ -1,31 +1,46 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTeam } from '../../contexts/TeamContext';
-import { EventResult, TeamMember } from '../../types';
-import { LeftMenuProps } from '../../types/LeftMenu.types';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useTeamStore } from '../../lib/store/useTeamStore';
 
-const LeftMenu: React.FC<LeftMenuProps> = ({ 
-  isOpen, 
-  onClose, 
-  showAuth, 
-  toggleAuth, 
-  events,
-  onShowEventDetails,
-  navItems
-}) => {
-  const { isAuthenticated, user } = useAuth();
-  const { selectedTeam } = useTeam();
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+// Define types locally if not available, or import them. 
+// Based on usage:
+interface EventResult {
+  id: string;
+  time: string;
+  dateAdded: string;
+  username: string;
+}
 
-  // Fetch team members when selected team changes
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string;
+  results?: EventResult[];
+}
+
+interface LeftMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  showAuth: boolean;
+  toggleAuth: () => void;
+  events: CalendarEvent[];
+  onShowEventDetails: (event: CalendarEvent) => void;
+  navItems?: { label: string; href: string; onClick?: () => void }[];
+}
+
+const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAuth, events, onShowEventDetails, navItems }) => {
+  const { user, isAuthenticated, token } = useAuthStore();
+  const { selectedTeam } = useTeamStore();
+  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchTeamMembers = async () => {
       if (selectedTeam) {
         try {
-          const token = localStorage.getItem('token');
+          // const token = localStorage.getItem('token'); // Removed direct access
           const response = await fetch(`/api/teams/${selectedTeam.id}/members`, {
             headers: {
               'Content-Type': 'application/json',

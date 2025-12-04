@@ -2,10 +2,11 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Header from '../../components/layout/Header';
 import LeftMenu from '../../components/layout/LeftMenu';
-import { useAuth } from '../../contexts/AuthContext';
 import Footer from '../../components/layout/Footer';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 
 // Define types for news
 interface NewsItem {
@@ -47,7 +48,7 @@ export default function BlogPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useAuthStore();
 
   // Fetch events from the backend
   useEffect(() => {

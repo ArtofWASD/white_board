@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/layout/Header';
 import LeftMenu from '../../components/layout/LeftMenu';
@@ -13,7 +13,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, logout, isLoading } = useAuth();
+  const { user, isAuthenticated, logout, isLoading } = useAuthStore();
   const router = useRouter();
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavItem[]>([]);

@@ -1,19 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '../../components/ui/Button';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { SuccessModal } from '../../components/auth/SuccessModal';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import Button from '../../components/ui/Button';
+import SuccessModal from '../../components/ui/SuccessModal';
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const { isAuthenticated, register, isLoading } = useAuth();
-  
-  // Form State
   const [step, setStep] = useState(1);
+  const router = useRouter();
+  const { register, isAuthenticated, isLoading } = useAuthStore();
+  
+  // Form state
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');

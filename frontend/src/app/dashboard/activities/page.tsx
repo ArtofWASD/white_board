@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuthStore } from '../../../lib/store/useAuthStore';
+import { useRouter } from 'next/navigation';
 import { Event, Team } from '../../../types';
 
 import { ListFilters, ViewMode } from '../../../components/ui/ListFilters';
@@ -14,7 +15,7 @@ interface GroupedEvents {
 }
 
 export default function ActivitiesPage() {
-  const { user } = useAuth();
+  const { user } = useAuthStore();
   const [events, setEvents] = useState<Event[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);

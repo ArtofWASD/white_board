@@ -1,88 +1,77 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { useAuth } from '../../contexts/AuthContext';
-import { CalendarEvent, BackendEvent, EventResult } from '../../types/Calendar.types';
-import { Exercise } from '../../types';
-import AddEventButton from './AddEventButton';
-import EventActionMenu from './EventActionMenu';
-import EventModal from './EventModal';
-import AddResultModal from './AddResultModal';
 import { EventContentArg } from '@fullcalendar/core';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import EventModal from './EventModal';
+import EventActionMenu from './EventActionMenu';
+import AddResultModal from './AddResultModal';
+import AddEventButton from './AddEventButton';
+import { Event as BackendEvent, EventResult } from '../../types';
+
+interface CalendarEvent {
+  id: string;
+  title: string;
+  date: string;
+  exerciseType?: string;
+  exercises?: any[];
+  results?: EventResult[];
+  color?: string;
+  teamId?: string;
+  timeCap?: string;
+  rounds?: string;
+}
 
 interface CalendarProps {
   isMenuOpen: boolean;
-  onUpdateEvents?: (events: CalendarEvent[]) => void;
   teamId?: string;
+  onUpdateEvents?: (events: CalendarEvent[]) => void;
 }
 
 interface EventTooltipProps {
   event: CalendarEvent;
-  position: { x: number; y: number };
+  position: { top: number; left: number };
   onClose: () => void;
 }
 
 const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onClose }) => {
-  useEffect(() => {
-    const handleClickOutside = () => {
-      onClose();
-    };
-
-    document.addEventListener('click', handleClickOutside);
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  }, [onClose]);
-
   return (
     <div 
-      className="absolute bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm z-20 w-64"
-      style={{
-        top: `${position.y}px`,
-        left: `${position.x}px`,
-        transform: 'translateY(10px)'
+      className="fixed z-50 bg-white rounded-lg shadow-xl p-4 border border-gray-200 w-64 pointer-events-none"
+      style={{ 
+        top: position.top, 
+        left: position.left,
+        transform: 'translate(-50%, -100%)',
+        marginTop: '-10px'
       }}
     >
-      <div className="font-semibold text-gray-800">{event.title}</div>
-      <div className="text-sm text-gray-600 mt-1">
-        Дата: {event.date}
-      </div>
-      
+      <h3 className="font-bold text-lg mb-2">{event.title}</h3>
+      {event.exerciseType && (
+        <p className="text-sm text-gray-600 mb-2">
+          <span className="font-semibold">Тип:</span> {event.exerciseType}
+        </p>
+      )}
+      {event.timeCap && (
+        <p className="text-sm text-gray-600 mb-2">
+          <span className="font-semibold">Time Cap:</span> {event.timeCap}
+        </p>
+      )}
+      {event.rounds && (
+        <p className="text-sm text-gray-600 mb-2">
+          <span className="font-semibold">Rounds:</span> {event.rounds}
+        </p>
+      )}
       {event.exercises && event.exercises.length > 0 && (
         <div className="mt-2">
-          <div className="text-xs font-medium text-gray-700 mb-1">Упражнения:</div>
-          <ul className="space-y-1">
-            {event.exercises.slice(0, 3).map((exercise, index) => (
-              <li key={index} className="text-xs flex justify-between">
-                <span className="text-gray-600">{exercise.name}</span>
-                <span className="text-gray-500">
-                  {exercise.weight || '0'} kg × {exercise.repetitions || '0'}
-                </span>
-              </li>
+          <p className="font-semibold text-sm mb-1">Упражнения:</p>
+          <ul className="text-sm list-disc pl-4">
+            {event.exercises.slice(0, 3).map((ex, idx) => (
+              <li key={idx}>{ex.name}</li>
             ))}
-            {event.exercises.length > 3 && (
-              <li className="text-xs text-gray-500">+ {event.exercises.length - 3} больше...</li>
-            )}
-          </ul>
-        </div>
-      )}
-      
-      {event.results && event.results.length > 0 && (
-        <div className="mt-2">
-          <div className="text-xs font-medium text-gray-700 mb-1">Результаты:</div>
-          <ul className="space-y-1">
-            {event.results.slice(0, 2).map((result) => (
-              <li key={result.id} className="text-xs flex justify-between">
-                <span className="text-gray-600">{result.time}</span>
-                <span className="text-gray-500">{result.dateAdded}</span>
-              </li>
-            ))}
-            {event.results.length > 2 && (
-              <li className="text-xs text-gray-500">+ {event.results.length - 2} больше...</li>
-            )}
+            {event.exercises.length > 3 && <li>...</li>}
           </ul>
         </div>
       )}
@@ -90,22 +79,22 @@ const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onClose })
   );
 };
 
-const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId }) => {
+const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents }) => {
+  const { user, isAuthenticated } = useAuthStore();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selectedDate, setSelectedDate] = useState<string>('');
   const [showAddEventButton, setShowAddEventButton] = useState(false);
-  const [showEventActionMenu, setShowEventActionMenu] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [buttonPosition, setButtonPosition] = useState({ top: 0, left: 0 });
+  const [showEventActionMenu, setShowEventActionMenu] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [eventToEdit, setEventToEdit] = useState<CalendarEvent | null>(null);
   const [showAddResultModal, setShowAddResultModal] = useState(false);
   const [eventToAddResult, setEventToAddResult] = useState<CalendarEvent | null>(null);
   const [tooltipEvent, setTooltipEvent] = useState<CalendarEvent | null>(null);
-  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  const [windowWidth, setWindowWidth] = useState(0);
+  const [tooltipPosition, setTooltipPosition] = useState({ top: 0, left: 0 });
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   const calendarRef = useRef<FullCalendar>(null);
-  const { isAuthenticated, user } = useAuth();
 
   const fetchEvents = useCallback(async () => {
     if (isAuthenticated && user) {
@@ -214,137 +203,44 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
   const handleEventClick = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
     setShowAddEventButton(false);
     setTooltipEvent(null);
-    const eventId = arg.event.id;
-    const event = events.find(e => e.id === eventId) || null;
+    const event = events.find(e => e.id === arg.event.id);
     if (event) {
+      setSelectedEvent(event);
       const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
       setButtonPosition({
-        top: rect.top + window.scrollY + rect.height / 2,
-        left: rect.left + window.scrollX + rect.width / 2
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX
       });
-      setSelectedEvent(event);
       setShowEventActionMenu(true);
     }
   };
 
   const handleEventMouseEnter = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
-    // setShowEventActionMenu(false);
-    const eventId = arg.event.id;
-    const event = events.find(e => e.id === eventId) || null;
+    if (showEventActionMenu) return;
+    
+    const event = events.find(e => e.id === arg.event.id);
     if (event) {
       const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
       setTooltipPosition({
-        x: rect.left + window.scrollX,
-        y: rect.top + window.scrollY
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX + (rect.width / 2)
       });
       setTooltipEvent(event);
     }
   };
 
   const handleEventMouseLeave = () => {
-    setTimeout(() => {
-      setTooltipEvent(null);
-    }, 100);
+    setTooltipEvent(null);
   };
 
-  const handleAddEvent = async (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => {
-    console.log('Calendar handleAddEvent - teamId:', teamId);
-    if (user) {
-      try {
-        const response = await fetch('/api/events', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            title,
-            description: '',
-            eventDate: selectedDate ? new Date(selectedDate).toISOString() : new Date().toISOString(),
-            exerciseType,
-            exercises,
-            teamId: teamId || undefined,
-            timeCap: timeCap || undefined,
-            rounds: rounds || undefined,
-          }),
-        });
-        
-        if (response.ok) {
-          setShowAddEventButton(false);
-          fetchEvents();
-        }
-      } catch (error) {
-        console.error('Error adding event:', error);
-      }
-    }
-  };
-
-  const handleUpdateEvent = async (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => {
-    if (eventToEdit && user) {
-      try {
-        const response = await fetch(`/api/events/${eventToEdit.id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            userId: user.id,
-            title,
-            description: '',
-            eventDate: new Date(eventToEdit.date).toISOString(),
-            exerciseType,
-            exercises: exercises.length > 0 ? exercises : undefined,
-            teamId: teamId || undefined,
-            timeCap: timeCap || undefined,
-            rounds: rounds || undefined,
-          }),
-        });
-        
-        if (response.ok) {
-          setShowEditModal(false);
-          setEventToEdit(null);
-          fetchEvents();
-        } else {
-          alert('Ошибка при обновлении события');
-        }
-      } catch (error) {
-        console.error('Error updating event:', error);
-        alert('Произошла ошибка при обновлении события');
-      }
-    }
-  };
-
-  const handleDeleteEvent = async (eventId: string) => {
-    if (confirm('Вы уверены, что хотите удалить это событие?') && user) {
-      try {
-        const response = await fetch(`/api/events/${eventId}`, {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ userId: user.id }),
-        });
-        if (response.ok) {
-          setShowEventActionMenu(false);
-          setSelectedEvent(null);
-          fetchEvents();
-        }
-      } catch (error) {
-        console.error('Error deleting event:', error);
-      }
-    }
-  };
-
-  const handleEditEvent = (event: CalendarEvent) => {
-    setEventToEdit(event);
+  const handleAddEvent = () => {
+    setShowAddEventButton(false);
+    setEventToEdit(null); // Ensure we are not in edit mode
     setShowEditModal(true);
-    setShowEventActionMenu(false);
   };
 
-  const handleAddResult = (event: CalendarEvent) => {
-    setEventToAddResult(event);
-    setShowAddResultModal(true);
-    setShowEventActionMenu(false);
+  const handleCloseAddEvent = () => {
+    setShowAddEventButton(false);
   };
 
   const handleCloseEventActionMenu = () => {
@@ -352,8 +248,25 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
     setSelectedEvent(null);
   };
 
-  const handleCloseAddEvent = () => {
-    setShowAddEventButton(false);
+  const handleDeleteEvent = async (eventId: string) => {
+    try {
+      const response = await fetch(`/api/events/${eventId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        fetchEvents();
+        handleCloseEventActionMenu();
+      }
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+    }
+  };
+
+  const handleEditEvent = (event: CalendarEvent) => {
+    setEventToEdit(event);
+    setShowEditModal(true);
+    handleCloseEventActionMenu();
   };
 
   const handleCloseEditModal = () => {
@@ -361,50 +274,88 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, onUpdateEvents, teamId 
     setEventToEdit(null);
   };
 
+  const handleUpdateEvent = async (eventData: any) => {
+    if (!user) return;
+
+    try {
+      const method = eventToEdit ? 'PUT' : 'POST';
+      const url = eventToEdit ? `/api/events/${eventToEdit.id}` : '/api/events';
+      
+      const body = {
+        ...eventData,
+        userId: user.id,
+        date: selectedDate || eventToEdit?.date,
+        teamId: teamId || eventToEdit?.teamId // Use passed teamId if creating new event
+      };
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.ok) {
+        fetchEvents();
+        handleCloseEditModal();
+      }
+    } catch (error) {
+      console.error('Failed to save event:', error);
+    }
+  };
+
+  const handleAddResult = (event: CalendarEvent) => {
+    setEventToAddResult(event);
+    setShowAddResultModal(true);
+    handleCloseEventActionMenu();
+  };
+
   const handleCloseAddResultModal = () => {
     setShowAddResultModal(false);
     setEventToAddResult(null);
   };
 
-  const handleSaveResult = async (time: string) => {
-    if (eventToAddResult && user) {
-      try {
-        const response = await fetch(`/api/events/${eventToAddResult.id}/results`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            username: user.name,
-            time,
-          }),
-        });
+  const handleSaveResult = async (resultData: any) => {
+    if (!eventToAddResult || !user) return;
 
-        if (response.ok) {
-          setShowAddResultModal(false);
-          setEventToAddResult(null);
-          fetchEvents();
-        }
-      } catch (error) {
-        console.error('Error saving result:', error);
+    try {
+      const response = await fetch(`/api/events/${eventToAddResult.id}/results`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...resultData,
+          userId: user.id,
+          username: user.name // Assuming we want to display the user's name
+        }),
+      });
+
+      if (response.ok) {
+        fetchEvents();
+        handleCloseAddResultModal();
       }
+    } catch (error) {
+      console.error('Failed to save result:', error);
     }
   };
 
+  // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (showAddEventButton && 
-          !(event.target as HTMLElement).closest('.add-event-button') &&
-          !(event.target as HTMLElement).closest('.event-modal') &&
-          !(event.target as HTMLElement).closest('[data-event-modal="true"]')) {
+      const target = event.target as HTMLElement;
+      
+      // Don't close if clicking inside the menu or button
+      if (target.closest('.event-action-menu') || target.closest('.add-event-button')) {
+        return;
+      }
+
+      if (showAddEventButton) {
         setShowAddEventButton(false);
       }
-      
-      if (showEventActionMenu && 
-          !(event.target as HTMLElement).closest('.calendar-event') &&
-          selectedEvent) {
+      if (showEventActionMenu) {
         setShowEventActionMenu(false);
-        setSelectedEvent(null);
       }
     };
 

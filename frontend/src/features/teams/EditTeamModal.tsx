@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 
 import { EditTeamModalProps, TeamMember, EditTeamModalUser as User } from '../../types/EditTeamModal.types';
 
@@ -14,7 +14,7 @@ export default function EditTeamModal({
 }: EditTeamModalProps) {
   console.log('EditTeamModal props:', { teamId, teamName, isOpen });
   
-  const { user } = useAuth();
+  const { user, token } = useAuthStore();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [athletes, setAthletes] = useState<User[]>([]);
   const [selectedAthlete, setSelectedAthlete] = useState<string>('');
@@ -36,7 +36,7 @@ export default function EditTeamModal({
       const url = `/api/teams/${teamId}/members`;
       console.log('Constructed URL:', url);
       
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export default function EditTeamModal({
 
   const fetchAvailableAthletes = useCallback(async () => {
     try {
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       
       // Fetch athletes from the API
       const response = await fetch('/api/auth/athletes', {
@@ -155,7 +155,7 @@ export default function EditTeamModal({
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       
       const response = await fetch(`/api/teams/${teamId}/members`, {
         method: 'POST',
@@ -198,7 +198,7 @@ export default function EditTeamModal({
 
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(`/api/teams/${teamId}/members`, {
         method: 'DELETE',
         headers: {

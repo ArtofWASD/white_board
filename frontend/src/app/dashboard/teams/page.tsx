@@ -1,13 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuthStore } from '../../../lib/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { Team } from '../../../types';
 import Button from '../../../components/ui/Button';
 
 export default function TeamsPage() {
-  const { user } = useAuth();
+  const { user, token } = useAuthStore();
   const router = useRouter();
   const [showCreateTeamForm, setShowCreateTeamForm] = useState(false);
   const [teamName, setTeamName] = useState('');
@@ -28,7 +28,7 @@ export default function TeamsPage() {
       
       try {
         setLoadingTeams(true);
-        const token = localStorage.getItem('token');
+        // const token = localStorage.getItem('token'); // Removed direct access
         
         const response = await fetch(`/api/teams?userId=${user.id}`, {
           method: 'GET',
@@ -69,7 +69,7 @@ export default function TeamsPage() {
       setSuccess(null);
       
       // Get token from localStorage
-      const token = localStorage.getItem('token');
+      // const token = localStorage.getItem('token'); // Removed direct access
       
       const response = await fetch('/api/teams', {
         method: 'POST',

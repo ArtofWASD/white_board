@@ -1,17 +1,23 @@
+'use client';
+
 import React from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTeam } from '../../contexts/TeamContext';
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useTeamStore } from '../../lib/store/useTeamStore';
 import Button from '../ui/Button';
-import { HeaderProps } from '../../types/Header.types';
 
+interface HeaderProps {
+  onLeftMenuClick: () => void;
+  onRightMenuClick: () => void;
+  navItems?: { label: string; href: string; icon?: React.ReactNode; onClick?: () => void; tooltip?: string }[];
+}
 
-const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, navItems }) => {
-  const { user, isAuthenticated } = useAuth();
-  const { teams, selectedTeam, selectTeam } = useTeam();
+const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick, navItems }) => {
   const router = useRouter();
+  const { user, isAuthenticated } = useAuthStore();
+  const { teams, selectedTeam, selectTeam } = useTeamStore();
 
   const handleLoginClick = () => {
     router.push('/login');

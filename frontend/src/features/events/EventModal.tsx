@@ -1,12 +1,50 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Exercise, EventResult, Team } from '../../types';
-import { EventModalProps } from '../../types/EventModal.types';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+import { Team, EventResult } from '../../types';
 
-const EventModal: React.FC<EventModalProps> = ({ isOpen, onClose, onSave, date, eventData, initialTeamId }) => {
-  const { user } = useAuth();
+interface Exercise {
+  id: number;
+  name: string;
+  weight?: string;
+  repetitions?: string;
+  rxWeight?: string;
+  rxReps?: string;
+  scWeight?: string;
+  scReps?: string;
+}
+
+interface EventData {
+  title?: string;
+  exerciseType?: string;
+  exercises?: Exercise[];
+  results?: EventResult[];
+  teamId?: string;
+  timeCap?: string;
+  rounds?: string;
+}
+
+interface EventModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => void;
+  date: string;
+  eventData?: EventData;
+  initialTeamId?: string;
+}
+
+const EventModal: React.FC<EventModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  date, 
+  eventData,
+  initialTeamId 
+}) => {
+  const { user } = useAuthStore();
+  
+  // Form state
   const [eventTitle, setEventTitle] = useState(eventData?.title || '');
   const [exerciseType, setExerciseType] = useState(eventData?.exerciseType || '');
   const [exercises, setExercises] = useState<Exercise[]>(eventData?.exercises || []);

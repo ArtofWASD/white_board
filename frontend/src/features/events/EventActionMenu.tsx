@@ -1,15 +1,27 @@
 'use client';
 
-import React, { useRef, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { EventActionMenuProps } from '../../types/EventActionMenu.types';
+import React, { useEffect, useRef } from 'react';
+import { useAuthStore } from '../../lib/store/useAuthStore';
 
-const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, onAddResult, position, onClose }) => {
+interface EventActionMenuProps {
+  onDelete: () => void;
+  onEdit: () => void;
+  onAddResult: () => void;
+  position: { top: number; left: number };
+  onClose: () => void;
+}
+
+const EventActionMenu: React.FC<EventActionMenuProps> = ({ 
+  onDelete, 
+  onEdit, 
+  onAddResult, 
+  position, 
+  onClose 
+}) => {
+  const { isAuthenticated } = useAuthStore();
   const menuRef = useRef<HTMLDivElement>(null);
-  const { isAuthenticated } = useAuth();
 
   const handleMenuClick = (e: React.MouseEvent) => {
-    // Prevent the click from propagating to the overlay which would close the menu
     e.stopPropagation();
   };
 
@@ -29,7 +41,7 @@ const EventActionMenu: React.FC<EventActionMenuProps> = ({ onDelete, onEdit, onA
   return (
     <div 
       ref={menuRef}
-      className="absolute bg-white border border-gray-300 rounded shadow-lg z-20"
+      className="absolute bg-white border border-gray-300 rounded shadow-lg z-20 event-action-menu"
       style={{ 
         top: `${position.top}px`, 
         left: `${position.left}px`,
