@@ -5,6 +5,7 @@ import { useAuthStore } from '../../../lib/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import { Team } from '../../../types';
 import Button from '../../../components/ui/Button';
+import { Loader } from '../../../components/ui/Loader';
 
 export default function TeamsPage() {
   const { user, token } = useAuthStore();
@@ -228,7 +229,7 @@ export default function TeamsPage() {
             </div>
           )}
           {loadingTeams ? (
-            <p className="text-gray-600">Загрузка команд...</p>
+            <Loader />
           ) : teams.length === 0 ? (
             <p className="text-gray-600">У вас пока нет команд</p>
           ) : (

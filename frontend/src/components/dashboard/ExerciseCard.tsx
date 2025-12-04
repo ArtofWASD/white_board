@@ -49,7 +49,7 @@ export function ExerciseCard({ exercise, onAddRecord }: ExerciseCardProps) {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex gap-2 w-full sm:w-auto">
+        <form onSubmit={handleSubmit} onPointerDown={(e) => e.stopPropagation()} className="flex gap-2 w-full sm:w-auto">
           <input
             type="number"
             step="0.5"
@@ -67,6 +67,7 @@ export function ExerciseCard({ exercise, onAddRecord }: ExerciseCardProps) {
       <div className="border-t pt-2">
         <button
           onClick={() => setShowHistory(!showHistory)}
+          onPointerDown={(e) => e.stopPropagation()}
           className="text-sm text-gray-500 hover:text-blue-600 flex items-center gap-1 w-full justify-center"
         >
           {showHistory ? 'Скрыть историю' : 'Показать историю'}

@@ -32,10 +32,13 @@ export async function PUT(
 
     console.log("API Route - Forwarding to backend URL:", backendUrl)
 
+    const authHeader = request.headers.get("authorization")
+
     const response = await fetch(backendUrl, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader ? { Authorization: authHeader } : {}),
       },
       body: JSON.stringify(body),
     })

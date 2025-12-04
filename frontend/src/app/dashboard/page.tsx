@@ -20,6 +20,7 @@ import {
 } from '@dnd-kit/sortable';
 
 import Button from '../../components/ui/Button';
+import { Loader } from '../../components/ui/Loader';
 import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
@@ -212,6 +213,10 @@ export default function DashboardPage() {
     if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
     return true;
   });
+
+  if (isLoading) {
+    return <Loader />;
+  }
 
   if (!user) {
     return (

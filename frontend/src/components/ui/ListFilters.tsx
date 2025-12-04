@@ -18,7 +18,7 @@ export function ListFilters({
   children
 }: ListFiltersProps) {
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+    <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4" onPointerDown={(e) => e.stopPropagation()}>
       <div className="flex items-center gap-4 w-full sm:w-auto">
         {onSearchChange && (
           <div className="relative w-full sm:w-64">

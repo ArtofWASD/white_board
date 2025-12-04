@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Event, Team } from '../../../types';
 
 import { ListFilters, ViewMode } from '../../../components/ui/ListFilters';
+import { Loader } from '../../../components/ui/Loader';
 
 interface GroupedEvents {
   [teamId: string]: {
@@ -71,7 +72,7 @@ export default function ActivitiesPage() {
   });
 
   if (loading) {
-    return <div className="p-8 text-center">Загрузка...</div>;
+    return <Loader />;
   }
 
   if (error) {

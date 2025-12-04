@@ -19,6 +19,7 @@ export interface User {
   registrationType?: string
   height?: number
   weight?: number
+  weightHistory?: { weight: number; date: string }[]
   dashboardLayout?: string[]
   dashboardLayoutMode?: string
 }

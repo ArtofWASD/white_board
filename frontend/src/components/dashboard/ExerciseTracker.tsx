@@ -57,7 +57,7 @@ export function ExerciseTracker({
       </div>
 
       {isCreating && (
-        <form onSubmit={handleCreateExercise} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
+        <form onSubmit={handleCreateExercise} onPointerDown={(e) => e.stopPropagation()} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
           <div className="flex gap-4">
             <input
               type="text"

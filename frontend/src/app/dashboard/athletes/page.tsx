@@ -5,6 +5,7 @@ import { useTeamStore } from '../../../lib/store/useTeamStore';
 import { Team } from '../../../types';
 import { TeamMember } from '../../../types/TeamManagement.types';
 import { ListFilters, ViewMode } from '../../../components/ui/ListFilters';
+import { Loader } from '../../../components/ui/Loader';
 
 interface AthleteWithTeams {
   id: string;
@@ -75,11 +76,7 @@ export default function AthletesPage() {
   }, [teams]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <Loader />;
   }
 
   return (
