@@ -7,6 +7,8 @@ export interface User {
   role: string;
   height?: number;
   weight?: number;
+  dashboardLayout?: string[];
+  dashboardLayoutMode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -23,6 +25,8 @@ export interface PrismaUser {
   role: string;
   height?: number;
   weight?: number;
+  dashboard_layout?: string[];
+  dashboard_layout_mode?: string;
   created_at: Date;
   updated_at: Date;
 }
@@ -38,6 +42,8 @@ export interface ProcessedUser {
   role: string;
   height?: number;
   weight?: number;
+  dashboardLayout?: string[];
+  dashboardLayoutMode?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,4 +59,6 @@ export interface UserResponse {
   role: string;
   height?: number;
   weight?: number;
+  dashboardLayout?: string[];
+  dashboardLayoutMode?: string;
 }

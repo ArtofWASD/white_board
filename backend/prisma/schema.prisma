@@ -27,6 +27,8 @@ model User {
   ownedTeams         Team[]       @relation("OwnedTeams")
   participatedEvents Event[]      @relation("EventParticipants")
   exercises          Exercise[]
+  dashboardLayout    String[]     @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
+  dashboardLayoutMode String      @default("asymmetric") @map("dashboard_layout_mode")
 
   @@map("users")
 }

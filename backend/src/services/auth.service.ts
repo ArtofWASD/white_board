@@ -52,6 +52,8 @@ export class AuthService {
         role: user.role,
         height: user.height,
         weight: user.weight,
+        dashboardLayout: user.dashboardLayout,
+        dashboardLayoutMode: user.dashboardLayoutMode,
       } as UserResponse,
       token: this.jwtService.sign(payload),
     };
@@ -96,6 +98,8 @@ export class AuthService {
         role: newUser.role,
         height: newUser.height,
         weight: newUser.weight,
+        dashboardLayout: newUser.dashboardLayout,
+        dashboardLayoutMode: newUser.dashboardLayoutMode,
       } as UserResponse,
       token: this.jwtService.sign(payload),
     };
@@ -123,6 +127,12 @@ export class AuthService {
     }
     if (updateProfileDto.weight !== undefined) {
       updateData.weight = updateProfileDto.weight;
+    }
+    if (updateProfileDto.dashboardLayout !== undefined) {
+      updateData.dashboardLayout = updateProfileDto.dashboardLayout;
+    }
+    if (updateProfileDto.dashboardLayoutMode !== undefined) {
+      updateData.dashboardLayoutMode = updateProfileDto.dashboardLayoutMode;
     }
 
     // Handle Email Update
@@ -172,6 +182,8 @@ export class AuthService {
         role: updatedUser.role,
         height: updatedUser.height,
         weight: updatedUser.weight,
+        dashboardLayout: updatedUser.dashboardLayout,
+        dashboardLayoutMode: updatedUser.dashboardLayoutMode,
       } as UserResponse,
     };
   }

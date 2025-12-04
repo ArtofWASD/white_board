@@ -7,6 +7,7 @@ import {
   MinLength,
   IsUUID,
   IsEnum,
+  IsArray,
 } from 'class-validator';
 
 export class LoginDto {
@@ -76,6 +77,15 @@ export class UpdateProfileDto {
   @IsOptional()
   @IsString()
   currentPassword?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  dashboardLayout?: string[];
+
+  @IsOptional()
+  @IsString()
+  dashboardLayoutMode?: string;
 }
 
 // Team DTOs

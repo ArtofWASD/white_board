@@ -3,10 +3,27 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  rectSortingStrategy,
+} from '@dnd-kit/sortable';
+
 import Button from '../../components/ui/Button';
 import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
+import { SortableItem } from '../../components/dashboard/SortableItem';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
 
@@ -24,17 +41,35 @@ interface Event {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, updateUser } = useAuthStore();
   const { flags } = useFeatureFlagStore();
   const router = useRouter();
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Initialize state from user object or defaults
+  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities']);
   const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric'>('asymmetric');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     if (user) {
       fetchData();
+      
+      // Sync state with user profile
+      if (user.dashboardLayout && user.dashboardLayout.length > 0) {
+        setItems(user.dashboardLayout);
+      }
+      if (user.dashboardLayoutMode) {
+        setLayoutMode(user.dashboardLayoutMode as 'asymmetric' | 'symmetric');
+      }
     }
   }, [user]);
 
@@ -59,6 +94,35 @@ export default function DashboardPage() {
       console.error('Failed to fetch dashboard data:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const saveLayout = async (newItems: string[], newMode: 'asymmetric' | 'symmetric') => {
+    if (!user) return;
+
+    try {
+      const response = await fetch(`/api/auth/profile/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dashboardLayout: newItems,
+          dashboardLayoutMode: newMode,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Update local user store to reflect changes
+        if (data.user) {
+            updateUser({
+                ...user,
+                dashboardLayout: newItems,
+                dashboardLayoutMode: newMode
+            });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to save dashboard layout:', error);
     }
   };
 
@@ -103,6 +167,51 @@ export default function DashboardPage() {
   const handleGoToProfile = () => {
     router.push('/profile');
   };
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = items.indexOf(active.id as string);
+      const newIndex = items.indexOf(over.id as string);
+      const newItems = arrayMove(items, oldIndex, newIndex);
+      
+      setItems(newItems);
+      saveLayout(newItems, layoutMode);
+    }
+  };
+
+  const handleLayoutChange = (mode: 'asymmetric' | 'symmetric') => {
+    setLayoutMode(mode);
+    saveLayout(items, mode);
+  };
+
+  const renderWidget = (id: string) => {
+    switch (id) {
+      case 'exercise-tracker':
+        return (
+          <ExerciseTracker 
+            exercises={exercises}
+            isLoading={isLoading}
+            onCreateExercise={handleCreateExercise}
+            onAddRecord={handleAddRecord}
+          />
+        );
+      case 'weight-tracker':
+        return user ? <WeightTracker user={user} /> : null;
+      case 'recent-activities':
+        return <RecentActivities exercises={exercises} events={events} />;
+      default:
+        return null;
+    }
+  };
+
+  // Filter items based on feature flags and user state
+  const visibleItems = items.filter(id => {
+    if (id === 'exercise-tracker' && !flags.showExerciseTracker) return false;
+    if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
+    return true;
+  });
 
   if (!user) {
     return (
@@ -156,7 +265,7 @@ export default function DashboardPage() {
       <div className="flex justify-end mb-6">
         <div className="flex bg-gray-100 p-1 rounded-lg">
           <button
-            onClick={() => setLayoutMode('asymmetric')}
+            onClick={() => handleLayoutChange('asymmetric')}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
               layoutMode === 'asymmetric' 
                 ? 'bg-white text-blue-600 shadow-sm' 
@@ -167,7 +276,7 @@ export default function DashboardPage() {
             2:1
           </button>
           <button
-            onClick={() => setLayoutMode('symmetric')}
+            onClick={() => handleLayoutChange('symmetric')}
             className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
               layoutMode === 'symmetric' 
                 ? 'bg-white text-blue-600 shadow-sm' 
@@ -180,30 +289,29 @@ export default function DashboardPage() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {flags.showExerciseTracker && (
-          <div className={`h-[600px] overflow-hidden ${
-            layoutMode === 'asymmetric' ? 'lg:col-span-2' : 'lg:col-span-1'
-          }`}>
-            <ExerciseTracker 
-              exercises={exercises}
-              isLoading={isLoading}
-              onCreateExercise={handleCreateExercise}
-              onAddRecord={handleAddRecord}
-            />
+      <DndContext 
+        sensors={sensors} 
+        collisionDetection={closestCenter} 
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext 
+          items={visibleItems} 
+          strategy={rectSortingStrategy}
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {visibleItems.map((id, index) => {
+              const isFeatured = index === 0 && layoutMode === 'asymmetric';
+              const className = `h-[600px] overflow-hidden ${isFeatured ? 'lg:col-span-2' : 'lg:col-span-1'}`;
+              
+              return (
+                <SortableItem key={id} id={id} className={className}>
+                  {renderWidget(id)}
+                </SortableItem>
+              );
+            })}
           </div>
-        )}
-        
-        {flags.showWeightTracker && user && (
-          <div className="h-[600px] overflow-hidden lg:col-span-1">
-            <WeightTracker user={user} />
-          </div>
-        )}
-
-        <div className="h-[600px] overflow-hidden lg:col-span-1">
-          <RecentActivities exercises={exercises} events={events} />
-        </div>
-      </div>
+        </SortableContext>
+      </DndContext>
     </div>
   );
 }

@@ -19,6 +19,8 @@ export interface User {
   registrationType?: string
   height?: number
   weight?: number
+  dashboardLayout?: string[]
+  dashboardLayoutMode?: string
 }
 
 export interface TeamMember {
