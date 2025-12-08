@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { AddToCalendarModal } from './AddToCalendarModal';
 
 interface Exercise {
   id: string;
@@ -17,6 +18,47 @@ export function TexasMethodCalculator({ exercises }: TexasMethodCalculatorProps)
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
   const [fiveRepMax, setFiveRepMax] = useState<number>(0);
   const [dayThreeMode, setDayThreeMode] = useState<'1x5' | '1x3' | '1x1'>('1x5');
+  
+  // Calendar Modal State
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [calendarModalData, setCalendarModalData] = useState<{title: string, description: string} | null>(null);
+
+  const openCalendarModal = (title: string, description: string) => {
+    setCalendarModalData({ title, description });
+    setIsCalendarModalOpen(true);
+  };
+
+  const handleAddToCalendar = async (date: Date) => {
+    if (!user || !calendarModalData) return;
+    
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          title: calendarModalData.title,
+          description: calendarModalData.description, // Optional depending on backend
+          eventDate: date.toISOString(),
+          exerciseType: 'strength_training', // Or similar type
+          exercises: selectedExerciseId ? [{
+             id: selectedExerciseId,
+             name: calendarModalData.description
+          }] : []
+        }),
+      });
+
+      if (response.ok) {
+        alert('Тренировка добавлена в календарь');
+      } else {
+        console.error('Failed to add event');
+      }
+    } catch (error) {
+      console.error('Error adding event:', error);
+    }
+  };
 
   useEffect(() => {
     if (selectedExerciseId) {
@@ -130,11 +172,62 @@ export function TexasMethodCalculator({ exercises }: TexasMethodCalculatorProps)
           </thead>
           <tbody>
             {weeks.map((week) => (
-                <tr key={week.weekNum} className="bg-white border-b hover:bg-gray-50">
+                <tr key={week.weekNum} className="bg-white border-b hover:bg-gray-50 align-middle">
                   <td className="px-2 py-3 font-medium text-gray-900 text-center">{week.weekNum}</td>
-                  <td className="px-2 py-3 text-gray-600">{week.day1}</td>
-                  <td className="px-2 py-3 text-gray-500">{week.day2}</td>
-                  <td className="px-2 py-3 text-right font-bold text-blue-600">{week.day3}</td>
+                  <td className="px-2 py-3 text-gray-600">
+                    <div className="flex items-center justify-between gap-1">
+                        <span>{week.day1}</span>
+                        <button 
+                            onClick={() => openCalendarModal(
+                                `${exercises.find(e => e.id === selectedExerciseId)?.name || 'TM'}: Неделя ${week.weekNum} День 1`, 
+                                `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}: ${week.day1}`
+                            )}
+                            className="text-gray-300 hover:text-blue-500 p-1"
+                            title="Добавить в календарь"
+                            onPointerDown={handleInputPointerDown}
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                  </td>
+                  <td className="px-2 py-3 text-gray-500">
+                     <div className="flex items-center justify-between gap-1">
+                        <span>{week.day2}</span>
+                        <button 
+                            onClick={() => openCalendarModal(
+                                `${exercises.find(e => e.id === selectedExerciseId)?.name || 'TM'}: Неделя ${week.weekNum} День 2`, 
+                                `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}: ${week.day2}`
+                            )}
+                            className="text-gray-300 hover:text-blue-500 p-1"
+                            title="Добавить в календарь"
+                            onPointerDown={handleInputPointerDown}
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                  </td>
+                  <td className="px-2 py-3 text-right font-bold text-blue-600">
+                     <div className="flex items-center justify-end gap-2">
+                        <span>{week.day3}</span>
+                        <button 
+                            onClick={() => openCalendarModal(
+                                `${exercises.find(e => e.id === selectedExerciseId)?.name || 'TM'}: Неделя ${week.weekNum} День 3`, 
+                                `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}: ${week.day3}`
+                            )}
+                            className="text-gray-300 hover:text-blue-500 p-1"
+                            title="Добавить в календарь"
+                            onPointerDown={handleInputPointerDown}
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </button>
+                    </div>
+                  </td>
                 </tr>
             ))}
           </tbody>
@@ -148,6 +241,16 @@ export function TexasMethodCalculator({ exercises }: TexasMethodCalculatorProps)
              Цель: увеличивать рабочий вес на 2.5 кг каждую неделю в день рекордов.
           </p>
       </div>
+
+      {calendarModalData && (
+        <AddToCalendarModal
+            isOpen={isCalendarModalOpen}
+            onClose={() => setIsCalendarModalOpen(false)}
+            onSave={handleAddToCalendar}
+            title={calendarModalData.title}
+            description={calendarModalData.description}
+        />
+      )}
 
     </div>
   );

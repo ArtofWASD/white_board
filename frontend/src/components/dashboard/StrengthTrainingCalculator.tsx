@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../ui/Button';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { AddToCalendarModal } from './AddToCalendarModal';
 
 interface Exercise {
   id: string;
@@ -33,7 +34,49 @@ export function StrengthTrainingCalculator({ exercises }: StrengthTrainingCalcul
   const [logWeight, setLogWeight] = useState<number>(0);
   const [logReps, setLogReps] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [showHistory, setShowHistory] = useState(false);
+
+  // Calendar Modal State
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [calendarModalData, setCalendarModalData] = useState<{title: string, description: string} | null>(null);
+
+  const openCalendarModal = (title: string, description: string) => {
+    setCalendarModalData({ title, description });
+    setIsCalendarModalOpen(true);
+  };
+
+  const handleAddToCalendar = async (date: Date) => {
+    if (!user || !calendarModalData) return;
+    
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          title: calendarModalData.title,
+          description: calendarModalData.description,
+          eventDate: date.toISOString(),
+          exerciseType: 'strength_training',
+          exercises: selectedExerciseId ? [{
+             id: selectedExerciseId,
+             name: calendarModalData.description
+          }] : []
+        }),
+      });
+
+      if (response.ok) {
+        alert('Тренировка добавлена в календарь');
+      } else {
+        console.error('Failed to add event');
+      }
+    } catch (error) {
+      console.error('Error adding event:', error);
+    }
+  };
 
   useEffect(() => {
     if (selectedExerciseId) {
@@ -212,7 +255,24 @@ export function StrengthTrainingCalculator({ exercises }: StrengthTrainingCalcul
                       </div>
                   </div>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => startLogging(1, calculateWeight(0.85))} onPointerDown={handleInputPointerDown}>Записать</Button>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" size="sm" onClick={() => startLogging(1, calculateWeight(0.85))} onPointerDown={handleInputPointerDown}>Записать</Button>
+                    <button 
+                         onClick={() => openCalendarModal(
+                             `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 1`, 
+                             `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
+Warm-up: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Work: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`
+                         )}
+                         className="text-gray-300 hover:text-blue-500 p-1"
+                         title="Добавить в календарь"
+                         onPointerDown={handleInputPointerDown}
+                     >
+                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                         </svg>
+                     </button>
+                  </div>
                 )}
               </td>
             </tr>
@@ -251,7 +311,24 @@ export function StrengthTrainingCalculator({ exercises }: StrengthTrainingCalcul
                       </div>
                   </div>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => startLogging(2, calculateWeight(0.90))} onPointerDown={handleInputPointerDown}>Записать</Button>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" size="sm" onClick={() => startLogging(2, calculateWeight(0.90))} onPointerDown={handleInputPointerDown}>Записать</Button>
+                    <button 
+                         onClick={() => openCalendarModal(
+                             `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 2`, 
+                             `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
+Warm-up: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Work: 3x${calculateWeight(0.70)}кг, 3x${calculateWeight(0.80)}кг, 3+x${calculateWeight(0.90)}кг`
+                         )}
+                         className="text-gray-300 hover:text-blue-500 p-1"
+                         title="Добавить в календарь"
+                         onPointerDown={handleInputPointerDown}
+                     >
+                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                         </svg>
+                     </button>
+                  </div>
                 )}
               </td>
             </tr>
@@ -290,7 +367,24 @@ export function StrengthTrainingCalculator({ exercises }: StrengthTrainingCalcul
                       </div>
                   </div>
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => startLogging(3, calculateWeight(0.95))} onPointerDown={handleInputPointerDown}>Записать</Button>
+                  <div className="flex gap-2 justify-end">
+                    <Button variant="outline" size="sm" onClick={() => startLogging(3, calculateWeight(0.95))} onPointerDown={handleInputPointerDown}>Записать</Button>
+                    <button 
+                         onClick={() => openCalendarModal(
+                             `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 3`, 
+                             `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
+Warm-up: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Work: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`
+                         )}
+                         className="text-gray-300 hover:text-blue-500 p-1"
+                         title="Добавить в календарь"
+                         onPointerDown={handleInputPointerDown}
+                     >
+                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                         </svg>
+                     </button>
+                  </div>
                 )}
               </td>
             </tr>
@@ -379,6 +473,16 @@ export function StrengthTrainingCalculator({ exercises }: StrengthTrainingCalcul
              )}
             </div>
         </div>
+      )}
+
+      {calendarModalData && (
+        <AddToCalendarModal
+            isOpen={isCalendarModalOpen}
+            onClose={() => setIsCalendarModalOpen(false)}
+            onSave={handleAddToCalendar}
+            title={calendarModalData.title}
+            description={calendarModalData.description}
+        />
       )}
 
     </div>
