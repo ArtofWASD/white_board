@@ -172,8 +172,8 @@ export function StrengthTrainingCalculator({ exercises }: StrengthTrainingCalcul
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th className="px-4 py-3">Неделя</th>
-              <th className="px-4 py-3">Разминка</th>
-              <th className="px-4 py-3">Рабочие сеты</th>
+              <th className="px-4 py-3 w-[35%]">Разминка</th>
+              <th className="px-4 py-3 w-[35%]">Рабочие сеты</th>
               <th className="px-4 py-3 text-right">Действие</th>
             </tr>
           </thead>

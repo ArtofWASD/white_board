@@ -6,7 +6,7 @@ import { useAuthStore } from '../../lib/store/useAuthStore';
 interface AddResultModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (time: string) => void;
+  onSave: (data: { time: string }) => void;
   eventName: string;
 }
 
@@ -21,7 +21,7 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
       return;
     }
     if (time.trim()) {
-      onSave(time);
+      onSave({ time });
     }
   };
 

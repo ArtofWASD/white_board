@@ -75,6 +75,20 @@ const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onClose })
           </ul>
         </div>
       )}
+      {event.results && event.results.length > 0 && (
+        <div className="mt-2 text-sm border-t pt-2 border-gray-100">
+          <p className="font-semibold text-sm mb-1">Результаты:</p>
+          <ul className="list-disc pl-4 text-gray-700">
+            {event.results.slice(0, 3).map((result, idx) => (
+              <li key={idx} className="flex flex-col">
+                 <span className="font-medium">{result.time}</span>
+                 <span className="text-xs text-gray-500">{result.username}</span>
+              </li>
+            ))}
+            {event.results.length > 3 && <li>...</li>}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
@@ -189,6 +203,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
   }, [isMenuOpen, windowWidth]);
 
   const handleDateClick = (arg: { dateStr: string, jsEvent: MouseEvent }) => {
+    arg.jsEvent.stopPropagation();
     setShowEventActionMenu(false);
     setTooltipEvent(null);
     const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
@@ -201,6 +216,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
   };
 
   const handleEventClick = (arg: { event: { id: string }, jsEvent: MouseEvent }) => {
+    arg.jsEvent.stopPropagation();
     setShowAddEventButton(false);
     setTooltipEvent(null);
     const event = events.find(e => e.id === arg.event.id);
@@ -281,10 +297,11 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
       const method = eventToEdit ? 'PUT' : 'POST';
       const url = eventToEdit ? `/api/events/${eventToEdit.id}` : '/api/events';
       
+      const validDate = eventToEdit ? eventToEdit.date : selectedDate;
       const body = {
         ...eventData,
         userId: user.id,
-        date: selectedDate || eventToEdit?.date,
+        eventDate: new Date(validDate).toISOString(),
         teamId: teamId || eventToEdit?.teamId // Use passed teamId if creating new event
       };
 
@@ -434,13 +451,13 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
         />
       )}
       
-      {showEditModal && eventToEdit && (
+      {showEditModal && (
         <EventModal
           isOpen={showEditModal}
           onClose={handleCloseEditModal}
           onSave={handleUpdateEvent}
-          date={eventToEdit.date}
-          eventData={{
+          date={eventToEdit?.date || selectedDate}
+          eventData={eventToEdit ? {
             title: eventToEdit.title,
             exerciseType: eventToEdit.exerciseType || '',
             exercises: eventToEdit.exercises || [],
@@ -448,7 +465,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
             teamId: eventToEdit.teamId,
             timeCap: eventToEdit.timeCap,
             rounds: eventToEdit.rounds
-          }}
+          } : undefined}
+          initialTeamId={teamId}
         />
       )}
               

@@ -25,10 +25,11 @@ interface EventData {
   rounds?: string;
 }
 
+
 interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (title: string, exerciseType: string, exercises: Exercise[], teamId?: string, timeCap?: string, rounds?: string) => void;
+  onSave: (data: any) => void;
   date: string;
   eventData?: EventData;
   initialTeamId?: string;
@@ -131,8 +132,14 @@ const EventModal: React.FC<EventModalProps> = ({
     e.preventDefault();
     console.log('EventModal handleSubmit - selectedTeamId:', selectedTeamId);
     if (eventTitle.trim()) {
-      onSave(eventTitle, exerciseType, exercises, selectedTeamId || undefined, timeCap, rounds);
-      resetForm();
+      onSave({
+        title: eventTitle,
+        exerciseType,
+        exercises,
+        teamId: selectedTeamId || undefined,
+        timeCap,
+        rounds
+      });
     }
   };
 
