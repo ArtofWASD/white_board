@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 interface FeatureFlags {
   showExerciseTracker: boolean;
   showWeightTracker: boolean;
+  strengthTrainingCalculator: boolean;
 }
 
 interface FeatureFlagState {
@@ -14,6 +15,7 @@ interface FeatureFlagState {
 const defaultFlags: FeatureFlags = {
   showExerciseTracker: true,
   showWeightTracker: true,
+  strengthTrainingCalculator: false,
 };
 
 export const useFeatureFlagStore = create<FeatureFlagState>()(

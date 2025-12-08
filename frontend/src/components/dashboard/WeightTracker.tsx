@@ -162,6 +162,7 @@ export function WeightTracker({ user }: WeightTrackerProps) {
             <div 
               className="flex flex-col space-y-2"
               onPointerDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
             >
               <input
                 type="number"

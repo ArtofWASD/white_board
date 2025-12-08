@@ -24,6 +24,7 @@ import { Loader } from '../../components/ui/Loader';
 import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
+import { StrengthTrainingCalculator } from '../../components/dashboard/StrengthTrainingCalculator';
 import { SortableItem } from '../../components/dashboard/SortableItem';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
@@ -50,7 +51,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Initialize state from user object or defaults
-  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities']);
+  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator']);
   const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric'>('asymmetric');
 
   const sensors = useSensors(
@@ -66,8 +67,14 @@ export default function DashboardPage() {
       
       // Sync state with user profile
       if (user.dashboardLayout && user.dashboardLayout.length > 0) {
-        setItems(user.dashboardLayout);
+        const savedLayout = user.dashboardLayout;
+        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator'];
+        const missingWidgets = allWidgets.filter(w => !savedLayout.includes(w));
+        setItems([...savedLayout, ...missingWidgets]);
+      } else {
+        setItems(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator']);
       }
+
       if (user.dashboardLayoutMode) {
         setLayoutMode(user.dashboardLayoutMode as 'asymmetric' | 'symmetric');
       }
@@ -78,8 +85,8 @@ export default function DashboardPage() {
     if (!user) return;
     try {
       const [exercisesRes, eventsRes] = await Promise.all([
-        fetch(`/api/exercises?userId=${user.id}`),
-        fetch(`/api/events?userId=${user.id}`)
+        fetch(`/api/exercises?userId=${user.id}`, { cache: 'no-store' }),
+        fetch(`/api/events?userId=${user.id}`, { cache: 'no-store' })
       ]);
 
       if (exercisesRes.ok) {
@@ -165,6 +172,25 @@ export default function DashboardPage() {
     }
   };
 
+  const handleUpdateExercise = async (id: string, name: string) => {
+    try {
+      console.log('Sending update request for:', id, name);
+      const response = await fetch(`/api/exercises/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      });
+      console.log('Update response status:', response.status);
+
+      if (response.ok) {
+        console.log('Update successful, fetching data...');
+        await fetchData();
+      }
+    } catch (error) {
+      console.error('Failed to update exercise:', error);
+    }
+  };
+
   const handleGoToProfile = () => {
     router.push('/profile');
   };
@@ -196,12 +222,15 @@ export default function DashboardPage() {
             isLoading={isLoading}
             onCreateExercise={handleCreateExercise}
             onAddRecord={handleAddRecord}
+            onUpdateExercise={handleUpdateExercise}
           />
         );
       case 'weight-tracker':
         return user ? <WeightTracker user={user} /> : null;
       case 'recent-activities':
         return <RecentActivities exercises={exercises} events={events} />;
+      case 'strength-training-calculator':
+        return <StrengthTrainingCalculator exercises={exercises} />;
       default:
         return null;
     }
@@ -211,6 +240,7 @@ export default function DashboardPage() {
   const visibleItems = items.filter(id => {
     if (id === 'exercise-tracker' && !flags.showExerciseTracker) return false;
     if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
+    if (id === 'strength-training-calculator' && !flags.strengthTrainingCalculator) return false;
     return true;
   });
 
@@ -305,8 +335,8 @@ export default function DashboardPage() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {visibleItems.map((id, index) => {
-              const isFeatured = index === 0 && layoutMode === 'asymmetric';
-              const className = `h-[600px] overflow-hidden ${isFeatured ? 'lg:col-span-2' : 'lg:col-span-1'}`;
+              const isWide = (index === 0 || index === 3) && layoutMode === 'asymmetric';
+              const className = `h-[600px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`;
               
               return (
                 <SortableItem key={id} id={id} className={className}>

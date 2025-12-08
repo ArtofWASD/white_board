@@ -79,4 +79,18 @@ export class ExercisesService {
       orderBy: { date: 'desc' },
     });
   }
+  async updateExercise(id: string, name: string) {
+    const exercise = await this.prisma.exercise.findUnique({
+      where: { id },
+    });
+
+    if (!exercise) {
+      throw new NotFoundException('Exercise not found');
+    }
+
+    return this.prisma.exercise.update({
+      where: { id },
+      data: { name },
+    });
+  }
 }

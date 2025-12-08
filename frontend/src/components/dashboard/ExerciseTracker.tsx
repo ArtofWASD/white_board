@@ -15,13 +15,15 @@ interface ExerciseTrackerProps {
   isLoading: boolean;
   onCreateExercise: (name: string, initialWeight?: number) => Promise<void>;
   onAddRecord: (exerciseId: string, weight: number) => Promise<void>;
+  onUpdateExercise: (id: string, name: string) => Promise<void>;
 }
 
 export function ExerciseTracker({ 
   exercises, 
   isLoading, 
   onCreateExercise, 
-  onAddRecord 
+  onAddRecord,
+  onUpdateExercise
 }: ExerciseTrackerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,13 +53,16 @@ export function ExerciseTracker({
     <div className="space-y-6 h-full flex flex-col">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">Прогресс упражнений</h2>
-        <Button onClick={() => setIsCreating(!isCreating)}>
+        <Button 
+          onClick={() => setIsCreating(!isCreating)}
+          onPointerDown={(e) => e.stopPropagation()}
+        >
           {isCreating ? 'Отмена' : 'Добавить упражнение'}
         </Button>
       </div>
 
       {isCreating && (
-        <form onSubmit={handleCreateExercise} onPointerDown={(e) => e.stopPropagation()} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
+        <form onSubmit={handleCreateExercise} onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
           <div className="flex gap-4">
             <input
               type="text"
@@ -105,6 +110,7 @@ export function ExerciseTracker({
                 key={exercise.id}
                 exercise={exercise}
                 onAddRecord={onAddRecord}
+                onUpdateExercise={onUpdateExercise}
               />
             ))}
           </div>

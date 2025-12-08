@@ -257,6 +257,16 @@ export default function ProfilePage() {
               onChange={() => toggleFlag('showWeightTracker')}
             />
           </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900">Калькулятор 5/3/1</h4>
+              <p className="text-sm text-gray-500">Показывать калькулятор силовых тренировок</p>
+            </div>
+            <Switch
+              checked={flags.strengthTrainingCalculator}
+              onChange={() => toggleFlag('strengthTrainingCalculator')}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@ import {
   ValidationPipe,
   NotFoundException,
   BadRequestException,
+  Put,
 } from '@nestjs/common';
 import { ExercisesService } from '../services/exercises.service';
 import { CreateExerciseDto, AddExerciseRecordDto } from '../dtos/exercises.dto';
@@ -59,5 +60,13 @@ export class ExercisesController {
   @Get(':id/records')
   async getRecords(@Param('id') id: string) {
     return this.exercisesService.getExerciseRecords(id);
+  }
+
+  @Put(':id')
+  async updateExercise(
+    @Param('id') id: string,
+    @Body('name') name: string,
+  ) {
+    return this.exercisesService.updateExercise(id, name);
   }
 }

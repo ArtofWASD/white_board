@@ -27,6 +27,7 @@ model User {
   ownedTeams         Team[]       @relation("OwnedTeams")
   participatedEvents Event[]      @relation("EventParticipants")
   exercises          Exercise[]
+  strengthResults    StrengthWorkoutResult[]
   dashboardLayout    String[]     @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
   dashboardLayoutMode String      @default("asymmetric") @map("dashboard_layout_mode")
 
@@ -38,8 +39,9 @@ model Exercise {
   name      String
   userId    String           @map("user_id")
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  records   ExerciseRecord[]
-  createdAt DateTime         @default(now()) @map("created_at")
+  records         ExerciseRecord[]
+  strengthResults StrengthWorkoutResult[]
+  createdAt       DateTime                @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
 
   @@map("exercises")
@@ -113,4 +115,19 @@ model EventResult {
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
 
   @@map("event_results")
+}
+
+model StrengthWorkoutResult {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  exerciseId String   @map("exercise_id")
+  date       DateTime @default(now())
+  week       Int      // 1, 2, 3, or video_games (just kidding, 4)
+  weight     Float
+  reps       Int
+  createdAt  DateTime @default(now()) @map("created_at")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@map("strength_workout_results")
 }
