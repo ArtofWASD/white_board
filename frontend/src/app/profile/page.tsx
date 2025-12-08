@@ -267,6 +267,16 @@ export default function ProfilePage() {
               onChange={() => toggleFlag('strengthTrainingCalculator')}
             />
           </div>
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="font-medium text-gray-900">Texas Method (Техасский метод)</h4>
+              <p className="text-sm text-gray-500">Калькулятор по методике Марка Риппто</p>
+            </div>
+            <Switch
+              checked={flags.texasMethodCalculator}
+              onChange={() => toggleFlag('texasMethodCalculator')}
+            />
+          </div>
         </div>
       </div>
     </div>

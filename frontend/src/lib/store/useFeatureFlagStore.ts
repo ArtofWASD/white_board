@@ -5,6 +5,7 @@ interface FeatureFlags {
   showExerciseTracker: boolean;
   showWeightTracker: boolean;
   strengthTrainingCalculator: boolean;
+  texasMethodCalculator: boolean;
 }
 
 interface FeatureFlagState {
@@ -16,6 +17,7 @@ const defaultFlags: FeatureFlags = {
   showExerciseTracker: true,
   showWeightTracker: true,
   strengthTrainingCalculator: false,
+  texasMethodCalculator: false,
 };
 
 export const useFeatureFlagStore = create<FeatureFlagState>()(

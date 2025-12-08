@@ -25,6 +25,7 @@ import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
 import { StrengthTrainingCalculator } from '../../components/dashboard/StrengthTrainingCalculator';
+import { TexasMethodCalculator } from '../../components/dashboard/TexasMethodCalculator';
 import { SortableItem } from '../../components/dashboard/SortableItem';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
@@ -51,7 +52,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Initialize state from user object or defaults
-  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator']);
+  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator', 'texas-method-calculator']);
   const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric'>('asymmetric');
 
   const sensors = useSensors(
@@ -68,11 +69,11 @@ export default function DashboardPage() {
       // Sync state with user profile
       if (user.dashboardLayout && user.dashboardLayout.length > 0) {
         const savedLayout = user.dashboardLayout;
-        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator'];
+        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator', 'texas-method-calculator'];
         const missingWidgets = allWidgets.filter(w => !savedLayout.includes(w));
         setItems([...savedLayout, ...missingWidgets]);
       } else {
-        setItems(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator']);
+        setItems(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator', 'texas-method-calculator']);
       }
 
       if (user.dashboardLayoutMode) {
@@ -231,6 +232,8 @@ export default function DashboardPage() {
         return <RecentActivities exercises={exercises} events={events} />;
       case 'strength-training-calculator':
         return <StrengthTrainingCalculator exercises={exercises} />;
+      case 'texas-method-calculator':
+        return <TexasMethodCalculator exercises={exercises} />;
       default:
         return null;
     }
@@ -241,6 +244,7 @@ export default function DashboardPage() {
     if (id === 'exercise-tracker' && !flags.showExerciseTracker) return false;
     if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
     if (id === 'strength-training-calculator' && !flags.strengthTrainingCalculator) return false;
+    if (id === 'texas-method-calculator' && !flags.texasMethodCalculator) return false;
     return true;
   });
 
