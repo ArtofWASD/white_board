@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Footer from '../components/layout/Footer';
 
 export default function Home() {
   const [hoveredSection, setHoveredSection] = useState<'blog' | 'calendar' | null>(null);
@@ -79,6 +80,7 @@ export default function Home() {
           </div>
         </Link>
       </main>
+      <Footer />
     </div>
   );
 }

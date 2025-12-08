@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My White Board",
-  description: "Чистое приложение доски",
+  title: "The Slate",
+  description: "Чистое приложение для ваших тренировок",
 };
 
 export default function RootLayout({

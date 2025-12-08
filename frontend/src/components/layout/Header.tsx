@@ -116,7 +116,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick, navI
               className="text-lg sm:text-xl font-bold cursor-pointer hover:text-gray-300 transition-colors"
               onClick={handleTitleClick}
             >
-              My White Board
+              The Slate
             </h1>
           )
         )}
