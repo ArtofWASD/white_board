@@ -24,6 +24,7 @@ import { Loader } from '../../components/ui/Loader';
 import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
+import { UniversalCalculator } from '../../components/dashboard/UniversalCalculator';
 import { StrengthTrainingCalculator } from '../../components/dashboard/StrengthTrainingCalculator';
 import { TexasMethodCalculator } from '../../components/dashboard/TexasMethodCalculator';
 import { SortableItem } from '../../components/dashboard/SortableItem';
@@ -52,7 +53,8 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   
   // Initialize state from user object or defaults
-  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator', 'texas-method-calculator']);
+  // Default to universal calculator, but support all IDs
+  const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator']);
   const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric'>('asymmetric');
 
   const sensors = useSensors(
@@ -69,11 +71,15 @@ export default function DashboardPage() {
       // Sync state with user profile
       if (user.dashboardLayout && user.dashboardLayout.length > 0) {
         const savedLayout = user.dashboardLayout;
-        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator', 'texas-method-calculator'];
+        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator', 'strength-training-calculator', 'texas-method-calculator', 'trainer-stats-widget'];
+        
+        // We support all IDs now, so no need to migrate forcedly unless we want to standardise.
+        // User asked for flexibility, so we respect savedLayout IDs.
+        
         const missingWidgets = allWidgets.filter(w => !savedLayout.includes(w));
-        setItems([...savedLayout, ...missingWidgets]);
+        setItems([...savedLayout, ...missingWidgets]); // Append new widgets to the end
       } else {
-        setItems(['exercise-tracker', 'weight-tracker', 'recent-activities', 'strength-training-calculator', 'texas-method-calculator']);
+        setItems(['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator', 'trainer-stats-widget']);
       }
 
       if (user.dashboardLayoutMode) {
@@ -230,6 +236,8 @@ export default function DashboardPage() {
         return user ? <WeightTracker user={user} /> : null;
       case 'recent-activities':
         return <RecentActivities exercises={exercises} events={events} />;
+      case 'universal-calculator':
+        return <UniversalCalculator exercises={exercises} />;
       case 'strength-training-calculator':
         return <StrengthTrainingCalculator exercises={exercises} />;
       case 'texas-method-calculator':
@@ -243,8 +251,23 @@ export default function DashboardPage() {
   const visibleItems = items.filter(id => {
     if (id === 'exercise-tracker' && !flags.showExerciseTracker) return false;
     if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
-    if (id === 'strength-training-calculator' && !flags.strengthTrainingCalculator) return false;
-    if (id === 'texas-method-calculator' && !flags.texasMethodCalculator) return false;
+    
+    // Universal Calculator Logic
+    if (id === 'universal-calculator') {
+        // Show only if universal mode is ON AND at least one calc is enabled
+        return flags.showUniversalCalculator && (flags.strengthTrainingCalculator || flags.texasMethodCalculator);
+    }
+
+    // Separate Calculators Logic
+    if (id === 'strength-training-calculator') {
+        // Show if universal mode is OFF AND calc is enabled
+        return !flags.showUniversalCalculator && flags.strengthTrainingCalculator;
+    }
+    if (id === 'texas-method-calculator') {
+        // Show if universal mode is OFF AND calc is enabled
+        return !flags.showUniversalCalculator && flags.texasMethodCalculator;
+    }
+
     return true;
   });
 
@@ -339,7 +362,7 @@ export default function DashboardPage() {
         >
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {visibleItems.map((id, index) => {
-              const isWide = (index === 0 || index === 3) && layoutMode === 'asymmetric';
+              const isWide = (index % 4 === 0 || index % 4 === 3) && layoutMode === 'asymmetric';
               const className = `h-[600px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`;
               
               return (

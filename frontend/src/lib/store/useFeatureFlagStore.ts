@@ -6,6 +6,7 @@ interface FeatureFlags {
   showWeightTracker: boolean;
   strengthTrainingCalculator: boolean;
   texasMethodCalculator: boolean;
+  showUniversalCalculator: boolean;
 }
 
 interface FeatureFlagState {
@@ -18,6 +19,7 @@ const defaultFlags: FeatureFlags = {
   showWeightTracker: true,
   strengthTrainingCalculator: false,
   texasMethodCalculator: false,
+  showUniversalCalculator: true,
 };
 
 export const useFeatureFlagStore = create<FeatureFlagState>()(

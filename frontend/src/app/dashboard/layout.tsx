@@ -38,6 +38,12 @@ export default function DashboardLayout({
 
       if (user.role === 'trainer') {
         items.push(
+          {
+            label: 'Управление', 
+            href: '/dashboard/organization',
+            icon: <Image src="/menegment.png" alt="Management" width={32} height={32} />,
+            tooltip: 'Управление'
+          },
           { 
             label: 'Команды', 
             href: '/dashboard/teams',

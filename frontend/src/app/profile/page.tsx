@@ -277,6 +277,16 @@ export default function ProfilePage() {
               onChange={() => toggleFlag('texasMethodCalculator')}
             />
           </div>
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div>
+              <h4 className="font-medium text-gray-900">Общий виджет калькуляторов</h4>
+              <p className="text-sm text-gray-500">Объединить все калькуляторы в один виджет</p>
+            </div>
+            <Switch
+              checked={flags.showUniversalCalculator}
+              onChange={() => toggleFlag('showUniversalCalculator')}
+            />
+          </div>
         </div>
       </div>
     </div>
