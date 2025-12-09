@@ -233,7 +233,8 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Feature Flags */}
+      {/* Feature Flags - Hide for organization_admin */}
+      {user.role !== 'organization_admin' && (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>
         <div className="space-y-6">
@@ -289,6 +290,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }

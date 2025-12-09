@@ -19,9 +19,11 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'trainer' | 'athlete'>('athlete');
+  const [role, setRole] = useState<'trainer' | 'athlete' | 'organization_admin'>('athlete');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [registrationType, setRegistrationType] = useState<'individual' | 'organization'>('individual');
+  const [organizationName, setOrganizationName] = useState('');
+  const [isOrganizationTrainer, setIsOrganizationTrainer] = useState(false);
   
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -90,7 +92,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const success = await register(name, email, password, role, gender, registrationType, lastName);
+      const success = await register(name, email, password, role, gender, registrationType, lastName, organizationName);
       if (!success) {
         setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
       } else {
@@ -341,64 +343,138 @@ export default function RegisterPage() {
                   className="space-y-6"
                 >
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2">Роль и предпочтения</h3>
-                    <p className="text-gray-600 text-sm">Выберите свою роль в команде.</p>
+                    <h3 className="text-xl font-semibold mb-2">Выберите цель</h3>
+                    <p className="text-gray-600 text-sm">Как вы планируете использовать сервис?</p>
                   </div>
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Роль
-                    </label>
-                    <div className="flex space-x-4">
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="role"
-                          checked={role === 'athlete'}
-                          onChange={() => setRole('athlete')}
-                          className="form-radio h-4 w-4 text-blue-600"
-                        />
-                        <span className="ml-2">Атлет</span>
-                      </label>
-                      <label className="inline-flex items-center">
-                        <input
-                          type="radio"
-                          name="role"
-                          checked={role === 'trainer'}
-                          onChange={() => setRole('trainer')}
-                          className="form-radio h-4 w-4 text-blue-600"
-                        />
-                        <span className="ml-2">Тренер</span>
-                      </label>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    {/* Athlete Card */}
+                    <div 
+                      className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        role === 'athlete' && registrationType === 'individual'
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                      onClick={() => {
+                        setRole('athlete');
+                        setRegistrationType('individual');
+                      }}
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className={`p-2 rounded-lg ${
+                          role === 'athlete' && registrationType === 'individual' ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                        }`}>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Я Атлет</h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Хочу вести дневник тренировок, следить за прогрессом и достигать целей.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Trainer Card */}
+                    <div 
+                      className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        role === 'trainer' && registrationType === 'individual'
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                      onClick={() => {
+                        setRole('trainer');
+                        setRegistrationType('individual');
+                      }}
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className={`p-2 rounded-lg ${
+                          role === 'trainer' && registrationType === 'individual' ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                        }`}>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Я Тренер</h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Тренирую клиентов, составляю программы и сам занимаюсь спортом.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Organization Card */}
+                    <div 
+                      className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
+                        registrationType === 'organization'
+                          ? 'border-blue-600 bg-blue-50'
+                          : 'border-gray-200 hover:border-blue-300'
+                      }`}
+                      onClick={() => {
+                        setRole('organization_admin'); 
+                        setIsOrganizationTrainer(false);
+                        setRegistrationType('organization');
+                      }}
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className={`p-2 rounded-lg ${
+                          registrationType === 'organization' ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                        }`}>
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                          </svg>
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-900">Организация / Клуб</h4>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Управление штатом тренеров, группами спортсменов и аналитикой клуба.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-gray-700 font-medium mb-2">
-                      Вид деятельности
-                    </label>
-                    <div className="flex flex-col space-y-2">
-                      <label className="inline-flex items-center">
+                  {registrationType === 'organization' && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="mt-4 space-y-4"
+                    >
+                      <div>
+                        <label htmlFor="organizationName" className="block text-gray-700 font-medium mb-2">
+                          Название организации
+                        </label>
                         <input
-                          type="radio"
-                          name="registrationType"
-                          checked={registrationType === 'individual'}
-                          onChange={() => setRegistrationType('individual')}
-                          className="form-radio h-4 w-4 text-blue-600"
+                          type="text"
+                          id="organizationName"
+                          value={organizationName}
+                          onChange={(e) => setOrganizationName(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          placeholder="Например: Спортивный клуб 'Олимп'"
+                          required
                         />
-                        <span className="ml-2">Индивидуальный</span>
-                      </label>
-                      <label className="inline-flex items-center">
+                      </div>
+
+                      <div className="flex items-center">
                         <input
-                          type="radio"
-                          name="registrationType"
-                          checked={registrationType === 'organization'}
-                          onChange={() => setRegistrationType('organization')}
-                          className="form-radio h-4 w-4 text-blue-600"
+                          id="is-trainer"
+                          type="checkbox"
+                          checked={isOrganizationTrainer}
+                          onChange={(e) => {
+                            setIsOrganizationTrainer(e.target.checked);
+                            setRole(e.target.checked ? 'trainer' : 'organization_admin');
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
-                        <span className="ml-2">Организация</span>
-                      </label>
-                    </div>
-                  </div>
+                        <label htmlFor="is-trainer" className="ml-2 block text-sm text-gray-900">
+                          Я также являюсь тренером (хочу вести клиентов)
+                        </label>
+                      </div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

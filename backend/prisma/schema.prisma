@@ -30,6 +30,7 @@ model User {
   strengthResults    StrengthWorkoutResult[]
   dashboardLayout    String[]     @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
   dashboardLayoutMode String      @default("asymmetric") @map("dashboard_layout_mode")
+  organizationName   String?      @map("organization_name")
 
   @@map("users")
 }

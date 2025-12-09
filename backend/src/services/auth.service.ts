@@ -78,8 +78,10 @@ export class AuthService {
         role: registerDto.role, // Use the provided role
         gender: registerDto.gender,
         registrationType: registerDto.registrationType,
+        organizationName: registerDto.organizationName,
         isAdmin:
           registerDto.role === 'trainer' ||
+          registerDto.role === 'organization_admin' ||
           registerDto.registrationType === 'organization',
       },
     });

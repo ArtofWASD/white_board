@@ -249,6 +249,19 @@ export default function DashboardPage() {
 
   // Filter items based on feature flags and user state
   const visibleItems = items.filter(id => {
+    // Organization Admins should not see training widgets
+    if (user?.role === 'organization_admin') {
+       const trainingWidgets = [
+         'exercise-tracker', 
+         'weight-tracker', 
+         'universal-calculator', 
+         'strength-training-calculator', 
+         'texas-method-calculator',
+         'recent-activities' // specific request to turn off training related widgets
+       ];
+       if (trainingWidgets.includes(id)) return false;
+    }
+
     if (id === 'exercise-tracker' && !flags.showExerciseTracker) return false;
     if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
     
@@ -302,7 +315,9 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-2xl font-semibold">{user.name}</h2>
               <p className="text-gray-600">{user.email}</p>
-              <p className="text-sm text-gray-500">Роль: {user.role === 'athlete' ? 'Атлет' : 'Тренер'}</p>
+              <p className="text-sm text-gray-500">
+                Роль: {user.role === 'athlete' ? 'Атлет' : user.role === 'organization_admin' ? 'Администратор организации' : 'Тренер'}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">

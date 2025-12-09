@@ -13,10 +13,11 @@ export interface User {
   name: string
   lastName?: string
   email: string
-  role: "trainer" | "athlete"
+  role: "trainer" | "athlete" | "organization_admin"
   isAdmin: boolean
   gender?: string
   registrationType?: string
+  organizationName?: string
   height?: number
   weight?: number
   weightHistory?: { weight: number; date: string }[]

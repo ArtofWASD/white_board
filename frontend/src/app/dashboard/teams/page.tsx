@@ -22,7 +22,7 @@ export default function TeamsPage() {
   // Fetch user's teams
   useEffect(() => {
     const fetchTeams = async () => {
-      if (!user || user.role !== 'trainer') {
+      if (!user || (user.role !== 'trainer' && user.role !== 'organization_admin')) {
         setLoadingTeams(false);
         return;
       }
@@ -130,11 +130,11 @@ export default function TeamsPage() {
     router.push(`/dashboard/teams/${teamId}`);
   };
 
-  if (!user || user.role !== 'trainer') {
+  if (!user || (user.role !== 'trainer' && user.role !== 'organization_admin')) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-2 text-red-600">Доступ запрещен</h2>
-        <p className="text-gray-700">Только тренеры могут управлять командами.</p>
+        <p className="text-gray-700">Только тренеры и администраторы организаций могут управлять командами.</p>
       </div>
     );
   }

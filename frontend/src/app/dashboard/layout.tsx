@@ -36,8 +36,8 @@ export default function DashboardLayout({
         },
       ];
 
-      if (user.role === 'trainer') {
-        items.push(
+      if (user.role === 'trainer' || user.role === 'organization_admin') {
+        const adminItems = [
           {
             label: 'Управление', 
             href: '/dashboard/organization',
@@ -55,14 +55,32 @@ export default function DashboardLayout({
             href: '/dashboard/athletes',
             icon: <Image src="/athlet_icon.png" alt="Athletes" width={32} height={32} />,
             tooltip: 'Атлеты'
-          },
-          { 
+          }
+        ];
+
+        // Trainers get "Activities" (Logs), strictly admin user does not unless they are also a trainer (logic handled by role)
+        // Actually, if role is 'trainer', they see everything.
+        // If role is 'organization_admin', they see adminItems.
+        // But wait, 'trainer' also needs to see adminItems if they are admin? 
+        // Current logic: All trainers see these items? No, standard trainers might not need "Management" if they are not Owners.
+        // But for now, let's assume 'trainer' + 'organization' type covers the previous 'trainer' role behavior.
+        
+        // Let's refine:
+        // organization_admin -> Management, Teams, Athletes
+        // trainer -> Management (maybe?), Teams, Athletes, Activities
+        
+        // For now, let's keep it simple: Both get these 3 items.
+        items.push(...adminItems);
+
+        // Only trainers get "Activities" (Workout Logs)
+        if (user.role === 'trainer') {
+           items.push({ 
             label: 'Занятия', 
             href: '/dashboard/activities',
             icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
             tooltip: 'Занятия'
-          }
-        );
+          });
+        }
       }
 
       // Add common items for all users

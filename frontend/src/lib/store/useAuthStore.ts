@@ -12,10 +12,11 @@ interface AuthState {
     name: string,
     email: string,
     password: string,
-    role: 'trainer' | 'athlete',
+    role: 'trainer' | 'athlete' | 'organization_admin',
     gender?: string,
     registrationType?: string,
-    lastName?: string
+    lastName?: string,
+    organizationName?: string
   ) => Promise<boolean>;
   logout: () => void;
   initializeAuth: () => void;
@@ -59,14 +60,15 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      register: async (name, email, password, role, gender, registrationType, lastName) => {
+      register: async (name, email, password, role, gender, registrationType, lastName, organizationName) => {
         try {
+          console.log('Registering with data:', { name, lastName, email, role, gender, registrationType, organizationName });
           const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name, lastName, email, password, role, gender, registrationType }),
+            body: JSON.stringify({ name, lastName, email, password, role, gender, registrationType, organizationName }),
           });
 
           const data = await response.json();

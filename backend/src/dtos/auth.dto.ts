@@ -41,7 +41,8 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  role: 'trainer' | 'athlete';
+  @IsEnum(['trainer', 'athlete', 'organization_admin'])
+  role: 'trainer' | 'athlete' | 'organization_admin';
 
   @IsString()
   @IsOptional()
@@ -50,6 +51,10 @@ export class RegisterDto {
   @IsString()
   @IsOptional()
   registrationType?: string;
+
+  @IsString()
+  @IsOptional()
+  organizationName?: string;
 }
 
 export class UpdateProfileDto {
