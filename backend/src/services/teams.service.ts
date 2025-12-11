@@ -26,6 +26,7 @@ export class TeamsService {
         name: createTeamDto.name,
         description: createTeamDto.description,
         ownerId: ownerId,
+        organizationName: owner.organizationName, // Copy organization name from owner
         members: {
           create: [],
         },
@@ -186,9 +187,16 @@ export class TeamsService {
       },
     });
 
-    // Combine both arrays and remove duplicates
     const memberTeams = teamMemberships.map((tm: any) => tm.team);
-    const allTeams = [...ownedTeams, ...memberTeams];
+    let allTeams = [...ownedTeams, ...memberTeams];
+
+    // If user is organization admin, add all teams from the organization
+    if (user.role === 'organization_admin' && user.organizationName) {
+        const orgTeams = await (this.prisma as any).team.findMany({
+            where: { organizationName: user.organizationName }
+        });
+        allTeams = [...allTeams, ...orgTeams];
+    }
 
     // Remove duplicates by id
     const uniqueTeams = allTeams.filter(

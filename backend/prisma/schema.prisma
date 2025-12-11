@@ -8,29 +8,75 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Enums
+enum UserRole {
+  ATHLETE
+  TRAINER
+  ORGANIZATION_ADMIN
+  SUPER_ADMIN
+}
+
+enum EventStatus {
+  FUTURE
+  COMPLETED
+  CANCELLED
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+// Models
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  users     User[]
+  teams     Team[]
+
+  @@map("organizations")
+}
+
 model User {
   id                 String       @id @default(uuid())
   name               String
   email              String       @unique
   password           String
-  role               String       @default("athlete")
+  role               UserRole     @default(ATHLETE)
   isAdmin            Boolean      @default(false) @map("is_admin")
-  gender             String?
-  registrationType   String?      @map("registration_type")
-  height             Int?
-  weight             Int?
+  gender             Gender?
+  userType           String?      @map("user_type") // Deprecated: use role
+  height             Int?         // cm
+  weight             Int?         // kg
   createdAt          DateTime     @default(now()) @map("created_at")
   updatedAt          DateTime     @updatedAt @map("updated_at")
   lastName           String?      @map("last_name")
+  
+  // Relations
   events             Event[]
   teamMemberships    TeamMember[]
   ownedTeams         Team[]       @relation("OwnedTeams")
   participatedEvents Event[]      @relation("EventParticipants")
   exercises          Exercise[]
   strengthResults    StrengthWorkoutResult[]
-  dashboardLayout    String[]     @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
-  dashboardLayoutMode String      @default("asymmetric") @map("dashboard_layout_mode")
-  organizationName   String?      @map("organization_name")
+  eventResults       EventResult[]
+
+  // Organization
+  organizationId     String?       @map("organization_id")
+  organization       Organization? @relation(fields: [organizationId], references: [id])
+  organizationName   String?       @map("organization_name") // Deprecated: use organization relation
+
+  dashboardLayout    String[]      @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
+  dashboardLayoutMode String       @default("asymmetric") @map("dashboard_layout_mode")
 
   @@map("users")
 }
@@ -40,9 +86,9 @@ model Exercise {
   name      String
   userId    String           @map("user_id")
   user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  records         ExerciseRecord[]
+  records   ExerciseRecord[]
   strengthResults StrengthWorkoutResult[]
-  createdAt       DateTime                @default(now()) @map("created_at")
+  createdAt DateTime         @default(now()) @map("created_at")
   updatedAt DateTime         @updatedAt @map("updated_at")
 
   @@map("exercises")
@@ -64,9 +110,9 @@ model Event {
   title        String
   description  String?
   eventDate    DateTime      @map("event_date")
-  status       String        @default("future")
+  status       EventStatus   @default(FUTURE)
   exerciseType String?       @map("exercise_type")
-  exercises    Json?         // Add exercises field back
+  exercises    Json?
   userId       String        @map("user_id")
   createdAt    DateTime      @default(now()) @map("created_at")
   updatedAt    DateTime      @updatedAt @map("updated_at")
@@ -85,23 +131,27 @@ model Team {
   id          String       @id @default(uuid())
   name        String
   description String?
-  ownerId     String
+  ownerId     String       @map("owner_id")
   createdAt   DateTime     @default(now()) @map("created_at")
   updatedAt   DateTime     @updatedAt @map("updated_at")
   members     TeamMember[]
   owner       User         @relation("OwnedTeams", fields: [ownerId], references: [id])
   events      Event[]
 
+  organizationId String?       @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  organizationName String?     @map("organization_name") // Deprecated: use organization relation
+
   @@map("teams")
 }
 
 model TeamMember {
-  id     String @id @default(uuid())
-  teamId String
-  userId String
-  role   String @default("athlete")
-  team   Team   @relation(fields: [teamId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  id     String   @id @default(uuid())
+  teamId String   @map("team_id")
+  userId String   @map("user_id")
+  role   TeamRole @default(MEMBER)
+  team   Team     @relation(fields: [teamId], references: [id])
+  user   User     @relation(fields: [userId], references: [id])
 
   @@unique([teamId, userId])
   @@map("team_members")
@@ -111,9 +161,13 @@ model EventResult {
   id        String   @id @default(uuid())
   time      String
   dateAdded DateTime @default(now()) @map("date_added")
-  username  String
   eventId   String   @map("event_id")
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  // Relations
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id])
+  username  String   // Kept for backward compatibility
 
   @@map("event_results")
 }
@@ -123,7 +177,7 @@ model StrengthWorkoutResult {
   userId     String   @map("user_id")
   exerciseId String   @map("exercise_id")
   date       DateTime @default(now())
-  week       Int      // 1, 2, 3, or video_games (just kidding, 4)
+  week       Int
   weight     Float
   reps       Int
   createdAt  DateTime @default(now()) @map("created_at")

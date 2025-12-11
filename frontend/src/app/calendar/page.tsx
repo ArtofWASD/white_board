@@ -32,6 +32,8 @@ interface ApiEvent {
   teamId?: string;
 }
 
+import TeamSelector from '../../features/events/TeamSelector';
+
 export default function CalendarPage() {
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
@@ -41,49 +43,26 @@ export default function CalendarPage() {
   
   const { isAuthenticated, user } = useAuthStore();
   const { selectedTeam } = useTeamStore();
+  
+  // Local state for calendar viewing preference. 
+  // Initialize with global selected team if available, or null for "All"
+  const [calendarTeamId, setCalendarTeamId] = useState<string | null>(selectedTeam?.id || null);
+
+  // Sync with global store initially or if store changes? 
+  // User might want to browse other teams without changing global context.
+  // let's keep it independent after init, but maybe update if selectedTeam changes from outside?
+  // simpler to just init with it.
+  
+  useEffect(() => {
+      if (selectedTeam) {
+          setCalendarTeamId(selectedTeam.id);
+      }
+  }, [selectedTeam]);
 
   // Function to update events in the calendar page
   const updateEvents = useCallback((newEvents: CalendarEvent[]) => {
     setEvents(newEvents);
   }, []);
-
-  // Fetch events from the backend
-  // Fetch events from the backend - REMOVED to avoid double fetching and infinite loops
-  // The Calendar component will fetch events and update this page via onUpdateEvents
-  /*
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (isAuthenticated && user) {
-        try {
-          const queryParams = new URLSearchParams({ userId: user.id });
-          if (selectedTeamId) {
-            queryParams.append('teamId', selectedTeamId);
-          }
-          const response = await fetch(`/api/events?${queryParams.toString()}`);
-          const data: ApiEvent[] = await response.json();
-          
-          if (response.ok) {
-            // Transform the data to match our CalendarEvent interface
-            const transformedEvents = data.map((event) => ({
-              id: event.id,
-              title: event.title,
-              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
-              results: event.results ? event.results.map(result => ({
-                ...result,
-                dateAdded: new Date(result.dateAdded).toLocaleDateString('ru-RU')
-              })) : []
-            }));
-            setEvents(transformedEvents);
-          }
-        } catch (error) {
-          console.error('Failed to fetch events:', error);
-        }
-      }
-    };
-
-    fetchEvents();
-  }, [isAuthenticated, user, selectedTeamId]);
-  */
 
   const handleLeftMenuClick = () => {
     setLeftMenuOpen(!leftMenuOpen);
@@ -125,10 +104,17 @@ export default function CalendarPage() {
       />
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-2 sm:p-4`}>
+        <div className="mb-4 flex justify-end">
+            <TeamSelector 
+                selectedTeamId={calendarTeamId} 
+                onSelectTeam={setCalendarTeamId}
+                className="w-full sm:w-64"
+            />
+        </div>
         <Calendar 
           isMenuOpen={leftMenuOpen} 
           onUpdateEvents={updateEvents} 
-          teamId={selectedTeam?.id}
+          teamId={calendarTeamId || undefined} 
         />
       </main>
       

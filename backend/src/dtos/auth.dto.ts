@@ -50,7 +50,7 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  registrationType?: string;
+  userType?: string;
 
   @IsString()
   @IsOptional()
