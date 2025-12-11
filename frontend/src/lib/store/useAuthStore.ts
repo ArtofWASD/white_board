@@ -21,6 +21,7 @@ interface AuthState {
   logout: () => void;
   initializeAuth: () => void;
   updateUser: (user: User) => void;
+  verifyUser: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -113,6 +114,37 @@ export const useAuthStore = create<AuthState>()(
       updateUser: (user) => {
         set({ user });
       },
+
+      verifyUser: async () => {
+        const state = get();
+        if (!state.user || !state.token) return false;
+
+        try {
+            const response = await fetch(`/api/auth/user/${state.user.id}`, {
+                headers: {
+                    'Authorization': `Bearer ${state.token}`
+                }
+            });
+
+            if (!response.ok) {
+                // If user not found or unauthorized, logout
+                console.warn('User verification failed, logging out...');
+                get().logout();
+                return false;
+            }
+            
+            // Optionally update user data here if needed
+            return true;
+        } catch (error) {
+            console.error('Verification error:', error);
+            // On network error we might not want to logout immediately, but for now let's be safe
+            // or just return false and let the caller decide. 
+            // Better to only logout on explicit 401/404. 
+            // For now, if request fails completely, we do nothing to avoid logging out offline users?
+            // But the user specifically asked for "if database is empty". That implies 404/401.
+            return false;
+        }
+      },
     }),
     {
       name: 'auth-storage', // name of the item in the storage (must be unique)
@@ -120,6 +152,10 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
         if (state) {
             state.isLoading = false;
+            // Verify user existence on rehydration (app load)
+            if (state.isAuthenticated && state.user) {
+                state.verifyUser();
+            }
         }
       }
     }

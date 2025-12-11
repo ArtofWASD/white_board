@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../../lib/store/useAuthStore';
 import { useRouter } from 'next/navigation';
+import { useToast } from '../../../lib/context/ToastContext';
 import { Team } from '../../../types';
 import Button from '../../../components/ui/Button';
 import { Loader } from '../../../components/ui/Loader';
@@ -10,6 +11,7 @@ import { Loader } from '../../../components/ui/Loader';
 export default function TeamsPage() {
   const { user, token } = useAuthStore();
   const router = useRouter();
+  const { error: toastError, info } = useToast();
   const [showCreateTeamForm, setShowCreateTeamForm] = useState(false);
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
@@ -119,10 +121,10 @@ export default function TeamsPage() {
     try {
       // For now, we'll implement a basic delete by calling a non-existent endpoint
       // In a real implementation, you would need to add DELETE endpoint to the backend
-      alert('Функция удаления еще не реализована на бэкенде');
+      info('Функция удаления еще не реализована на бэкенде');
     } catch (err) {
       console.error('Error deleting team:', err);
-      alert('Ошибка при удалении команды');
+      toastError('Ошибка при удалении команды');
     }
   };
 

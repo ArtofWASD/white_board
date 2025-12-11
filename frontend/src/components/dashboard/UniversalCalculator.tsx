@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/useAuthStore';
 import { useFeatureFlagStore } from '@/lib/store/useFeatureFlagStore';
+import { useToast } from '@/lib/context/ToastContext';
 import { AddToCalendarModal } from './AddToCalendarModal';
+import { DashboardWidget, InteractiveArea } from './DashboardWidget';
 import { TexasMethodModule } from './calculators/TexasMethodModule';
 import { StrengthTrainingModule } from './calculators/StrengthTrainingModule';
 
@@ -18,6 +20,7 @@ interface UniversalCalculatorProps {
 export function UniversalCalculator({ exercises }: UniversalCalculatorProps) {
   const { user } = useAuthStore();
   const { flags } = useFeatureFlagStore();
+  const { success, error: toastError } = useToast();
   const [activeModule, setActiveModule] = useState<'texas' | '531'>('texas');
   
   // Calendar Modal State
@@ -66,79 +69,70 @@ export function UniversalCalculator({ exercises }: UniversalCalculatorProps) {
       });
 
       if (response.ok) {
-        alert('Тренировка добавлена в календарь');
+        success('Тренировка добавлена в календарь');
       } else {
         console.error('Failed to add event');
+        toastError('Не удалось добавить тренировку в календарь');
       }
     } catch (error) {
       console.error('Error adding event:', error);
+      toastError('Ошибка при добавлении события');
     }
   };
 
-  const handleInputPointerDown = (e: React.PointerEvent) => {
-    e.stopPropagation();
-  };
-
-  const handleInputKeyDown = (e: React.KeyboardEvent) => {
-    e.stopPropagation();
-  };
+  const moduleSwitcher = (showTexas && show531) ? (
+     <InteractiveArea className="flex bg-gray-100 p-1 rounded-lg">
+        <button
+            onClick={() => setActiveModule('texas')}
+            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                activeModule === 'texas' 
+                    ? 'bg-white text-blue-600 shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+            }`}
+        >
+            Техасский
+        </button>
+        <button
+            onClick={() => setActiveModule('531')}
+            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+                activeModule === '531' 
+                    ? 'bg-white text-blue-600 shadow-sm' 
+                    : 'text-gray-500 hover:text-gray-700'
+            }`}
+        >
+            5/3/1
+        </button>
+    </InteractiveArea>
+  ) : null;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 h-full flex flex-col relative">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">Калькулятор</h2>
-        
-        {/* Module Switcher if both are enabled */}
-        {showTexas && show531 && (
-             <div className="flex bg-gray-100 p-1 rounded-lg">
-                <button
-                    onClick={() => setActiveModule('texas')}
-                    onPointerDown={handleInputPointerDown}
-                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                        activeModule === 'texas' 
-                            ? 'bg-white text-blue-600 shadow-sm' 
-                            : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                    Техасский
-                </button>
-                <button
-                    onClick={() => setActiveModule('531')}
-                    onPointerDown={handleInputPointerDown}
-                    className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                        activeModule === '531' 
-                            ? 'bg-white text-blue-600 shadow-sm' 
-                            : 'text-gray-500 hover:text-gray-700'
-                    }`}
-                >
-                    5/3/1
-                </button>
-            </div>
-        )}
-      </div>
-
-      <div className="flex-1 overflow-hidden">
+    <DashboardWidget 
+        title="Калькулятор" 
+        headerActions={moduleSwitcher}
+        className="shadow-md border-0"
+    >
+      <InteractiveArea className="h-full flex flex-col">
           {activeModule === 'texas' && showTexas && (
               <TexasMethodModule 
                 exercises={exercises} 
                 onAddToCalendar={openCalendarModal}
-                handleInputPointerDown={handleInputPointerDown}
-                handleInputKeyDown={handleInputKeyDown}
+                handleInputPointerDown={() => {}} // Deprecated, handled by Wrapper
+                handleInputKeyDown={() => {}} // Deprecated
               />
           )}
           {activeModule === '531' && show531 && (
               <StrengthTrainingModule 
                 exercises={exercises} 
                 onAddToCalendar={openCalendarModal}
-                handleInputPointerDown={handleInputPointerDown}
-                handleInputKeyDown={handleInputKeyDown}
+                handleInputPointerDown={() => {}}
+                handleInputKeyDown={() => {}}
               />
           )}
 
           {!((activeModule === 'texas' && showTexas) || (activeModule === '531' && show531)) && (
               <div className="text-gray-500 text-center mt-10">Выберите доступный модуль</div>
           )}
-      </div>
+      </InteractiveArea>
 
       {calendarModalData && (
         <AddToCalendarModal
@@ -149,6 +143,6 @@ export function UniversalCalculator({ exercises }: UniversalCalculatorProps) {
             description={calendarModalData.description}
         />
       )}
-    </div>
+    </DashboardWidget>
   );
 }

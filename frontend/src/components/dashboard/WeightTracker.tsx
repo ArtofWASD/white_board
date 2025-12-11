@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User } from '../../types';
 import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useToast } from '../../lib/context/ToastContext';
 
 interface WeightTrackerProps {
   user: User;
@@ -8,6 +9,7 @@ interface WeightTrackerProps {
 
 export function WeightTracker({ user }: WeightTrackerProps) {
   const { updateUser } = useAuthStore();
+  const { success, error: toastError } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [newWeight, setNewWeight] = useState(user.weight?.toString() || '');
   const [isLoading, setIsLoading] = useState(false);
@@ -56,12 +58,13 @@ export function WeightTracker({ user }: WeightTrackerProps) {
 
         updateUser(updatedUser);
         setIsEditing(false);
+        success('Вес успешно обновлен');
       } else {
-        alert(`Не удалось обновить вес: ${data.message || 'Неизвестная ошибка'}`);
+        toastError(`Не удалось обновить вес: ${data.message || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
       console.error('Error updating weight:', error);
-      alert('Ошибка при обновлении веса');
+      toastError('Ошибка при обновлении веса');
     } finally {
       setIsLoading(false);
     }

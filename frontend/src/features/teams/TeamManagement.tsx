@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useToast } from '../../lib/context/ToastContext';
 
 import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
 
 export default function TeamManagement() {
   const { user } = useAuthStore();
+  const { success, error: toastError } = useToast();
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamMembers, setTeamMembers] = useState<{[key: string]: TeamMember[]}>({});
   const [newTeamName, setNewTeamName] = useState('');
@@ -24,7 +26,7 @@ export default function TeamManagement() {
       const data = await response.json();
       setTeams(data);
     } catch (err) {
-      setError('Failed to fetch teams');
+      toastError('Failed to fetch teams');
       console.error(err);
     } finally {
       setLoading(false);
@@ -47,10 +49,10 @@ export default function TeamManagement() {
           // If JSON parsing fails, use the status text or a generic message
           errorMessage = response.statusText || 'Failed to fetch team members';
         }
-        setError(errorMessage);
+        toastError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to fetch team members');
+      toastError('Failed to fetch team members');
       console.error(err);
     }
   }, []);
@@ -93,9 +95,10 @@ export default function TeamManagement() {
       setNewTeamName('');
       setNewTeamDescription('');
       
-      alert('Team created successfully!');
+      
+      success('Team created successfully!');
     } catch (err) {
-      setError('Failed to create team');
+      toastError('Failed to create team');
       console.error(err);
     } finally {
       setLoading(false);
@@ -132,7 +135,7 @@ export default function TeamManagement() {
       // Lookup user by email
       const foundUser = await lookupUserByEmail(newMemberEmail);
       if (!foundUser) {
-        setError('User not found with that email');
+        toastError('User not found with that email');
         setLoading(false);
         return;
       }
@@ -154,7 +157,7 @@ export default function TeamManagement() {
         
         // Reset form
         setNewMemberEmail('');
-        alert('Member added successfully!');
+        success('Member added successfully!');
       } else {
         // Try to parse error response as JSON, but handle case where it's not JSON
         let errorMessage = 'Failed to add member';
@@ -164,10 +167,10 @@ export default function TeamManagement() {
         } catch {
           errorMessage = response.statusText || 'Failed to add member';
         }
-        setError(errorMessage);
+        toastError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to add member');
+      toastError('Failed to add member');
       console.error(err);
     } finally {
       setLoading(false);
@@ -192,7 +195,7 @@ export default function TeamManagement() {
       if (response.ok) {
         // Refresh team members
         fetchTeamMembers(teamId);
-        alert('Member removed successfully!');
+        success('Member removed successfully!');
       } else {
         // Try to parse error response as JSON, but handle case where it's not JSON
         let errorMessage = 'Failed to remove member';
@@ -202,10 +205,10 @@ export default function TeamManagement() {
         } catch {
           errorMessage = response.statusText || 'Failed to remove member';
         }
-        setError(errorMessage);
+        toastError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to remove member');
+      toastError('Failed to remove member');
       console.error(err);
     } finally {
       setLoading(false);
@@ -225,11 +228,7 @@ export default function TeamManagement() {
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-bold mb-4">Team Management</h2>
       
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
+
       
       {/* Create Team Form */}
       <div className="mb-8">

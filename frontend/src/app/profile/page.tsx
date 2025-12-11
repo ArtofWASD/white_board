@@ -4,12 +4,14 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
+import { useToast } from '../../lib/context/ToastContext';
 import Button from '../../components/ui/Button';
 import { Switch } from '../../components/ui/Switch';
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuthStore();
   const { flags, toggleFlag } = useFeatureFlagStore();
+  const { success, error: toastError } = useToast();
   
   // Email state
   const [email, setEmail] = useState(user?.email || '');
@@ -41,13 +43,13 @@ export default function ProfilePage() {
       if (response.ok && data.user) {
         updateUser(data.user);
         setIsEmailEditing(false);
-        alert('Email успешно обновлен');
+        success('Email успешно обновлен');
       } else {
-        alert(`Не удалось обновить email: ${data.message || 'Неизвестная ошибка'}`);
+        toastError(`Не удалось обновить email: ${data.message || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
       console.error('Error updating email:', error);
-      alert('Ошибка при обновлении email');
+      toastError('Ошибка при обновлении email');
     } finally {
       setIsLoading(false);
     }
@@ -58,7 +60,7 @@ export default function ProfilePage() {
     if (!user) return;
 
     if (newPassword !== confirmPassword) {
-      alert('Новые пароли не совпадают');
+      toastError('Новые пароли не совпадают');
       return;
     }
     
@@ -80,13 +82,13 @@ export default function ProfilePage() {
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
-        alert('Пароль успешно обновлен');
+        success('Пароль успешно обновлен');
       } else {
-        alert(`Не удалось обновить пароль: ${data.message || 'Неизвестная ошибка'}`);
+        toastError(`Не удалось обновить пароль: ${data.message || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
       console.error('Error updating password:', error);
-      alert('Ошибка при обновлении пароля');
+      toastError('Ошибка при обновлении пароля');
     } finally {
       setIsLoading(false);
     }

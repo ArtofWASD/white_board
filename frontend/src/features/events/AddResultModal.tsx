@@ -1,7 +1,6 @@
-'use client';
-
 import React, { useState } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useToast } from '../../lib/context/ToastContext';
 
 interface AddResultModalProps {
   isOpen: boolean;
@@ -12,12 +11,13 @@ interface AddResultModalProps {
 
 const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave, eventName }) => {
   const { user, isAuthenticated } = useAuthStore();
+  const { error } = useToast();
   const [time, setTime] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      alert('Вы должны быть авторизованы для добавления результата');
+      error('Вы должны быть авторизованы для добавления результата');
       return;
     }
     if (time.trim()) {

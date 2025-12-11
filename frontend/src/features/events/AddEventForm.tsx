@@ -1,10 +1,12 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useToast } from '../../lib/context/ToastContext';
 import { AddEventFormProps } from '../../types/AddEventForm.types';
 import { Exercise, Team } from '../../types';
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
+  const { success, error: toastError } = useToast();
   const [title, setTitle] = useState('');
   const [exerciseType, setExerciseType] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -40,7 +42,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
     if (!exerciseName) return;
     
     const newExercise: Exercise = {
-      id: Date.now(),
+      id: Date.now().toString(),
       name: exerciseName,
       weight: rxWeight, // Default to Rx values for backward compatibility
       repetitions: rxReps,
@@ -58,7 +60,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
     setScReps('');
   };
 
-  const removeExercise = (id: number) => {
+  const removeExercise = (id: string) => {
     setExercises(exercises.filter(ex => ex.id !== id));
   };
 
@@ -73,7 +75,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
     });
 
     if (!user?.id) {
-      alert('Ошибка: Пользователь не идентифицирован');
+      toastError('Ошибка: Пользователь не идентифицирован');
       return;
     }
 
@@ -116,13 +118,14 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
         setScWeight('');
         setScReps('');
         if (onClose) onClose();
+        success('Событие успешно создано');
       } else {
         console.error('Server returned error:', data);
-        alert(data.message || 'Ошибка при создании события');
+        toastError(data.message || 'Ошибка при создании события');
       }
     } catch (error) {
       console.error('Error creating event:', error);
-      alert('Произошла ошибка при создании события');
+      toastError('Произошла ошибка при создании события');
     }
   };
 

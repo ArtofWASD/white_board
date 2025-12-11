@@ -2,11 +2,13 @@
 
 import React, { useState } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useToast } from '../../lib/context/ToastContext';
 
 import { CreateTeamModalProps } from '../../types/CreateTeamModal.types';
 
 export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: CreateTeamModalProps) {
   const { user } = useAuthStore();
+  const { success, error: toastError } = useToast();
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,9 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
         onTeamCreated();
         onClose();
         
-        alert('Team created successfully!');
+        onClose();
+        
+        success('Team created successfully!');
       } else {
         const errorData = await response.json();
         setError(errorData.error || 'Failed to create team');

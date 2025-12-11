@@ -118,10 +118,10 @@ export function TexasMethodModule({
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th className="px-2 py-3">Нед</th>
-              <th className="px-2 py-3">Объем (Пн)</th>
-              <th className="px-2 py-3">Легкая (Ср)</th>
-              <th className="px-2 py-3 text-right">Интенс. (Пт)</th>
+              <th className="px-2 py-3 w-12 text-center">Нед</th>
+              <th className="px-2 py-3 w-[30%]">Объем (Пн)</th>
+              <th className="px-2 py-3 w-[30%]">Легкая (Ср)</th>
+              <th className="px-2 py-3 w-[30%]">Интенс. (Пт)</th>
             </tr>
           </thead>
           <tbody>
@@ -129,7 +129,7 @@ export function TexasMethodModule({
                 <tr key={week.weekNum} className="bg-white border-b hover:bg-gray-50 align-middle">
                   <td className="px-2 py-3 font-medium text-gray-900 text-center">{week.weekNum}</td>
                   <td className="px-2 py-3 text-gray-600">
-                    <div className="flex items-center justify-between gap-1">
+                    <div className="flex items-center justify-start gap-2">
                         <span>{week.day1}</span>
                         <button 
                             onClick={() => onAddToCalendar(
@@ -147,7 +147,7 @@ export function TexasMethodModule({
                     </div>
                   </td>
                   <td className="px-2 py-3 text-gray-500">
-                     <div className="flex items-center justify-between gap-1">
+                     <div className="flex items-center justify-start gap-2">
                         <span>{week.day2}</span>
                         <button 
                             onClick={() => onAddToCalendar(
@@ -164,8 +164,8 @@ export function TexasMethodModule({
                         </button>
                     </div>
                   </td>
-                  <td className="px-2 py-3 text-right font-bold text-blue-600">
-                     <div className="flex items-center justify-end gap-2">
+                  <td className="px-2 py-3 font-bold text-blue-600">
+                     <div className="flex items-center justify-start gap-2">
                         <span>{week.day3}</span>
                         <button 
                             onClick={() => onAddToCalendar(

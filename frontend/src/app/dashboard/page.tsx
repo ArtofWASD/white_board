@@ -25,8 +25,7 @@ import { ExerciseTracker } from '../../components/dashboard/ExerciseTracker';
 import { RecentActivities } from '../../components/dashboard/RecentActivities';
 import { WeightTracker } from '../../components/dashboard/WeightTracker';
 import { UniversalCalculator } from '../../components/dashboard/UniversalCalculator';
-import { StrengthTrainingCalculator } from '../../components/dashboard/StrengthTrainingCalculator';
-import { TexasMethodCalculator } from '../../components/dashboard/TexasMethodCalculator';
+
 import { SortableItem } from '../../components/dashboard/SortableItem';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
@@ -55,7 +54,7 @@ export default function DashboardPage() {
   // Initialize state from user object or defaults
   // Default to universal calculator, but support all IDs
   const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator']);
-  const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric'>('asymmetric');
+  const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric' | 'symmetric-1-1'>('asymmetric');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -71,7 +70,7 @@ export default function DashboardPage() {
       // Sync state with user profile
       if (user.dashboardLayout && user.dashboardLayout.length > 0) {
         const savedLayout = user.dashboardLayout;
-        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator', 'strength-training-calculator', 'texas-method-calculator', 'trainer-stats-widget'];
+        const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator', 'trainer-stats-widget'];
         
         // We support all IDs now, so no need to migrate forcedly unless we want to standardise.
         // User asked for flexibility, so we respect savedLayout IDs.
@@ -83,7 +82,7 @@ export default function DashboardPage() {
       }
 
       if (user.dashboardLayoutMode) {
-        setLayoutMode(user.dashboardLayoutMode as 'asymmetric' | 'symmetric');
+        setLayoutMode(user.dashboardLayoutMode as 'asymmetric' | 'symmetric' | 'symmetric-1-1');
       }
     }
   }, [user]);
@@ -112,7 +111,7 @@ export default function DashboardPage() {
     }
   };
 
-  const saveLayout = async (newItems: string[], newMode: 'asymmetric' | 'symmetric') => {
+  const saveLayout = async (newItems: string[], newMode: 'asymmetric' | 'symmetric' | 'symmetric-1-1') => {
     if (!user) return;
 
     try {
@@ -215,7 +214,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLayoutChange = (mode: 'asymmetric' | 'symmetric') => {
+  const handleLayoutChange = (mode: 'asymmetric' | 'symmetric' | 'symmetric-1-1') => {
     setLayoutMode(mode);
     saveLayout(items, mode);
   };
@@ -238,10 +237,7 @@ export default function DashboardPage() {
         return <RecentActivities exercises={exercises} events={events} />;
       case 'universal-calculator':
         return <UniversalCalculator exercises={exercises} />;
-      case 'strength-training-calculator':
-        return <StrengthTrainingCalculator exercises={exercises} />;
-      case 'texas-method-calculator':
-        return <TexasMethodCalculator exercises={exercises} />;
+
       default:
         return null;
     }
@@ -255,9 +251,7 @@ export default function DashboardPage() {
          'exercise-tracker', 
          'weight-tracker', 
          'universal-calculator', 
-         'strength-training-calculator', 
-         'texas-method-calculator',
-         'recent-activities' // specific request to turn off training related widgets
+         'recent-activities'
        ];
        if (trainingWidgets.includes(id)) return false;
     }
@@ -271,14 +265,9 @@ export default function DashboardPage() {
         return flags.showUniversalCalculator && (flags.strengthTrainingCalculator || flags.texasMethodCalculator);
     }
 
-    // Separate Calculators Logic
-    if (id === 'strength-training-calculator') {
-        // Show if universal mode is OFF AND calc is enabled
-        return !flags.showUniversalCalculator && flags.strengthTrainingCalculator;
-    }
-    if (id === 'texas-method-calculator') {
-        // Show if universal mode is OFF AND calc is enabled
-        return !flags.showUniversalCalculator && flags.texasMethodCalculator;
+    // Deprecated calculators
+    if (id === 'strength-training-calculator' || id === 'texas-method-calculator') {
+        return false;
     }
 
     return true;
@@ -363,6 +352,17 @@ export default function DashboardPage() {
           >
             1:1:1
           </button>
+          <button
+            onClick={() => handleLayoutChange('symmetric-1-1')}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+              layoutMode === 'symmetric-1-1' 
+                ? 'bg-white text-blue-600 shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            title="2 колонки (симметрично)"
+          >
+            1:1
+          </button>
         </div>
       </div>
       
@@ -375,10 +375,12 @@ export default function DashboardPage() {
           items={visibleItems} 
           strategy={rectSortingStrategy}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className={`grid grid-cols-1 gap-8 ${
+            layoutMode === 'symmetric-1-1' ? 'lg:grid-cols-2' : 'lg:grid-cols-3'
+          }`}>
             {visibleItems.map((id, index) => {
               const isWide = (index % 4 === 0 || index % 4 === 3) && layoutMode === 'asymmetric';
-              const className = `h-[600px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`;
+              const className = `h-[450px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`;
               
               return (
                 <SortableItem key={id} id={id} className={className}>

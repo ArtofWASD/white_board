@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import Button from '../ui/Button';
+import { Card } from '../ui/Card';
+import { Input } from '../ui/Input';
 
 interface ExerciseRecord {
   id: string;
@@ -66,15 +68,15 @@ export function ExerciseCard({ exercise, onAddRecord, onUpdateExercise }: Exerci
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 border border-gray-100 hover:shadow-lg transition-shadow">
+    <Card className="hover:shadow-lg transition-shadow">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
         <div className="w-full sm:w-auto">
           {isEditing ? (
              <div className="flex items-center gap-2 mb-1" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-               <input 
+               <Input 
                  value={editName}
                  onChange={(e) => setEditName(e.target.value)}
-                 className="px-2 py-1 text-lg font-bold border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 w-full sm:w-48"
+                 className="w-full sm:w-48 font-bold text-lg"
                  autoFocus
                />
                <button onClick={handleUpdate} className="text-green-600 hover:text-green-700 p-1">
@@ -107,16 +109,16 @@ export function ExerciseCard({ exercise, onAddRecord, onUpdateExercise }: Exerci
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} className="flex gap-2 w-full sm:w-auto">
-          <input
+        <form onSubmit={handleSubmit} onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} className="flex gap-2 w-full sm:w-auto items-end">
+          <Input
             type="number"
             step="0.5"
             placeholder="Новый вес"
             value={newWeight}
             onChange={(e) => setNewWeight(e.target.value)}
-            className="w-full sm:w-32 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full sm:w-32"
           />
-          <Button type="submit" disabled={isAdding || !newWeight} size="sm">
+          <Button type="submit" disabled={isAdding || !newWeight} size="sm" className="mb-[2px]">
             {isAdding ? '...' : 'Добавить'}
           </Button>
         </form>
@@ -154,6 +156,6 @@ export function ExerciseCard({ exercise, onAddRecord, onUpdateExercise }: Exerci
           </div>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

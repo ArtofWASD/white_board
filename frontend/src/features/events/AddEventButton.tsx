@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
+import { useToast } from '../../lib/context/ToastContext';
 
 interface AddEventButtonProps {
   onAddEvent: () => void;
@@ -13,11 +14,12 @@ interface AddEventButtonProps {
 
 const AddEventButton: React.FC<AddEventButtonProps> = ({ onAddEvent, onCancel, date, position, teamId }) => {
   const { isAuthenticated } = useAuthStore();
+  const { error } = useToast();
 
   const handleAddEventClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!isAuthenticated) {
-      alert('Вы должны быть авторизованы для создания события');
+      error('Вы должны быть авторизованы для создания события');
       return;
     }
     onAddEvent();

@@ -170,8 +170,8 @@ export function StrengthTrainingModule({
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th className="px-2 py-3 w-12 text-center">Нед</th>
-              <th className="px-2 py-3 w-1/3">Разминка</th>
-              <th className="px-2 py-3 w-1/3">Рабочие сеты</th>
+              <th className="px-2 py-3 w-[35%]">Разминка</th>
+              <th className="px-2 py-3 w-[35%]">Рабочие сеты</th>
               <th className="px-2 py-3 text-right">Действие</th>
             </tr>
           </thead>
@@ -210,16 +210,16 @@ export function StrengthTrainingModule({
                       </div>
                   </div>
                 ) : (
-                  <div className="flex gap-1 justify-end">
-                    <Button variant="outline" size="sm" onClick={() => startLogging(1, calculateWeight(0.85))} onPointerDown={handleInputPointerDown} className="px-2 text-xs">Зап</Button>
+                  <div className="flex gap-1 justify-end items-start text-right">
+                    <Button variant="outline" size="sm" onClick={() => startLogging(1, calculateWeight(0.85))} onPointerDown={handleInputPointerDown} className="px-3">Заполнить</Button>
                     <button 
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 1`, 
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
-Warm-up: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
-Work: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`
+Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Рабочие: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`
                          )}
-                         className="text-gray-300 hover:text-blue-500 p-1"
+                         className="text-gray-300 hover:text-blue-500 p-1 mt-0.5"
                          title="Добавить в календарь"
                          onPointerDown={handleInputPointerDown}
                      >
@@ -266,16 +266,16 @@ Work: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calcu
                       </div>
                   </div>
                 ) : (
-                  <div className="flex gap-1 justify-end">
-                    <Button variant="outline" size="sm" onClick={() => startLogging(2, calculateWeight(0.90))} onPointerDown={handleInputPointerDown} className="px-2 text-xs">Зап</Button>
+                  <div className="flex gap-1 justify-end items-start text-right">
+                    <Button variant="outline" size="sm" onClick={() => startLogging(2, calculateWeight(0.90))} onPointerDown={handleInputPointerDown} className="px-3">Заполнить</Button>
                     <button 
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 2`, 
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
-Warm-up: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
-Work: 3x${calculateWeight(0.70)}кг, 3x${calculateWeight(0.80)}кг, 3+x${calculateWeight(0.90)}кг`
+Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Рабочие: 3x${calculateWeight(0.70)}кг, 3x${calculateWeight(0.80)}кг, 3+x${calculateWeight(0.90)}кг`
                          )}
-                         className="text-gray-300 hover:text-blue-500 p-1"
+                         className="text-gray-300 hover:text-blue-500 p-1 mt-0.5"
                          title="Добавить в календарь"
                          onPointerDown={handleInputPointerDown}
                      >
@@ -322,16 +322,16 @@ Work: 3x${calculateWeight(0.70)}кг, 3x${calculateWeight(0.80)}кг, 3+x${calcu
                       </div>
                   </div>
                 ) : (
-                  <div className="flex gap-1 justify-end">
-                    <Button variant="outline" size="sm" onClick={() => startLogging(3, calculateWeight(0.95))} onPointerDown={handleInputPointerDown} className="px-2 text-xs">Зап</Button>
+                  <div className="flex gap-1 justify-end items-start text-right">
+                    <Button variant="outline" size="sm" onClick={() => startLogging(3, calculateWeight(0.95))} onPointerDown={handleInputPointerDown} className="px-3">Заполнить</Button>
                     <button 
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 3`, 
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
-Warm-up: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
-Work: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`
+Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Рабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`
                          )}
-                         className="text-gray-300 hover:text-blue-500 p-1"
+                         className="text-gray-300 hover:text-blue-500 p-1 mt-0.5"
                          title="Добавить в календарь"
                          onPointerDown={handleInputPointerDown}
                      >

@@ -97,7 +97,7 @@ export default function RegisterPage() {
           email, 
           password, 
           role, 
-          gender, 
+          gender.toUpperCase(), 
           userType, 
           lastName, 
           organizationName

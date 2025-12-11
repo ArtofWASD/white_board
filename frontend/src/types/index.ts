@@ -86,6 +86,7 @@ export interface CalendarEvent {
   timeCap?: string
   rounds?: string
   status?: "FUTURE" | "COMPLETED" | "CANCELLED"
+  description?: string;
 }
 
 export interface Event {

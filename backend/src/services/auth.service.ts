@@ -246,4 +246,28 @@ export class AuthService {
       throw error;
     }
   }
+  async getUser(userId: string) {
+    const user = await (this.prisma as any).user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      user: {
+        id: user.id,
+        name: user.name,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        height: user.height,
+        weight: user.weight,
+        dashboardLayout: user.dashboardLayout,
+        dashboardLayoutMode: user.dashboardLayoutMode,
+        organizationId: user.organizationId
+      } as UserResponse,
+    };
+  }
 }

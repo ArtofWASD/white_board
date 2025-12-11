@@ -57,4 +57,10 @@ export class AuthController {
   async getAthletes() {
     return this.authService.getAthletes();
   }
+  @HttpCode(HttpStatus.OK)
+  // Get user details for verification
+  @Get('user/:userId')
+  async getUser(@Param('userId') userId: string) {
+    return this.authService.getUser(userId);
+  }
 }
