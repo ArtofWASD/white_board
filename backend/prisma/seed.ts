@@ -26,22 +26,28 @@ async function main() {
   const trainers: User[] = [];
   const athletes: User[] = [];
 
+  // Create Organization
+  const org = await prisma.organization.create({
+    data: {
+        name: 'Global Gym'
+    }
+  });
+
   // Create Trainers
   for (const trainer of trainersData) {
     const user = await prisma.user.upsert({
       where: { email: trainer.email },
       update: {
-        userType: 'individual', // Update existing users
-        role: 'trainer',
+        role: 'TRAINER',
       },
       create: {
         name: trainer.name,
         email: trainer.email,
         password,
-        role: 'trainer',
-        gender: trainer.gender,
-        userType: 'individual', // Set for new users
-        organizationName: 'Global Gym',
+        role: 'TRAINER',
+        gender: trainer.gender === 'male' ? 'MALE' : 'FEMALE',
+        organizationId: org.id,
+        isAdmin: true
       },
     });
     trainers.push(user);
@@ -52,19 +58,19 @@ async function main() {
   for (let i = 0; i < athletesNames.length; i++) {
     const name = athletesNames[i];
     const email = `athlete${i + 1}@example.com`;
+    // Athletes join the same org for demo? Or null? Let's say null for individuals, or same org.
+    // Spec says individuals exist.
     const user = await prisma.user.upsert({
       where: { email },
       update: {
-        userType: 'individual', // Update existing users
-        role: 'athlete',
+        role: 'ATHLETE',
       },
       create: {
         name,
         email,
         password,
-        role: 'athlete',
-        gender: i % 2 === 0 ? 'male' : 'female',
-        userType: 'individual', // Set for new users
+        role: 'ATHLETE',
+        gender: i % 2 === 0 ? 'MALE' : 'FEMALE',
         height: 170 + Math.floor(Math.random() * 20),
         weight: 60 + Math.floor(Math.random() * 30),
       },
@@ -78,11 +84,6 @@ async function main() {
   for (let i = 0; i < teamNames.length; i++) {
     const owner = trainers[i % trainers.length];
     
-    // Check if team exists to avoid duplicates or errors if unique constraints exist (though this schema doesn't seem to enforce unique team names globally, but good practice)
-    // Actually schema doesn't have unique on team name. But let's check basic existence or just create.
-    // The previous script just did create, which might duplicate teams if run multiple times. 
-    // Let's use findFirst first to avoid spamming teams if they exist with same name and owner.
-    
     let team = await prisma.team.findFirst({
         where: { name: teamNames[i], ownerId: owner.id }
     });
@@ -93,6 +94,7 @@ async function main() {
               name: teamNames[i],
               description: `Training team led by ${owner.name}`,
               ownerId: owner.id,
+              organizationId: org.id // Link to org
             },
           });
           console.log(`Created team: ${team.name} owned by ${owner.name}`);
@@ -101,7 +103,7 @@ async function main() {
     }
 
 
-    // Add random athletes to team (Upsert logic for team members is cleaner)
+    // Add random athletes to team
     const teamAthletes = athletes.slice(i * 5, (i + 1) * 5);
     for (const athlete of teamAthletes) {
         // Check membership
@@ -119,7 +121,7 @@ async function main() {
                 data: {
                   teamId: team.id,
                   userId: athlete.id,
-                  role: 'athlete',
+                  role: 'MEMBER', 
                 },
               });
         }
@@ -131,15 +133,13 @@ async function main() {
   const eventTitles = ['Morning Run', 'Strength Session', 'Yoga Class', 'HIIT Workout'];
 
   for (const user of allUsers) {
-    // Check if user has events to avoid infinite accumulation
     const eventCount = await prisma.event.count({ where: { userId: user.id } });
     
     if (eventCount < 2) {
-         // Create 2-3 events for each user
         const numEvents = 2 + Math.floor(Math.random() * 2);
         for (let i = 0; i < numEvents; i++) {
             const eventDate = new Date();
-            eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * 10) - 2); // +/- days
+            eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * 10) - 2); 
 
             await prisma.event.create({
                 data: {
@@ -147,7 +147,7 @@ async function main() {
                     description: 'Test event description',
                     eventDate: eventDate,
                     userId: user.id,
-                    status: 'future',
+                    status: 'FUTURE',
                     exerciseType: 'General',
                 }
             });

@@ -180,11 +180,11 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
                                 {member.user.name} {member.user.lastName}
                               </span>
                               <span className={`text-xs px-2 py-1 rounded-full ${
-                                member.role === 'trainer' 
+                                member.user.role === 'TRAINER' 
                                   ? 'bg-purple-100 text-purple-800' 
                                   : 'bg-blue-100 text-blue-800'
                               }`}>
-                                {member.role === 'trainer' ? 'Тренер' : 'Спортсмен'}
+                                {member.user.role === 'TRAINER' ? 'Тренер' : 'Спортсмен'}
                               </span>
                             </div>
                           </li>

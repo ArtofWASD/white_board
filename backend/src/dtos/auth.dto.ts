@@ -41,20 +41,21 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsEnum(['trainer', 'athlete', 'organization_admin'])
-  role: 'trainer' | 'athlete' | 'organization_admin';
+  // Validate against string values of the enum
+  @IsEnum(['ATHLETE', 'TRAINER', 'ORGANIZATION_ADMIN', 'SUPER_ADMIN'])
+  role: 'ATHLETE' | 'TRAINER' | 'ORGANIZATION_ADMIN' | 'SUPER_ADMIN';
 
   @IsString()
   @IsOptional()
-  gender?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
 
   @IsString()
   @IsOptional()
-  userType?: string;
+  userType?: string; // Keep for backward compat, but ignore in logic
 
   @IsString()
   @IsOptional()
-  organizationName?: string;
+  organizationName?: string; // Used to create/find Organization
 }
 
 export class UpdateProfileDto {

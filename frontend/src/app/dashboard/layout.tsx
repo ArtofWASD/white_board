@@ -36,7 +36,7 @@ export default function DashboardLayout({
         },
       ];
 
-      if (user.role === 'trainer' || user.role === 'organization_admin') {
+      if (user.role === 'TRAINER' || user.role === 'ORGANIZATION_ADMIN') {
         const adminItems = [
           {
             label: 'Управление', 
@@ -73,7 +73,7 @@ export default function DashboardLayout({
         items.push(...adminItems);
 
         // Only trainers get "Activities" (Workout Logs)
-        if (user.role === 'trainer') {
+        if (user.role === 'TRAINER') {
            items.push({ 
             label: 'Занятия', 
             href: '/dashboard/activities',

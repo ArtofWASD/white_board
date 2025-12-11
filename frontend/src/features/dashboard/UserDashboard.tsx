@@ -46,7 +46,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Добро пожаловать, {user.name}{user.lastName ? ` ${user.lastName}` : ''} ({user.role === 'athlete' ? 'Атлет' : 'Тренер'})!</h2>
+        <h2 className="text-2xl font-bold">Добро пожаловать, {user.name}{user.lastName ? ` ${user.lastName}` : ''} ({user.role === 'ATHLETE' ? 'Атлет' : 'Тренер'})!</h2>
         <div className="flex space-x-2">
           {onClose && (
             <Button
@@ -87,7 +87,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
       </div>
       
       {/* Create Team Button for Trainers */}
-      {user.role === 'trainer' && (
+      {user.role === 'TRAINER' && (
         <div className="mt-8">
           <Button
             onClick={() => setIsCreateTeamModalOpen(true)}

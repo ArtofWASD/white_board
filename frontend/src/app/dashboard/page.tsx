@@ -250,7 +250,7 @@ export default function DashboardPage() {
   // Filter items based on feature flags and user state
   const visibleItems = items.filter(id => {
     // Organization Admins should not see training widgets
-    if (user?.role === 'organization_admin') {
+    if (user?.role === 'ORGANIZATION_ADMIN') {
        const trainingWidgets = [
          'exercise-tracker', 
          'weight-tracker', 
@@ -316,7 +316,7 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-semibold">{user.name}</h2>
               <p className="text-gray-600">{user.email}</p>
               <p className="text-sm text-gray-500">
-                Роль: {user.role === 'athlete' ? 'Атлет' : user.role === 'organization_admin' ? 'Администратор организации' : 'Тренер'}
+                Роль: {user.role === 'ATHLETE' ? 'Атлет' : user.role === 'ORGANIZATION_ADMIN' ? 'Администратор организации' : 'Тренер'}
               </p>
             </div>
           </div>

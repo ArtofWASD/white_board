@@ -69,27 +69,44 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    
+    let organizationData: any = {};
+    if (registerDto.role === 'ORGANIZATION_ADMIN' && registerDto.organizationName) {
+        organizationData = {
+            organization: {
+                create: {
+                    name: registerDto.organizationName
+                }
+            }
+        };
+    }
+
     const newUser = await (this.prisma as any).user.create({
       data: {
         name: registerDto.name,
-        lastName: registerDto.lastName, // Properly handle lastName
+        lastName: registerDto.lastName,
         email: registerDto.email,
         password: hashedPassword,
-        role: registerDto.role, // Use the provided role
+        role: registerDto.role, 
         gender: registerDto.gender,
-        userType: registerDto.userType,
-        organizationName: registerDto.organizationName,
         isAdmin:
-          registerDto.role === 'trainer' ||
-          registerDto.role === 'organization_admin' ||
-          registerDto.userType === 'organization',
+          registerDto.role === 'TRAINER' ||
+          registerDto.role === 'ORGANIZATION_ADMIN',
+        // Legacy fields mapping
+        userType: registerDto.role === 'ORGANIZATION_ADMIN' ? 'organization' : 'individual',
+        organizationName: registerDto.organizationName,
+        ...organizationData
       },
+      include: {
+        organization: true
+      }
     });
 
     const payload = {
       email: newUser.email,
       sub: newUser.id,
       role: newUser.role,
+      organizationId: newUser.organization?.id 
     };
     return {
       user: {
@@ -102,6 +119,7 @@ export class AuthService {
         weight: newUser.weight,
         dashboardLayout: newUser.dashboardLayout,
         dashboardLayoutMode: newUser.dashboardLayoutMode,
+        organizationId: newUser.organization?.id
       } as UserResponse,
       token: this.jwtService.sign(payload),
     };

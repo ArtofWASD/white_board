@@ -12,7 +12,7 @@ interface AuthState {
     name: string,
     email: string,
     password: string,
-    role: 'trainer' | 'athlete' | 'organization_admin',
+    role: 'TRAINER' | 'ATHLETE' | 'ORGANIZATION_ADMIN',
     gender?: string,
     userType?: string,
     lastName?: string,

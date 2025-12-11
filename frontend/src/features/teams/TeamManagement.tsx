@@ -13,7 +13,7 @@ export default function TeamManagement() {
   const [newTeamDescription, setNewTeamDescription] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
   const [newMemberEmail, setNewMemberEmail] = useState('');
-  const [newMemberRole, setNewMemberRole] = useState<'athlete' | 'trainer'>('athlete');
+  const [newMemberRole, setNewMemberRole] = useState<'ATHLETE' | 'TRAINER'>('ATHLETE');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -212,7 +212,7 @@ export default function TeamManagement() {
     }
   };
 
-  if (!user || user.role !== 'trainer') {
+  if (!user || user.role !== 'TRAINER') {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-bold mb-4">Team Management</h2>
@@ -332,11 +332,11 @@ export default function TeamManagement() {
                 <select
                   id="memberRole"
                   value={newMemberRole}
-                  onChange={(e) => setNewMemberRole(e.target.value as 'athlete' | 'trainer')}
+                  onChange={(e) => setNewMemberRole(e.target.value as 'ATHLETE' | 'TRAINER')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="athlete">Athlete</option>
-                  <option value="trainer">Trainer</option>
+                  <option value="ATHLETE">Athlete</option>
+                  <option value="TRAINER">Trainer</option>
                 </select>
               </div>
               
@@ -387,11 +387,11 @@ export default function TeamManagement() {
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            member.user.role === 'trainer' 
+                            member.user.role === 'TRAINER' 
                               ? 'bg-purple-100 text-purple-800' 
                               : 'bg-blue-100 text-blue-800'
                           }`}>
-                            {member.user.role === 'trainer' ? 'Trainer' : 'Athlete'}
+                            {member.user.role === 'TRAINER' ? 'Trainer' : 'Athlete'}
                           </span>
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

@@ -44,7 +44,7 @@ export default function AthletesPage() {
               // Filter for athletes only if needed.
               // Assuming "athletes" means users with role 'athlete'.
               
-              if (member.user.role === 'athlete') {
+              if (member.user.role === 'ATHLETE') {
                 if (!athleteMap.has(member.user.id)) {
                   athleteMap.set(member.user.id, {
                     id: member.user.id,

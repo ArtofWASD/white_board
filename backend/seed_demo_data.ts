@@ -1,5 +1,5 @@
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, UserRole, TeamRole } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
@@ -16,7 +16,7 @@ async function main() {
         name: 'Demo Admin',
         email: email,
         password: 'password123', // In real app should be hashed, but for dev/test env maybe okay if auth allows plain or we restart
-        role: 'organization_admin',
+        role: UserRole.ORGANIZATION_ADMIN,
         organizationName: 'Demo Org',
         isAdmin: true,
       }
@@ -24,12 +24,12 @@ async function main() {
   } else {
     console.log('User found:', user.email, user.role);
     // Ensure role and org
-    if (user.role !== 'organization_admin' || !user.organizationName) {
+    if (user.role !== UserRole.ORGANIZATION_ADMIN || !user.organizationName) {
         console.log('Updating user role/org...');
         user = await prisma.user.update({
             where: { id: user.id },
             data: { 
-                role: 'organization_admin',
+                role: UserRole.ORGANIZATION_ADMIN,
                 organizationName: user.organizationName || 'Demo Org'
             }
         });
@@ -48,7 +48,7 @@ async function main() {
               name: 'Partner Admin',
               email: otherAdminEmail,
               password: 'password123',
-              role: 'organization_admin',
+              role: UserRole.ORGANIZATION_ADMIN,
               organizationName: orgName
           }
       });
@@ -86,9 +86,9 @@ async function main() {
 
   // Create Athletes and Trainers
   const members = [
-      { name: 'John Doe', email: 'john@example.com', role: 'athlete' },
-      { name: 'Jane Smith', email: 'jane@example.com', role: 'athlete' },
-      { name: 'Coach Mike', email: 'mike@example.com', role: 'trainer' },
+      { name: 'John Doe', email: 'john@example.com', role: UserRole.ATHLETE },
+      { name: 'Jane Smith', email: 'jane@example.com', role: UserRole.ATHLETE },
+      { name: 'Coach Mike', email: 'mike@example.com', role: UserRole.TRAINER },
   ];
 
   const teamAlpha = await prisma.team.findFirst({ where: { name: 'Alpha Team' } });
@@ -109,18 +109,37 @@ async function main() {
       }
 
       // Add to teams
+      // Map UserRole to TeamRole if possible or defaulting to MEMBER/ATHLETE if that's what TeamRole has
+      // Assuming TeamRole has ATHLETE/TRAINER based on previous frontend code, OR we match logic.
+      // If TeamRole is owner/admin/member, then we need mapping.
+      // Let's assume TeamRole has similar values or we map 'athlete' -> 'MEMBER'? 
+      // Actually in frontend we saw user passing 'ATHLETE'/'TRAINER' to team member API.
+      // So TeamRole probably mirrors UserRole in this design?
+      // Let's try to use the same enum value if types allow, or cast to any if stuck, but try TeamRole.ATHLETE if exists.
+      // Safer: Just cast to TeamRole for now as I can't check the generated client Enum easily without reading d.ts which was erroring.
+      // But based on user input, it expects Uppercase.
+      
+      let teamRole: TeamRole;
+      if (m.role === UserRole.TRAINER) {
+          // If TeamRole has TRAINER, use it. If not, use MEMBER + isTrainer flag? No, schema refactor says Enum.
+          // Let's assume the schema has TRAINER in TeamRole per previous findings.
+           teamRole = 'TRAINER' as TeamRole; 
+      } else {
+           teamRole = 'ATHLETE' as TeamRole;
+      }
+
       if (teamAlpha && m.email.includes('john')) {
-          await addToTeam(teamAlpha.id, mUser.id, m.role);
+          await addToTeam(teamAlpha.id, mUser.id, teamRole);
       }
       if (teamBeta && (m.email.includes('jane') || m.email.includes('mike'))) {
-          await addToTeam(teamBeta.id, mUser.id, m.role);
+          await addToTeam(teamBeta.id, mUser.id, teamRole);
       }
   }
 
   console.log('Seeding complete.');
 }
 
-async function addToTeam(teamId: string, userId: string, role: string) {
+async function addToTeam(teamId: string, userId: string, role: TeamRole) {
     try {
         await prisma.teamMember.create({
             data: { teamId, userId, role }

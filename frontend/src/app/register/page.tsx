@@ -19,7 +19,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'trainer' | 'athlete' | 'organization_admin'>('athlete');
+  const [role, setRole] = useState<'TRAINER' | 'ATHLETE' | 'ORGANIZATION_ADMIN'>('ATHLETE');
   const [gender, setGender] = useState<'male' | 'female'>('male');
   const [userType, setUserType] = useState<'individual' | 'organization'>('individual');
   const [organizationName, setOrganizationName] = useState('');
@@ -92,7 +92,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const success = await register(name, email, password, role, gender, userType, lastName, organizationName);
+      const success = await register(
+          name, 
+          email, 
+          password, 
+          role, 
+          gender, 
+          userType, 
+          lastName, 
+          organizationName
+      );
       if (!success) {
         setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
       } else {
@@ -351,18 +360,18 @@ export default function RegisterPage() {
                     {/* Athlete Card */}
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        role === 'athlete' && userType === 'individual'
+                        role === 'ATHLETE' && userType === 'individual'
                           ? 'border-blue-600 bg-blue-50'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                       onClick={() => {
-                        setRole('athlete');
+                        setRole('ATHLETE');
                         setUserType('individual');
                       }}
                     >
                       <div className="flex items-start space-x-4">
                         <div className={`p-2 rounded-lg ${
-                          role === 'athlete' && userType === 'individual' ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                          role === 'ATHLETE' && userType === 'individual' ? 'bg-blue-600 text-white' : 'bg-gray-100'
                         }`}>
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -380,18 +389,18 @@ export default function RegisterPage() {
                     {/* Trainer Card */}
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                        role === 'trainer' && userType === 'individual'
+                        role === 'TRAINER' && userType === 'individual'
                           ? 'border-blue-600 bg-blue-50'
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                       onClick={() => {
-                        setRole('trainer');
+                        setRole('TRAINER');
                         setUserType('individual');
                       }}
                     >
                       <div className="flex items-start space-x-4">
                         <div className={`p-2 rounded-lg ${
-                          role === 'trainer' && userType === 'individual' ? 'bg-blue-600 text-white' : 'bg-gray-100'
+                          role === 'TRAINER' && userType === 'individual' ? 'bg-blue-600 text-white' : 'bg-gray-100'
                         }`}>
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
@@ -414,7 +423,7 @@ export default function RegisterPage() {
                           : 'border-gray-200 hover:border-blue-300'
                       }`}
                       onClick={() => {
-                        setRole('organization_admin'); 
+                        setRole('ORGANIZATION_ADMIN'); 
                         setIsOrganizationTrainer(false);
                         setUserType('organization');
                       }}
@@ -465,7 +474,7 @@ export default function RegisterPage() {
                           checked={isOrganizationTrainer}
                           onChange={(e) => {
                             setIsOrganizationTrainer(e.target.checked);
-                            setRole(e.target.checked ? 'trainer' : 'organization_admin');
+                            setRole(e.target.checked ? 'TRAINER' : 'ORGANIZATION_ADMIN');
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />

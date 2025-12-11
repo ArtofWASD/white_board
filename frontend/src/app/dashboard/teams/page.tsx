@@ -22,7 +22,7 @@ export default function TeamsPage() {
   // Fetch user's teams
   useEffect(() => {
     const fetchTeams = async () => {
-      if (!user || (user.role !== 'trainer' && user.role !== 'organization_admin')) {
+      if (!user || (user.role !== 'TRAINER' && user.role !== 'ORGANIZATION_ADMIN')) {
         setLoadingTeams(false);
         return;
       }
@@ -130,7 +130,7 @@ export default function TeamsPage() {
     router.push(`/dashboard/teams/${teamId}`);
   };
 
-  if (!user || (user.role !== 'trainer' && user.role !== 'organization_admin')) {
+  if (!user || (user.role !== 'TRAINER' && user.role !== 'ORGANIZATION_ADMIN')) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-2 text-red-600">Доступ запрещен</h2>

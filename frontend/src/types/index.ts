@@ -6,6 +6,7 @@ export interface Team {
   ownerId: string
   created_at: string
   updated_at: string
+  organizationId?: string
 }
 
 export interface User {
@@ -13,11 +14,12 @@ export interface User {
   name: string
   lastName?: string
   email: string
-  role: "trainer" | "athlete" | "organization_admin"
+  role: "TRAINER" | "ATHLETE" | "ORGANIZATION_ADMIN" | "SUPER_ADMIN"
   isAdmin: boolean
-  gender?: string
+  gender?: "MALE" | "FEMALE" | "OTHER"
   userType?: string
   organizationName?: string
+  organizationId?: string
   height?: number
   weight?: number
   weightHistory?: { weight: number; date: string }[]
@@ -27,8 +29,9 @@ export interface User {
 
 export interface TeamMember {
   id: string
+  teamId: string 
   userId: string
-  role: string
+  role: "OWNER" | "ADMIN" | "MEMBER"
   user: User
 }
 
@@ -40,18 +43,20 @@ export interface AuthContextType {
     name: string,
     email: string,
     password: string,
-    role: "trainer" | "athlete",
+    role: "TRAINER" | "ATHLETE" | "ORGANIZATION_ADMIN",
     gender?: string,
     userType?: string,
     lastName?: string,
+    organizationName?: string
   ) => Promise<boolean>
   logout: () => void
   isAuthenticated: boolean
   isLoading: boolean
 }
 
+// Exercise interface updated to match schema (UUID string id)
 export interface Exercise {
-  id: number
+  id: string 
   name: string
   weight: string
   repetitions: string
@@ -66,6 +71,7 @@ export interface EventResult {
   time: string
   dateAdded: string
   username: string
+  userId?: string
 }
 
 export interface CalendarEvent {
@@ -79,6 +85,7 @@ export interface CalendarEvent {
   teamId?: string
   timeCap?: string
   rounds?: string
+  status?: "FUTURE" | "COMPLETED" | "CANCELLED"
 }
 
 export interface Event {
@@ -86,7 +93,7 @@ export interface Event {
   title: string
   description?: string
   eventDate: string
-  status: "past" | "future"
+  status: "FUTURE" | "COMPLETED" | "CANCELLED"
   exerciseType?: string
   userId: string
   createdAt: string

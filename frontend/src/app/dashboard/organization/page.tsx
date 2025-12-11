@@ -26,7 +26,7 @@ export default function OrganizationPage() {
 
   useEffect(() => {
     if (user) {
-      if (user.role !== 'trainer') {
+      if (user.role !== 'TRAINER' && user.role !== 'ORGANIZATION_ADMIN') {
         // Simple client-side protection, though middleware/layout should handle this better
         // window.location.href = '/dashboard'; 
         // Commented out per nextjs nav pattern, usually we assume authorized if they got here via link

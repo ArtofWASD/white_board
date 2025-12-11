@@ -165,7 +165,7 @@ export default function EditTeamModal({
         },
         body: JSON.stringify({
           userId: selectedAthlete,
-          role: 'athlete',
+          role: 'ATHLETE',
         }),
       });
       
@@ -327,11 +327,11 @@ export default function EditTeamModal({
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            member.user.role === 'trainer' 
+                            member.user.role === 'TRAINER' 
                               ? 'bg-purple-100 text-purple-800' 
                               : 'bg-blue-100 text-blue-800'
                           }`}>
-                            {member.user.role === 'trainer' ? 'Тренер' : 'Спортсмен'}
+                            {member.user.role === 'TRAINER' ? 'Тренер' : 'Спортсмен'}
                           </span>
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">

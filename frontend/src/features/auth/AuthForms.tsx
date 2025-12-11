@@ -9,7 +9,7 @@ export default function AuthForms() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState<'trainer' | 'athlete'>('athlete');
+  const [role, setRole] = useState<'TRAINER' | 'ATHLETE'>('ATHLETE');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -100,8 +100,8 @@ export default function AuthForms() {
                 <input
                   type="radio"
                   name="role"
-                  checked={role === 'athlete'}
-                  onChange={() => setRole('athlete')}
+                  checked={role === 'ATHLETE'}
+                  onChange={() => setRole('ATHLETE')}
                   className="form-radio"
                 />
                 <span className="ml-2">Атлет</span>
@@ -110,8 +110,8 @@ export default function AuthForms() {
                 <input
                   type="radio"
                   name="role"
-                  checked={role === 'trainer'}
-                  onChange={() => setRole('trainer')}
+                  checked={role === 'TRAINER'}
+                  onChange={() => setRole('TRAINER')}
                   className="form-radio"
                 />
                 <span className="ml-2">Тренер</span>

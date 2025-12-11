@@ -61,4 +61,5 @@ export interface UserResponse {
   weight?: number;
   dashboardLayout?: string[];
   dashboardLayoutMode?: string;
+  organizationId?: string;
 }
