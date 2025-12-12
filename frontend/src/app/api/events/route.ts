@@ -71,6 +71,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("userId")
+    const teamId = searchParams.get("teamId")
 
     if (!userId) {
       return NextResponse.json({ message: "User ID is required" }, { status: 400 })
@@ -78,7 +79,14 @@ export async function GET(request: Request) {
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const response = await fetch(`${backendUrl}/events/${userId}`, {
+    
+    // Construct URL with query parameters
+    const backendApiUrl = new URL(`${backendUrl}/events/${userId}`)
+    if (teamId) {
+      backendApiUrl.searchParams.append("teamId", teamId)
+    }
+
+    const response = await fetch(backendApiUrl.toString(), {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

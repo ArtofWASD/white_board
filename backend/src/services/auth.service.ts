@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 import { SafeUser, UserResponse, User } from '../types';
@@ -236,7 +237,7 @@ export class AuthService {
     try {
       console.log('Fetching all users as athletes...');
       const users = await (this.prisma as any).user.findMany({
-        where: { role: 'athlete' },
+        where: { role: UserRole.ATHLETE },
         select: {
           id: true,
           name: true,

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useTeamStore } from '../../lib/store/useTeamStore';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useRouter } from 'next/navigation';
 import Header from '../../components/layout/Header';
@@ -14,6 +15,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { user, isAuthenticated, logout, isLoading } = useAuthStore();
+  const { fetchTeams } = useTeamStore();
   const router = useRouter();
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavItem[]>([]);
@@ -24,6 +26,11 @@ export default function DashboardLayout({
     if (!isAuthenticated) {
       router.push('/login');
       return;
+    }
+
+    // Load teams immediately when user enters dashboard
+    if (user) {
+        fetchTeams();
     }
 
     if (user) {

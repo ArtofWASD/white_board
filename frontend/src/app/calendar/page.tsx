@@ -42,7 +42,14 @@ export default function CalendarPage() {
   const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
   
   const { isAuthenticated, user } = useAuthStore();
-  const { selectedTeam } = useTeamStore();
+  const { selectedTeam, fetchTeams, teams } = useTeamStore();
+  
+  // Ensure teams are loaded if accessed directly
+  useEffect(() => {
+    if (isAuthenticated && teams.length === 0) {
+        fetchTeams(); 
+    }
+  }, [isAuthenticated, teams.length, fetchTeams]);
   
   // Local state for calendar viewing preference. 
   // Initialize with global selected team if available, or null for "All"

@@ -52,6 +52,7 @@ export default function EditTeamPage() {
     try {
       // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(`/api/teams/${teamId}`, {
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -76,6 +77,7 @@ export default function EditTeamPage() {
       setLoading(true);
       // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(`/api/teams/${teamId}/members`, {
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
           ...(token && { 'Authorization': `Bearer ${token}` }),
@@ -144,7 +146,7 @@ export default function EditTeamPage() {
         },
         body: JSON.stringify({
           userId: selectedAthlete,
-          role: 'ATHLETE',
+          role: 'MEMBER',
         }),
       });
       

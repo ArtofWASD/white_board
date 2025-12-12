@@ -15,10 +15,14 @@ interface AthleteWithTeams {
 }
 
 export default function AthletesPage() {
-  const { teams } = useTeamStore();
+  const { teams, fetchTeams } = useTeamStore();
   const [athletes, setAthletes] = useState<AthleteWithTeams[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+
+  useEffect(() => {
+    fetchTeams();
+  }, [fetchTeams]);
 
   useEffect(() => {
     const fetchAthletes = async () => {
@@ -32,7 +36,7 @@ export default function AthletesPage() {
 
       try {
         const promises = teams.map(team => 
-          fetch(`/api/teams/${team.id}/members`).then(res => res.json())
+          fetch(`/api/teams/${team.id}/members`, { cache: 'no-store' }).then(res => res.json())
         );
 
         const results = await Promise.all(promises);

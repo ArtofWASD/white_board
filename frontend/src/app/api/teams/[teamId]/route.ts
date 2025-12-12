@@ -18,6 +18,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
 
     const response = await fetch(url, {
       method: "GET",
+      cache: "no-store",
       headers: {
         "Content-Type": "application/json",
       },

@@ -22,8 +22,8 @@ export class AddTeamMemberDto {
   userId: string;
 
   @IsString()
-  @IsEnum(['athlete', 'trainer'])
-  role: 'athlete' | 'trainer';
+  @IsEnum(['MEMBER', 'ADMIN', 'OWNER'])
+  role: 'MEMBER' | 'ADMIN' | 'OWNER';
 }
 
 export class RemoveTeamMemberDto {
