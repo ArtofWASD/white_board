@@ -50,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick, navI
         </button>
         {isDashboard && (
           <Link href="/dashboard" className="ml-2 flex items-center">
-            <Image src="/logo.png" alt="Logo" width={60} height={60} className="w-auto h-10 sm:h-14 object-contain" />
+            <Image src="/logo.png" alt="Logo" width={180} height={60} priority className="w-auto h-10 sm:h-14 object-contain" />
           </Link>
         )}
       </div>

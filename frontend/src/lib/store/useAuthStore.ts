@@ -69,7 +69,16 @@ export const useAuthStore = create<AuthState>()(
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ name, lastName, email, password, role, gender, userType, organizationName }),
+            body: JSON.stringify({ 
+              name, 
+              lastName, 
+              email, 
+              password, 
+              role, 
+              gender, 
+              userType, 
+              organizationName: organizationName || null 
+            }),
           });
 
           const data = await response.json();

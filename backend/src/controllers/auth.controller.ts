@@ -25,9 +25,9 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  async register(@Body() registerDto: RegisterDto) {
-    console.log('Register DTO received:', registerDto);
-    return this.authService.register(registerDto);
+  async register(@Body() body: any) {
+    console.log('RAW REGISTER BODY (RETRY):', JSON.stringify(body, null, 2));
+    return this.authService.register(body);
   }
 
   @HttpCode(HttpStatus.OK)

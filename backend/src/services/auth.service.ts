@@ -70,8 +70,11 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     
+    console.log('Register DTO in Service:', JSON.stringify(registerDto, null, 2));
+    
     let organizationData: any = {};
-    if (registerDto.role === 'ORGANIZATION_ADMIN' && registerDto.organizationName) {
+    // Check if organizationName is provided and not empty
+    if (registerDto.organizationName && registerDto.organizationName.trim().length > 0) {
         organizationData = {
             organization: {
                 create: {
@@ -80,6 +83,9 @@ export class AuthService {
             }
         };
     }
+
+    const isOrgRegistration = !!organizationData.organization;
+    const computedUserType = isOrgRegistration ? 'organization' : (registerDto.userType || 'individual');
 
     const newUser = await (this.prisma as any).user.create({
       data: {
@@ -93,7 +99,7 @@ export class AuthService {
           registerDto.role === 'TRAINER' ||
           registerDto.role === 'ORGANIZATION_ADMIN',
         // Legacy fields mapping
-        userType: registerDto.role === 'ORGANIZATION_ADMIN' ? 'organization' : 'individual',
+        userType: computedUserType,
         organizationName: registerDto.organizationName,
         ...organizationData
       },

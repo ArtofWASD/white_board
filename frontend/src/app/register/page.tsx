@@ -88,10 +88,19 @@ export default function RegisterPage() {
       return;
     }
 
+    if (userType === 'organization' && !organizationName.trim()) {
+      setError('Пожалуйста, введите название организации');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
     try {
+      console.log('Available frontend data:', { name, email, role, userType, organizationName });
+      const orgNameParam = organizationName || '';
+      console.log('Passing organizationName:', orgNameParam);
+      
       const success = await register(
           name, 
           email, 
@@ -100,7 +109,7 @@ export default function RegisterPage() {
           gender.toUpperCase(), 
           userType, 
           lastName, 
-          organizationName
+          organizationName || '' // Ensure string
       );
       if (!success) {
         setError('Не удалось зарегистрироваться. Попробуйте еще раз.');

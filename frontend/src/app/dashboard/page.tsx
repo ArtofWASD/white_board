@@ -332,36 +332,54 @@ export default function DashboardPage() {
         <div className="flex bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => handleLayoutChange('asymmetric')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+            className={`p-1.5 rounded-md transition-all ${
               layoutMode === 'asymmetric' 
-                ? 'bg-white text-blue-600 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white shadow-sm' 
+                : 'hover:bg-gray-200 opacity-60 hover:opacity-100'
             }`}
             title="2 колонки (несимметрично)"
           >
-            2:1
+            <Image 
+              src="/asymmetrical.png" 
+              alt="2:1" 
+              width={24} 
+              height={24}
+              className="w-6 h-6"
+            />
           </button>
           <button
             onClick={() => handleLayoutChange('symmetric')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+            className={`p-1.5 rounded-md transition-all ${
               layoutMode === 'symmetric' 
-                ? 'bg-white text-blue-600 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white shadow-sm' 
+                : 'hover:bg-gray-200 opacity-60 hover:opacity-100'
             }`}
             title="3 колонки (симметрично)"
           >
-            1:1:1
+            <Image 
+              src="/symmetric_3.png" 
+              alt="1:1:1" 
+              width={24} 
+              height={24}
+              className="w-6 h-6"
+            />
           </button>
           <button
             onClick={() => handleLayoutChange('symmetric-1-1')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+            className={`p-1.5 rounded-md transition-all ${
               layoutMode === 'symmetric-1-1' 
-                ? 'bg-white text-blue-600 shadow-sm' 
-                : 'text-gray-500 hover:text-gray-700'
+                ? 'bg-white shadow-sm' 
+                : 'hover:bg-gray-200 opacity-60 hover:opacity-100'
             }`}
             title="2 колонки (симметрично)"
           >
-            1:1
+            <Image 
+              src="/symmetric_2.png" 
+              alt="1:1" 
+              width={24} 
+              height={24}
+              className="w-6 h-6"
+            />
           </button>
         </div>
       </div>
