@@ -122,9 +122,9 @@ export default function ActivitiesPage() {
                           </p>
                         </div>
                         <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          event.status === 'future' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          event.status === 'FUTURE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {event.status === 'future' ? 'Предстоящее' : 'Прошедшее'}
+                          {event.status === 'FUTURE' ? 'Предстоящее' : 'Прошедшее'}
                         </span>
                       </div>
                       
@@ -173,9 +173,9 @@ export default function ActivitiesPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              event.status === 'future' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                              event.status === 'FUTURE' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                             }`}>
-                              {event.status === 'future' ? 'Предстоящее' : 'Прошедшее'}
+                              {event.status === 'FUTURE' ? 'Предстоящее' : 'Прошедшее'}
                             </span>
                           </td>
                         </tr>
