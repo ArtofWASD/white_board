@@ -9,6 +9,7 @@ import {
   Delete,
   Request,
   Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TeamsService } from '../services/teams.service';
 import {
@@ -32,7 +33,7 @@ export class TeamsController {
     const ownerId = extractUserIdFromToken(authHeader);
 
     if (!ownerId) {
-      return { message: 'Authentication required', statusCode: 401 };
+      throw new UnauthorizedException('Authentication required');
     }
 
     const result = await this.teamsService.createTeam(createTeamDto, ownerId);

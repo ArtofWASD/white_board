@@ -14,7 +14,7 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { user, isAuthenticated, logout, isLoading } = useAuthStore();
+  const { user, isAuthenticated, logout, isLoading, verifyUser } = useAuthStore();
   const { fetchTeams } = useTeamStore();
   const router = useRouter();
   const [leftMenuOpen, setLeftMenuOpen] = useState(false);
@@ -31,6 +31,7 @@ export default function DashboardLayout({
     // Load teams immediately when user enters dashboard
     if (user) {
         fetchTeams();
+        verifyUser();
     }
 
     if (user) {

@@ -1,5 +1,7 @@
 import * as jwt from 'jsonwebtoken';
 
+import { jwtConfig } from '../config/jwt.config';
+
 export interface JwtPayload {
   email: string;
   sub: string; // user ID
@@ -18,8 +20,7 @@ export function extractUserIdFromToken(
   const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
   try {
-    const secret = process.env.JWT_SECRET || 'your-secret-key';
-    const decoded = jwt.verify(token, secret) as JwtPayload;
+    const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;
     return decoded.sub; // 'sub' contains the user ID
   } catch (error) {
     console.error('Error verifying JWT token:', error);

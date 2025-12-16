@@ -7,7 +7,7 @@ import { useToast } from '../../lib/context/ToastContext';
 import { CreateTeamModalProps } from '../../types/CreateTeamModal.types';
 
 export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: CreateTeamModalProps) {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const { success, error: toastError } = useToast();
   const [teamName, setTeamName] = useState('');
   const [teamDescription, setTeamDescription] = useState('');
@@ -27,6 +27,7 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: teamName,

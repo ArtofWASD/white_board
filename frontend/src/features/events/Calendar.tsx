@@ -105,8 +105,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
     if (event) {
       const rect = (arg.jsEvent.target as HTMLElement).getBoundingClientRect();
       setTooltipPosition({
-        top: rect.top + window.scrollY,
-        left: rect.left + window.scrollX + (rect.width / 2)
+        top: rect.top,
+        left: rect.left + (rect.width / 2)
       });
       setTooltipEvent(event);
     }

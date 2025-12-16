@@ -7,7 +7,7 @@ import { useToast } from '../../lib/context/ToastContext';
 import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
 
 export default function TeamManagement() {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const { success, error: toastError } = useToast();
   const [teams, setTeams] = useState<Team[]>([]);
   const [teamMembers, setTeamMembers] = useState<{[key: string]: TeamMember[]}>({});
@@ -22,7 +22,11 @@ export default function TeamManagement() {
   const fetchUserTeams = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`/api/teams/user/${user?.id}`);
+      const response = await fetch(`/api/teams/user/${user?.id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       const data = await response.json();
       setTeams(data);
     } catch (err) {
@@ -35,7 +39,11 @@ export default function TeamManagement() {
 
   const fetchTeamMembers = useCallback(async (teamId: string) => {
     try {
-      const response = await fetch(`/api/teams/${teamId}/members`);
+      const response = await fetch(`/api/teams/${teamId}/members`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setTeamMembers(prev => ({...prev, [teamId]: data}));
@@ -81,6 +89,7 @@ export default function TeamManagement() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           name: newTeamName,
@@ -88,17 +97,25 @@ export default function TeamManagement() {
         }),
       });
       
-      const newTeam = await response.json();
-      setTeams(prev => [...prev, newTeam]);
-      
-      // Reset form
-      setNewTeamName('');
-      setNewTeamDescription('');
-      
-      
-      success('Team created successfully!');
+      if (response.ok) {
+        const newTeam = await response.json();
+        setTeams(prev => [...prev, newTeam]);
+        
+        // Reset form
+        setNewTeamName('');
+        setNewTeamDescription('');
+        
+        success('Team created successfully!');
+      } else {
+        if (response.status === 401) {
+          toastError('Session expired. Please login again.');
+          // Optional: You might want to redirect to login or clear auth store here
+        } else {
+          toastError('Failed to create team');
+        }
+      }
     } catch (err) {
-      toastError('Failed to create team');
+      toastError('An error occurred');
       console.error(err);
     } finally {
       setLoading(false);
@@ -111,6 +128,7 @@ export default function TeamManagement() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
       });
       
@@ -144,6 +162,7 @@ export default function TeamManagement() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           userId: foundUser.id,
@@ -186,6 +205,7 @@ export default function TeamManagement() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
           userId: userId,
