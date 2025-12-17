@@ -119,12 +119,29 @@ export default function TeamsPage() {
     if (!confirm('Вы уверены, что хотите удалить эту команду?')) return;
     
     try {
-      // For now, we'll implement a basic delete by calling a non-existent endpoint
-      // In a real implementation, you would need to add DELETE endpoint to the backend
-      info('Функция удаления еще не реализована на бэкенде');
+      setLoading(true);
+      // const token = localStorage.getItem('token'); // Removed direct access
+      
+      const response = await fetch(`/api/teams/${teamId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      if (response.ok) {
+        setTeams(prev => prev.filter(t => t.id !== teamId));
+        info('Команда успешно удалена');
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.message || 'Не удалось удалить команду');
+      }
     } catch (err) {
       console.error('Error deleting team:', err);
-      toastError('Ошибка при удалении команды');
+      setError('Ошибка при удалении команды');
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -10,12 +10,14 @@ import {
   Request,
   Headers,
   UnauthorizedException,
+  Patch,
 } from '@nestjs/common';
 import { TeamsService } from '../services/teams.service';
 import {
   CreateTeamDto,
   AddTeamMemberDto,
   RemoveTeamMemberDto,
+  UpdateTeamDto,
 } from '../dtos/teams.dto';
 import { extractUserIdFromToken } from '../utils/jwt.utils';
 
@@ -84,6 +86,41 @@ export class TeamsController {
   @Get(':teamId')
   async getTeam(@Param('teamId') teamId: string) {
     const result = await this.teamsService.getTeamById(teamId);
+    return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Delete(':teamId')
+  async deleteTeam(
+    @Param('teamId') teamId: string,
+    @Headers('authorization') authHeader: string,
+  ) {
+    const userId = extractUserIdFromToken(authHeader);
+    if (!userId) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    const result = await this.teamsService.deleteTeam(teamId, userId);
+    return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Patch(':teamId')
+  async updateTeam(
+    @Param('teamId') teamId: string,
+    @Body() updateTeamDto: UpdateTeamDto,
+    @Headers('authorization') authHeader: string,
+  ) {
+    const userId = extractUserIdFromToken(authHeader);
+    if (!userId) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    const result = await this.teamsService.updateTeam(
+      teamId,
+      updateTeamDto,
+      userId,
+    );
     return result;
   }
 }

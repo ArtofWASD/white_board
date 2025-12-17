@@ -27,7 +27,15 @@ export class AddTeamMemberDto {
 }
 
 export class RemoveTeamMemberDto {
-  @IsUUID()
-  @IsNotEmpty()
   userId: string;
+}
+
+export class UpdateTeamDto {
+  @IsString()
+  @IsOptional()
+  name?: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
 }

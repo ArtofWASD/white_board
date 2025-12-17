@@ -55,3 +55,88 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     )
   }
 }
+
+// Delete a team
+export async function DELETE(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
+  try {
+    const { teamId } = await params
+    
+    // Validate teamId
+    if (!teamId || typeof teamId !== "string") {
+      return NextResponse.json({ message: "Invalid team ID" }, { status: 400 })
+    }
+
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const url = `${backendUrl}/teams/${teamId}`
+    
+    const authHeader = request.headers.get("authorization")
+
+    const response = await fetch(url, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader && { "Authorization": authHeader }),
+      },
+    })
+
+    if (response.ok) {
+        return NextResponse.json({ message: "Team deleted successfully" })
+    } else {
+        const errorData = await response.json().catch(() => ({}))
+        return NextResponse.json(errorData, { status: response.status })
+    }
+  } catch (error) {
+    console.error("Error deleting team:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to delete team",
+      },
+      { status: 500 },
+    )
+  }
+}
+
+// Update a team
+export async function PATCH(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
+  try {
+    const { teamId } = await params
+    const body = await request.json()
+    
+    // Validate teamId
+    if (!teamId || typeof teamId !== "string") {
+      return NextResponse.json({ message: "Invalid team ID" }, { status: 400 })
+    }
+
+    // Forward the request to our NestJS backend
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const url = `${backendUrl}/teams/${teamId}`
+    
+    const authHeader = request.headers.get("authorization")
+
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        ...(authHeader && { "Authorization": authHeader }),
+      },
+      body: JSON.stringify(body),
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+        return NextResponse.json(data)
+    } else {
+        return NextResponse.json(data, { status: response.status })
+    }
+  } catch (error) {
+    console.error("Error updating team:", error)
+    return NextResponse.json(
+      {
+        error: "Failed to update team",
+      },
+      { status: 500 },
+    )
+  }
+}

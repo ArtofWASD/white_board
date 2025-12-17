@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import {
   CreateTeamDto,
   AddTeamMemberDto,
   RemoveTeamMemberDto,
+  UpdateTeamDto,
 } from '../dtos/teams.dto';
 
 @Injectable()
@@ -216,5 +221,52 @@ export class TeamsService {
     }
 
     return team;
+  }
+
+  async deleteTeam(teamId: string, userId: string) {
+    const team = await (this.prisma as any).team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new NotFoundException('Team not found');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Only the owner can delete the team');
+    }
+
+    await (this.prisma as any).team.delete({
+      where: { id: teamId },
+    });
+
+    return { message: 'Team deleted successfully' };
+  }
+
+  async updateTeam(
+    teamId: string,
+    updateTeamDto: UpdateTeamDto,
+    userId: string,
+  ) {
+    const team = await (this.prisma as any).team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new NotFoundException('Team not found');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Only the owner can update the team');
+    }
+
+    const updatedTeam = await (this.prisma as any).team.update({
+      where: { id: teamId },
+      data: {
+        ...updateTeamDto,
+      },
+    });
+
+    return updatedTeam;
   }
 }

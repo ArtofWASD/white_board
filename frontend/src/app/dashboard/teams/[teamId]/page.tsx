@@ -38,6 +38,10 @@ export default function EditTeamPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  
+  // Edit mode state
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editNameValue, setEditNameValue] = useState('');
 
   useEffect(() => {
     if (teamId) {
@@ -62,6 +66,7 @@ export default function EditTeamPage() {
       if (response.ok) {
         const data = await response.json();
         setTeam(data);
+        setEditNameValue(data.name);
       } else {
         console.error('Failed to fetch team details');
         setError('Не удалось загрузить информацию о команде');
@@ -200,6 +205,41 @@ export default function EditTeamPage() {
     }
   };
 
+  const handleUpdateTeamName = async () => {
+    if (!team || !editNameValue.trim()) return;
+
+    try {
+      setLoading(true);
+      
+      const response = await fetch(`/api/teams/${teamId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+        body: JSON.stringify({
+          name: editNameValue,
+        }),
+      });
+
+      if (response.ok) {
+        const updatedTeam = await response.json();
+        setTeam(prev => prev ? { ...prev, name: updatedTeam.name } : null);
+        setSuccess('Название команды обновлено');
+        setIsEditingName(false);
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.message || 'Не удалось обновить название команды');
+      }
+    } catch (err) {
+      console.error('Error updating team name:', err);
+      setError('Ошибка при обновлении названия');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!user) {
     return <div className="p-8 text-center">Загрузка...</div>;
   }
@@ -209,16 +249,58 @@ export default function EditTeamPage() {
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center mb-8">
           <button
-            onClick={() => router.push('/dashboard')}
+            onClick={() => router.push('/dashboard/teams')}
             className="mr-4 text-gray-500 hover:text-gray-700 transition-colors"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
           </button>
-          <h1 className="text-3xl font-bold text-gray-800">
-            {team ? `Редактирование команды: ${team.name}` : 'Загрузка...'}
-          </h1>
+          
+          {isEditingName ? (
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                value={editNameValue}
+                onChange={(e) => setEditNameValue(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                autoFocus
+              />
+              <button
+                onClick={handleUpdateTeamName}
+                disabled={loading}
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Сохранить
+              </button>
+              <button
+                onClick={() => {
+                  setIsEditingName(false);
+                  setEditNameValue(team?.name || '');
+                }}
+                className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Отмена
+              </button>
+            </div>
+          ) : (
+            <div className="flex items-center">
+              <h1 className="text-3xl font-bold text-gray-800">
+                {team ? `Редактирование команды: ${team.name}` : 'Загрузка...'}
+              </h1>
+              {team && (
+                <button
+                  onClick={() => setIsEditingName(true)}
+                  className="ml-3 text-gray-400 hover:text-blue-600 transition-colors"
+                  title="Изменить название"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                </button>
+              )}
+            </div>
+          )}
         </div>
 
         {error && (
