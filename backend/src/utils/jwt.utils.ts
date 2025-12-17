@@ -23,7 +23,7 @@ export function extractUserIdFromToken(
     const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;
     return decoded.sub; // 'sub' contains the user ID
   } catch (error) {
-    console.error('Error verifying JWT token:', error);
+
     return null;
   }
 }

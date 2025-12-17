@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import Button from '../../components/ui/Button';
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -35,7 +36,7 @@ export default function LoginPage() {
         setError('Не удалось войти. Пожалуйста, проверьте учетные данные.');
       }
     } catch (error) {
-      console.error('Login error:', error);
+
       setError('Произошла ошибка при входе');
     } finally {
       setLoading(false);
@@ -78,11 +79,7 @@ export default function LoginPage() {
             <p className="text-gray-600 text-sm">Добро пожаловать обратно! Пожалуйста, войдите в свой аккаунт.</p>
           </div>
 
-          {error && (
-            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-              {error}
-            </div>
-          )}
+          <ErrorDisplay error={error} onClose={() => setError('')} className="mb-6" />
           
           <form onSubmit={handleSubmit}>
             <motion.div

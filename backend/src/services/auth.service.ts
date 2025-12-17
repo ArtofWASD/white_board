@@ -71,7 +71,7 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     
-    console.log('Register DTO in Service:', JSON.stringify(registerDto, null, 2));
+
     
     let organizationData: any = {};
     // Check if organizationName is provided and not empty
@@ -141,8 +141,7 @@ export class AuthService {
     }
 
     // Log the incoming data
-    console.log('Updating profile for user:', userId);
-    console.log('Incoming data:', updateProfileDto);
+
 
     // Build update data object with only provided fields
     const updateData: Partial<User> = {};
@@ -198,7 +197,7 @@ export class AuthService {
       data: updateData,
     });
 
-    console.log('Updated user:', updatedUser);
+
 
     return {
       user: {
@@ -235,7 +234,7 @@ export class AuthService {
 
   async getAthletes() {
     try {
-      console.log('Fetching all users as athletes...');
+
       const users = await (this.prisma as any).user.findMany({
         where: { role: UserRole.ATHLETE },
         select: {
@@ -246,10 +245,11 @@ export class AuthService {
           role: true,
         },
       });
-      console.log(`Found ${users.length} users.`);
+
       return users;
     } catch (error) {
-      console.error('Error fetching athletes:', error);
+      // Log error internally if needed, or just rethrow
+
       throw error;
     }
   }

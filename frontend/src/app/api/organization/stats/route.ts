@@ -22,16 +22,16 @@ export async function GET(request: Request) {
         if (response.ok) {
             return NextResponse.json(data);
         } else {
-            console.error('Backend returned error:', data);
+
             return NextResponse.json(data, { status: response.status });
         }
     } catch (e) {
-        console.error('Failed to parse backend response:', text);
+
         return NextResponse.json({ error: 'Invalid response from backend' }, { status: 500 });
     }
 
   } catch (error) {
-    console.error('Error fetching organization stats:', error);
+
     return NextResponse.json(
       { error: 'Failed to fetch organization stats' },
       { status: 500 }

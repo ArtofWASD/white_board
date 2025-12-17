@@ -11,7 +11,7 @@ export class OrganizationController {
       const stats = await this.organizationService.getTrainerStats(trainerId);
       return stats;
     } catch (error) {
-        console.error('Error fetching organization stats:', error);
+
         throw new HttpException(
             'Failed to fetch organization stats',
             HttpStatus.INTERNAL_SERVER_ERROR

@@ -52,18 +52,18 @@ export const useAuthStore = create<AuthState>()(
             });
             return true;
           } else {
-            console.error('Login failed:', data.message);
+
             return false;
           }
         } catch (error) {
-          console.error('Login error:', error);
+
           return false;
         }
       },
 
       register: async (name, email, password, role, gender, userType, lastName, organizationName) => {
         try {
-          console.log('Registering with data:', { name, lastName, email, role, gender, userType, organizationName });
+
           const response = await fetch('/api/auth/register', {
             method: 'POST',
             headers: {
@@ -91,11 +91,11 @@ export const useAuthStore = create<AuthState>()(
             });
             return true;
           } else {
-            console.error('Registration failed:', data.message);
+
             return false;
           }
         } catch (error) {
-          console.error('Registration error:', error);
+
           return false;
         }
       },
@@ -137,7 +137,7 @@ export const useAuthStore = create<AuthState>()(
 
             if (!response.ok) {
                 // If user not found or unauthorized, logout
-                console.warn('User verification failed, logging out...');
+
                 get().logout();
                 return false;
             }
@@ -145,7 +145,7 @@ export const useAuthStore = create<AuthState>()(
             // Optionally update user data here if needed
             return true;
         } catch (error) {
-            console.error('Verification error:', error);
+
             // On network error we might not want to logout immediately, but for now let's be safe
             // or just return false and let the caller decide. 
             // Better to only logout on explicit 401/404. 

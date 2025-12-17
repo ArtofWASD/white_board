@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useToast } from '../../lib/context/ToastContext';
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 import { CreateTeamModalProps } from '../../types/CreateTeamModal.types';
 
@@ -53,7 +54,7 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
       }
     } catch (err) {
       setError('Failed to create team');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -77,11 +78,7 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
             </button>
           </div>
           
-          {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {error}
-            </div>
-          )}
+          <ErrorDisplay error={error} onClose={() => setError(null)} className="mb-4" />
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

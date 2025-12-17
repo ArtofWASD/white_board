@@ -39,7 +39,7 @@ export function TrainerStatsWidget() {
         setStats(data);
       }
     } catch (error) {
-      console.error('Failed to fetch trainer stats:', error);
+
     } finally {
       setIsLoading(false);
     }

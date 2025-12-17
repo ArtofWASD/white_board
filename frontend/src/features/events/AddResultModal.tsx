@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
-import { useToast } from '../../lib/context/ToastContext';
+
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 interface AddResultModalProps {
   isOpen: boolean;
@@ -11,15 +12,17 @@ interface AddResultModalProps {
 
 const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave, eventName }) => {
   const { user, isAuthenticated } = useAuthStore();
-  const { error } = useToast();
+
   const [time, setTime] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isAuthenticated) {
-      error('Вы должны быть авторизованы для добавления результата');
+      setError('Вы должны быть авторизованы для добавления результата');
       return;
     }
+    setError(null);
     if (time.trim()) {
       onSave({ time });
     }
@@ -33,6 +36,7 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
         <h3 className="text-lg font-semibold mb-4">
           Добавить результат для события &quot;{eventName}&quot;
         </h3>
+        <ErrorDisplay error={error} onClose={() => setError(null)} className="mb-4" />
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">

@@ -44,8 +44,8 @@ export function WeightTracker({ user }: WeightTrackerProps) {
           date: new Date().toISOString(),
         };
 
-        console.log('Current history:', user.weightHistory);
-        console.log('New entry:', newEntry);
+
+
 
         // Update local user with new weight AND history
         // We merge the backend response (which has updated weight) with our local history
@@ -54,7 +54,7 @@ export function WeightTracker({ user }: WeightTrackerProps) {
           weightHistory: [...(user.weightHistory || []), newEntry],
         };
 
-        console.log('Updated user:', updatedUser);
+
 
         updateUser(updatedUser);
         setIsEditing(false);
@@ -63,7 +63,7 @@ export function WeightTracker({ user }: WeightTrackerProps) {
         toastError(`Не удалось обновить вес: ${data.message || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
-      console.error('Error updating weight:', error);
+
       toastError('Ошибка при обновлении веса');
     } finally {
       setIsLoading(false);

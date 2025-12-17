@@ -57,7 +57,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
             }
           }
         } catch (error) {
-          console.error('Failed to fetch team members:', error);
+
         }
       } else {
         setTeamMembers([]);

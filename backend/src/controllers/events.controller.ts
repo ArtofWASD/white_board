@@ -31,10 +31,7 @@ export class EventsController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe())
   async createEvent(@Body() createEventDto: CreateEventDto) {
-    console.log('Received create event request:', createEventDto);
-    console.log('Exercises type:', typeof createEventDto.exercises);
-    console.log('Exercises value:', createEventDto.exercises);
-    console.log('Controller calling service with teamId:', createEventDto.teamId);
+
 
     try {
       return await this.eventsService.createEvent(
@@ -98,15 +95,15 @@ export class EventsController {
     @Param('eventId') eventId: string,
     @Body() body: { userId?: string },
   ) {
-    console.log('Delete event request received:', { eventId, body });
+
 
     const userId = body.userId;
     if (!userId) {
-      console.log('User ID is missing from request body');
+
       throw new BadRequestException('User ID is required');
     }
 
-    console.log('Calling events service to delete event:', { eventId, userId });
+
     await this.eventsService.deleteEvent(eventId, userId);
   }
 

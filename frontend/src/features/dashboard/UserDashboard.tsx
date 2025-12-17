@@ -27,7 +27,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
             setEvents(data);
           }
         } catch (error) {
-          console.error('Failed to fetch events:', error);
+
         } finally {
           setLoading(false);
         }
@@ -109,7 +109,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
         onClose={() => setIsCreateTeamModalOpen(false)}
         onTeamCreated={() => {
           // Optionally refresh team data or show notification
-          console.log('Team created successfully');
+
         }}
       />
     </div>

@@ -24,7 +24,7 @@ export async function POST(
       return NextResponse.json(data, { status: response.status });
     }
   } catch (error) {
-    console.error('Error creating exercise record:', error);
+
     return NextResponse.json(
       { error: 'Failed to create exercise record' },
       { status: 500 }
@@ -49,7 +49,7 @@ export async function GET(
       return NextResponse.json(data, { status: response.status });
     }
   } catch (error) {
-    console.error('Error fetching exercise records:', error);
+
     return NextResponse.json(
       { error: 'Failed to fetch exercise records' },
       { status: 500 }

@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       )
     }
   } catch (error) {
-    console.error("Login error:", error)
+
     return NextResponse.json({ message: "Произошла ошибка при входе" }, { status: 500 })
   }
 }

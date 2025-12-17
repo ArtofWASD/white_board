@@ -70,7 +70,7 @@ export default function AthletesPage() {
 
         setAthletes(Array.from(athleteMap.values()));
       } catch (error) {
-        console.error('Error fetching athletes:', error);
+
       } finally {
         setLoading(false);
       }

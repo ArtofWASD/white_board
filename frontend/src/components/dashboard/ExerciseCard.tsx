@@ -36,7 +36,7 @@ export function ExerciseCard({ exercise, onAddRecord, onUpdateExercise }: Exerci
   }, [exercise.name]);
 
   const handleUpdate = async () => {
-    console.log('Updating exercise:', exercise.id, 'to', editName);
+
     if (!editName.trim() || editName === exercise.name) {
       setIsEditing(false);
       setEditName(exercise.name);
@@ -61,7 +61,7 @@ export function ExerciseCard({ exercise, onAddRecord, onUpdateExercise }: Exerci
       await onAddRecord(exercise.id, parseFloat(newWeight));
       setNewWeight('');
     } catch (error) {
-      console.error('Failed to add record', error);
+
     } finally {
       setIsAdding(false);
     }

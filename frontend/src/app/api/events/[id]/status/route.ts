@@ -34,7 +34,7 @@ export async function PUT(
       )
     }
   } catch (error) {
-    console.error("Update event status error:", error)
+
     return NextResponse.json(
       { message: "Произошла ошибка при обновлении статуса события" },
       { status: 500 },

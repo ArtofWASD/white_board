@@ -92,7 +92,7 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
         onUpdateEvents(filteredEvents);
       }
     } catch (err: any) {
-      console.error('Failed to fetch events:', err);
+
       setError(err.message);
     } finally {
       setLoading(false);
@@ -118,7 +118,7 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
       }
       return false;
     } catch (error) {
-      console.error('Failed to delete event:', error);
+
       return false;
     }
   };
@@ -145,7 +145,7 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
       }
       return false;
     } catch (error) {
-      console.error('Failed to create event', error);
+
       return false;
     }
   };
@@ -173,7 +173,7 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
         }
         return false;
     } catch (error) {
-        console.error('Failed to update event', error);
+
         return false;
     }
   };
@@ -197,7 +197,7 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
         }
         return false;
       } catch (error) {
-          console.error('Failed to add result', error);
+
           return false;
       }
   };

@@ -48,7 +48,7 @@ export default function ProfilePage() {
         toastError(`Не удалось обновить email: ${data.message || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
-      console.error('Error updating email:', error);
+
       toastError('Ошибка при обновлении email');
     } finally {
       setIsLoading(false);
@@ -87,7 +87,7 @@ export default function ProfilePage() {
         toastError(`Не удалось обновить пароль: ${data.message || 'Неизвестная ошибка'}`);
       }
     } catch (error) {
-      console.error('Error updating password:', error);
+
       toastError('Ошибка при обновлении пароля');
     } finally {
       setIsLoading(false);

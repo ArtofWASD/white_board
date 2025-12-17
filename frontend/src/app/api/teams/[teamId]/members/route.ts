@@ -4,19 +4,18 @@ import { NextResponse } from "next/server"
 export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const { teamId } = await params
-    console.log("Fetching team members for team ID:", teamId)
-    console.log("Team ID type:", typeof teamId)
+
 
     // Validate teamId
     if (!teamId || typeof teamId !== "string") {
-      console.error("Invalid team ID received:", teamId)
+
       return NextResponse.json({ message: "Invalid team ID" }, { status: 400 })
     }
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members`
-    console.log("Forwarding request to backend URL:", url)
+
 
     const response = await fetch(url, {
       method: "GET",
@@ -26,16 +25,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       },
     })
 
-    console.log("Backend response status:", response.status)
-    console.log("Backend response headers:", [...response.headers.entries()])
+
 
     // Check if response is OK and content type is JSON
     const contentType = response.headers.get("content-type")
-    console.log("Backend response content type:", contentType)
+
 
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json()
-      console.log("Backend response data:", data)
+
 
       if (response.ok) {
         return NextResponse.json(data)
@@ -44,13 +42,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
           data.message ||
           data.error ||
           `Backend error: ${response.status} ${response.statusText}`
-        console.error("Backend error response:", errorMessage)
+
         return NextResponse.json({ message: errorMessage }, { status: response.status })
       }
     } else {
       // Handle non-JSON responses
       const text = await response.text()
-      console.log("Backend response text:", text)
+
 
       if (response.ok) {
         return new NextResponse(text, {
@@ -60,12 +58,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       } else {
         const errorMessage =
           text || `Backend error: ${response.status} ${response.statusText}`
-        console.error("Backend error response (text):", errorMessage)
+
         return NextResponse.json({ message: errorMessage }, { status: response.status })
       }
     }
   } catch (error) {
-    console.error("Error fetching team members:", error)
+
     return NextResponse.json(
       {
         error:
@@ -82,12 +80,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
   try {
     const { teamId } = await params
     const body = await request.json()
-    console.log("Adding team member to team ID:", teamId, "with data:", body)
+
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members/add`
-    console.log("Forwarding request to backend URL:", url)
+
 
     const response = await fetch(url, {
       method: "POST",
@@ -97,16 +95,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       body: JSON.stringify(body),
     })
 
-    console.log("Backend response status:", response.status)
-    console.log("Backend response headers:", [...response.headers.entries()])
+
 
     // Check if response is OK and content type is JSON
     const contentType = response.headers.get("content-type")
-    console.log("Backend response content type:", contentType)
+
 
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json()
-      console.log("Backend response data:", data)
+
 
       if (response.ok) {
         return NextResponse.json(data, { status: 201 })
@@ -115,13 +112,13 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
           data.message ||
           data.error ||
           `Backend error: ${response.status} ${response.statusText}`
-        console.error("Backend error response:", errorMessage)
+
         return NextResponse.json({ message: errorMessage }, { status: response.status })
       }
     } else {
       // Handle non-JSON responses
       const text = await response.text()
-      console.log("Backend response text:", text)
+
 
       if (response.ok) {
         return new NextResponse(text, {
@@ -131,12 +128,12 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       } else {
         const errorMessage =
           text || `Backend error: ${response.status} ${response.statusText}`
-        console.error("Backend error response (text):", errorMessage)
+
         return NextResponse.json({ message: errorMessage }, { status: response.status })
       }
     }
   } catch (error) {
-    console.error("Error adding team member:", error)
+
     return NextResponse.json(
       {
         error:
@@ -156,12 +153,12 @@ export async function DELETE(
   try {
     const { teamId } = await params
     const body = await request.json()
-    console.log("Removing team member from team ID:", teamId, "with data:", body)
+
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members/remove`
-    console.log("Forwarding request to backend URL:", url)
+
 
     const response = await fetch(url, {
       method: "DELETE",
@@ -171,16 +168,15 @@ export async function DELETE(
       body: JSON.stringify(body),
     })
 
-    console.log("Backend response status:", response.status)
-    console.log("Backend response headers:", [...response.headers.entries()])
+
 
     // Check if response is OK and content type is JSON
     const contentType = response.headers.get("content-type")
-    console.log("Backend response content type:", contentType)
+
 
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json()
-      console.log("Backend response data:", data)
+
 
       if (response.ok) {
         return NextResponse.json(data)
@@ -189,13 +185,13 @@ export async function DELETE(
           data.message ||
           data.error ||
           `Backend error: ${response.status} ${response.statusText}`
-        console.error("Backend error response:", errorMessage)
+
         return NextResponse.json({ message: errorMessage }, { status: response.status })
       }
     } else {
       // Handle non-JSON responses
       const text = await response.text()
-      console.log("Backend response text:", text)
+
 
       if (response.ok) {
         return new NextResponse(text, {
@@ -205,12 +201,12 @@ export async function DELETE(
       } else {
         const errorMessage =
           text || `Backend error: ${response.status} ${response.statusText}`
-        console.error("Backend error response (text):", errorMessage)
+
         return NextResponse.json({ message: errorMessage }, { status: response.status })
       }
     }
   } catch (error) {
-    console.error("Error removing team member:", error)
+
     return NextResponse.json(
       {
         error:

@@ -44,7 +44,7 @@ export default function ActivitiesPage() {
         setTeams(teamsData);
         setEvents(eventsData);
       } catch (err) {
-        console.error(err);
+
         setError('Ошибка при загрузке данных');
       } finally {
         setLoading(false);

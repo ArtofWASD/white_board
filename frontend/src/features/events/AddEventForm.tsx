@@ -4,15 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useToast } from '../../lib/context/ToastContext';
 import { AddEventFormProps } from '../../types/AddEventForm.types';
 import { Exercise, Team } from '../../types';
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
-  const { success, error: toastError } = useToast();
+  const { success } = useToast();
   const [title, setTitle] = useState('');
   const [exerciseType, setExerciseType] = useState('');
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
 
   // Exercise input state
   const [exerciseName, setExerciseName] = useState('');
@@ -31,7 +33,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
             setTeams(data);
           }
         } catch (error) {
-          console.error('Failed to fetch teams:', error);
+
         }
       }
     };
@@ -67,15 +69,10 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Submitting event form...', {
-      userId: user?.id,
-      teamId: selectedTeamId,
-      title,
-      date: selectedDate
-    });
+    setError(null);
 
     if (!user?.id) {
-      toastError('Ошибка: Пользователь не идентифицирован');
+      setError('Ошибка: Пользователь не идентифицирован');
       return;
     }
 
@@ -90,8 +87,6 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
         exercises: exercises.length > 0 ? exercises : undefined,
       };
 
-      console.log('Sending payload:', payload);
-
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
@@ -101,10 +96,8 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       });
       
       const data = await response.json();
-      console.log('Response:', response.status, data);
-      
+
       if (response.ok) {
-        console.log('Event created successfully');
         if (onSubmit) {
           onSubmit(title, exerciseType, exercises);
         }
@@ -120,18 +113,17 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
         if (onClose) onClose();
         success('Событие успешно создано');
       } else {
-        console.error('Server returned error:', data);
-        toastError(data.message || 'Ошибка при создании события');
+        setError(data.message || 'Ошибка при создании события');
       }
     } catch (error) {
-      console.error('Error creating event:', error);
-      toastError('Произошла ошибка при создании события');
+      setError('Произошла ошибка при создании события');
     }
   };
 
   return (
     <div className="border rounded-lg p-6 mb-6">
       <h3 className="text-xl font-semibold mb-4">Добавить новое событие</h3>
+      <ErrorDisplay error={error} onClose={() => setError(null)} className="mb-4" />
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">

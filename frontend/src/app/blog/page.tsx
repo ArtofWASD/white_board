@@ -72,7 +72,7 @@ export default function BlogPage() {
             setEvents(transformedEvents);
           }
         } catch (error) {
-          console.error('Failed to fetch events:', error);
+
         }
       }
     };

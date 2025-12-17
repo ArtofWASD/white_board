@@ -71,11 +71,11 @@ export function UniversalCalculator({ exercises }: UniversalCalculatorProps) {
       if (response.ok) {
         success('Тренировка добавлена в календарь');
       } else {
-        console.error('Failed to add event');
+
         toastError('Не удалось добавить тренировку в календарь');
       }
     } catch (error) {
-      console.error('Error adding event:', error);
+
       toastError('Ошибка при добавлении события');
     }
   };

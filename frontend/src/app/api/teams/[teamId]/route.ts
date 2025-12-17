@@ -4,7 +4,7 @@ import { NextResponse } from "next/server"
 export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
     const { teamId } = await params
-    console.log("Fetching team details for team ID:", teamId)
+
 
     // Validate teamId
     if (!teamId || typeof teamId !== "string") {
@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}`
-    console.log("Forwarding request to backend URL:", url)
+
 
     const response = await fetch(url, {
       method: "GET",
@@ -24,7 +24,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       },
     })
 
-    console.log("Backend response status:", response.status)
+
 
     const contentType = response.headers.get("content-type")
 
@@ -46,7 +46,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       }
     }
   } catch (error) {
-    console.error("Error fetching team details:", error)
+
     return NextResponse.json(
       {
         error: "Failed to fetch team details: " + (error instanceof Error ? error.message : "Unknown error"),
@@ -87,7 +87,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ t
         return NextResponse.json(errorData, { status: response.status })
     }
   } catch (error) {
-    console.error("Error deleting team:", error)
+
     return NextResponse.json(
       {
         error: "Failed to delete team",
@@ -131,7 +131,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ te
         return NextResponse.json(data, { status: response.status })
     }
   } catch (error) {
-    console.error("Error updating team:", error)
+
     return NextResponse.json(
       {
         error: "Failed to update team",

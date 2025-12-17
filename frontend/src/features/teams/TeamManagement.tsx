@@ -31,7 +31,7 @@ export default function TeamManagement() {
       setTeams(data);
     } catch (err) {
       toastError('Failed to fetch teams');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -61,7 +61,7 @@ export default function TeamManagement() {
       }
     } catch (err) {
       toastError('Failed to fetch team members');
-      console.error(err);
+
     }
   }, []);
 
@@ -116,7 +116,7 @@ export default function TeamManagement() {
       }
     } catch (err) {
       toastError('An error occurred');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -138,7 +138,7 @@ export default function TeamManagement() {
       }
       return null;
     } catch (err) {
-      console.error('Error looking up user:', err);
+
       return null;
     }
   };
@@ -190,7 +190,7 @@ export default function TeamManagement() {
       }
     } catch (err) {
       toastError('Failed to add member');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -229,7 +229,7 @@ export default function TeamManagement() {
       }
     } catch (err) {
       toastError('Failed to remove member');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }

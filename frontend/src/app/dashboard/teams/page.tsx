@@ -46,11 +46,11 @@ export default function TeamsPage() {
           setTeams(data);
         } else {
           const errorData = await response.json().catch(() => ({}));
-          console.error('Failed to fetch teams:', response.status, errorData);
+
           setError(errorData.message || errorData.error || `Failed to fetch teams (${response.status})`);
         }
       } catch (err) {
-        console.error('Error fetching teams:', err);
+
         const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
         setError(`Error fetching teams: ${errorMessage}`);
       } finally {
@@ -103,7 +103,7 @@ export default function TeamsPage() {
         setError(errorData.message || errorData.error || 'Не удалось создать команду');
       }
     } catch (err) {
-      console.error('Error creating team:', err);
+
       if (err instanceof TypeError && err.message.includes('fetch')) {
         setError('Сервис недоступен. Пожалуйста, убедитесь, что сервер запущен.');
       } else {
@@ -138,7 +138,7 @@ export default function TeamsPage() {
         setError(errorData.message || 'Не удалось удалить команду');
       }
     } catch (err) {
-      console.error('Error deleting team:', err);
+
       setError('Ошибка при удалении команды');
     } finally {
       setLoading(false);

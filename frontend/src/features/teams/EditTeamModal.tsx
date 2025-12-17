@@ -12,7 +12,7 @@ export default function EditTeamModal({
   onClose, 
   onTeamUpdated 
 }: EditTeamModalProps) {
-  console.log('EditTeamModal props:', { teamId, teamName, isOpen });
+
   
   const { user, token } = useAuthStore();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
@@ -25,7 +25,7 @@ export default function EditTeamModal({
     try {
       // Validate teamId format
       if (!teamId || typeof teamId !== 'string' || teamId === 'undefined') {
-        console.warn('Invalid team ID received:', teamId);
+
         setTeamMembers([]);
         return;
       }
@@ -34,7 +34,7 @@ export default function EditTeamModal({
       
       // Log the URL being constructed
       const url = `/api/teams/${teamId}/members`;
-      console.log('Constructed URL:', url);
+
       
       // const token = localStorage.getItem('token'); // Removed direct access
       const response = await fetch(url, {
@@ -44,7 +44,7 @@ export default function EditTeamModal({
         },
       });
       
-      console.log('Response status:', response.status);
+
       
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -55,12 +55,12 @@ export default function EditTeamModal({
           if (Array.isArray(data)) {
             setTeamMembers(data);
           } else {
-            console.error('Unexpected data format:', data);
+
             setTeamMembers([]);
           }
         } else {
           const text = await response.text();
-          console.error('Non-JSON response:', text);
+
           setError('Received unexpected response format from server');
           setTeamMembers([]);
         }
@@ -71,28 +71,28 @@ export default function EditTeamModal({
         if (contentType && contentType.includes('application/json')) {
           try {
             const errorData = await response.json();
-            console.error('Error fetching team members (JSON):', errorData);
+
             // Show the specific error message from the backend
             const errorMessage = errorData.message || errorData.error || `Server error: ${response.status} ${response.statusText}`;
             setError(errorMessage);
           } catch (parseError) {
-            console.error('Failed to parse error response as JSON:', parseError);
+
             setError(`Server error: ${response.status} ${response.statusText}`);
           }
         } else {
           try {
             const errorText = await response.text();
-            console.error('Error fetching team members (text):', errorText);
+
             setError(errorText || `Server error: ${response.status} ${response.statusText}`);
           } catch (textError) {
-            console.error('Failed to read error response as text:', textError);
+
             setError(`Server error: ${response.status} ${response.statusText}`);
           }
         }
         setTeamMembers([]);
       }
     } catch (err) {
-      console.error('Exception fetching team members:', err);
+
       setError('Failed to fetch team members: ' + (err instanceof Error ? err.message : 'Unknown error'));
       setTeamMembers([]);
     } finally {
@@ -113,28 +113,28 @@ export default function EditTeamModal({
         },
       });
 
-      console.log('Fetch Athletes Status:', response.status);
+
 
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
           setAthletes(data);
         } else {
-          console.error('Unexpected athletes data format:', data);
+
           setAthletes([]);
         }
       } else {
-        console.error('Failed to fetch athletes. Status:', response.status);
+
         try {
           const errorData = await response.json();
-          console.error('Error details:', errorData);
+
         } catch (e) {
-          console.error('Could not parse error response:', e);
+
         }
         setAthletes([]);
       }
     } catch (err) {
-      console.error('Exception fetching athletes:', err);
+
       setAthletes([]);
     }
   }, []);
@@ -145,7 +145,7 @@ export default function EditTeamModal({
       fetchTeamMembers();
       fetchAvailableAthletes();
     } else if (isOpen) {
-      console.warn('EditTeamModal open but invalid teamId:', teamId);
+
     }
   }, [isOpen, teamId, fetchTeamMembers, fetchAvailableAthletes]);
 
@@ -187,7 +187,7 @@ export default function EditTeamModal({
       }
     } catch (err) {
       setError('Failed to add member');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -227,7 +227,7 @@ export default function EditTeamModal({
       }
     } catch (err) {
       setError('Failed to remove member');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }

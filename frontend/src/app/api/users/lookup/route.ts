@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       )
     }
   } catch (error) {
-    console.error("Error looking up user:", error)
+
     return NextResponse.json({ error: "Failed to lookup user" }, { status: 500 })
   }
 }

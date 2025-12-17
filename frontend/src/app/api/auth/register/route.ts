@@ -29,7 +29,7 @@ export async function POST(request: Request) {
       )
     }
   } catch (error) {
-    console.error("Registration error:", error)
+
     return NextResponse.json(
       { message: "Произошла ошибка при регистрации" },
       { status: 500 },

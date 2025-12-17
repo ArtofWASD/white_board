@@ -60,11 +60,11 @@ export const useTeamStore = create<TeamState>()(
               set({ teams: [] });
             }
           } else {
-            console.error('Failed to fetch teams');
+
             set({ error: 'Failed to fetch teams' });
           }
         } catch (err) {
-          console.error('Error fetching teams:', err);
+
           set({ error: 'Error fetching teams' });
         } finally {
           set({ loading: false });

@@ -68,11 +68,11 @@ export default function EditTeamPage() {
         setTeam(data);
         setEditNameValue(data.name);
       } else {
-        console.error('Failed to fetch team details');
+
         setError('Не удалось загрузить информацию о команде');
       }
     } catch (err) {
-      console.error('Error fetching team details:', err);
+
       setError('Ошибка при загрузке информации о команде');
     }
   };
@@ -101,7 +101,7 @@ export default function EditTeamPage() {
         setError(errorData.message || 'Не удалось загрузить участников команды');
       }
     } catch (err) {
-      console.error('Error fetching team members:', err);
+
       setError('Ошибка при загрузке участников команды');
     } finally {
       setLoading(false);
@@ -127,10 +127,10 @@ export default function EditTeamPage() {
           setAthletes([]);
         }
       } else {
-        console.error('Failed to fetch athletes');
+
       }
     } catch (err) {
-      console.error('Error fetching athletes:', err);
+
     }
   };
 
@@ -166,7 +166,7 @@ export default function EditTeamPage() {
       }
     } catch (err) {
       setError('Ошибка при добавлении спортсмена');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -199,7 +199,7 @@ export default function EditTeamPage() {
       }
     } catch (err) {
       setError('Ошибка при удалении участника');
-      console.error(err);
+
     } finally {
       setLoading(false);
     }
@@ -233,7 +233,7 @@ export default function EditTeamPage() {
         setError(errorData.message || 'Не удалось обновить название команды');
       }
     } catch (err) {
-      console.error('Error updating team name:', err);
+
       setError('Ошибка при обновлении названия');
     } finally {
       setLoading(false);

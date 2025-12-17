@@ -77,7 +77,7 @@ const EventModal: React.FC<EventModalProps> = ({
             setTeams(data);
           }
         } catch (error) {
-          console.error('Failed to fetch teams:', error);
+
         }
       }
     };
@@ -130,7 +130,7 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('EventModal handleSubmit - selectedTeamId:', selectedTeamId);
+
     if (eventTitle.trim()) {
       onSave({
         title: eventTitle,

@@ -70,7 +70,7 @@ export function StrengthTrainingModule({
         setHistory(data);
       }
     } catch (error) {
-      console.error('Failed to fetch history', error);
+
     } finally {
       setLoadingHistory(false);
     }
@@ -110,7 +110,7 @@ export function StrengthTrainingModule({
         setLogReps(0);
       }
     } catch (error) {
-      console.error('Failed to save result', error);
+
     } finally {
       setIsSubmitting(false);
     }

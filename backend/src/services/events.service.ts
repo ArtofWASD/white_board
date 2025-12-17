@@ -65,9 +65,7 @@ export class EventsService {
     // Let's trust the existing code pattern for values, but I will double check schema if I get errors.
     // actually, I should just Call the existing `updateEventStatuses` from the Cron job!
     
-    console.log('Running scheduled event status update...');
-    await this.updateEventStatuses();
-    console.log('Scheduled event status update complete.');
+
   }
 
   async createEvent(
@@ -82,25 +80,14 @@ export class EventsService {
     rounds?: string,
     teamId?: string,
   ) {
-    console.log('Creating event with data:', {
-      userId,
-      title,
-      eventDate,
-      description,
-      exerciseType,
-      exercises,
-      participantIds,
-      timeCap,
-      rounds,
-      teamId,
-    });
+
 
     // Check if user exists
     const user = await (this.prisma as any).user.findUnique({
       where: { id: userId },
     });
     if (!user) {
-      console.log('User not found:', userId);
+
       throw new NotFoundException('User not found');
     }
 
@@ -111,7 +98,7 @@ export class EventsService {
       });
 
       if (participants.length !== participantIds.length) {
-        console.log('Some participants not found:', participantIds);
+
         throw new NotFoundException('One or more participants not found');
       }
     }
@@ -119,11 +106,11 @@ export class EventsService {
     // Convert string date to Date object and validate
     const eventDateObj = new Date(eventDate);
     if (isNaN(eventDateObj.getTime())) {
-      console.log('Invalid date format:', eventDate);
+
       throw new Error('Invalid date format');
     }
 
-    console.log('Converted date object:', eventDateObj);
+
 
     // Prepare event data
     const baseEventData = {
@@ -149,11 +136,11 @@ export class EventsService {
           }
         : baseEventData;
 
-    console.log('Creating event with data:', createData);
+
     const event = await (this.prisma as any).event.create({
       data: createData,
     });
-    console.log('Event created successfully:', event);
+
 
     return event;
   }
@@ -350,32 +337,29 @@ export class EventsService {
   }
 
   async deleteEvent(eventId: string, userId: string): Promise<void> {
-    console.log('Attempting to delete event:', { eventId, userId });
+
 
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
     });
     if (!event) {
-      console.log('Event not found:', eventId);
+
       throw new NotFoundException('Event not found');
     }
 
-    console.log('Found event:', event);
+
 
     // Check if the user is the owner of the event
     if (event.userId !== userId) {
-      console.log('User is not the owner of the event:', {
-        userId,
-        eventUserId: event.userId,
-      });
+
       throw new ForbiddenException('You can only delete your own events');
     }
 
-    console.log('Deleting event:', eventId);
+
     await (this.prisma as any).event.delete({
       where: { id: eventId },
     });
-    console.log('Event deleted successfully:', eventId);
+
   }
 
   async createEventResult(eventId: string, time: string, username: string) {
@@ -427,45 +411,31 @@ export class EventsService {
     rounds?: string,
     teamId?: string,
   ) {
-    console.log('Updating event with data:', {
-      eventId,
-      userId,
-      title,
-      eventDate,
-      description,
-      exerciseType,
-      exercises,
-      timeCap,
-      rounds,
-      teamId,
-    });
+
 
     // Check if event exists
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
     });
     if (!event) {
-      console.log('Event not found:', eventId);
+
       throw new NotFoundException('Event not found');
     }
 
     // Check if the user is the owner of the event
     if (event.userId !== userId) {
-      console.log('User is not the owner of the event:', {
-        userId,
-        eventUserId: event.userId,
-      });
+
       throw new ForbiddenException('You can only update your own events');
     }
 
     // Convert string date to Date object and validate
     const eventDateObj = new Date(eventDate);
     if (isNaN(eventDateObj.getTime())) {
-      console.log('Invalid date format:', eventDate);
+
       throw new Error('Invalid date format');
     }
 
-    console.log('Converted date object:', eventDateObj);
+
 
     // Prepare event data
     const updateData = {
@@ -479,12 +449,12 @@ export class EventsService {
       teamId,
     };
 
-    console.log('Updating event with data:', updateData);
+
     const updatedEvent = await (this.prisma as any).event.update({
       where: { id: eventId },
       data: updateData,
     });
-    console.log('Event updated successfully:', updatedEvent);
+
 
     return updatedEvent;
   }

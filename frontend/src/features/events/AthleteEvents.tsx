@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AddEventForm from './AddEventForm';
 import { DashboardEvent } from '../../types/UserDashboard.types';
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 interface AthleteEventsProps {
   userId: string;
@@ -11,31 +12,31 @@ export default function AthleteEvents({ userId }: AthleteEventsProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        // API call to fetch events
-        const response = await fetch(`/api/events?userId=${userId}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-          setEvents(data);
-        } else {
-          setError(data.message || 'Failed to fetch events');
-        }
-      } catch (err) {
-        setError('Failed to fetch events');
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const fetchEvents = React.useCallback(async () => {
+    if (!userId) return;
+    
+    try {
+      setLoading(true);
+      setError(null);
+      // API call to fetch events
+      const response = await fetch(`/api/events?userId=${userId}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setEvents(data);
+      } else {
+        setError(data.message || 'Failed to fetch events');
       }
-    };
-
-    if (userId) {
-      fetchEvents();
+    } catch (err) {
+      setError('Failed to fetch events');
+    } finally {
+      setLoading(false);
     }
   }, [userId]);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const updateEventStatus = async (eventId: string, status: 'past' | 'future') => {
     try {
@@ -59,7 +60,7 @@ export default function AthleteEvents({ userId }: AthleteEventsProps) {
       }
     } catch (err) {
       setError('Failed to update event status');
-      console.error(err);
+
     }
   };
 
@@ -72,7 +73,7 @@ export default function AthleteEvents({ userId }: AthleteEventsProps) {
   }
 
   if (error) {
-    return <div className="text-center py-4 text-red-500">Ошибка: {error}</div>;
+    return <ErrorDisplay error={error} onRetry={fetchEvents} className="m-4" />;
   }
 
   // Create a minimal user object for AddEventForm

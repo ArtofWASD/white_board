@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import Button from '../../components/ui/Button';
 import SuccessModal from '../../components/ui/SuccessModal';
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
@@ -97,9 +98,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      console.log('Available frontend data:', { name, email, role, userType, organizationName });
-      const orgNameParam = organizationName || '';
-      console.log('Passing organizationName:', orgNameParam);
+
       
       const success = await register(
           name, 
@@ -117,7 +116,7 @@ export default function RegisterPage() {
         setShowSuccessModal(true);
       }
     } catch (error) {
-      console.error('Registration error:', error);
+
       setError('Произошла ошибка при регистрации');
     } finally {
       setLoading(false);
@@ -220,11 +219,7 @@ export default function RegisterPage() {
           
           {renderStepIndicator()}
 
-          {error && (
-            <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-              {error}
-            </div>
-          )}
+          <ErrorDisplay error={error} onClose={() => setError('')} className="mb-6" />
           
           <form onSubmit={handleSubmit}>
             <AnimatePresence mode="wait">

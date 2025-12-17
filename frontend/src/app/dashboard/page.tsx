@@ -105,7 +105,7 @@ export default function DashboardPage() {
         setEvents(data);
       }
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error);
+
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +136,7 @@ export default function DashboardPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to save dashboard layout:', error);
+
     }
   };
 
@@ -158,7 +158,7 @@ export default function DashboardPage() {
         fetchData();
       }
     } catch (error) {
-      console.error('Failed to create exercise:', error);
+
     }
   };
 
@@ -174,26 +174,26 @@ export default function DashboardPage() {
         fetchData();
       }
     } catch (error) {
-      console.error('Failed to add record:', error);
+
     }
   };
 
   const handleUpdateExercise = async (id: string, name: string) => {
     try {
-      console.log('Sending update request for:', id, name);
+
       const response = await fetch(`/api/exercises/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name }),
       });
-      console.log('Update response status:', response.status);
+
 
       if (response.ok) {
-        console.log('Update successful, fetching data...');
+
         await fetchData();
       }
     } catch (error) {
-      console.error('Failed to update exercise:', error);
+
     }
   };
 

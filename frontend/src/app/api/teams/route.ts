@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       )
     }
   } catch (error) {
-    console.error("Error creating team:", error)
+
     // Check if the error is due to the backend being unreachable
     if (error instanceof Error) {
       const isConnectionError =
@@ -104,7 +104,7 @@ export async function GET(request: Request) {
       )
     }
   } catch (error) {
-    console.error("Error fetching teams:", error)
+
     // Check if the error is due to the backend being unreachable
     if (error instanceof Error) {
       const isConnectionError =

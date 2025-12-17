@@ -36,7 +36,7 @@ export async function GET(
       )
     }
   } catch (error: unknown) {
-    console.error("Error fetching user:", error)
+
     return NextResponse.json(
       { message: `Internal server error: ${(error as Error).message}` },
       { status: 500 },
