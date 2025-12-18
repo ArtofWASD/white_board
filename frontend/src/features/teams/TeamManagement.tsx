@@ -6,6 +6,8 @@ import { useToast } from '../../lib/context/ToastContext';
 import { QRCodeCanvas } from 'qrcode.react';
 
 import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
+import { User as FullUser } from '../../types';
+import { UserDetailModal } from './UserDetailModal';
 
 export default function TeamManagement() {
   const { user, token } = useAuthStore();
@@ -20,6 +22,15 @@ export default function TeamManagement() {
   const [loading, setLoading] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  
+  // User detail modal state
+  const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const handleUserClick = (user: any) => {
+    setSelectedUserForDetail(user as FullUser);
+    setIsDetailModalOpen(true);
+  };
 
   const fetchUserTeams = useCallback(async () => {
     try {
@@ -455,7 +466,10 @@ export default function TeamManagement() {
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {teamMembers[selectedTeam]?.map((member) => (
                       <tr key={member.id}>
-                        <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                        <td 
+                          className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6 cursor-pointer hover:underline"
+                          onClick={() => handleUserClick(member.user)}
+                        >
                           {member.user.name}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -546,6 +560,12 @@ export default function TeamManagement() {
 
         </div>
       )}
+      
+      <UserDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        user={selectedUserForDetail}
+      />
     </div>
   );
 }

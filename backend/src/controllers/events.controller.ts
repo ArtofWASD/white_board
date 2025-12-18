@@ -134,6 +134,11 @@ export class EventsController {
     return this.eventsService.getEventResults(eventId);
   }
 
+  @Get('results/user/:userId')
+  async getEventResultsByUserId(@Param('userId') userId: string) {
+    return this.eventsService.getEventResultsByUserId(userId);
+  }
+
   @Put(':eventId')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ValidationPipe())

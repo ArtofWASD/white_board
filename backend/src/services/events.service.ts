@@ -399,6 +399,22 @@ export class EventsService {
     });
   }
 
+  async getEventResultsByUserId(userId: string) {
+    return (this.prisma as any).eventResult.findMany({
+      where: { userId },
+      include: {
+        event: {
+          select: {
+            title: true,
+            eventDate: true,
+            exerciseType: true,
+          }
+        }
+      },
+      orderBy: { dateAdded: 'desc' },
+    });
+  }
+
   async updateEvent(
     eventId: string,
     userId: string,

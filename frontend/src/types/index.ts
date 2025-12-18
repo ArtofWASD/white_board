@@ -108,6 +108,29 @@ export interface Event {
   results?: EventResult[]
 }
 
+export interface StrengthWorkoutResult {
+  id: string;
+  userId: string;
+  exerciseId: string;
+  date: string;
+  week: number;
+  weight: number;
+  reps: number;
+  createdAt: string;
+  exercise?: {
+    id: string;
+    name: string;
+  };
+}
+
+export interface UserEventResult extends EventResult {
+  event?: {
+    title: string;
+    eventDate: string;
+    exerciseType?: string;
+  };
+}
+
 export interface NavItem {
   label: string;
   href: string;

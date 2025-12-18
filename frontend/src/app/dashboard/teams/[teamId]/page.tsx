@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../../../lib/store/useAuthStore';
 import { useParams, useRouter } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
+import { UserDetailModal } from '../../../../features/teams/UserDetailModal';
+import { User as FullUser } from '../../../../types';
 
 interface User {
   id: string;
@@ -47,6 +49,15 @@ export default function EditTeamPage() {
   
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+
+  // User detail modal state
+  const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  const handleUserClick = (user: any) => {
+    setSelectedUserForDetail(user as FullUser);
+    setIsDetailModalOpen(true);
+  };
 
   useEffect(() => {
     if (teamId) {
@@ -497,7 +508,10 @@ export default function EditTeamPage() {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {teamMembers.map((member) => (
                     <tr key={member.id}>
-                      <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                      <td 
+                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6 cursor-pointer hover:underline"
+                        onClick={() => handleUserClick(member.user)}
+                      >
                         {member.user.name} {member.user.lastName}
                       </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -529,6 +543,12 @@ export default function EditTeamPage() {
           )}
         </div>
       </div>
+      
+      <UserDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        user={selectedUserForDetail}
+      />
     </div>
   );
 }
