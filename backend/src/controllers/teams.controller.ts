@@ -123,4 +123,34 @@ export class TeamsController {
     );
     return result;
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Post(':teamId/invite')
+  async refreshInviteCode(
+    @Param('teamId') teamId: string,
+    @Headers('authorization') authHeader: string,
+  ) {
+    const userId = extractUserIdFromToken(authHeader);
+    if (!userId) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    const result = await this.teamsService.refreshInviteCode(teamId, userId);
+    return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('invite/:code/join')
+  async joinTeamByInvite(
+    @Param('code') code: string,
+    @Headers('authorization') authHeader: string,
+  ) {
+    const userId = extractUserIdFromToken(authHeader);
+    if (!userId) {
+      throw new UnauthorizedException('Authentication required');
+    }
+
+    const result = await this.teamsService.joinTeamByInvite(code, userId);
+    return result;
+  }
 }

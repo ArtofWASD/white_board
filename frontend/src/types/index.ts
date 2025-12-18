@@ -7,6 +7,8 @@ export interface Team {
   created_at: string
   updated_at: string
   organizationId?: string
+  owner?: User
+  members?: TeamMember[]
 }
 
 export interface User {

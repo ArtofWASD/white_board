@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../lib/store/useAuthStore';
@@ -12,6 +12,8 @@ import ErrorDisplay from '../../components/ui/ErrorDisplay';
 export default function RegisterPage() {
   const [step, setStep] = useState(1);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const inviteCode = searchParams.get('inviteCode');
   const { register, isAuthenticated, isLoading } = useAuthStore();
   
   // Form state
@@ -30,12 +32,16 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
-  // Redirect to dashboard if already logged in
+  // Redirect to dashboard if already logged in or redirection for invite
   useEffect(() => {
     if (!isLoading && isAuthenticated && !showSuccessModal) {
-      router.push('/');
+      if (inviteCode) {
+        router.push(`/invite/${inviteCode}`);
+      } else {
+        router.push('/');
+      }
     }
-  }, [isAuthenticated, router, showSuccessModal, isLoading]);
+  }, [isAuthenticated, router, showSuccessModal, isLoading, inviteCode]);
 
   const validateStep1 = () => {
     if (!email || !password || !confirmPassword) {

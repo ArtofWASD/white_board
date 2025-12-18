@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
+import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
 export default function AuthForms() {
   const { login, register } = useAuthStore();
@@ -52,11 +53,7 @@ export default function AuthForms() {
         {isLogin ? 'Вход' : 'Регистрация'}
       </h2>
       
-      {error && (
-        <div className="mb-4 p-2 bg-red-100 text-red-700 rounded">
-          {error}
-        </div>
-      )}
+      <ErrorDisplay error={error} onClose={() => setError('')} className="mb-4" />
       
       <form onSubmit={handleSubmit}>
         {!isLogin && (

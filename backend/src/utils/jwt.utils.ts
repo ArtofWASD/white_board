@@ -13,11 +13,17 @@ export interface JwtPayload {
 export function extractUserIdFromToken(
   authHeader: string | undefined,
 ): string | null {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+  if (!authHeader) {
     return null;
   }
 
-  const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+  // Use regex for case-insensitive 'Bearer ' check and handle extra spaces
+  const match = authHeader.match(/^bearer\s+(.+)$/i);
+  if (!match) {
+    return null;
+  }
+
+  const token = match[1];
 
   try {
     const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;

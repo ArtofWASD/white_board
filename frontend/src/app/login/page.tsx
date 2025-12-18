@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '../../lib/store/useAuthStore';
@@ -15,12 +15,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login, isAuthenticated, isLoading } = useAuthStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
+  const inviteCode = searchParams.get('inviteCode');
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push('/'); // Redirect to home page which shows calendar
+      router.push(redirect || '/');
     }
-  }, [isAuthenticated, router, isLoading]);
+  }, [isAuthenticated, router, isLoading, redirect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,8 +33,8 @@ export default function LoginPage() {
     try {
       const success = await login(email, password);
       if (success) {
-        // Redirect to home page (which displays calendar) after successful login
-        router.push('/');
+        // Redirect to intended page or home
+        router.push(redirect || '/');
       } else {
         setError('Не удалось войти. Пожалуйста, проверьте учетные данные.');
       }
@@ -131,7 +134,7 @@ export default function LoginPage() {
             <p className="text-gray-600">
               Нет аккаунта?{' '}
               <Button
-                href="/register"
+                href={inviteCode ? `/register?inviteCode=${inviteCode}` : '/register'}
                 variant="link"
                 className="font-medium p-0 h-auto"
               >

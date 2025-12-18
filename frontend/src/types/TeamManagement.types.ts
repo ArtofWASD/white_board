@@ -17,6 +17,8 @@ export interface Team {
   name: string;
   description: string | null;
   ownerId: string;
+  inviteCode?: string;
+  inviteCodeCreatedAt?: string;
   createdAt: string;
   updatedAt: string;
 }

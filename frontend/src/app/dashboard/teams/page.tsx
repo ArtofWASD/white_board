@@ -7,6 +7,7 @@ import { useToast } from '../../../lib/context/ToastContext';
 import { Team } from '../../../types';
 import Button from '../../../components/ui/Button';
 import { Loader } from '../../../components/ui/Loader';
+import AthleteTeamView from '../../../features/teams/AthleteTeamView';
 
 export default function TeamsPage() {
   const { user, token } = useAuthStore();
@@ -24,7 +25,7 @@ export default function TeamsPage() {
   // Fetch user's teams
   useEffect(() => {
     const fetchTeams = async () => {
-      if (!user || (user.role !== 'TRAINER' && user.role !== 'ORGANIZATION_ADMIN')) {
+      if (!user) {
         setLoadingTeams(false);
         return;
       }
@@ -149,20 +150,29 @@ export default function TeamsPage() {
     router.push(`/dashboard/teams/${teamId}`);
   };
 
-  if (!user || (user.role !== 'TRAINER' && user.role !== 'ORGANIZATION_ADMIN')) {
+  if (!user) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-2 text-red-600">Доступ запрещен</h2>
-        <p className="text-gray-700">Только тренеры и администраторы организаций могут управлять командами.</p>
+        <p className="text-gray-700">Пожалуйста, войдите в систему.</p>
       </div>
     );
   }
 
+  const isManagement = user.role === 'TRAINER' || user.role === 'ORGANIZATION_ADMIN';
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">Управление командами</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-8">
+        {isManagement ? 'Управление командами' : 'Моя команда'}
+      </h1>
       
-      <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+      {!isManagement ? (
+        <div className="mt-8">
+          {loadingTeams ? <Loader /> : <AthleteTeamView teams={teams} />}
+        </div>
+      ) : (
+        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
         <h3 className="text-xl font-semibold mb-2 text-indigo-600">Создать команду</h3>
         <p className="text-gray-700 mb-4">Создайте новую команду для управления спортсменами</p>
         {!showCreateTeamForm ? (
@@ -283,6 +293,7 @@ export default function TeamsPage() {
           )}
         </div>
       </div>
+    )}
     </div>
   );
 }

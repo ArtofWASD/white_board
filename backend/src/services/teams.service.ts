@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
+import { randomBytes } from 'crypto';
 import {
   Injectable,
   NotFoundException,
@@ -181,13 +182,60 @@ export class TeamsService {
     // Get all teams where the user is the owner
     const ownedTeams = await (this.prisma as any).team.findMany({
       where: { ownerId: userId },
+      include: {
+        owner: {
+          select: {
+            id: true,
+            name: true,
+            lastName: true,
+            email: true,
+          },
+        },
+        members: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                name: true,
+                lastName: true,
+                email: true,
+                role: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     // Get all teams the user belongs to as a member
     const teamMemberships = await (this.prisma as any).teamMember.findMany({
       where: { userId: userId },
       include: {
-        team: true,
+        team: {
+          include: {
+            owner: {
+              select: {
+                id: true,
+                name: true,
+                lastName: true,
+                email: true,
+              },
+            },
+            members: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    lastName: true,
+                    email: true,
+                    role: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
@@ -267,5 +315,77 @@ export class TeamsService {
     });
 
     return updatedTeam;
+  }
+
+  async refreshInviteCode(teamId: string, userId: string) {
+    const team = await (this.prisma as any).team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new NotFoundException('Team not found');
+    }
+
+    if (team.ownerId !== userId) {
+      throw new ForbiddenException('Only the owner can generate invite codes');
+    }
+
+    // Generate a random 8-character hex string (e.g., "a1b2c3d4")
+    const inviteCode = randomBytes(4).toString('hex');
+
+    const updatedTeam = await (this.prisma as any).team.update({
+      where: { id: teamId },
+      data: {
+        inviteCode,
+        inviteCodeCreatedAt: new Date(),
+      },
+    });
+
+    return { inviteCode: updatedTeam.inviteCode };
+  }
+
+  async joinTeamByInvite(code: string, userId: string) {
+    // Find team by invite code
+    const team = await (this.prisma as any).team.findUnique({
+      where: { inviteCode: code },
+    });
+
+    if (!team) {
+      throw new NotFoundException('Invalid or expired invite code');
+    }
+
+    // Check if user exists
+    const user = await (this.prisma as any).user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Check if member already exists in team
+    const existingMember = await (this.prisma as any).teamMember.findUnique({
+      where: {
+        teamId_userId: {
+          teamId: team.id,
+          userId: userId,
+        },
+      },
+    });
+
+    if (existingMember) {
+      return { message: 'Already a member of this team', teamId: team.id };
+    }
+
+    // Add member to team
+    await (this.prisma as any).teamMember.create({
+      data: {
+        teamId: team.id,
+        userId: userId,
+        role: 'MEMBER', // Default role for invited users
+      },
+    });
+
+    return { message: 'Successfully joined team', teamId: team.id };
   }
 }

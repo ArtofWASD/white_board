@@ -141,6 +141,9 @@ model Team {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   organizationName String?     @map("organization_name") // Deprecated: use organization relation
 
+  inviteCode        String?      @unique @map("invite_code")
+  inviteCodeCreatedAt DateTime? @map("invite_code_created_at")
+
   @@map("teams")
 }
 

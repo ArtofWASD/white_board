@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../../../lib/store/useAuthStore';
 import { useParams, useRouter } from 'next/navigation';
+import { QRCodeCanvas } from 'qrcode.react';
 
 interface User {
   id: string;
@@ -23,6 +24,7 @@ interface Team {
   id: string;
   name: string;
   description?: string;
+  inviteCode?: string;
 }
 
 export default function EditTeamPage() {
@@ -42,12 +44,16 @@ export default function EditTeamPage() {
   // Edit mode state
   const [isEditingName, setIsEditingName] = useState(false);
   const [editNameValue, setEditNameValue] = useState('');
+  
+  const [inviteCode, setInviteCode] = useState<string | null>(null);
+  const [inviteLink, setInviteLink] = useState<string | null>(null);
 
   useEffect(() => {
     if (teamId) {
       fetchTeamDetails();
       fetchTeamMembers();
       fetchAvailableAthletes();
+      fetchInviteCode();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId]);
@@ -127,10 +133,58 @@ export default function EditTeamPage() {
           setAthletes([]);
         }
       } else {
-
+        // Handle error if needed
       }
     } catch (err) {
+      console.error('Failed to fetch athletes', err);
+    }
+  };
 
+  const fetchInviteCode = async () => {
+    try {
+      const response = await fetch(`/api/teams/${teamId}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.inviteCode) {
+          setInviteCode(data.inviteCode);
+          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch invite code', err);
+    }
+  };
+
+  const generateInviteCode = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`/api/teams/${teamId}/invite`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setInviteCode(data.inviteCode);
+        setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`);
+        setSuccess('Пригласительная ссылка создана');
+        setTimeout(() => setSuccess(null), 3000);
+      } else {
+        setError('Не удалось создать пригласительную ссылку');
+      }
+    } catch (err) {
+      setError('Не удалось создать пригласительную ссылку');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -314,6 +368,69 @@ export default function EditTeamPage() {
             {success}
           </div>
         )}
+
+        {/* Invite Section */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">Приглашение в команду</h2>
+          <div className="bg-blue-50 p-6 rounded-lg">
+            <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="flex-1 w-full">
+                  {!inviteCode ? (
+                    <div>
+                      <p className="text-gray-600 mb-4">Создайте уникальную ссылку, чтобы пригласить спортсменов в вашу команду.</p>
+                      <button
+                        onClick={generateInviteCode}
+                        disabled={loading}
+                        className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors"
+                      >
+                        Создать пригласительную ссылку
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Ссылка для приглашения</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            readOnly 
+                            value={inviteLink || ''} 
+                            className="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-800"
+                          />
+                          <button 
+                              onClick={() => {
+                                if (inviteLink) {
+                                  navigator.clipboard.writeText(inviteLink);
+                                  setSuccess('Ссылка скопирована!');
+                                  setTimeout(() => setSuccess(null), 3000);
+                                }
+                              }}
+                              className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+                          >
+                            Копировать
+                          </button>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={generateInviteCode}
+                        disabled={loading}
+                        className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                      >
+                        Сгенерировать новую ссылку
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                {inviteLink && (
+                  <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <QRCodeCanvas value={inviteLink} size={150} />
+                    <span className="text-sm text-gray-500 mt-2 font-medium">QR код для сканирования</span>
+                  </div>
+                )}
+            </div>
+          </div>
+        </div>
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Добавить спортсмена</h2>

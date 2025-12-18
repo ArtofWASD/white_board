@@ -1,27 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import Calendar from '../../features/events/Calendar';
 import Header from '../../components/layout/Header';
 import LeftMenu from '../../components/layout/LeftMenu';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useTeamStore } from '../../lib/store/useTeamStore';
 import Footer from '../../components/layout/Footer';
-
-// Define types for our events and results
-interface EventResult {
-  id: string;
-  time: string;
-  dateAdded: string;
-  username: string;
-}
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  date: string;
-  results?: EventResult[];
-}
+import { NavItem, CalendarEvent, EventResult } from '../../types';
 
 // Define type for API response
 interface ApiEvent {
@@ -41,9 +28,77 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // For showing event details
   const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
   
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated, user, logout } = useAuthStore();
   const { selectedTeam, fetchTeams, teams } = useTeamStore();
   
+  const navItems = React.useMemo(() => {
+    if (!user) return [];
+
+    const items: NavItem[] = [
+      { 
+        label: 'Главная', 
+        href: '/dashboard',
+        icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
+        tooltip: 'Главная'
+      },
+      { 
+        label: 'Команды', 
+        href: '/dashboard/teams',
+        icon: <Image src="/teams_icon.png" alt="Teams" width={32} height={32} />,
+        tooltip: 'Команды'
+      },
+    ];
+
+    if (user.role === 'TRAINER' || user.role === 'ORGANIZATION_ADMIN') {
+      items.push({
+        label: 'Управление', 
+        href: '/dashboard/organization',
+        icon: <Image src="/menegment.png" alt="Management" width={32} height={32} />,
+        tooltip: 'Управление'
+      });
+
+      items.push({ 
+        label: 'Атлеты', 
+        href: '/dashboard/athletes',
+        icon: <Image src="/athlet_icon.png" alt="Athletes" width={32} height={32} />,
+        tooltip: 'Атлеты'
+      });
+
+      if (user.role === 'TRAINER') {
+        items.push({ 
+          label: 'Занятия', 
+          href: '/dashboard/activities',
+          icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
+          tooltip: 'Занятия'
+        });
+      }
+    }
+
+    items.push(
+      { 
+        label: 'Календарь', 
+        href: '/calendar',
+        icon: <Image src="/calendar_icon.png" alt="Calendar" width={32} height={32} />,
+        tooltip: 'Календарь'
+      },
+      { 
+        label: 'Выйти', 
+        href: '#', 
+        onClick: () => {
+          logout();
+        },
+        icon: (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+          </svg>
+        ),
+        tooltip: 'Выйти'
+      }
+    );
+
+    return items;
+  }, [user, logout]);
+
   // Ensure teams are loaded if accessed directly
   useEffect(() => {
     if (isAuthenticated && teams.length === 0) {
@@ -99,6 +154,7 @@ export default function CalendarPage() {
       <Header 
         onLeftMenuClick={handleLeftMenuClick} 
         onRightMenuClick={() => {}} 
+        navItems={navItems}
       />
       
       <LeftMenu 
