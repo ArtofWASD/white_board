@@ -13,6 +13,11 @@ interface User {
   email: string;
   role: string;
   lastName?: string;
+  teamMemberships?: {
+    team: {
+      name: string;
+    };
+  }[];
 }
 
 interface TeamMember {
@@ -49,6 +54,7 @@ export default function EditTeamPage() {
   
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // User detail modal state
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(null);
@@ -199,14 +205,12 @@ export default function EditTeamPage() {
     }
   };
 
-  const addTeamMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAthlete || !user) return;
+  const addTeamMember = async (athleteId: string) => {
+    if (!athleteId || !user) return;
 
     try {
       setLoading(true);
       setError(null);
-      // const token = localStorage.getItem('token'); // Removed direct access
       
       const response = await fetch(`/api/teams/${teamId}/members`, {
         method: 'POST',
@@ -215,14 +219,14 @@ export default function EditTeamPage() {
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
         body: JSON.stringify({
-          userId: selectedAthlete,
+          userId: athleteId,
           role: 'MEMBER',
         }),
       });
       
       if (response.ok) {
         fetchTeamMembers();
-        setSelectedAthlete('');
+        fetchAvailableAthletes();
         setSuccess('Спортсмен успешно добавлен');
         setTimeout(() => setSuccess(null), 3000);
       } else {
@@ -231,7 +235,6 @@ export default function EditTeamPage() {
       }
     } catch (err) {
       setError('Ошибка при добавлении спортсмена');
-
     } finally {
       setLoading(false);
     }
@@ -445,40 +448,68 @@ export default function EditTeamPage() {
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Добавить спортсмена</h2>
-          <form onSubmit={addTeamMember} className="bg-gray-50 p-4 rounded-lg">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-              <div className="md:col-span-2">
-                <label htmlFor="athleteSelect" className="block text-sm font-medium text-gray-700 mb-1">
-                  Выберите спортсмена
-                </label>
-                <select
-                  id="athleteSelect"
-                  value={selectedAthlete}
-                  onChange={(e) => setSelectedAthlete(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">-- Выберите из списка --</option>
-                  {athletes
-                    .filter(athlete => !teamMembers.some(member => member.userId === athlete.id))
-                    .map((athlete) => (
-                    <option key={athlete.id} value={athlete.id}>
-                      {athlete.name} {athlete.lastName ? athlete.lastName : ''} ({athlete.email})
-                    </option>
-                  ))}
-                </select>
+          
+          <div className="mb-6">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
-              
-              <div>
-                <button
-                  type="submit"
-                  disabled={loading || !selectedAthlete}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                >
-                  {loading ? 'Добавление...' : 'Добавить в команду'}
-                </button>
-              </div>
+              <input
+                type="text"
+                placeholder="Поиск по имени или фамилии..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
             </div>
-          </form>
+          </div>
+
+          <div className="max-h-80 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
+            {athletes
+              .filter(athlete => {
+                const fullName = `${athlete.name} ${athlete.lastName || ''}`.toLowerCase();
+                const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+                const notInTeam = !teamMembers.some(member => member.userId === athlete.id);
+                return matchesSearch && notInTeam;
+              })
+              .map((athlete) => (
+                <div key={athlete.id} className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100">
+                  <div className="flex-1 min-w-0 mr-4">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {athlete.name} {athlete.lastName || ''}
+                    </p>
+                    <div className="flex flex-wrap gap-1 mt-0.5">
+                      {athlete.teamMemberships && athlete.teamMemberships.length > 0 ? (
+                        athlete.teamMemberships.map((tm, idx) => (
+                          <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-200 text-gray-700">
+                            {tm.team.name}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-[10px] text-gray-400">Без команды</span>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => addTeamMember(athlete.id)}
+                    disabled={loading}
+                    className="flex-shrink-0 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                  >
+                    Добавить
+                  </button>
+                </div>
+              ))}
+            {athletes.filter(athlete => {
+              const fullName = `${athlete.name} ${athlete.lastName || ''}`.toLowerCase();
+              const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+              const notInTeam = !teamMembers.some(member => member.userId === athlete.id);
+              return matchesSearch && notInTeam;
+            }).length === 0 && (
+              <p className="text-center py-4 text-gray-500 text-sm">Спортсмены не найдены</p>
+            )}
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -493,9 +524,6 @@ export default function EditTeamPage() {
                   <tr>
                     <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                       Имя
-                    </th>
-                    <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                      Email
                     </th>
                     <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                       Роль
@@ -514,9 +542,7 @@ export default function EditTeamPage() {
                       >
                         {member.user.name} {member.user.lastName}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {member.user.email}
-                      </td>
+
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           member.user.role === 'TRAINER' 

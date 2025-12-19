@@ -243,6 +243,15 @@ export class AuthService {
           lastName: true,
           email: true,
           role: true,
+          teamMemberships: {
+            select: {
+              team: {
+                select: {
+                  name: true
+                }
+              }
+            }
+          }
         },
       });
 

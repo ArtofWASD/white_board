@@ -262,34 +262,46 @@ export default function TeamsPage() {
           ) : teams.length === 0 ? (
             <p className="text-gray-600">У вас пока нет команд</p>
           ) : (
-            <div className="flex flex-col gap-4">
-              {teams.map((team) => (
-                <div key={team.id} className="border border-gray-200 rounded-lg p-4 flex justify-between items-center">
-                  <div>
-                    <h5 className="font-medium text-gray-900">{team.name}</h5>
-                    {team.description && (
-                      <p className="text-sm text-gray-600 mt-1">{team.description}</p>
-                    )}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      onClick={() => handleEditTeam(team.id)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      Редактировать
-                    </Button>
-                    <Button
-                      onClick={() => handleDeleteTeam(team.id)}
-                      size="sm"
-                      variant="outline"
-                    >
-                      Удалить
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <AthleteTeamView 
+              teams={teams} 
+              isTrainer={isManagement}
+              onRemoveMember={async (teamId, userId) => {
+                try {
+                  setLoading(true);
+                  const response = await fetch(`/api/teams/${teamId}/members`, {
+                    method: 'DELETE',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      ...(token && { 'Authorization': `Bearer ${token}` }),
+                    },
+                    body: JSON.stringify({ userId }),
+                  });
+            
+                  if (response.ok) {
+                    setTeams(prev => prev.map(t => {
+                       if (t.id === teamId) {
+                         return {
+                           ...t,
+                           members: t.members?.filter(m => m.userId !== userId)
+                         };
+                       }
+                       return t;
+                    }));
+                    info('Спортсмен успешно удален из команды');
+
+                    // If team is empty now, maybe we should refresh or something, but array filtering works for now.
+                  } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    setError(errorData.message || 'Не удалось удалить спортсмена');
+                  }
+                } catch (err) {
+                  setError('Ошибка при удалении спортсмена');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              onEditTeam={handleEditTeam}
+            />
           )}
         </div>
       </div>
