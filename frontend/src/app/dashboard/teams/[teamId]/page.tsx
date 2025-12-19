@@ -480,15 +480,15 @@ export default function EditTeamPage() {
                     <p className="text-sm font-semibold text-gray-900 truncate">
                       {athlete.name} {athlete.lastName || ''}
                     </p>
-                    <div className="flex flex-wrap gap-1 mt-0.5">
+                    <div className="flex flex-wrap gap-1 mt-1">
                       {athlete.teamMemberships && athlete.teamMemberships.length > 0 ? (
                         athlete.teamMemberships.map((tm, idx) => (
-                          <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-gray-200 text-gray-700">
+                          <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
                             {tm.team.name}
                           </span>
                         ))
                       ) : (
-                        <span className="text-[10px] text-gray-400">Без команды</span>
+                        <span className="text-xs font-medium text-gray-500 italic">Без команды</span>
                       )}
                     </div>
                   </div>
