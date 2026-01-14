@@ -150,48 +150,64 @@ export default function WorkoutsPage() {
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
         <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <Link 
-              href="/blog" 
-              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-              </svg>
-              Назад
-            </Link>
-            <div className="w-24"></div> {/* Spacer for alignment */}
-          </div>
-          
-          <div className="space-y-8">
-            {displayedWorkouts.map((item) => (
-              <article 
-                key={item.id} 
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+          {/* Development Message */}
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
+            <div className="mt-8">
+              <Link 
+                href="/" 
+                className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
               >
-                <div className="p-6">
-                  <h2 className="text-2xl font-bold mb-3 text-gray-800">{item.title}</h2>
-                  <p className="text-gray-600 mb-4">{item.excerpt}</p>
-                  <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                    <span>{item.date}</span>
-                    <span className="px-2 py-1 bg-gray-200 rounded-full text-xs">{item.difficulty}</span>
-                  </div>
-                  <Link 
-                    href={`/blog/workouts/${item.id}`}
-                    className="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                  >
-                    Посмотреть тренировку
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
-          
-          {loading && (
-            <div className="mt-8 text-center">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div>
+                На главную
+              </Link>
             </div>
-          )}
+          </div>
+
+          {/* Temporary Content - Hidden */}
+          <div className="hidden">
+            <div className="flex items-center justify-between mb-8">
+              <Link 
+                href="/blog" 
+                className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Назад
+              </Link>
+              <div className="w-24"></div> {/* Spacer for alignment */}
+            </div>
+            
+            <div className="space-y-8">
+              {displayedWorkouts.map((item) => (
+                <article 
+                  key={item.id} 
+                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div className="p-6">
+                    <h2 className="text-2xl font-bold mb-3 text-gray-800">{item.title}</h2>
+                    <p className="text-gray-600 mb-4">{item.excerpt}</p>
+                    <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                      <span>{item.date}</span>
+                      <span className="px-2 py-1 bg-gray-200 rounded-full text-xs">{item.difficulty}</span>
+                    </div>
+                    <Link 
+                      href={`/blog/workouts/${item.id}`}
+                      className="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      Посмотреть тренировку
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+            
+            {loading && (
+              <div className="mt-8 text-center">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-green-600"></div>
+              </div>
+            )}
+          </div>
         </div>
       </main>
       

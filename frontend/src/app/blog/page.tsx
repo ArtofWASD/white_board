@@ -144,70 +144,86 @@ export default function BlogPage() {
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
         <div className="max-w-4xl mx-auto">
-          {/* Two large links for News and Workouts */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <Link 
-              href="/blog/news" 
-              className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
-            >
-              <div className="flex flex-col h-full justify-center items-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Новости</h2>
-                <div className="w-26 h-0.5 bg-black mt-2"></div>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                    Читайте последние новости и обновления
-                  </span>
-                </div>
-              </div>
-            </Link>
-            
-            <Link 
-              href="/blog/workouts" 
-              className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
-            >
-              <div className="flex flex-col h-full justify-center items-center">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Воркауты</h2>
-                <div className="w-28 h-0.5 bg-black mt-2"></div>
-                <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                    Откройте для себя новые тренировки
-                  </span>
-                </div>
-              </div>
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {newsItems.map((item) => (
-              <article 
-                key={item.id} 
-                className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+          {/* Development Message */}
+          <div className="flex flex-col items-center justify-center min-h-[50vh]">
+            <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
+            <div className="mt-8">
+              <Link 
+                href="/" 
+                className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
               >
-                <div className="p-6">
-                  <h2 className="text-xl font-bold mb-3 text-gray-800">{item.title}</h2>
-                  <p className="text-gray-600 mb-4">{item.excerpt}</p>
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>{item.date}</span>
-                    <span>{item.readTime}</span>
-                  </div>
-                  <Link 
-                    href={`/blog/news/${item.id}`}
-                    className="mt-4 text-indigo-600 font-medium hover:text-indigo-800 transition-colors inline-block"
-                  >
-                    Читать далее →
-                  </Link>
-                </div>
-              </article>
-            ))}
+                На главную
+              </Link>
+            </div>
           </div>
-          
-          <div className="mt-8 flex justify-center">
-            <Link 
-              href="/" 
-              className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
-            >
-              На главную
-            </Link>
+
+          {/* Temporary Content - Hidden */}
+          <div className="hidden">
+            {/* Two large links for News and Workouts */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <Link 
+                href="/blog/news" 
+                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
+              >
+                <div className="flex flex-col h-full justify-center items-center">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Новости</h2>
+                  <div className="w-26 h-0.5 bg-black mt-2"></div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      Читайте последние новости и обновления
+                    </span>
+                  </div>
+                </div>
+              </Link>
+              
+              <Link 
+                href="/blog/workouts" 
+                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
+              >
+                <div className="flex flex-col h-full justify-center items-center">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Воркауты</h2>
+                  <div className="w-28 h-0.5 bg-black mt-2"></div>
+                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      Откройте для себя новые тренировки
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {newsItems.map((item) => (
+                <article 
+                  key={item.id} 
+                  className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+                >
+                  <div className="p-6">
+                    <h2 className="text-xl font-bold mb-3 text-gray-800">{item.title}</h2>
+                    <p className="text-gray-600 mb-4">{item.excerpt}</p>
+                    <div className="flex justify-between items-center text-sm text-gray-500">
+                      <span>{item.date}</span>
+                      <span>{item.readTime}</span>
+                    </div>
+                    <Link 
+                      href={`/blog/news/${item.id}`}
+                      className="mt-4 text-indigo-600 font-medium hover:text-indigo-800 transition-colors inline-block"
+                    >
+                      Читать далее →
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+            
+            <div className="mt-8 flex justify-center">
+              <Link 
+                href="/" 
+                className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
+              >
+                На главную
+              </Link>
+            </div>
           </div>
         </div>
       </main>
