@@ -20,7 +20,7 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick, navI
   const { user, isAuthenticated } = useAuthStore();
   const { teams, selectedTeam, selectTeam } = useTeamStore();
 
-  const isDashboard = pathname?.startsWith('/dashboard');
+  const isDashboard = pathname?.startsWith('/dashboard') || pathname === '/calendar';
 
   const handleLoginClick = () => {
     router.push('/login');
@@ -39,11 +39,11 @@ const Header: React.FC<HeaderProps> = ({ onLeftMenuClick, onRightMenuClick, navI
   };
 
   return (
-    <header className="bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative">
+    <header className="bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4">
       <div className="flex items-center">
         <button 
           onClick={onLeftMenuClick}
-          className={`bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer ${navItems ? 'md:hidden' : ''}`}
+          className="bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer"
           aria-label="Menu"
         >
           <Image src="/menu.png" alt="Menu" width={27} height={27} className="sm:w-[35px] sm:h-[35px]" />

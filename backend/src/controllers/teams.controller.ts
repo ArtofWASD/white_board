@@ -8,10 +8,10 @@ import {
   Get,
   Delete,
   Request,
-  Headers,
-  UnauthorizedException,
+  UseGuards,
   Patch,
 } from '@nestjs/common';
+import { UserRole } from '@prisma/client';
 import { TeamsService } from '../services/teams.service';
 import {
   CreateTeamDto,
@@ -19,25 +19,23 @@ import {
   RemoveTeamMemberDto,
   UpdateTeamDto,
 } from '../dtos/teams.dto';
-import { extractUserIdFromToken } from '../utils/jwt.utils';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 @Controller('teams')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class TeamsController {
   constructor(private teamsService: TeamsService) {}
 
   @HttpCode(HttpStatus.CREATED)
   @Post('create')
+  @Roles(UserRole.TRAINER, UserRole.ORGANIZATION_ADMIN, UserRole.SUPER_ADMIN)
   async createTeam(
     @Body() createTeamDto: CreateTeamDto,
-    @Headers('authorization') authHeader: string,
+    @Request() req: any,
   ) {
-    // Extract user ID from JWT token
-    const ownerId = extractUserIdFromToken(authHeader);
-
-    if (!ownerId) {
-      throw new UnauthorizedException('Authentication required');
-    }
-
+    const ownerId = req.user.id;
     const result = await this.teamsService.createTeam(createTeamDto, ownerId);
     return result;
   }
@@ -93,13 +91,9 @@ export class TeamsController {
   @Delete(':teamId')
   async deleteTeam(
     @Param('teamId') teamId: string,
-    @Headers('authorization') authHeader: string,
+    @Request() req: any,
   ) {
-    const userId = extractUserIdFromToken(authHeader);
-    if (!userId) {
-      throw new UnauthorizedException('Authentication required');
-    }
-
+    const userId = req.user.id;
     const result = await this.teamsService.deleteTeam(teamId, userId);
     return result;
   }
@@ -109,13 +103,9 @@ export class TeamsController {
   async updateTeam(
     @Param('teamId') teamId: string,
     @Body() updateTeamDto: UpdateTeamDto,
-    @Headers('authorization') authHeader: string,
+    @Request() req: any,
   ) {
-    const userId = extractUserIdFromToken(authHeader);
-    if (!userId) {
-      throw new UnauthorizedException('Authentication required');
-    }
-
+    const userId = req.user.id;
     const result = await this.teamsService.updateTeam(
       teamId,
       updateTeamDto,
@@ -128,13 +118,9 @@ export class TeamsController {
   @Post(':teamId/invite')
   async refreshInviteCode(
     @Param('teamId') teamId: string,
-    @Headers('authorization') authHeader: string,
+    @Request() req: any,
   ) {
-    const userId = extractUserIdFromToken(authHeader);
-    if (!userId) {
-      throw new UnauthorizedException('Authentication required');
-    }
-
+    const userId = req.user.id;
     const result = await this.teamsService.refreshInviteCode(teamId, userId);
     return result;
   }
@@ -143,13 +129,9 @@ export class TeamsController {
   @Post('invite/:code/join')
   async joinTeamByInvite(
     @Param('code') code: string,
-    @Headers('authorization') authHeader: string,
+    @Request() req: any,
   ) {
-    const userId = extractUserIdFromToken(authHeader);
-    if (!userId) {
-      throw new UnauthorizedException('Authentication required');
-    }
-
+    const userId = req.user.id;
     const result = await this.teamsService.joinTeamByInvite(code, userId);
     return result;
   }
