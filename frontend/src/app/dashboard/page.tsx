@@ -429,7 +429,13 @@ export default function DashboardPage() {
               } else if (visibleExpandedCount <= 2) {
                   mobileClass = 'h-[65vh]';
               } else {
+                  // Standard height for other widgets
                   mobileClass = 'h-[450px]';
+                  
+                  // Specific override for calculator which has tall content (tables)
+                  if (id === 'universal-calculator') {
+                      mobileClass = 'h-[600px]';
+                  }
               }
               
               // Combine with desktop classes

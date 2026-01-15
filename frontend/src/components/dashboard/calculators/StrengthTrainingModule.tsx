@@ -139,7 +139,7 @@ export function StrengthTrainingModule({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">1RM (Максимум)</label>
+            <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">1RM (Максимум)</label>
             <input
               type="number"
               value={oneRepMax || ''}
@@ -151,7 +151,7 @@ export function StrengthTrainingModule({
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Тренировочный Вес (90%)</label>
+            <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">Тренировочный Вес (90%)</label>
             <input
               type="number"
               value={trainingMax || ''}
@@ -169,49 +169,58 @@ export function StrengthTrainingModule({
         <table className="w-full text-sm text-left table-fixed">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th className="px-2 py-3 w-12 text-center">Нед</th>
-              <th className="px-2 py-3 w-[35%]">Разминка</th>
-              <th className="px-2 py-3 w-[35%]">Рабочие сеты</th>
-              <th className="px-2 py-3 text-right">Действие</th>
+              <th className="px-1 py-3 w-8 text-center border-r border-gray-200">Нед</th>
+              <th className="px-1 py-3 w-[35%] border-r border-gray-200">Разминка</th>
+              <th className="px-1 py-3 w-[35%] border-r border-gray-200">Рабочие сеты</th>
+              <th className="px-1 py-3 text-right w-[20%]">Действие</th>
             </tr>
           </thead>
           <tbody>
             {/* Week 1 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
-              <td className="px-2 py-3 font-medium text-gray-900 text-center">1</td>
-              <td className="px-2 py-3 text-gray-500 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">1</td>
+              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 3 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>65% × 5 ({calculateWeight(0.65)}кг)</div>
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div className="font-bold text-blue-600">85% × 5+ ({calculateWeight(0.85)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 text-right">
+              <td className="px-1 py-6 text-right bg-gray-50/30">
                 {loggingWeek === 1 ? (
                   <div className="flex flex-col items-end gap-2" onPointerDown={handleInputPointerDown} onKeyDown={handleInputKeyDown}>
                       <input 
                         type="number" 
-                        className="w-16 px-1 py-1 border rounded text-right text-sm"
+                        className="w-full min-w-[3rem] px-1 py-1 border rounded text-right text-sm"
                         placeholder="Reps"
                         value={logReps || ''}
                         onChange={(e) => setLogReps(Number(e.target.value))}
                         autoFocus
                       />
-                      <div className="flex gap-1">
-                        <button onClick={() => setLoggingWeek(null)} className="text-xs text-gray-500 hover:text-gray-700">Отм</button>
-                        <Button variant="primary" size="sm" onClick={saveResult} disabled={isSubmitting}>OK</Button>
+                      <div className="flex gap-2">
+                        <button onClick={() => setLoggingWeek(null)} className="text-xs text-gray-500 hover:text-gray-700 p-1">Отм</button>
+                        <Button variant="primary" size="sm" onClick={saveResult} disabled={isSubmitting} className="px-2 py-1 h-8 text-xs">OK</Button>
                       </div>
                   </div>
                 ) : (
-                  <div className="flex gap-1 justify-end items-start text-right">
-                    <Button variant="outline" size="sm" onClick={() => startLogging(1, calculateWeight(0.85))} onPointerDown={handleInputPointerDown} className="px-3">Заполнить</Button>
+                  <div className="flex justify-center items-center h-full gap-4">
+                    <button 
+                        onClick={() => startLogging(1, calculateWeight(0.85))} 
+                        onPointerDown={handleInputPointerDown} 
+                        className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                        title="Заполнить"
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
                     <button 
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 1`, 
@@ -219,7 +228,7 @@ export function StrengthTrainingModule({
 Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
 Рабочие: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`
                          )}
-                         className="text-gray-300 hover:text-blue-500 p-1 mt-0.5"
+                         className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
                          title="Добавить в календарь"
                          onPointerDown={handleInputPointerDown}
                      >
@@ -234,40 +243,49 @@ export function StrengthTrainingModule({
 
             {/* Week 2 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
-              <td className="px-2 py-3 font-medium text-gray-900 text-center">2</td>
-              <td className="px-2 py-3 text-gray-500 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">2</td>
+              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 3 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>70% × 3 ({calculateWeight(0.70)}кг)</div>
                   <div>80% × 3 ({calculateWeight(0.80)}кг)</div>
                   <div className="font-bold text-blue-600">90% × 3+ ({calculateWeight(0.90)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 text-right">
+              <td className="px-1 py-6 text-right bg-gray-50/30">
                 {loggingWeek === 2 ? (
                   <div className="flex flex-col items-end gap-2" onPointerDown={handleInputPointerDown} onKeyDown={handleInputKeyDown}>
                       <input 
                         type="number" 
-                        className="w-16 px-1 py-1 border rounded text-right text-sm"
+                        className="w-full min-w-[3rem] px-1 py-1 border rounded text-right text-sm"
                         placeholder="Reps"
                         value={logReps || ''}
                         onChange={(e) => setLogReps(Number(e.target.value))}
                         autoFocus
                       />
-                      <div className="flex gap-1">
-                        <button onClick={() => setLoggingWeek(null)} className="text-xs text-gray-500 hover:text-gray-700" onPointerDown={handleInputPointerDown}>Отм</button>
-                        <Button variant="primary" size="sm" onClick={saveResult} disabled={isSubmitting} onPointerDown={handleInputPointerDown}>OK</Button>
+                      <div className="flex gap-2">
+                        <button onClick={() => setLoggingWeek(null)} className="text-xs text-gray-500 hover:text-gray-700 p-1" onPointerDown={handleInputPointerDown}>Отм</button>
+                        <Button variant="primary" size="sm" onClick={saveResult} disabled={isSubmitting} onPointerDown={handleInputPointerDown} className="px-2 py-1 h-8 text-xs">OK</Button>
                       </div>
                   </div>
                 ) : (
-                  <div className="flex gap-1 justify-end items-start text-right">
-                    <Button variant="outline" size="sm" onClick={() => startLogging(2, calculateWeight(0.90))} onPointerDown={handleInputPointerDown} className="px-3">Заполнить</Button>
+                  <div className="flex justify-center items-center h-full gap-4">
+                    <button 
+                         onClick={() => startLogging(2, calculateWeight(0.90))} 
+                         onPointerDown={handleInputPointerDown} 
+                         className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                         title="Заполнить"
+                     >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
                     <button 
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 2`, 
@@ -275,8 +293,8 @@ export function StrengthTrainingModule({
 Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
 Рабочие: 3x${calculateWeight(0.70)}кг, 3x${calculateWeight(0.80)}кг, 3+x${calculateWeight(0.90)}кг`
                          )}
-                         className="text-gray-300 hover:text-blue-500 p-1 mt-0.5"
-                         title="Добавить в календарь"
+                         className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                         title="Добавить в calendar"
                          onPointerDown={handleInputPointerDown}
                      >
                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -290,40 +308,49 @@ export function StrengthTrainingModule({
 
             {/* Week 3 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
-              <td className="px-2 py-3 font-medium text-gray-900 text-center">3</td>
-              <td className="px-2 py-3 text-gray-500 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">3</td>
+              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 3 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div>85% × 3 ({calculateWeight(0.85)}кг)</div>
                   <div className="font-bold text-blue-600">95% × 1+ ({calculateWeight(0.95)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 text-right">
+              <td className="px-1 py-6 text-right bg-gray-50/30">
                 {loggingWeek === 3 ? (
                   <div className="flex flex-col items-end gap-2" onPointerDown={handleInputPointerDown} onKeyDown={handleInputKeyDown}>
                       <input 
                         type="number" 
-                        className="w-16 px-1 py-1 border rounded text-right text-sm"
+                        className="w-full min-w-[3rem] px-1 py-1 border rounded text-right text-sm"
                         placeholder="Reps"
                         value={logReps || ''}
                         onChange={(e) => setLogReps(Number(e.target.value))}
                         autoFocus
                       />
-                      <div className="flex gap-1">
-                        <button onClick={() => setLoggingWeek(null)} className="text-xs text-gray-500 hover:text-gray-700" onPointerDown={handleInputPointerDown}>Отм</button>
-                        <Button variant="primary" size="sm" onClick={saveResult} disabled={isSubmitting} onPointerDown={handleInputPointerDown}>OK</Button>
+                      <div className="flex gap-2">
+                        <button onClick={() => setLoggingWeek(null)} className="text-xs text-gray-500 hover:text-gray-700 p-1" onPointerDown={handleInputPointerDown}>Отм</button>
+                        <Button variant="primary" size="sm" onClick={saveResult} disabled={isSubmitting} onPointerDown={handleInputPointerDown} className="px-2 py-1 h-8 text-xs">OK</Button>
                       </div>
                   </div>
                 ) : (
-                  <div className="flex gap-1 justify-end items-start text-right">
-                    <Button variant="outline" size="sm" onClick={() => startLogging(3, calculateWeight(0.95))} onPointerDown={handleInputPointerDown} className="px-3">Заполнить</Button>
+                  <div className="flex justify-center items-center h-full gap-4">
+                    <button 
+                         onClick={() => startLogging(3, calculateWeight(0.95))} 
+                         onPointerDown={handleInputPointerDown} 
+                         className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                         title="Заполнить"
+                     >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                    </button>
                     <button 
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 3`, 
@@ -331,7 +358,7 @@ export function StrengthTrainingModule({
 Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
 Рабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`
                          )}
-                         className="text-gray-300 hover:text-blue-500 p-1 mt-0.5"
+                         className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
                          title="Добавить в календарь"
                          onPointerDown={handleInputPointerDown}
                      >
@@ -346,23 +373,25 @@ export function StrengthTrainingModule({
 
             {/* Week 4 (Deload) */}
             <tr className="bg-white hover:bg-gray-50 align-top">
-              <td className="px-2 py-3 font-medium text-gray-900 text-center">4</td>
-              <td className="px-2 py-3 text-gray-500 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">4</td>
+              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 5 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 break-words text-xs sm:text-sm">
+              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
                 <div className="space-y-1 text-gray-500">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 5 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-2 py-3 text-right">
-                <span className="text-xs text-gray-400">Deload</span>
+              <td className="px-1 py-6 text-right bg-gray-50/30">
+                <div className="flex justify-center items-center h-full">
+                  <span className="text-[10px] text-gray-400">Deload</span>
+                </div>
               </td>
             </tr>
           </tbody>
