@@ -16,8 +16,8 @@ export default function DashboardLayout({
 }) {
   const { user, isAuthenticated, logout, isLoading, verifyUser } = useAuthStore();
   const { fetchTeams } = useTeamStore();
+  const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const router = useRouter();
-  const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const navItems = React.useMemo<NavItem[]>(() => {
     if (!user) return [];
 
@@ -102,9 +102,7 @@ export default function DashboardLayout({
     }
   }, [user, isAuthenticated, router, isLoading, fetchTeams, verifyUser]);
 
-  const handleLeftMenuClick = () => {
-    setLeftMenuOpen(!leftMenuOpen);
-  };
+
 
   if (!isAuthenticated || !user) {
     return null; // Or a loading spinner
@@ -113,21 +111,21 @@ export default function DashboardLayout({
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header 
-        onLeftMenuClick={handleLeftMenuClick} 
         onRightMenuClick={() => {}} 
+        onLeftMenuClick={() => setIsLeftMenuOpen(true)}
         navItems={navItems}
       />
       
-      <LeftMenu 
-        isOpen={leftMenuOpen}
-        onClose={() => setLeftMenuOpen(false)}
+      <LeftMenu
+        isOpen={isLeftMenuOpen}
+        onClose={() => setIsLeftMenuOpen(false)}
         showAuth={false}
         toggleAuth={() => {}}
-        events={[]} // We might need to pass events here if we want to show them in the menu
+        events={[]}
         onShowEventDetails={() => {}}
         navItems={navItems}
       />
-      
+
       <main className="flex-grow container mx-auto px-4 py-8">
         {children}
       </main>

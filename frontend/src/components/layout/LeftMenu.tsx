@@ -161,12 +161,6 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
           <div className="mt-4">
             {isAuthenticated && user ? (
               <div className="mb-4">
-                <div className="bg-gray-100 p-4 rounded-lg">
-                  <h3 className="font-bold text-lg mb-2">Физические параметры</h3>
-                  <p className="text-gray-700"><span className="font-medium">Рост:</span> {user.height ? `${user.height} см` : 'Не указан'}</p>
-                  <p className="text-gray-700"><span className="font-medium">Вес:</span> {user.weight ? `${user.weight} кг` : 'Не указан'}</p>
-                </div>
-
                 {/* Team Members Section */}
                 {selectedTeam && (
                   <div className="mt-4 bg-gray-50 p-4 rounded-lg">

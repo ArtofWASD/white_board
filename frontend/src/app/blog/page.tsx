@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import Header from '../../components/layout/Header';
-import LeftMenu from '../../components/layout/LeftMenu';
 import Footer from '../../components/layout/Footer';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 
@@ -42,7 +41,6 @@ interface ApiEvent {
 }
 
 export default function BlogPage() {
-  const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [events, setEvents] = useState<CalendarEvent[]>([]); // For left menu events
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -80,9 +78,7 @@ export default function BlogPage() {
     fetchEvents();
   }, [isAuthenticated, user]);
 
-  const handleLeftMenuClick = () => {
-    setLeftMenuOpen(!leftMenuOpen);
-  };
+
 
   const toggleAuth = () => {
     setShowAuth(!showAuth);
@@ -129,20 +125,10 @@ export default function BlogPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header 
-        onLeftMenuClick={handleLeftMenuClick} 
         onRightMenuClick={() => {}} 
       />
       
-      <LeftMenu 
-        isOpen={leftMenuOpen}
-        onClose={handleLeftMenuClick}
-        showAuth={showAuth}
-        toggleAuth={toggleAuth}
-        events={events}
-        onShowEventDetails={handleShowEventDetails}
-      />
-      
-      <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
+      <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
           {/* Development Message */}
           <div className="flex flex-col items-center justify-center min-h-[50vh]">

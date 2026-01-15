@@ -55,6 +55,14 @@ export default function DashboardPage() {
   // Default to universal calculator, but support all IDs
   const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator']);
   const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric' | 'symmetric-1-1'>('asymmetric');
+  const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
+
+  const handleToggleExpand = (id: string) => {
+    setExpandedItems(prev => ({
+      ...prev,
+      [id]: !(prev[id] ?? true) // Default to true if undefined
+    }));
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -219,31 +227,7 @@ export default function DashboardPage() {
     saveLayout(items, mode);
   };
 
-  const renderWidget = (id: string) => {
-    switch (id) {
-      case 'exercise-tracker':
-        return (
-          <ExerciseTracker 
-            exercises={exercises}
-            isLoading={isLoading}
-            onCreateExercise={handleCreateExercise}
-            onAddRecord={handleAddRecord}
-            onUpdateExercise={handleUpdateExercise}
-          />
-        );
-      case 'weight-tracker':
-        return user ? <WeightTracker user={user} /> : null;
-      case 'recent-activities':
-        return <RecentActivities exercises={exercises} events={events} />;
-      case 'universal-calculator':
-        return <UniversalCalculator exercises={exercises} />;
-
-      default:
-        return null;
-    }
-  };
-
-  // Filter items based on feature flags and user state
+    // Filter items based on feature flags and user state
   const visibleItems = items.filter(id => {
     // Organization Admins should not see training widgets
     if (user?.role === 'ORGANIZATION_ADMIN') {
@@ -273,6 +257,39 @@ export default function DashboardPage() {
     return true;
   });
 
+  const renderWidget = (id: string) => {
+    const isExpanded = expandedItems[id] ?? true;
+
+    // Common props for all widgets
+    const commonProps = {
+        isExpanded,
+        onToggle: () => handleToggleExpand(id),
+    };
+
+    switch (id) {
+      case 'exercise-tracker':
+        return (
+          <ExerciseTracker 
+            exercises={exercises}
+            isLoading={isLoading}
+            onCreateExercise={handleCreateExercise}
+            onAddRecord={handleAddRecord}
+            onUpdateExercise={handleUpdateExercise}
+            {...commonProps}
+          />
+        );
+      case 'weight-tracker':
+        return user ? <WeightTracker user={user} {...commonProps} /> : null;
+      case 'recent-activities':
+        return <RecentActivities exercises={exercises} events={events} {...commonProps} />;
+      case 'universal-calculator':
+        return <UniversalCalculator exercises={exercises} {...commonProps} />;
+
+      default:
+        return null;
+    }
+  };
+
   if (isLoading) {
     return <Loader />;
   }
@@ -294,7 +311,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full px-1 sm:px-6 lg:px-8 py-8">
       <div className="bg-white rounded-lg shadow-xl p-6 mb-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
@@ -315,20 +332,21 @@ export default function DashboardPage() {
               variant="ghost"
               isIcon={true}
               tooltip="Редактировать профиль"
-              className="mr-12"
+              className="mr-2 sm:mr-12"
             >
               <Image 
                 src="/edit_profile_icon.png" 
                 alt="Редактировать профиль" 
                 width={40} 
                 height={40} 
+                className="w-8 h-8 sm:w-10 sm:h-10"
               />
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end mb-6">
+      <div className="hidden lg:flex justify-end mb-6">
         <div className="flex bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => handleLayoutChange('asymmetric')}
@@ -398,7 +416,33 @@ export default function DashboardPage() {
           }`}>
             {visibleItems.map((id, index) => {
               const isWide = (index % 4 === 0 || index % 4 === 3) && layoutMode === 'asymmetric';
-              const className = `h-[450px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'}`;
+              
+              // Mobile height calculation
+              const isExpanded = expandedItems[id] ?? true;
+              const visibleExpandedCount = visibleItems.filter(i => expandedItems[i] ?? true).length;
+              
+              let mobileClass = '';
+              if (!isExpanded) {
+                  mobileClass = 'h-[50px]';
+              } else if (visibleExpandedCount === 1) {
+                  mobileClass = 'h-[calc(100dvh-200px)]';
+              } else if (visibleExpandedCount <= 2) {
+                  mobileClass = 'h-[65vh]';
+              } else {
+                  mobileClass = 'h-[450px]';
+              }
+              
+              // Combine with desktop classes
+              // On desktop (lg), we generally keep the fixed height 450px OR allow auto if we want.
+              // But user request specifically focused on "smartphones and tablets".
+              // So I will override mobile height with `lg:h-[450px]` (standard)
+              // UNLESS we want collapse on desktop too? Plan said "Collapse button visible only on mobile/tablet".
+              // So on desktop, it's always "Expanded" effectively in UI, but state might be whatever.
+              // But if the button is hidden on desktop, user can't toggle it. 
+              // So `isExpanded` state is effectively ignored visually on desktop OR we respect it if we let them.
+              // I will keep `lg:h-[450px]` fixed for desktop to ensure grid stability.
+              
+              const className = `${mobileClass} lg:h-[450px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'} transition-all duration-300`;
               
               return (
                 <SortableItem key={id} id={id} className={className}>

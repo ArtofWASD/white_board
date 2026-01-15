@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Header from '../../../components/layout/Header';
-import LeftMenu from '../../../components/layout/LeftMenu';
 import { useAuthStore } from '../../../lib/store/useAuthStore';
 import Footer from '../../../components/layout/Footer';
 
@@ -18,16 +17,13 @@ interface NewsItem {
 }
 
 export default function NewsPage() {
-  const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [displayedNews, setDisplayedNews] = useState<NewsItem[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   
-  const handleLeftMenuClick = () => {
-    setLeftMenuOpen(!leftMenuOpen);
-  };
+
 
   const toggleAuth = () => {
     setShowAuth(!showAuth);
@@ -136,20 +132,10 @@ export default function NewsPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header 
-        onLeftMenuClick={handleLeftMenuClick} 
         onRightMenuClick={() => {}} 
       />
       
-      <LeftMenu 
-        isOpen={leftMenuOpen}
-        onClose={handleLeftMenuClick}
-        showAuth={showAuth}
-        toggleAuth={toggleAuth}
-        events={[]}
-        onShowEventDetails={() => {}}
-      />
-      
-      <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
+      <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
           {/* Development Message */}
           <div className="flex flex-col items-center justify-center min-h-[50vh]">

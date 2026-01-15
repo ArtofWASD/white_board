@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../ui/Card';
 
 interface DashboardWidgetProps {
@@ -7,6 +7,8 @@ interface DashboardWidgetProps {
   children: React.ReactNode;
   headerActions?: React.ReactNode;
   noPadding?: boolean;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
@@ -15,7 +17,11 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   children,
   headerActions,
   noPadding = false,
+  isExpanded = true,
+  onToggle,
 }) => {
+  // const [isCollapsed, setIsCollapsed] = useState(false);
+
   const handlePointerDown = (e: React.PointerEvent) => {
     // Only stop propagation if we are interacting with interactive elements inside the widget
     // But usually for dnd-kit grid, we want the *header* or specific handle to drag, 
@@ -35,20 +41,46 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   };
 
   return (
-    <Card className={`h-full flex flex-col relative ${className}`} noPadding={true}>
+    <Card className={`h-full flex flex-col relative transition-all duration-300 ${className} ${!isExpanded ? 'overflow-hidden' : ''}`} noPadding={true}>
       {(title || headerActions) && (
-         <div className="p-4 border-b border-gray-100 flex justify-between items-center shrink-0">
-           {title && <h2 className="text-xl font-bold text-gray-900">{title}</h2>}
-           {headerActions && <div className="flex items-center gap-2">{headerActions}</div>}
+         <div className={`flex justify-between items-center shrink-0 ${!isExpanded ? 'px-4 h-full' : 'p-4 border-b border-gray-100'}`}>
+           {title && <h2 className={`font-bold text-gray-900 transition-all ${!isExpanded ? 'text-base' : 'text-xl'}`}>{title}</h2>}
+           <div className="flex items-center gap-2">
+             {headerActions && <div>{headerActions}</div>}
+             {/* Collapse button - only visible on mobile/tablet */}
+             <button 
+                onClick={onToggle}
+                className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+                title={!isExpanded ? "Развернуть" : "Свернуть"}
+                onPointerDown={(e) => e.stopPropagation()} 
+             >
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  width="24" 
+                  height="24" 
+                  viewBox="0 0 24 24" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                  className={`transform transition-transform duration-200 ${!isExpanded ? 'rotate-180' : ''}`}
+                >
+                  <polyline points="18 15 12 9 6 15"></polyline>
+                </svg>
+             </button>
+           </div>
          </div>
       )}
       
+      {isExpanded && (
       <div 
         className={`flex-1 overflow-hidden ${!noPadding ? 'p-4' : ''}`}
         // We can add a class here to mark it as "no-drag" region if we configure dnd-sensor to ignore it
       >
         {children}
       </div>
+      )}
     </Card>
   );
 };

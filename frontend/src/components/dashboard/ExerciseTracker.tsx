@@ -16,6 +16,8 @@ interface ExerciseTrackerProps {
   onCreateExercise: (name: string, initialWeight?: number) => Promise<void>;
   onAddRecord: (exerciseId: string, weight: number) => Promise<void>;
   onUpdateExercise: (id: string, name: string) => Promise<void>;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 export function ExerciseTracker({ 
@@ -23,13 +25,17 @@ export function ExerciseTracker({
   isLoading, 
   onCreateExercise, 
   onAddRecord,
-  onUpdateExercise
+  onUpdateExercise,
+  isExpanded = true,
+  onToggle
 }: ExerciseTrackerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [newExerciseName, setNewExerciseName] = useState('');
   const [initialWeight, setInitialWeight] = useState('');
+
+  // const [isCollapsed, setIsCollapsed] = useState(false); // REMOVED local state
 
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,18 +56,47 @@ export function ExerciseTracker({
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 space-y-6 h-full flex flex-col">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">Прогресс упражнений</h2>
-        <Button 
-          onClick={() => setIsCreating(!isCreating)}
-          onPointerDown={(e) => e.stopPropagation()}
-        >
-          {isCreating ? 'Отмена' : 'Добавить упражнение'}
-        </Button>
+    <div className={`bg-white rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? 'overflow-hidden justify-center px-4' : 'p-6'}`}>
+      <div className={`flex justify-between items-center ${!isExpanded ? '' : 'mb-6'}`}>
+        <h2 className={`font-bold text-gray-800 transition-all ${!isExpanded ? 'text-lg' : 'text-2xl'}`}>Прогресс упражнений</h2>
+        
+        <div className="flex items-center gap-2">
+          {isExpanded && (
+            <Button 
+              onClick={() => setIsCreating(!isCreating)}
+              onPointerDown={(e) => e.stopPropagation()}
+            >
+              {isCreating ? 'Отмена' : 'Добавить'}
+            </Button>
+          )}
+          {/* Collapse button - only visible on mobile/tablet */}
+          <button 
+            onClick={onToggle}
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title={!isExpanded ? "Развернуть" : "Свернуть"}
+            onPointerDown={(e) => e.stopPropagation()} 
+          >
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className={`transform transition-transform duration-200 ${!isExpanded ? 'rotate-180' : ''}`}
+            >
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+        </div>
       </div>
 
-      {isCreating && (
+      {isExpanded && (
+        <>
+          {isCreating && (
         <form onSubmit={handleCreateExercise} onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
           <div className="flex gap-4">
             <input
@@ -116,6 +151,8 @@ export function ExerciseTracker({
           </div>
         )}
       </div>
+      </>
+    )}
     </div>
   );
 }

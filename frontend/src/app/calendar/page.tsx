@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Calendar from '../../features/events/Calendar';
 import Header from '../../components/layout/Header';
-import LeftMenu from '../../components/layout/LeftMenu';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useTeamStore } from '../../lib/store/useTeamStore';
 import Footer from '../../components/layout/Footer';
@@ -21,9 +20,11 @@ interface ApiEvent {
 
 import TeamSelector from '../../features/events/TeamSelector';
 
+import LeftMenu from '../../components/layout/LeftMenu';
+
 export default function CalendarPage() {
-  const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
+  const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
   const [events, setEvents] = useState<CalendarEvent[]>([]); // Store events for displaying results
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // For showing event details
   const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
@@ -126,9 +127,7 @@ export default function CalendarPage() {
     setEvents(newEvents);
   }, []);
 
-  const handleLeftMenuClick = () => {
-    setLeftMenuOpen(!leftMenuOpen);
-  };
+
 
   // This function is no longer needed as dashboard is a separate page
   // const handleRightMenuClick = () => {};
@@ -152,21 +151,22 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header 
-        onLeftMenuClick={handleLeftMenuClick} 
         onRightMenuClick={() => {}} 
+        onLeftMenuClick={() => setIsLeftMenuOpen(true)}
         navItems={navItems}
       />
       
-      <LeftMenu 
-        isOpen={leftMenuOpen}
-        onClose={handleLeftMenuClick}
+      <LeftMenu
+        isOpen={isLeftMenuOpen}
+        onClose={() => setIsLeftMenuOpen(false)}
         showAuth={showAuth}
         toggleAuth={toggleAuth}
         events={events}
         onShowEventDetails={handleShowEventDetails}
+        navItems={navItems}
       />
-      
-      <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-2 sm:p-4`}>
+
+      <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-2 sm:p-4`}>
         <div className="mb-4 flex justify-end">
             <TeamSelector 
                 selectedTeamId={calendarTeamId} 
@@ -175,7 +175,7 @@ export default function CalendarPage() {
             />
         </div>
         <Calendar 
-          isMenuOpen={leftMenuOpen} 
+          isMenuOpen={false} 
           onUpdateEvents={updateEvents} 
           teamId={calendarTeamId || undefined} 
         />

@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import Header from '../../../../components/layout/Header';
-import LeftMenu from '../../../../components/layout/LeftMenu';
 import Footer from '../../../../components/layout/Footer';
 
 // Define types for news
@@ -17,12 +16,7 @@ interface NewsItem {
 }
 
 export default function NewsDetailPage({ params }: { params: { id: string } }) {
-  const [leftMenuOpen, setLeftMenuOpen] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
-
-  const handleLeftMenuClick = () => {
-    setLeftMenuOpen(!leftMenuOpen);
-  };
 
   const toggleAuth = () => {
     setShowAuth(!showAuth);
@@ -71,20 +65,10 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
     return (
       <div className="min-h-screen flex flex-col">
         <Header 
-          onLeftMenuClick={handleLeftMenuClick} 
           onRightMenuClick={() => {}} 
         />
         
-        <LeftMenu 
-          isOpen={leftMenuOpen}
-          onClose={handleLeftMenuClick}
-          showAuth={showAuth}
-          toggleAuth={toggleAuth}
-          events={[]}
-          onShowEventDetails={() => {}}
-        />
-        
-        <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
+        <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <Link 
@@ -120,20 +104,10 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
   return (
     <div className="min-h-screen flex flex-col">
       <Header 
-        onLeftMenuClick={handleLeftMenuClick} 
         onRightMenuClick={() => {}} 
       />
       
-      <LeftMenu 
-        isOpen={leftMenuOpen}
-        onClose={handleLeftMenuClick}
-        showAuth={showAuth}
-        toggleAuth={toggleAuth}
-        events={[]}
-        onShowEventDetails={() => {}}
-      />
-      
-      <main className={`flex-grow transition-all duration-300 ease-in-out ${leftMenuOpen ? 'ml-80' : 'ml-0'} p-4`}>
+      <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <Link 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 interface Exercise {
   id: string;
@@ -26,6 +26,8 @@ interface Event {
 interface RecentActivitiesProps {
   exercises: Exercise[];
   events: Event[];
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 interface Activity {
@@ -37,7 +39,8 @@ interface Activity {
   originalId: string; // exerciseId or eventId
 }
 
-export function RecentActivities({ exercises, events }: RecentActivitiesProps) {
+export function RecentActivities({ exercises, events, isExpanded = true, onToggle }: RecentActivitiesProps) {
+  // const [isCollapsed, setIsCollapsed] = useState(false);
   // Flatten exercise records
   const exerciseActivities: Activity[] = exercises.flatMap((exercise) => 
     exercise.records.map((record) => ({
@@ -81,8 +84,34 @@ export function RecentActivities({ exercises, events }: RecentActivitiesProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 h-full flex flex-col">
-      <h2 className="text-2xl font-bold text-gray-800 mb-6">Последние активности</h2>
+    <div className={`bg-white rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? 'overflow-hidden justify-center px-4' : 'p-6'}`}>
+      <div className={`flex justify-between items-center ${!isExpanded ? '' : 'mb-6'}`}>
+        <h2 className={`font-bold text-gray-800 transition-all ${!isExpanded ? 'text-lg' : 'text-2xl'}`}>Последние активности</h2>
+        <button 
+          onClick={onToggle}
+          className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+          title={!isExpanded ? "Развернуть" : "Свернуть"}
+          onPointerDown={(e) => e.stopPropagation()} 
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className={`transform transition-transform duration-200 ${!isExpanded ? 'rotate-180' : ''}`}
+          >
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </button>
+      </div>
+
+      {isExpanded && (
+       <>
       
       <div className="flex-1 overflow-y-auto min-h-0 pr-2">
         {recentActivities.length === 0 ? (
@@ -110,6 +139,8 @@ export function RecentActivities({ exercises, events }: RecentActivitiesProps) {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

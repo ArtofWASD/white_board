@@ -15,9 +15,11 @@ interface Exercise {
 
 interface UniversalCalculatorProps {
   exercises: Exercise[];
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
-export function UniversalCalculator({ exercises }: UniversalCalculatorProps) {
+export function UniversalCalculator({ exercises, isExpanded, onToggle }: UniversalCalculatorProps) {
   const { user } = useAuthStore();
   const { flags } = useFeatureFlagStore();
   const { success, error: toastError } = useToast();
@@ -110,6 +112,8 @@ export function UniversalCalculator({ exercises }: UniversalCalculatorProps) {
         title="Калькулятор" 
         headerActions={moduleSwitcher}
         className="shadow-md border-0"
+        isExpanded={isExpanded}
+        onToggle={onToggle}
     >
       <InteractiveArea className="h-full flex flex-col">
           {activeModule === 'texas' && showTexas && (
