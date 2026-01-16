@@ -18,11 +18,12 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({ selectedTeamId, onSelectTea
       </label>
       <select
         id="team-select"
-        value={selectedTeamId || ''}
-        onChange={(e) => onSelectTeam(e.target.value === '' ? null : e.target.value)}
+        value={selectedTeamId || 'my'}
+        onChange={(e) => onSelectTeam(e.target.value)}
         className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
       >
-        <option value="">Все события (Мои + Организация)</option>
+        <option value="my">Мои события</option>
+        <option value="all_teams">Все команды</option>
         {teams.map((team) => (
           <option key={team.id} value={team.id}>
             {team.name}

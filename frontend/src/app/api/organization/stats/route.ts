@@ -1,6 +1,23 @@
 import { NextResponse } from 'next/server';
 
+import { cookies } from "next/headers"
+
 const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+
+// Helper function to get token from localStorage (we'll get it from cookies in the request)
+async function getToken(request: Request) {
+  // Try to get token from Authorization header first
+  const authHeader =
+    request.headers.get("Authorization") || request.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader
+  }
+
+  // Fallback to cookies
+  const cookieStore = await cookies()
+  const token = cookieStore.get("token")
+  return token ? `Bearer ${token.value}` : null
+}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -11,8 +28,15 @@ export async function GET(request: Request) {
   }
 
   try {
+    // Get token from request
+    const authHeader = await getToken(request)
+
     const response = await fetch(`${BACKEND_URL}/organization/stats/${trainerId}`, {
-        cache: 'no-store'
+        cache: 'no-store',
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader && { Authorization: authHeader }),
+        },
     });
     
     // Check if the response body is empty or invalid JSON

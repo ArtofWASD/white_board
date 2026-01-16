@@ -139,7 +139,7 @@ export function StrengthTrainingModule({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">1RM (Максимум)</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">1RM (Максимум)</label>
             <input
               type="number"
               value={oneRepMax || ''}
@@ -151,7 +151,7 @@ export function StrengthTrainingModule({
             />
           </div>
           <div>
-            <label className="block text-[10px] sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">Тренировочный Вес (90%)</label>
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">Тренировочный Вес (90%)</label>
             <input
               type="number"
               value={trainingMax || ''}
@@ -179,14 +179,14 @@ export function StrengthTrainingModule({
             {/* Week 1 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">1</td>
-              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 3 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>65% × 5 ({calculateWeight(0.65)}кг)</div>
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
@@ -244,14 +244,14 @@ export function StrengthTrainingModule({
             {/* Week 2 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">2</td>
-              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
-                  <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
-                  <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
-                  <div>60% × 3 ({calculateWeight(0.60)}кг)</div>
+                  <div>45% × 5 ({calculateWeight(0.45)}кг)</div>
+                  <div>55% × 5 ({calculateWeight(0.55)}кг)</div>
+                  <div>65% × 3 ({calculateWeight(0.65)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>70% × 3 ({calculateWeight(0.70)}кг)</div>
                   <div>80% × 3 ({calculateWeight(0.80)}кг)</div>
@@ -290,7 +290,7 @@ export function StrengthTrainingModule({
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 2`, 
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
-Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Разминка: 5x${calculateWeight(0.45)}кг, 5x${calculateWeight(0.55)}кг, 3x${calculateWeight(0.65)}кг
 Рабочие: 3x${calculateWeight(0.70)}кг, 3x${calculateWeight(0.80)}кг, 3+x${calculateWeight(0.90)}кг`
                          )}
                          className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
@@ -309,14 +309,14 @@ export function StrengthTrainingModule({
             {/* Week 3 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">3</td>
-              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
-                  <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
-                  <div>60% × 3 ({calculateWeight(0.60)}кг)</div>
+                  <div>60% × 5 ({calculateWeight(0.60)}кг)</div>
+                  <div>70% × 3 ({calculateWeight(0.70)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div>85% × 3 ({calculateWeight(0.85)}кг)</div>
@@ -355,7 +355,7 @@ export function StrengthTrainingModule({
                          onClick={() => onAddToCalendar(
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || '5/3/1'}: Неделя 3`, 
                              `${exercises.find(e => e.id === selectedExerciseId)?.name || 'Упражнение'}:
-Разминка: 5x${calculateWeight(0.40)}кг, 5x${calculateWeight(0.50)}кг, 3x${calculateWeight(0.60)}кг
+Разминка: 5x${calculateWeight(0.50)}кг, 5x${calculateWeight(0.60)}кг, 3x${calculateWeight(0.70)}кг
 Рабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`
                          )}
                          className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
@@ -374,14 +374,14 @@ export function StrengthTrainingModule({
             {/* Week 4 (Deload) */}
             <tr className="bg-white hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">4</td>
-              <td className="px-1 py-6 text-gray-500 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
                   <div>60% × 5 ({calculateWeight(0.60)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-[10px] sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
                 <div className="space-y-1 text-gray-500">
                   <div>40% × 5 ({calculateWeight(0.40)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.50)}кг)</div>
@@ -390,7 +390,7 @@ export function StrengthTrainingModule({
               </td>
               <td className="px-1 py-6 text-right bg-gray-50/30">
                 <div className="flex justify-center items-center h-full">
-                  <span className="text-[10px] text-gray-400">Deload</span>
+                  <span className="text-xs text-gray-400">Deload</span>
                 </div>
               </td>
             </tr>

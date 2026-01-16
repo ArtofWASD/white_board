@@ -1,11 +1,30 @@
 import { NextResponse } from "next/server"
 
+import { cookies } from "next/headers"
+
+// Helper function to get token from localStorage (we'll get it from cookies in the request)
+async function getToken(request: Request) {
+  // Try to get token from Authorization header first
+  const authHeader =
+    request.headers.get("Authorization") || request.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader
+  }
+
+  // Fallback to cookies
+  const cookieStore = await cookies()
+  const token = cookieStore.get("token")
+  return token ? `Bearer ${token.value}` : null
+}
+
 // Create a new event
 export async function POST(request: Request) {
   try {
     const { userId, title, eventDate, description, exerciseType, exercises, teamId } =
       await request.json()
 
+    // Get token from request
+    const authHeader = await getToken(request)
 
 
     // Forward the request to our NestJS backend
@@ -16,6 +35,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader && { Authorization: authHeader }),
       },
       body: JSON.stringify({
         userId,
@@ -69,6 +89,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: "User ID is required" }, { status: 400 })
     }
 
+    // Get token from request
+    const authHeader = await getToken(request)
+
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     
@@ -82,6 +105,7 @@ export async function GET(request: Request) {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader && { Authorization: authHeader }),
       },
     })
 

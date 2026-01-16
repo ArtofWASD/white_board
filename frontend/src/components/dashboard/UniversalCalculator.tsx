@@ -42,10 +42,11 @@ export function UniversalCalculator({ exercises, isExpanded, onToggle }: Univers
     }
   }, [showTexas, show531]);
 
-  // If neither is enabled, don't render anything (or handle in parent)
-  if (!showTexas && !show531) {
-      return null;
-  }
+  // If neither is enabled, we still render the widget to show the "Select available module" message
+  // so the user isn't confused why the widget disappeared.
+  // if (!showTexas && !show531) {
+  //     return null;
+  // }
 
   const openCalendarModal = (title: string, description: string) => {
     setCalendarModalData({ title, description });

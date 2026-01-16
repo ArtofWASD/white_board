@@ -38,7 +38,13 @@ export default function OrganizationPage() {
   const fetchStats = async () => {
     try {
       if (!user) return;
-      const response = await fetch(`/api/organization/stats?trainerId=${user.id}`);
+      const { token } = useAuthStore.getState();
+      const response = await fetch(`/api/organization/stats?trainerId=${user.id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        }
+      });
       if (response.ok) {
         const data = await response.json();
         setStats(data);

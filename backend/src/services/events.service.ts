@@ -147,17 +147,7 @@ export class EventsService {
 
   async getEventsByUserId(userId: string, teamId?: string) {
     if (teamId) {
-      // If teamId is provided, fetch events for that team OR personal events for the user
-      // Note: If calling as admin viewing another team, we might just want that team's events?
-      // Current logic: Team events OR (Personal events of Caller AND teamId=null) ??
-      // Actually, if filtering by Team, we likely just want that Team's events.
-      // But the existing logic was: OR [ {teamId}, {userId, teamId: null} ]
-      // This mixes "My Personal Stuff" into "Team View". Let's keep it for compatibility if desired,
-      // OR if the requirement is "Select Team -> Show ONLY Team", we should change it.
-      // Given the "Team Selector" feature, users probably want to see JUST the team.
-      // However, for safety/legacy, I will stick to "Events relevant to this context".
-      
-      // Fetch all members of the team
+      // Specific Team View
       const teamMembers = await (this.prisma as any).teamMember.findMany({
         where: { teamId },
         select: { userId: true },
@@ -169,7 +159,7 @@ export class EventsService {
         where: {
           OR: [
             { teamId: teamId },
-            { userId: { in: memberIds } }, // Include events from all team members
+            { userId: { in: memberIds } },
           ],
         },
         orderBy: { eventDate: 'asc' },
@@ -182,7 +172,7 @@ export class EventsService {
         },
       });
     } else {
-      // Fetching "ALL" (no specific team selected)
+      // Normal User View / All Teams View
       
       // 1. Check if user is Organization Admin
       const user = await (this.prisma as any).user.findUnique({
@@ -191,8 +181,6 @@ export class EventsService {
       });
 
       if (user?.role === 'organization_admin' && user.organizationName) {
-          // Admin View: All events in Organization
-          
           // Find all users in org
           const orgUsers = await (this.prisma as any).user.findMany({
               where: { organizationName: user.organizationName },
@@ -210,8 +198,8 @@ export class EventsService {
           return (this.prisma as any).event.findMany({
             where: {
               OR: [
-                { userId: { in: orgUserIds } }, // Created by any user in org
-                { teamId: { in: orgTeamIds } }, // Associated with any team in org
+                { userId: { in: orgUserIds } },
+                { teamId: { in: orgTeamIds } },
               ],
             },
             orderBy: { eventDate: 'asc' },
@@ -225,19 +213,39 @@ export class EventsService {
           });
       }
 
-      // 2. Normal User View (Personal + Member Teams)
+      // 2. Normal User View (Personal + Member Teams + Owned Teams)
+      // Fetch teams where user is a member
       const userTeams = await (this.prisma as any).teamMember.findMany({
         where: { userId },
         select: { teamId: true },
       });
       
-      const teamIds = userTeams.map((t: any) => t.teamId);
+      const memberTeamIds = userTeams.map((t: any) => t.teamId);
+
+      // Fetch teams where user is owner
+      const ownedTeams = await (this.prisma as any).team.findMany({
+        where: { ownerId: userId },
+        select: { id: true }
+      });
+      const ownedTeamIds = ownedTeams.map((t: any) => t.id);
+
+      // Combine and unique
+      const teamIds = [...new Set([...memberTeamIds, ...ownedTeamIds])];
+
+      // Fetch ALL members of these teams
+      const teamMembers = await (this.prisma as any).teamMember.findMany({
+        where: { teamId: { in: teamIds } },
+        select: { userId: true }
+      });
+      // Unique member IDs
+      const allMemberIds = [...new Set(teamMembers.map((m: any) => m.userId))];
 
       return (this.prisma as any).event.findMany({
         where: {
           OR: [
-            { userId: userId }, // Personal events (and events created by user for teams)
-            { teamId: { in: teamIds } }, // Events for teams the user is in
+            { userId: userId }, // Personal events
+            { teamId: { in: teamIds } }, // Events assigned to teams
+            { userId: { in: allMemberIds } } // Events from other team members
           ],
         },
         orderBy: { eventDate: 'asc' },
@@ -251,6 +259,7 @@ export class EventsService {
       });
     }
   }
+
 
   async getPastEventsByUserId(userId: string) {
     // First update event statuses based on current date
@@ -473,5 +482,44 @@ export class EventsService {
 
 
     return updatedEvent;
+  }
+  async getDebugInfo(userId: string) {
+    const user = await (this.prisma as any).user.findUnique({ where: { id: userId } });
+    if (!user) return { error: 'User not found' };
+
+    const memberTeams = await (this.prisma as any).teamMember.findMany({ where: { userId } });
+    const ownedTeams = await (this.prisma as any).team.findMany({ where: { ownerId: userId } });
+    
+    const memberTeamIds = memberTeams.map(t => t.teamId);
+    const ownedTeamIds = ownedTeams.map(t => t.id);
+    const allTeamIds = [...new Set([...memberTeamIds, ...ownedTeamIds])];
+
+    const teamMembers = await (this.prisma as any).teamMember.findMany({
+        where: { teamId: { in: allTeamIds } },
+        select: { userId: true, teamId: true }
+    });
+    
+    const events = await (this.prisma as any).event.findMany({
+        where: {
+            OR: [
+                { userId: userId },
+                { teamId: { in: allTeamIds } },
+                { userId: { in: teamMembers.map(m => m.userId) } }
+            ]
+        },
+        take: 20
+    });
+
+    return {
+        user: { id: user.id, name: user.name, email: user.email },
+        teams: {
+            member: memberTeams,
+            owned: ownedTeams,
+            allIds: allTeamIds
+        },
+        teammates: teamMembers,
+        eventsFoundCount: events.length,
+        sampleEvents: events
+    };
   }
 }

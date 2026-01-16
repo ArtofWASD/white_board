@@ -29,9 +29,15 @@ export default function ActivitiesPage() {
 
       try {
         setLoading(true);
+        const { token } = useAuthStore.getState();
+        const headers = {
+          'Content-Type': 'application/json',
+          ...(token && { 'Authorization': `Bearer ${token}` }),
+        };
+
         const [teamsRes, eventsRes] = await Promise.all([
-          fetch(`/api/teams?userId=${user.id}`),
-          fetch(`/api/events?userId=${user.id}`)
+          fetch(`/api/teams?userId=${user.id}`, { headers }),
+          fetch(`/api/events?userId=${user.id}`, { headers })
         ]);
 
         if (!teamsRes.ok || !eventsRes.ok) {

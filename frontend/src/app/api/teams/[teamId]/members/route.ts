@@ -1,5 +1,22 @@
 import { NextResponse } from "next/server"
 
+import { cookies } from "next/headers"
+
+// Helper function to get token from localStorage (we'll get it from cookies in the request)
+async function getToken(request: Request) {
+  // Try to get token from Authorization header first
+  const authHeader =
+    request.headers.get("Authorization") || request.headers.get("authorization")
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader
+  }
+
+  // Fallback to cookies
+  const cookieStore = await cookies()
+  const token = cookieStore.get("token")
+  return token ? `Bearer ${token.value}` : null
+}
+
 // Get all members of a team
 export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
   try {
@@ -12,6 +29,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       return NextResponse.json({ message: "Invalid team ID" }, { status: 400 })
     }
 
+    // Get token from request
+    const authHeader = await getToken(request)
+
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members`
@@ -22,6 +42,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader && { Authorization: authHeader }),
       },
     })
 

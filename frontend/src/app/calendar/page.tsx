@@ -108,8 +108,8 @@ export default function CalendarPage() {
   }, [isAuthenticated, teams.length, fetchTeams]);
   
   // Local state for calendar viewing preference. 
-  // Initialize with global selected team if available, or null for "All"
-  const [calendarTeamId, setCalendarTeamId] = useState<string | null>(selectedTeam?.id || null);
+  // Initialize with global selected team if available, or 'my' for "My Events"
+  const [calendarTeamId, setCalendarTeamId] = useState<string | null>(selectedTeam?.id || 'my');
 
   // Sync with global store initially or if store changes? 
   // User might want to browse other teams without changing global context.

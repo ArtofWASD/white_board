@@ -29,18 +29,7 @@ export class OrganizationService {
 
     const athleteIds = uniqueAthletes.map((u: any) => u.id);
 
-    const recentEventResults = await (this.prisma as any).eventResult.count({
-        where: {
-            dateAdded: { gte: thirtyDaysAgo },
-            event: {
-                userId: { in: athleteIds } // Approximation: user matches if they participated. 
-                // Better approach: Find results where username matches athlete names? 
-                // Schema shows EventResult has 'username' but not direct userId relation.
-                // Let's use StrengthWorkoutResult which has userId.
-            }
-        }
-    });
-
+    // Fetch separate counts/IDs to merge them
     const recentStrengthResults = await (this.prisma as any).strengthWorkoutResult.findMany({
         where: {
             userId: { in: athleteIds },
@@ -49,14 +38,46 @@ export class OrganizationService {
         select: { userId: true }
     });
 
-    const activeAthleteIds = new Set(recentStrengthResults.map((r: any) => r.userId));
-    // Since EventResult links by username, let's skip it for "Active Athlete" exact count for now to avoid name mismatch issues,
-    // or try to match by name.
-    // For simplicity, we count Strength Active Athletes.
+    // Fetched Active Athletes and Workouts
+    // Note: older EventResults might not have userId, only username.
+    const athleteNames = uniqueAthletes.map((u: any) => `${u.name} ${u.lastName || ''}`.trim());
+    const athleteNamesSimple = uniqueAthletes.map((u: any) => u.name); // Fallback if lastname missing in DB but present in Result
+
+    const recentEventResults = await (this.prisma as any).eventResult.findMany({
+        where: {
+             OR: [
+                { userId: { in: athleteIds } },
+                 // Helper: Match by username if userId is null
+                 // Use basic name matching
+                { username: { in: [...athleteNames, ...athleteNamesSimple] } },
+                { event: { userId: { in: athleteIds } } } // If athlete created event (e.g. personal)
+             ],
+            dateAdded: { gte: thirtyDaysAgo }
+        },
+        include: {
+            user: true,
+            event: true
+        }
+    });
+
+    const activeAthleteIds = new Set<string>();
+    recentStrengthResults.forEach((r: any) => activeAthleteIds.add(r.userId));
+    recentEventResults.forEach((r: any) => {
+        if (r.userId) {
+            activeAthleteIds.add(r.userId);
+        } else {
+             // Try to map username back to athleteId
+             const athlete = uniqueAthletes.find((u: any) => 
+                `${u.name} ${u.lastName || ''}`.trim() === r.username || 
+                u.name === r.username
+             );
+             if (athlete) activeAthleteIds.add(athlete.id);
+        }
+    });
     
     // 4. Recent Activity (Global for Trainer's teams)
     // Fetch latest Strength Results
-    const latestActivity = await (this.prisma as any).strengthWorkoutResult.findMany({
+    const latestStrengthActivity = await (this.prisma as any).strengthWorkoutResult.findMany({
         where: {
             userId: { in: athleteIds }
         },
@@ -68,20 +89,56 @@ export class OrganizationService {
         }
     });
 
-    const formattedActivity = latestActivity.map((activity: any) => ({
+    // Fetch latest Event Results
+    const latestEventActivity = await (this.prisma as any).eventResult.findMany({
+        where: {
+             OR: [
+                { userId: { in: athleteIds } },
+                { username: { in: [...athleteNames, ...athleteNamesSimple] } },
+                { event: { userId: { in: athleteIds } } }
+             ]
+        },
+        take: 5,
+        orderBy: { dateAdded: 'desc' },
+        include: {
+            user: { select: { name: true, lastName: true } },
+            event: { select: { title: true } }
+        }
+    });
+
+    const formattedStrengthActivity = latestStrengthActivity.map((activity: any) => ({
         id: activity.id,
         athleteName: `${activity.user.name} ${activity.user.lastName || ''}`.trim(),
-        action: `performed ${activity.exercise.name}`,
+        action: `выполнил упражнение ${activity.exercise.name}`,
         date: activity.date,
-        details: `${activity.weight}kg x ${activity.reps}`
+        details: `${activity.weight}кг x ${activity.reps}`
     }));
+
+    const formattedEventActivity = latestEventActivity.map((activity: any) => {
+        const name = activity.user 
+            ? `${activity.user.name} ${activity.user.lastName || ''}`.trim()
+            : activity.username || 'Unknown Athlete';
+            
+        return {
+            id: activity.id,
+            athleteName: name,
+            action: `завершил событие ${activity.event.title}`,
+            date: activity.dateAdded,
+            details: `Результат: ${activity.time}`
+        };
+    });
+
+    // Merge and sort
+    const allActivity = [...formattedStrengthActivity, ...formattedEventActivity]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5);
 
     return {
         totalAthletes: uniqueAthletes.length,
         activeAthletes: activeAthleteIds.size,
         totalTeams: ownedTeams.length,
-        totalWorkouts: recentStrengthResults.length, // + EventResults count if possible
-        recentActivity: formattedActivity
+        totalWorkouts: recentStrengthResults.length + recentEventResults.length,
+        recentActivity: allActivity
     };
   }
 }

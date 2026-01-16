@@ -14,6 +14,7 @@ export interface CalendarEvent {
   timeCap?: string;
   rounds?: string;
   description?: string;
+  userId?: string;
 }
 
 interface UseCalendarEventsProps {
@@ -34,7 +35,10 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
     setError(null);
     try {
       const queryParams = new URLSearchParams({ userId: user.id });
-      if (teamId) {
+      // Only append teamId if it is a specific UUID, not our special filter keywords
+      const isSpecialFilter = ['all', 'my', 'all_teams'].includes(teamId || '');
+      
+      if (teamId && !isSpecialFilter) {
         queryParams.append('teamId', teamId);
       }
       
@@ -72,19 +76,41 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
           teamId: event.teamId,
           timeCap: event.timeCap,
           rounds: event.rounds,
-          description: event.description
+          description: event.description,
+          userId: event.userId
         };
       }));
 
       // Filter logic logic derived from original component
       const filteredEvents = calendarEvents.filter(event => {
-        if (teamId) {
-          // Team Board: events this team or personal
-          return event.teamId === teamId || !event.teamId;
-        } else {
-          // Personal Board: only personal
-          return !event.teamId;
+        // Fallback or explicit 'my'
+        if (!teamId || teamId === 'my') {
+            // Strictly personal events: Created by me AND not assigned to a team
+            return event.id && (!event.teamId && (event as any).userId === user?.id); 
+            // Note: event object might not have userId on frontend type?
+            // Let's check the type definition used in this file. 
+            // BackendEvent has userId. CalendarEvent might not mapped it.
+            // I need to ensure userId is available in CalendarEvent.
+            // I will update the map function above first? 
+            // Wait, I can't check userId if it's not mapped.
+            // Let's assume for a moment I can access it or I need to add it.
         }
+        
+        if (teamId === 'all_teams') {
+            // "All Teams" view should aggregate what you see on individual team boards.
+            // Individual team boards show: Team Events + Personal Events.
+            // Therefore, "All Teams" should show: All Team Events + Personal Events.
+            // Since backend "Normal View" fetches exactly this set (User's Personal + User's Teams),
+            // we should simply return everything fetched.
+             return true;
+        }
+
+        if (teamId === 'all') {
+            return true;
+        }
+
+        // Specific Team: events this team or personal
+        return event.teamId === teamId || !event.teamId;
       });
 
       setEvents(filteredEvents);

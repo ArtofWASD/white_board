@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTeamStore } from '../../../lib/store/useTeamStore';
+import { useAuthStore } from '../../../lib/store/useAuthStore';
 import { Team } from '../../../types';
 import { TeamMember } from '../../../types/TeamManagement.types';
 import { ListFilters, ViewMode } from '../../../components/ui/ListFilters';
@@ -35,8 +36,15 @@ export default function AthletesPage() {
       const athleteMap = new Map<string, AthleteWithTeams>();
 
       try {
+        const { token } = useAuthStore.getState();
         const promises = teams.map(team => 
-          fetch(`/api/teams/${team.id}/members`, { cache: 'no-store' }).then(res => res.json())
+          fetch(`/api/teams/${team.id}/members`, { 
+            cache: 'no-store',
+            headers: {
+              'Content-Type': 'application/json',
+              ...(token && { 'Authorization': `Bearer ${token}` }),
+            }
+          }).then(res => res.json())
         );
 
         const results = await Promise.all(promises);

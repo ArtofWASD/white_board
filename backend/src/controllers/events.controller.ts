@@ -174,4 +174,8 @@ export class EventsController {
       throw new BadRequestException('Ошибка при обновлении события');
     }
   }
+  @Get('debug/:userId')
+  async getDebugEvents(@Param('userId') userId: string) {
+    return this.eventsService.getDebugInfo(userId);
+  }
 }

@@ -245,8 +245,10 @@ export default function DashboardPage() {
     
     // Universal Calculator Logic
     if (id === 'universal-calculator') {
-        // Show only if universal mode is ON AND at least one calc is enabled
-        return flags.showUniversalCalculator && (flags.strengthTrainingCalculator || flags.texasMethodCalculator);
+        // Show if universal mode is ON. 
+        // We no longer strictly require a sub-calculator to be enabled to show the widget container,
+        // so the user can at least see the empty widget and know they need to enable something or select one.
+        return flags.showUniversalCalculator;
     }
 
     // Deprecated calculators
@@ -424,18 +426,10 @@ export default function DashboardPage() {
               let mobileClass = '';
               if (!isExpanded) {
                   mobileClass = 'h-[50px]';
-              } else if (visibleExpandedCount === 1) {
-                  mobileClass = 'h-[calc(100dvh-200px)]';
-              } else if (visibleExpandedCount <= 2) {
-                  mobileClass = 'h-[65vh]';
               } else {
-                  // Standard height for other widgets
-                  mobileClass = 'h-[450px]';
-                  
-                  // Specific override for calculator which has tall content (tables)
-                  if (id === 'universal-calculator') {
-                      mobileClass = 'h-[600px]';
-                  }
+                  // User requested no height limit on mobile (was limited to 600px/450px previously)
+                  // We use h-auto to let it grow as needed by content.
+                  mobileClass = 'h-auto min-h-[300px]';
               }
               
               // Combine with desktop classes
