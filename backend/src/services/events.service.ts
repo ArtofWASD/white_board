@@ -371,7 +371,7 @@ export class EventsService {
 
   }
 
-  async createEventResult(eventId: string, time: string, username: string) {
+  async createEventResult(eventId: string, time: string, username: string, userId?: string) {
     // Check if event exists
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
@@ -386,6 +386,7 @@ export class EventsService {
         time,
         username,
         eventId,
+        userId,
       },
     });
 

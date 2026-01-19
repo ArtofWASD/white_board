@@ -75,6 +75,13 @@ export default function CalendarPage() {
       }
     }
 
+    items.push({
+      label: 'Таймер',
+      href: '/timer',
+      icon: <Image src="/stopwatch.png" alt="Timer" width={32} height={32} />,
+      tooltip: 'Таймер'
+    });
+
     items.push(
       { 
         label: 'Календарь', 

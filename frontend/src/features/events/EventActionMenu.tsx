@@ -7,6 +7,7 @@ interface EventActionMenuProps {
   onDelete: () => void;
   onEdit: () => void;
   onAddResult: () => void;
+  onStartTimer: () => void;
   position: { top: number; left: number };
   onClose: () => void;
 }
@@ -14,7 +15,8 @@ interface EventActionMenuProps {
 const EventActionMenu: React.FC<EventActionMenuProps> = ({ 
   onDelete, 
   onEdit, 
-  onAddResult, 
+  onAddResult,
+  onStartTimer,
   position, 
   onClose 
 }) => {
@@ -63,6 +65,13 @@ const EventActionMenu: React.FC<EventActionMenuProps> = ({
           disabled={!isAuthenticated} // Disable if not authenticated
         >
           Удалить
+        </button>
+        <button 
+          onClick={onStartTimer}
+          className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-t border-gray-200 mt-1 font-medium text-blue-600"
+          disabled={!isAuthenticated} 
+        >
+          Запустить таймер
         </button>
         <button 
           onClick={onAddResult}

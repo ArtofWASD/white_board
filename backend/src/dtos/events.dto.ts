@@ -99,4 +99,8 @@ export class CreateEventResultDto {
   @IsString()
   @IsNotEmpty()
   username: string;
+
+  @IsOptional()
+  @IsString()
+  userId?: string;
 }

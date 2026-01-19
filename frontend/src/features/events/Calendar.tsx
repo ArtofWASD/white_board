@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
@@ -23,6 +24,7 @@ interface CalendarProps {
 import { EventTooltip } from './EventTooltip';
 
 const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents }) => {
+  const router = useRouter();
   const { user } = useAuthStore();
   const { 
     events, 
@@ -243,6 +245,68 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
     );
   };
 
+  const handleStartTimer = () => {
+    if (!selectedEvent) return;
+    
+    // Parse time cap or duration
+    let timeCapSeconds = 0;
+    if (selectedEvent.timeCap) {
+       // Normalize: replace comma with dot, remove non-numeric except dot and colon
+       const raw = selectedEvent.timeCap.replace(',', '.').replace(/[^0-9:.]/g, '');
+       
+       if (raw.includes(':')) {
+           const parts = raw.split(':').map(Number);
+           if (parts.length === 2) {
+             timeCapSeconds = parts[0] * 60 + parts[1];
+           }
+       } else {
+           // Assume format like "15" means 15 minutes if no colon is present? 
+           // Or should we assume seconds? 
+           // The placeholder says "15:00". "1" usually means 1 minute in this context.
+           // Let's assume minutes if parsed value < 100, wait, ambiguity.
+           // Standard WOD notation: "20 min" or "20:00".
+           // If user typed "1", it likely means 1 minute.
+           const val = parseFloat(raw);
+           if (!isNaN(val)) {
+               timeCapSeconds = val * 60;
+           }
+       }
+    }
+
+    // Determine mode
+    let mode = '';
+    switch (selectedEvent.exerciseType) {
+      case 'For Time': mode = 'FOR_TIME'; break;
+      case 'AMRAP': mode = 'AMRAP'; break;
+      case 'EMOM': mode = 'EMOM'; break;
+      case 'Not for Time': mode = 'INTERVALS'; break; // Or regular timer?
+    }
+    
+    if (!mode) return; // Should we show error or just default to something? Defaulting to not navigating is safer.
+    
+    const params = new URLSearchParams();
+    params.set('mode', mode);
+    params.set('eventId', selectedEvent.id);
+    if (selectedEvent.rounds) params.set('rounds', selectedEvent.rounds);
+    
+    if (mode === 'FOR_TIME' && timeCapSeconds > 0) {
+       params.set('timeCap', timeCapSeconds.toString());
+    } else if (mode === 'AMRAP' && timeCapSeconds > 0) {
+       // Assuming timeCap field is used for AMRAP duration too in the UI per EventModal logic
+       // EventModal uses timeCap field for AMRAP duration as well ("Time Cap (Лимит времени)")
+       params.set('duration', timeCapSeconds.toString());
+    }
+
+    if (mode === 'EMOM') {
+        // EMOM usually needs interval and rounds.
+        // If we only have rounds, we might default interval to 60s.
+        params.set('intervalWork', '60');
+    }
+    
+    router.push(`/timer?${params.toString()}`);
+    handleCloseEventActionMenu();
+  };
+
   return (
     <div className={`p-2 sm:p-4 lg:p-6 relative transition-all duration-300 ease-in-out w-full ${isMenuOpen ? 'md:pl-4' : ''}`}>
 
@@ -286,6 +350,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
           onDelete={() => handleDeleteEvent(selectedEvent.id)}
           onEdit={() => handleEditEvent(selectedEvent)}
           onAddResult={() => handleAddResult(selectedEvent)}
+          onStartTimer={handleStartTimer}
           position={buttonPosition}
           onClose={handleCloseEventActionMenu}
         />

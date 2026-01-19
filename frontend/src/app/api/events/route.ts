@@ -20,7 +20,7 @@ async function getToken(request: Request) {
 // Create a new event
 export async function POST(request: Request) {
   try {
-    const { userId, title, eventDate, description, exerciseType, exercises, teamId } =
+    const { userId, title, eventDate, description, exerciseType, exercises, teamId, timeCap, rounds } =
       await request.json()
 
     // Get token from request
@@ -45,6 +45,8 @@ export async function POST(request: Request) {
         exerciseType,
         exercises,
         teamId,
+        timeCap,
+        rounds,
       }),
     })
 

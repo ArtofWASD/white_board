@@ -88,7 +88,7 @@ export async function PUT(
       return NextResponse.json({ message: "Event ID is required" }, { status: 400 })
     }
 
-    const { userId, title, eventDate, description, exerciseType, exercises, teamId } =
+    const { userId, title, eventDate, description, exerciseType, exercises, teamId, timeCap, rounds } =
       await request.json()
 
 
@@ -115,6 +115,8 @@ export async function PUT(
         exerciseType,
         exercises,
         teamId,
+        timeCap,
+        rounds,
       }),
     })
 

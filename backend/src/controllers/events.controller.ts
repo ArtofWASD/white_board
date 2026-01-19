@@ -119,6 +119,7 @@ export class EventsController {
         eventId,
         createEventResultDto.time,
         createEventResultDto.username,
+        createEventResultDto.userId, // Pass userId
       );
     } catch (error: unknown) {
       if (error instanceof NotFoundException) {
