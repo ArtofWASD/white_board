@@ -1,19 +1,8 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
-import { Team, EventResult } from '../../types';
+import { Team, EventResult, TeamMember, Exercise } from '../../types';
 
-interface Exercise {
-  id: number;
-  name: string;
-  weight?: string;
-  repetitions?: string;
-  rxWeight?: string;
-  rxReps?: string;
-  scWeight?: string;
-  scReps?: string;
-}
+// Removed local Exercise interface to avoid conflict or need to update it to use string id matching global type
 
 interface EventData {
   title?: string;
@@ -23,6 +12,7 @@ interface EventData {
   teamId?: string;
   timeCap?: string;
   rounds?: string;
+  participants?: { id: string; name: string; lastName?: string }[];
 }
 
 
@@ -43,7 +33,7 @@ const EventModal: React.FC<EventModalProps> = ({
   eventData,
   initialTeamId 
 }) => {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   
   // Form state
   const [eventTitle, setEventTitle] = useState(eventData?.title || '');
@@ -65,24 +55,58 @@ const EventModal: React.FC<EventModalProps> = ({
   // Team state
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>(eventData?.teamId || initialTeamId || '');
+  
+  // Member assignment state
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [assignMode, setAssignMode] = useState<'all' | 'selected'>('all');
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
   // Fetch teams
   useEffect(() => {
     const fetchTeams = async () => {
-      if (user) {
+      if (user && token) {
         try {
-          const response = await fetch(`/api/teams?userId=${user.id}`);
+          const response = await fetch(`/api/teams?userId=${user.id}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
           if (response.ok) {
             const data = await response.json();
             setTeams(data);
           }
         } catch (error) {
-
+           console.error("Failed to fetch teams", error);
         }
       }
     };
     fetchTeams();
-  }, [user]);
+  }, [user, token]);
+
+  // Fetch team members when team changes
+  useEffect(() => {
+    const fetchMembers = async () => {
+        if (selectedTeamId && token) {
+            try {
+                const response = await fetch(`/api/teams/${selectedTeamId}/members`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setTeamMembers(data);
+                } else {
+                    setTeamMembers([]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch team members", error);
+                setTeamMembers([]);
+            }
+        } else {
+            setTeamMembers([]);
+        }
+    };
+    fetchMembers();
+  }, [selectedTeamId, token]);
 
   // Handle form initialization and updates
   useEffect(() => {
@@ -94,6 +118,15 @@ const EventModal: React.FC<EventModalProps> = ({
       setSelectedTeamId(eventData.teamId || '');
       setTimeCap(eventData.timeCap || '');
       setRounds(eventData.rounds || '');
+      
+      // Initialize assignment state
+      if (eventData.participants && eventData.participants.length > 0) {
+          setAssignMode('selected');
+          setSelectedMemberIds(eventData.participants.map(p => p.id));
+      } else {
+          setAssignMode('all');
+          setSelectedMemberIds([]);
+      }
     } else if (isOpen) {
       // Reset form when opening without eventData
       setEventTitle('');
@@ -109,6 +142,8 @@ const EventModal: React.FC<EventModalProps> = ({
       setSelectedTeamId(initialTeamId || '');
       setTimeCap('');
       setRounds('');
+      setAssignMode('all');
+      setSelectedMemberIds([]);
     }
   }, [isOpen, eventData, initialTeamId]);
 
@@ -126,6 +161,8 @@ const EventModal: React.FC<EventModalProps> = ({
     setSelectedTeamId(eventData?.teamId || initialTeamId || '');
     setTimeCap(eventData?.timeCap || '');
     setRounds(eventData?.rounds || '');
+    setAssignMode('all');
+    setSelectedMemberIds([]);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -138,7 +175,9 @@ const EventModal: React.FC<EventModalProps> = ({
         exercises,
         teamId: selectedTeamId || undefined,
         timeCap,
-        rounds
+        rounds,
+        // Pass assignment info. If 'all', assignedUserIds is undefined or empty implies whole team
+        assignedUserIds: assignMode === 'selected' ? selectedMemberIds : undefined
       });
     }
   };
@@ -146,7 +185,7 @@ const EventModal: React.FC<EventModalProps> = ({
   const handleAddExercise = () => {
     if (exerciseName.trim()) {
       const newExercise: Exercise = {
-        id: Date.now(),
+        id: Date.now().toString(), // Use string ID
         name: exerciseName.trim(),
         weight: rxWeight, // Default to Rx values
         repetitions: rxReps,
@@ -164,8 +203,16 @@ const EventModal: React.FC<EventModalProps> = ({
     }
   };
 
-  const handleRemoveExercise = (id: number) => {
+  const handleRemoveExercise = (id: string) => {
     setExercises(exercises.filter(exercise => exercise.id !== id));
+  };
+  
+  const toggleMemberSelection = (userId: string) => {
+      setSelectedMemberIds(prev => 
+        prev.includes(userId) 
+            ? prev.filter(id => id !== userId)
+            : [...prev, userId]
+      );
   };
 
   if (!isOpen) return null;
@@ -218,6 +265,52 @@ const EventModal: React.FC<EventModalProps> = ({
               ))}
             </select>
           </div>
+          
+          {/* Athlete Assignment UI */}
+          {selectedTeamId && teamMembers.length > 0 && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Назначить:</label>
+                  <div className="flex gap-4 mb-3">
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input 
+                            type="radio" 
+                            name="assignMode" 
+                            checked={assignMode === 'all'} 
+                            onChange={() => setAssignMode('all')}
+                            className="text-blue-600 focus:ring-blue-500"
+                          />
+                          Всей команде
+                      </label>
+                      <label className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input 
+                            type="radio" 
+                            name="assignMode" 
+                            checked={assignMode === 'selected'} 
+                            onChange={() => setAssignMode('selected')}
+                             className="text-blue-600 focus:ring-blue-500"
+                          />
+                          Выбрать атлетов
+                      </label>
+                  </div>
+                  
+                  {assignMode === 'selected' && (
+                      <div className="max-h-40 overflow-y-auto border border-gray-300 rounded bg-white p-2">
+                          <div className="text-xs text-gray-500 mb-2">Выберите одного или нескольких</div>
+                          {teamMembers.map(member => (
+                              <label key={member.id} className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 cursor-pointer rounded">
+                                  <input 
+                                    type="checkbox"
+                                    checked={selectedMemberIds.includes(member.user.id)}
+                                    onChange={() => toggleMemberSelection(member.user.id)}
+                                    className="rounded text-blue-600 focus:ring-blue-500"
+                                  />
+                                  <span className="text-sm">{member.user.name} {member.user.lastName || ''}</span>
+                              </label>
+                          ))}
+                      </div>
+                  )}
+              </div>
+          )}
 
           <div className="mb-4">
             <label htmlFor="exerciseType" className="block text-sm font-medium text-gray-700 mb-1">

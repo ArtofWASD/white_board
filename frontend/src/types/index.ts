@@ -89,6 +89,7 @@ export interface CalendarEvent {
   rounds?: string
   status?: "FUTURE" | "COMPLETED" | "CANCELLED"
   description?: string;
+  participants?: { id: string; name: string; lastName?: string }[];
 }
 
 export interface Event {
@@ -106,6 +107,7 @@ export interface Event {
   teamId?: string
   exercises?: Exercise[]
   results?: EventResult[]
+  participants?: { id: string; name: string; lastName?: string }[]
 }
 
 export interface StrengthWorkoutResult {

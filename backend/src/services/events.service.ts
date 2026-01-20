@@ -169,6 +169,13 @@ export class EventsService {
               dateAdded: 'desc',
             },
           },
+          participants: {
+            select: {
+              id: true,
+              name: true,
+              lastName: true,
+            }
+          },
         },
       });
     } else {
@@ -208,6 +215,13 @@ export class EventsService {
                 orderBy: {
                   dateAdded: 'desc',
                 },
+              },
+              participants: {
+                select: {
+                  id: true,
+                  name: true,
+                  lastName: true,
+                }
               },
             },
           });
@@ -255,6 +269,13 @@ export class EventsService {
               dateAdded: 'desc',
             },
           },
+          participants: {
+            select: {
+              id: true,
+              name: true,
+              lastName: true,
+            }
+          },
         },
       });
     }
@@ -271,13 +292,20 @@ export class EventsService {
         status: 'past',
       },
       orderBy: { eventDate: 'desc' },
-      include: {
-        results: {
-          orderBy: {
-            dateAdded: 'desc',
+        include: {
+          results: {
+            orderBy: {
+              dateAdded: 'desc',
+            },
           },
+          participants: {
+             select: {
+              id: true,
+              name: true,
+              lastName: true
+            }
+          }
         },
-      },
     });
   }
 
@@ -359,9 +387,44 @@ export class EventsService {
 
 
     // Check if the user is the owner of the event
-    if (event.userId !== userId) {
+    let hasPermission = event.userId === userId;
 
-      throw new ForbiddenException('You can only delete your own events');
+    if (!hasPermission && event.teamId) {
+        // Check if user is owner of the team
+        const team = await (this.prisma as any).team.findUnique({
+            where: { id: event.teamId },
+            select: { ownerId: true }
+        });
+        if (team && team.ownerId === userId) {
+            hasPermission = true;
+        }
+    }
+
+    // Extended permission check for Organization Admins and Super Admins
+    if (!hasPermission) {
+        const requestor = await (this.prisma as any).user.findUnique({
+             where: { id: userId }
+        });
+
+        if (requestor) {
+             if (requestor.role === 'SUPER_ADMIN') {
+                 hasPermission = true;
+             } else if (requestor.role === 'ORGANIZATION_ADMIN' && requestor.organizationId) {
+                 // Check if event owner belongs to the same organization
+                 // We need to fetch event owner's org
+                 const eventOwner = await (this.prisma as any).user.findUnique({
+                      where: { id: event.userId },
+                      select: { organizationId: true }
+                 });
+                 if (eventOwner && eventOwner.organizationId === requestor.organizationId) {
+                      hasPermission = true;
+                 }
+             }
+        }
+    }
+
+    if (!hasPermission) {
+      throw new ForbiddenException('You can only delete your own events or events in your team');
     }
 
 

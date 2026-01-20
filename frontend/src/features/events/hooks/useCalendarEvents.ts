@@ -1,21 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuthStore } from '@/lib/store/useAuthStore';
-import { Event as BackendEvent, EventResult } from '@/types';
-
-export interface CalendarEvent {
-  id: string;
-  title: string;
-  date: string;
-  exerciseType?: string;
-  exercises?: any[];
-  results?: EventResult[];
-  color?: string;
-  teamId?: string;
-  timeCap?: string;
-  rounds?: string;
-  description?: string;
-  userId?: string;
-}
+import { Event as BackendEvent, EventResult, CalendarEvent } from '@/types';
 
 interface UseCalendarEventsProps {
   teamId?: string;
@@ -23,10 +8,59 @@ interface UseCalendarEventsProps {
 }
 
 export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsProps = {}) => {
-  const { user, isAuthenticated } = useAuthStore();
+    const { user, isAuthenticated, token } = useAuthStore();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [teams, setTeams] = useState<any[]>([]); // Using any[] to avoid strict type issues if Team is not perfectly matched, or import Team
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Fetch user teams to map names and colors
+  useEffect(() => {
+    const fetchTeams = async () => {
+      if (!user || !token) return;
+      try {
+        const response = await fetch(`/api/teams?userId=${user.id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            setTeams(data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch teams for calendar colors", e);
+      }
+    };
+    fetchTeams();
+  }, [user, token]);
+
+  const getTeamColor = useCallback((teamId?: string) => {
+    if (!teamId) return 'bg-blue-100'; // Personal event default
+    
+    // Use index for consistent, distinct coloring based on user's team list order
+    const teamIndex = teams.findIndex((t: any) => t.id === teamId);
+    
+    // Palette
+    const colors = [
+        'bg-red-100', 'bg-orange-100', 'bg-amber-100', 'bg-yellow-100', 
+        'bg-lime-100', 'bg-green-100', 'bg-emerald-100', 'bg-teal-100', 
+        'bg-cyan-100', 'bg-sky-100', 'bg-indigo-100', 'bg-violet-100', 
+        'bg-purple-100', 'bg-fuchsia-100', 'bg-pink-100', 'bg-rose-100'
+    ];
+    
+    if (teamIndex === -1) {
+        // Fallback for unknown team (e.g. removed from list but event exists)
+        // Hash it
+        let hash = 0;
+        for (let i = 0; i < teamId.length; i++) {
+            hash = teamId.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return colors[Math.abs(hash) % colors.length];
+    }
+    
+    return colors[teamIndex % colors.length];
+  }, [teams]);
 
   const fetchEvents = useCallback(async () => {
     if (!isAuthenticated || !user) return;
@@ -65,6 +99,8 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
            }));
         }
         
+        const team = teams.find((t: any) => t.id === event.teamId);
+        
         return {
           id: event.id,
           title: event.title,
@@ -72,12 +108,14 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
           exerciseType: event.exerciseType,
           exercises: event.exercises || [],
           results: results,
-          color: 'bg-blue-100',
+          color: getTeamColor(event.teamId),
           teamId: event.teamId,
+          teamName: team ? team.name : undefined,
           timeCap: event.timeCap,
           rounds: event.rounds,
           description: event.description,
-          userId: event.userId
+          userId: event.userId,
+          participants: event.participants
         };
       }));
 
@@ -87,22 +125,12 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
         if (!teamId || teamId === 'my') {
             // Strictly personal events: Created by me AND not assigned to a team
             return event.id && (!event.teamId && (event as any).userId === user?.id); 
-            // Note: event object might not have userId on frontend type?
-            // Let's check the type definition used in this file. 
-            // BackendEvent has userId. CalendarEvent might not mapped it.
-            // I need to ensure userId is available in CalendarEvent.
-            // I will update the map function above first? 
-            // Wait, I can't check userId if it's not mapped.
-            // Let's assume for a moment I can access it or I need to add it.
         }
         
         if (teamId === 'all_teams') {
-            // "All Teams" view should aggregate what you see on individual team boards.
-            // Individual team boards show: Team Events + Personal Events.
-            // Therefore, "All Teams" should show: All Team Events + Personal Events.
-            // Since backend "Normal View" fetches exactly this set (User's Personal + User's Teams),
-            // we should simply return everything fetched.
-             return true;
+            // "All Teams" view should show events from all teams the user is part of.
+            // It should NOT show personal events (which have no teamId).
+             return !(!event.teamId && (event as any).userId === user?.id);
         }
 
         if (teamId === 'all') {
@@ -123,7 +151,7 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
     } finally {
       setLoading(false);
     }
-  }, [isAuthenticated, user, teamId, onUpdateEvents]);
+  }, [isAuthenticated, user, teamId, onUpdateEvents, teams, getTeamColor, token]);
 
   // Initial fetch
   useEffect(() => {
@@ -152,11 +180,20 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
   const createEvent = async (eventData: any, selectedDate?: string) => {
     if (!user) return false;
     try {
+      // Filter out special filter values for teamId
+      const currentTeamId = ['all', 'my', 'all_teams'].includes(teamId || '') ? undefined : teamId;
+
+      // Determine teamId: prioritize eventData.teamId if it exists (even if null/""), default to currentTeamId
+      let finalTeamId = eventData.teamId !== undefined ? eventData.teamId : currentTeamId;
+      // Ensure empty string becomes null for backend consistency if needed, or keep as is if backend handles it.
+      // Assuming backend expects null or UUID.
+      if (finalTeamId === '') finalTeamId = null;
+
       const body = {
         ...eventData,
-        userId: user.id,
+        userId: eventData.userId || user.id, // Allow override for assigning events
         eventDate: new Date(eventData.date || selectedDate!).toISOString(),
-        teamId: teamId || eventData.teamId,
+        teamId: finalTeamId,
       };
 
       const response = await fetch('/api/events', {

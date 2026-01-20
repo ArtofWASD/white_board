@@ -18,6 +18,17 @@ export const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onC
         marginTop: '-10px'
       }}
     >
+      {event.teamName && (
+        <span className="inline-block px-2 py-0.5 rounded text-xs font-semibold bg-gray-100 text-gray-700 mb-1">
+          {event.teamName}
+        </span>
+      )}
+      {event.participants && event.participants.length > 0 && (
+        <div className="mb-2 text-xs text-gray-600 bg-blue-50 p-1.5 rounded border border-blue-100">
+          <span className="font-semibold text-blue-800">Assignees: </span>
+          {event.participants.map((p) => p.name + (p.lastName ? ` ${p.lastName}` : '')).join(', ')}
+        </div>
+      )}
       <h3 className="font-bold text-lg mb-2">{event.title}</h3>
       {event.exerciseType && (
         <p className="text-sm text-gray-600 mb-2">

@@ -11,9 +11,9 @@ import EventModal from './EventModal';
 import EventActionMenu from './EventActionMenu';
 import AddResultModal from './AddResultModal';
 import AddEventButton from './AddEventButton';
-import { Event as BackendEvent, EventResult } from '../../types';
+import { Event as BackendEvent, EventResult, CalendarEvent } from '../../types';
 
-import { useCalendarEvents, CalendarEvent } from './hooks/useCalendarEvents';
+import { useCalendarEvents } from './hooks/useCalendarEvents';
 
 interface CalendarProps {
   isMenuOpen: boolean;
@@ -170,7 +170,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
       const body = {
         ...eventData,
         date: validDate, 
-        teamId: teamId || eventToEdit?.teamId,
+        // Allow moving event to another team if changed in modal
+        teamId: eventData.teamId || teamId || eventToEdit?.teamId,
       };
       
       const updateSuccess = await updateEvent(eventToEdit.id, body);
@@ -178,7 +179,16 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
       
     } else {
       // Create
-      const createSuccess = await createEvent(eventData, selectedDate);
+      const { assignedUserIds, ...restData } = eventData;
+      
+      // Map assignedUserIds to participantIds for the backend
+      // We keep the teamId as is (selectedTeamId from modal), allowing "Assigned Team Event"
+      // or "Personal Event" if no team selected (though modal restricts assignment to teams)
+      const createSuccess = await createEvent({
+          ...restData,
+          participantIds: assignedUserIds
+      }, selectedDate);
+
       if (createSuccess) handleCloseEditModal();
     }
   };
@@ -369,7 +379,8 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
             results: eventToEdit.results || [],
             teamId: eventToEdit.teamId,
             timeCap: eventToEdit.timeCap,
-            rounds: eventToEdit.rounds
+            rounds: eventToEdit.rounds,
+            participants: eventToEdit.participants
           } : undefined}
           initialTeamId={teamId}
         />

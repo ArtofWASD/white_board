@@ -35,8 +35,8 @@ export const useWODTimer = (config: TimerConfig) => {
     totalRounds: config.rounds || 1,
   });
 
-  const requestRef = useRef<number>();
-  const startTimeRef = useRef<number>();
+  const requestRef = useRef<number | undefined>(undefined);
+  const startTimeRef = useRef<number | undefined>(undefined);
   const baseTimeRef = useRef<number>(0); // Time accumulated before current run segment
   const lastTickRef = useRef<number>(0);
 
