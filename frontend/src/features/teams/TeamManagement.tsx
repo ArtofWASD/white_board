@@ -8,6 +8,8 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
 import { User as FullUser } from '../../types';
 import { UserDetailModal } from './UserDetailModal';
+import { AddMemberModal } from './AddMemberModal';
+import Button from '../../components/ui/Button';
 
 export default function TeamManagement() {
   const { user, token } = useAuthStore();
@@ -17,8 +19,6 @@ export default function TeamManagement() {
   const [newTeamName, setNewTeamName] = useState('');
   const [newTeamDescription, setNewTeamDescription] = useState('');
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [newMemberEmail, setNewMemberEmail] = useState('');
-  const [newMemberRole, setNewMemberRole] = useState<'ATHLETE' | 'TRAINER'>('ATHLETE');
   const [loading, setLoading] = useState(false);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
@@ -26,6 +26,9 @@ export default function TeamManagement() {
   // User detail modal state
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Add Member Modal state
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
 
   const handleUserClick = (user: any) => {
     setSelectedUserForDetail(user as FullUser);
@@ -190,80 +193,6 @@ export default function TeamManagement() {
     }
   };
 
-  const lookupUserByEmail = async (email: string): Promise<User | null> => {
-    try {
-      const response = await fetch(`/api/auth/lookup?email=${encodeURIComponent(email)}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-      });
-      
-      if (response.ok) {
-        const user = await response.json();
-        return user;
-      }
-      return null;
-    } catch (err) {
-
-      return null;
-    }
-  };
-
-  const addTeamMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTeam || !newMemberEmail.trim() || !user) return;
-
-    try {
-      setLoading(true);
-      
-      // Lookup user by email
-      const foundUser = await lookupUserByEmail(newMemberEmail);
-      if (!foundUser) {
-        toastError('User not found with that email');
-        setLoading(false);
-        return;
-      }
-      
-      const response = await fetch(`/api/teams/${selectedTeam}/members`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userId: foundUser.id,
-          role: newMemberRole,
-        }),
-      });
-      
-      if (response.ok) {
-        // Refresh team members
-        fetchTeamMembers(selectedTeam);
-        
-        // Reset form
-        setNewMemberEmail('');
-        success('Member added successfully!');
-      } else {
-        // Try to parse error response as JSON, but handle case where it's not JSON
-        let errorMessage = 'Failed to add member';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = response.statusText || 'Failed to add member';
-        }
-        toastError(errorMessage);
-      }
-    } catch (err) {
-      toastError('Failed to add member');
-
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const removeTeamMember = async (teamId: string, userId: string) => {
     if (!user) return;
 
@@ -315,8 +244,6 @@ export default function TeamManagement() {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-bold mb-4">Team Management</h2>
-      
-
       
       {/* Create Team Form */}
       <div className="mb-8">
@@ -394,116 +321,10 @@ export default function TeamManagement() {
         <div className="border-t pt-6">
           <h3 className="text-lg font-semibold mb-3">Manage Team Members</h3>
           
-          {/* Add Member Form */}
-          <form onSubmit={addTeamMember} className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h4 className="font-medium mb-3">Add Member</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label htmlFor="memberEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                  Email *
-                </label>
-                <input
-                  type="email"
-                  id="memberEmail"
-                  value={newMemberEmail}
-                  onChange={(e) => setNewMemberEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="memberRole" className="block text-sm font-medium text-gray-700 mb-1">
-                  Role
-                </label>
-                <select
-                  id="memberRole"
-                  value={newMemberRole}
-                  onChange={(e) => setNewMemberRole(e.target.value as 'ATHLETE' | 'TRAINER')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="ATHLETE">Athlete</option>
-                  <option value="TRAINER">Trainer</option>
-                </select>
-              </div>
-              
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                >
-                  {loading ? 'Adding...' : 'Add Member'}
-                </button>
-              </div>
-            </div>
-          </form>
-          
-          {/* Members List */}
-          <div>
-            <h4 className="font-medium mb-3">Team Members</h4>
-            {teamMembers[selectedTeam]?.length === 0 ? (
-              <p className="text-gray-600">No members in this team yet.</p>
-            ) : (
-              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-                <table className="min-w-full divide-y divide-gray-300">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                        Name
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Email
-                      </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                        Role
-                      </th>
-                      <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
-                        <span className="sr-only">Actions</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {teamMembers[selectedTeam]?.map((member) => (
-                      <tr key={member.id}>
-                        <td 
-                          className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6 cursor-pointer hover:underline"
-                          onClick={() => handleUserClick(member.user)}
-                        >
-                          {member.user.name}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {member.user.email}
-                        </td>
-                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            member.user.role === 'TRAINER' 
-                              ? 'bg-purple-100 text-purple-800' 
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {member.user.role === 'TRAINER' ? 'Trainer' : 'Athlete'}
-                          </span>
-                        </td>
-                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                          <button
-                            onClick={() => removeTeamMember(selectedTeam, member.userId)}
-                            disabled={loading}
-                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                          >
-                            Remove
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-          
           {/* Invite Section */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-medium mb-3">Team Invitation</h4>
+            
             <div className="flex flex-col md:flex-row gap-6 items-start">
                <div className="flex-1 w-full">
                   {!inviteCode ? (
@@ -557,7 +378,78 @@ export default function TeamManagement() {
                )}
             </div>
           </div>
-
+          
+          {/* Members List */}
+          <div>
+            <h4 className="font-medium mb-3">Team Members</h4>
+            {teamMembers[selectedTeam]?.length === 0 ? (
+              <p className="text-gray-600 mb-4">No members in this team yet.</p>
+            ) : (
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg mb-6">
+                <table className="min-w-full divide-y divide-gray-300">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                        Name
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Email
+                      </th>
+                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                        Role
+                      </th>
+                      <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                        <span className="sr-only">Actions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {teamMembers[selectedTeam]?.map((member) => (
+                      <tr key={member.id}>
+                        <td 
+                          className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6 cursor-pointer hover:underline"
+                          onClick={() => handleUserClick(member.user)}
+                        >
+                          {member.user.name}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {member.user.email}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            member.user.role === 'TRAINER' 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : 'bg-blue-100 text-blue-800'
+                          }`}>
+                            {member.user.role === 'TRAINER' ? 'Trainer' : 'Athlete'}
+                          </span>
+                        </td>
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                          <button
+                            onClick={() => removeTeamMember(selectedTeam, member.userId)}
+                            disabled={loading}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            Remove
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            
+            <div className="flex justify-end">
+               <Button
+                  onClick={() => setIsAddMemberModalOpen(true)}
+                  variant="outline"
+                  className="!py-2 !px-4"
+               >
+                  <span>Add Member</span>
+               </Button>
+            </div>
+          </div>
         </div>
       )}
       
@@ -566,6 +458,19 @@ export default function TeamManagement() {
         onClose={() => setIsDetailModalOpen(false)}
         user={selectedUserForDetail}
       />
+
+       {selectedTeam && (
+          <AddMemberModal
+            isOpen={isAddMemberModalOpen}
+            onClose={() => setIsAddMemberModalOpen(false)}
+            teamId={selectedTeam}
+            existingMemberIds={teamMembers[selectedTeam]?.map(m => m.userId) || []}
+            onMemberAdded={() => {
+               fetchTeamMembers(selectedTeam);
+            }}
+            token={token}
+          />
+       )}
     </div>
   );
 }

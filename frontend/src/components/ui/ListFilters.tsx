@@ -8,6 +8,7 @@ interface ListFiltersProps {
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
   children?: ReactNode;
+  hideViewToggle?: boolean;
 }
 
 export function ListFilters({
@@ -15,7 +16,8 @@ export function ListFilters({
   onViewModeChange,
   onSearchChange,
   searchPlaceholder = 'Поиск...',
-  children
+  children,
+  hideViewToggle = false,
 }: ListFiltersProps) {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
@@ -39,42 +41,45 @@ export function ListFilters({
         {children}
       </div>
 
-      <div className="flex bg-gray-100 p-1 rounded-lg">
-        <button
-          onClick={() => onViewModeChange('list')}
-          className={`p-2 rounded-md transition-all ${
-            viewMode === 'list' 
-              ? 'bg-white shadow-sm text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          title="Список"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="8" y1="6" x2="21" y2="6"></line>
-            <line x1="8" y1="12" x2="21" y2="12"></line>
-            <line x1="8" y1="18" x2="21" y2="18"></line>
-            <line x1="3" y1="6" x2="3.01" y2="6"></line>
-            <line x1="3" y1="12" x2="3.01" y2="12"></line>
-            <line x1="3" y1="18" x2="3.01" y2="18"></line>
-          </svg>
-        </button>
-        <button
-          onClick={() => onViewModeChange('card')}
-          className={`p-2 rounded-md transition-all ${
-            viewMode === 'card' 
-              ? 'bg-white shadow-sm text-blue-600' 
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          title="Карточки"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="7" height="7"></rect>
-            <rect x="14" y="3" width="7" height="7"></rect>
-            <rect x="14" y="14" width="7" height="7"></rect>
-            <rect x="3" y="14" width="7" height="7"></rect>
-          </svg>
-        </button>
-      </div>
+      {!hideViewToggle && (
+        <div className="flex bg-gray-100 p-1 rounded-lg">
+          <button
+            onClick={() => onViewModeChange('list')}
+            className={`p-2 rounded-md transition-all ${
+              viewMode === 'list' 
+                ? 'bg-white shadow-sm text-blue-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            title="Список"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="8" y1="6" x2="21" y2="6"></line>
+              <line x1="8" y1="12" x2="21" y2="12"></line>
+              <line x1="8" y1="18" x2="21" y2="18"></line>
+              <line x1="3" y1="6" x2="3.01" y2="6"></line>
+              <line x1="3" y1="12" x2="3.01" y2="12"></line>
+              <line x1="3" y1="18" x2="3.01" y2="18"></line>
+            </svg>
+          </button>
+          <button
+            onClick={() => onViewModeChange('card')}
+            className={`p-2 rounded-md transition-all ${
+              viewMode === 'card' 
+                ? 'bg-white shadow-sm text-blue-600' 
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+            title="Карточки"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="7"></rect>
+              <rect x="14" y="3" width="7" height="7"></rect>
+              <rect x="14" y="14" width="7" height="7"></rect>
+              <rect x="3" y="14" width="7" height="7"></rect>
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
+
   );
 }

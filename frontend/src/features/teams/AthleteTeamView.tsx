@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Team, User } from '../../types';
 import { Card } from '../../components/ui/Card';
 import { UserDetailModal } from './UserDetailModal';
 import { ListFilters, ViewMode } from '../../components/ui/ListFilters';
+import { useMediaQuery } from '../../hooks/useMediaQuery';
 
 interface AthleteTeamViewProps {
   teams: Team[];
@@ -16,6 +17,13 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('card');
+  const isMobileOrTablet = useMediaQuery('(max-width: 1024px)'); // Adjust breakpoint as needed
+
+  useEffect(() => {
+    if (isMobileOrTablet) {
+      setViewMode('list');
+    }
+  }, [isMobileOrTablet]);
 
   const handleUserClick = (user: User) => {
     setSelectedUser(user);
@@ -89,6 +97,7 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
             <ListFilters
               viewMode={viewMode}
               onViewModeChange={setViewMode}
+              hideViewToggle={isMobileOrTablet}
             >
                <div className="flex items-center">
                   <h3 className="text-xl font-bold text-gray-900 flex items-center mr-4">

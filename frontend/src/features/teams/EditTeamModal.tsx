@@ -4,8 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 
 import { QRCodeCanvas } from 'qrcode.react';
-import { EditTeamModalProps, TeamMember, EditTeamModalUser as User } from '../../types/EditTeamModal.types';
+import { EditTeamModalProps, TeamMember } from '../../types/EditTeamModal.types';
 import ErrorDisplay from '../../components/ui/ErrorDisplay';
+import { AddMemberModal } from './AddMemberModal';
 
 export default function EditTeamModal({ 
   teamId, 
@@ -18,12 +19,13 @@ export default function EditTeamModal({
   
   const { user, token } = useAuthStore();
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [athletes, setAthletes] = useState<User[]>([]);
-  const [selectedAthlete, setSelectedAthlete] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
+  
+  // Add Member Modal state
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
 
   const fetchTeamMembers = useCallback(async () => {
     try {
@@ -47,8 +49,6 @@ export default function EditTeamModal({
           ...(token && { 'Authorization': `Bearer ${token}` }),
         },
       });
-      
-
       
       if (response.ok) {
         const contentType = response.headers.get('content-type');
@@ -104,45 +104,6 @@ export default function EditTeamModal({
     }
   }, [teamId]);
 
-  const fetchAvailableAthletes = useCallback(async () => {
-    try {
-      // const token = localStorage.getItem('token'); // Removed direct access
-      
-      // Fetch athletes from the API
-      const response = await fetch('/api/auth/athletes', {
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-
-
-
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setAthletes(data);
-        } else {
-
-          setAthletes([]);
-        }
-      } else {
-
-        try {
-          const errorData = await response.json();
-
-        } catch (e) {
-
-        }
-        setAthletes([]);
-      }
-    } catch (err) {
-
-      setAthletes([]);
-    }
-  }, []);
-
   const fetchInviteCode = useCallback(async () => {
       try {
         const response = await fetch(`/api/teams/${teamId}`, {
@@ -193,56 +154,12 @@ export default function EditTeamModal({
   useEffect(() => {
     if (isOpen && teamId && typeof teamId === 'string' && teamId !== 'undefined') {
       fetchTeamMembers();
-      fetchAvailableAthletes();
       fetchInviteCode();
     } else if (isOpen) {
 
     }
-  }, [isOpen, teamId, fetchTeamMembers, fetchAvailableAthletes, fetchInviteCode]);
+  }, [isOpen, teamId, fetchTeamMembers, fetchInviteCode]);
 
-  const addTeamMember = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedAthlete || !user) return;
-
-    try {
-      setLoading(true);
-      // const token = localStorage.getItem('token'); // Removed direct access
-      
-      const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        body: JSON.stringify({
-          userId: selectedAthlete,
-          role: 'ATHLETE',
-        }),
-      });
-      
-      if (response.ok) {
-        // Refresh team members
-        fetchTeamMembers();
-        setSelectedAthlete('');
-        onTeamUpdated();
-      } else {
-        // Try to parse error response as JSON, but handle case where it's not JSON
-        let errorMessage = 'Failed to add member';
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
-        } catch {
-          errorMessage = response.statusText || 'Failed to add member';
-        }
-        setError(errorMessage);
-      }
-    } catch (err) {
-      setError('Failed to add member');
-
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const removeTeamMember = async (userId: string) => {
     if (!user) return;
@@ -306,7 +223,17 @@ export default function EditTeamModal({
 
           {/* Invite Section */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-            <h3 className="font-medium mb-3">Приглашение в команду</h3>
+            <div className="flex justify-between items-center mb-3">
+               <h3 className="font-medium">Приглашение в команду</h3>
+               <button
+                  type="button"
+                  onClick={() => setIsAddMemberModalOpen(true)}
+                  className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+               >
+                  Добавить
+               </button>
+            </div>
+            
             <div className="flex flex-col md:flex-row gap-6 items-start">
                <div className="flex-1 w-full">
                   {!inviteCode ? (
@@ -360,41 +287,6 @@ export default function EditTeamModal({
                )}
             </div>
           </div>
-          
-          {/* Add Member Form */}
-          <form onSubmit={addTeamMember} className="mb-6 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-medium mb-3">Добавить спортсмена</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label htmlFor="athleteSelect" className="block text-sm font-medium text-gray-700 mb-1">
-                  Спортсмен
-                </label>
-                <select
-                  id="athleteSelect"
-                  value={selectedAthlete}
-                  onChange={(e) => setSelectedAthlete(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Выберите спортсмена</option>
-                  {athletes.map((athlete) => (
-                    <option key={athlete.id} value={athlete.id}>
-                      {athlete.name} {athlete.lastName ? athlete.lastName : ''} ({athlete.email})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              
-              <div className="flex items-end">
-                <button
-                  type="submit"
-                  disabled={loading || !selectedAthlete}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
-                >
-                  {loading ? 'Добавление...' : 'Добавить'}
-                </button>
-              </div>
-            </div>
-          </form>
           
           {/* Members List */}
           <div>
@@ -466,6 +358,18 @@ export default function EditTeamModal({
           </div>
         </div>
       </div>
+
+       <AddMemberModal
+        isOpen={isAddMemberModalOpen}
+        onClose={() => setIsAddMemberModalOpen(false)}
+        teamId={teamId}
+        existingMemberIds={teamMembers.map(m => m.userId)}
+        onMemberAdded={() => {
+           fetchTeamMembers();
+           onTeamUpdated();
+        }}
+        token={token}
+      />
     </div>
   );
 }

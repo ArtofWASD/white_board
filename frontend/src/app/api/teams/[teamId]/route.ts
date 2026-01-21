@@ -15,12 +15,14 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}`
 
+    const authHeader = request.headers.get("authorization")
 
     const response = await fetch(url, {
       method: "GET",
       cache: "no-store",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader && { "Authorization": authHeader }),
       },
     })
 

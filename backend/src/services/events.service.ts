@@ -400,7 +400,43 @@ export class EventsService {
         }
     }
 
+    // Check if the requestor is a Coach (Owner or Admin) of a team the event owner belongs to
+    if (!hasPermission) {
+        // Get teams where requestor is Owner
+        const ownedTeams = await (this.prisma as any).team.findMany({
+            where: { ownerId: userId },
+            select: { id: true }
+        });
+        const requestorTeamIds = ownedTeams.map((t: any) => t.id);
+
+        // Get teams where requestor is Admin
+        const adminMemberships = await (this.prisma as any).teamMember.findMany({
+            where: {
+                userId: userId,
+                role: { in: ['OWNER', 'ADMIN'] }
+            },
+            select: { teamId: true }
+        });
+
+        const allAdminTeamIds = [...new Set([...requestorTeamIds, ...adminMemberships.map((m: any) => m.teamId)])];
+
+        if (allAdminTeamIds.length > 0) {
+             // Check if event owner is a member of any of these teams
+             const targetMembership = await (this.prisma as any).teamMember.findFirst({
+                 where: {
+                     userId: event.userId,
+                     teamId: { in: allAdminTeamIds }
+                 }
+             });
+
+             if (targetMembership) {
+                 hasPermission = true;
+             }
+        }
+    }
+
     // Extended permission check for Organization Admins and Super Admins
+
     if (!hasPermission) {
         const requestor = await (this.prisma as any).user.findUnique({
              where: { id: userId }

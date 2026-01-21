@@ -5,6 +5,8 @@ import { useAuthStore } from '../../../../lib/store/useAuthStore';
 import { useParams, useRouter } from 'next/navigation';
 import { QRCodeCanvas } from 'qrcode.react';
 import { UserDetailModal } from '../../../../features/teams/UserDetailModal';
+import { AddMemberModal } from '../../../../features/teams/AddMemberModal';
+import Button from '../../../../components/ui/Button';
 import { User as FullUser } from '../../../../types';
 
 interface User {
@@ -13,11 +15,6 @@ interface User {
   email: string;
   role: string;
   lastName?: string;
-  teamMemberships?: {
-    team: {
-      name: string;
-    };
-  }[];
 }
 
 interface TeamMember {
@@ -42,8 +39,6 @@ export default function EditTeamPage() {
 
   const [team, setTeam] = useState<Team | null>(null);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [athletes, setAthletes] = useState<User[]>([]);
-  const [selectedAthlete, setSelectedAthlete] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -54,11 +49,13 @@ export default function EditTeamPage() {
   
   const [inviteCode, setInviteCode] = useState<string | null>(null);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
 
   // User detail modal state
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+
+  // Add Member Modal state
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
 
   const handleUserClick = (user: any) => {
     setSelectedUserForDetail(user as FullUser);
@@ -66,18 +63,20 @@ export default function EditTeamPage() {
   };
 
   useEffect(() => {
-    if (teamId) {
+    if (teamId && token) {
+      console.log(`Fetching team details for ${teamId} with token: ${token.substring(0, 10)}...`);
       fetchTeamDetails();
       fetchTeamMembers();
-      fetchAvailableAthletes();
       fetchInviteCode();
+    } else {
+      console.log('Skipping fetch:', { teamId, hasToken: !!token });
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [teamId]);
+  }, [teamId, token]);
 
   const fetchTeamDetails = async () => {
     try {
-      // const token = localStorage.getItem('token'); // Removed direct access
+      console.log('Calling fetchTeamDetails...');
       const response = await fetch(`/api/teams/${teamId}`, {
         cache: 'no-store',
         headers: {
@@ -86,17 +85,26 @@ export default function EditTeamPage() {
         },
       });
 
+      console.log('fetchTeamDetails response status:', response.status);
+
       if (response.ok) {
         const data = await response.json();
         setTeam(data);
         setEditNameValue(data.name);
       } else {
-
-        setError('Не удалось загрузить информацию о команде');
+        const errorText = await response.text();
+        console.error('fetchTeamDetails error body:', errorText);
+        try {
+            const errorData = JSON.parse(errorText);
+            setError(errorData.message || 'Не удалось загрузить информацию о команде');
+        } catch {
+            setError(`Ошибка: ${response.status} ${response.statusText}`);
+        }
       }
     } catch (err) {
-
-      setError('Ошибка при загрузке информации о команде');
+       console.error('fetchTeamDetails exception:', err);
+       const errorMessage = err instanceof Error ? err.message : 'Неизвестная ошибка';
+       setError(`Ошибка при загрузке информации о команде: ${errorMessage}`);
     }
   };
 
@@ -124,36 +132,9 @@ export default function EditTeamPage() {
         setError(errorData.message || 'Не удалось загрузить участников команды');
       }
     } catch (err) {
-
       setError('Ошибка при загрузке участников команды');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchAvailableAthletes = async () => {
-    try {
-      // const token = localStorage.getItem('token'); // Removed direct access
-      const response = await fetch('/api/auth/athletes', {
-        cache: 'no-store',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          setAthletes(data);
-        } else {
-          setAthletes([]);
-        }
-      } else {
-        // Handle error if needed
-      }
-    } catch (err) {
-      console.error('Failed to fetch athletes', err);
     }
   };
 
@@ -200,41 +181,6 @@ export default function EditTeamPage() {
       }
     } catch (err) {
       setError('Не удалось создать пригласительную ссылку');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const addTeamMember = async (athleteId: string) => {
-    if (!athleteId || !user) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-        },
-        body: JSON.stringify({
-          userId: athleteId,
-          role: 'MEMBER',
-        }),
-      });
-      
-      if (response.ok) {
-        fetchTeamMembers();
-        fetchAvailableAthletes();
-        setSuccess('Спортсмен успешно добавлен');
-        setTimeout(() => setSuccess(null), 3000);
-      } else {
-        const errorData = await response.json().catch(() => ({}));
-        setError(errorData.message || 'Не удалось добавить спортсмена');
-      }
-    } catch (err) {
-      setError('Ошибка при добавлении спортсмена');
     } finally {
       setLoading(false);
     }
@@ -445,80 +391,15 @@ export default function EditTeamPage() {
             </div>
           </div>
         </div>
-
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Добавить спортсмена</h2>
-          
-          <div className="mb-6">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                placeholder="Поиск по имени или фамилии..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-sm"
-              />
-            </div>
-          </div>
-
-          <div className="max-h-80 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-            {athletes
-              .filter(athlete => {
-                const fullName = `${athlete.name} ${athlete.lastName || ''}`.toLowerCase();
-                const matchesSearch = fullName.includes(searchQuery.toLowerCase());
-                const notInTeam = !teamMembers.some(member => member.userId === athlete.id);
-                return matchesSearch && notInTeam;
-              })
-              .map((athlete) => (
-                <div key={athlete.id} className="flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100">
-                  <div className="flex-1 min-w-0 mr-4">
-                    <p className="text-sm font-semibold text-gray-900 truncate">
-                      {athlete.name} {athlete.lastName || ''}
-                    </p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {athlete.teamMemberships && athlete.teamMemberships.length > 0 ? (
-                        athlete.teamMemberships.map((tm, idx) => (
-                          <span key={idx} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
-                            {tm.team.name}
-                          </span>
-                        ))
-                      ) : (
-                        <span className="text-xs font-medium text-gray-500 italic">Без команды</span>
-                      )}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => addTeamMember(athlete.id)}
-                    disabled={loading}
-                    className="flex-shrink-0 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                  >
-                    Добавить
-                  </button>
-                </div>
-              ))}
-            {athletes.filter(athlete => {
-              const fullName = `${athlete.name} ${athlete.lastName || ''}`.toLowerCase();
-              const matchesSearch = fullName.includes(searchQuery.toLowerCase());
-              const notInTeam = !teamMembers.some(member => member.userId === athlete.id);
-              return matchesSearch && notInTeam;
-            }).length === 0 && (
-              <p className="text-center py-4 text-gray-500 text-sm">Спортсмены не найдены</p>
-            )}
-          </div>
-        </div>
-
+        
+        {/* Team Members List (Moved here) */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Состав команды</h2>
           
           {teamMembers.length === 0 ? (
-            <p className="text-gray-600 italic">В команде пока нет участников.</p>
+            <p className="text-gray-600 italic mb-4">В команде пока нет участников.</p>
           ) : (
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg mb-6">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   <tr>
@@ -567,13 +448,38 @@ export default function EditTeamPage() {
               </table>
             </div>
           )}
+
+          <div className="flex justify-end">
+          <div className="flex justify-end">
+             <Button
+                onClick={() => setIsAddMemberModalOpen(true)}
+                variant="outline"
+                className="!py-2 !px-4 bg-white hover:bg-gray-50 text-black border-gray-300"
+             >
+                <span>Добавить участника</span>
+             </Button>
+          </div>
+          </div>
         </div>
+
       </div>
       
       <UserDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         user={selectedUserForDetail}
+      />
+
+       <AddMemberModal
+        isOpen={isAddMemberModalOpen}
+        onClose={() => setIsAddMemberModalOpen(false)}
+        teamId={teamId}
+        existingMemberIds={teamMembers.map(m => m.userId)}
+        onMemberAdded={() => {
+           fetchTeamMembers();
+           // setIsAddMemberModalOpen(false); // Optional: close on add? Keeping open for multiple adds
+        }}
+        token={token}
       />
     </div>
   );
