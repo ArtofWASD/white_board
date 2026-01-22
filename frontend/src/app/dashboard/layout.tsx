@@ -149,7 +149,7 @@ export default function DashboardLayout({
         navItems={navItems}
       />
 
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main className="flex-grow container mx-auto p-2 sm:p-4 lg:px-8 lg:py-8">
         {children}
       </main>
     </div>

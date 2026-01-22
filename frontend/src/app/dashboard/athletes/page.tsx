@@ -96,6 +96,7 @@ export default function AthletesPage() {
       <ListFilters 
         viewMode={viewMode} 
         onViewModeChange={setViewMode}
+        hideToggleOnMobile={true}
       >
         <h1 className="text-3xl font-bold text-gray-800">Атлеты</h1>
       </ListFilters>
@@ -112,13 +113,13 @@ export default function AthletesPage() {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Имя
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Email
                     </th>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Команды
                     </th>
                   </tr>
@@ -126,20 +127,20 @@ export default function AthletesPage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {athletes.map((athlete) => (
                     <tr key={athlete.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-lg">
+                          <div className="hidden sm:flex h-10 w-10 rounded-full bg-blue-100 items-center justify-center text-blue-600 font-bold text-lg">
                             {athlete.name.charAt(0).toUpperCase()}
                           </div>
-                          <div className="ml-4">
+                          <div className="ml-0 sm:ml-4">
                             <div className="text-sm font-medium text-gray-900">{athlete.name}</div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                         <div className="text-sm text-gray-500">{athlete.email}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-wrap gap-2">
                           {athlete.teams.map(team => (
                             <span key={team.id} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

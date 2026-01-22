@@ -159,11 +159,11 @@ export default function TeamsPage() {
     );
   }
 
-  const isManagement = user.role === 'TRAINER' || user.role === 'ORGANIZATION_ADMIN';
+  const isManagement = user.role === 'TRAINER' || user.role === 'ORGANIZATION_ADMIN' || user.role === 'SUPER_ADMIN';
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8">
+    <div className="w-full">
+      <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
         {isManagement ? 'Управление командами' : 'Моя команда'}
       </h1>
       

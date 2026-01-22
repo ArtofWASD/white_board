@@ -9,6 +9,7 @@ interface ListFiltersProps {
   searchPlaceholder?: string;
   children?: ReactNode;
   hideViewToggle?: boolean;
+  hideToggleOnMobile?: boolean;
 }
 
 export function ListFilters({
@@ -18,6 +19,7 @@ export function ListFilters({
   searchPlaceholder = 'Поиск...',
   children,
   hideViewToggle = false,
+  hideToggleOnMobile = false,
 }: ListFiltersProps) {
   return (
     <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4" onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
@@ -42,7 +44,7 @@ export function ListFilters({
       </div>
 
       {!hideViewToggle && (
-        <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className={`flex bg-gray-100 p-1 rounded-lg ${hideToggleOnMobile ? 'hidden sm:flex' : ''}`}>
           <button
             onClick={() => onViewModeChange('list')}
             className={`p-2 rounded-md transition-all ${

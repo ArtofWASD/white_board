@@ -51,12 +51,12 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
       {teams.map((team) => (
         <Card key={team.id} noPadding className="overflow-hidden border-0 shadow-md">
           {/* Team Header */}
-          <div className="p-6 md:p-8 border-b border-gray-100 bg-white">
+          <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 bg-white">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-3 mb-2">
                   <span className="bg-blue-600 w-2 h-8 rounded-full"></span>
-                  <h2 className="text-3xl font-bold text-gray-900">{team.name}</h2>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{team.name}</h2>
                   {isTrainer && onEditTeam && (
                      <button 
                        onClick={() => onEditTeam(team.id)}
@@ -93,14 +93,14 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
             </div>
           </div>
 
-          <div className="p-6 md:p-8">
+          <div className="p-3 sm:p-6 md:p-8">
             <ListFilters
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               hideViewToggle={isMobileOrTablet}
             >
                <div className="flex items-center">
-                  <h3 className="text-xl font-bold text-gray-900 flex items-center mr-4">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center mr-4">
                     <span className="bg-gray-100 text-gray-600 p-2 rounded-lg mr-3">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -108,7 +108,7 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
                     </span>
                     Состав команды
                   </h3>
-                  <span className="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                  <span className="text-xs sm:text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
                     {team.members?.length || 0} участников
                   </span>
                </div>
@@ -159,17 +159,17 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Имя
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Email
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Роль
                       </th>
                       {isTrainer && onRemoveMember && (
-                        <th scope="col" className="relative px-6 py-3">
+                        <th scope="col" className="relative px-2 py-2 sm:px-6 sm:py-3">
                           <span className="sr-only">Действия</span>
                         </th>
                       )}
@@ -182,24 +182,24 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
                         className="hover:bg-blue-50 cursor-pointer transition-colors"
                         onClick={() => handleUserClick(member.user)}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="flex-shrink-0 h-10 w-10">
+                            <div className="flex-shrink-0 h-10 w-10 hidden sm:block">
                               <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
                                 {member.user.name.charAt(0)}{member.user.lastName?.charAt(0) || ''}
                               </div>
                             </div>
-                            <div className="ml-4">
-                              <div className="text-sm font-medium text-blue-600 hover:text-blue-900">
+                            <div className="sm:ml-4">
+                              <div className="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-900">
                                 {member.user.name} {member.user.lastName}
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-500">{member.user.email}</div>
+                        <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                          <div className="text-xs sm:text-sm text-gray-500">{member.user.email}</div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                              member.role === 'OWNER' ? 'bg-purple-100 text-purple-800' :
                              member.role === 'ADMIN' ? 'bg-green-100 text-green-800' :
@@ -209,7 +209,7 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
                           </span>
                         </td>
                         {isTrainer && onRemoveMember && (
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
                             {member.role !== 'OWNER' && (
                               <button
                                 onClick={(e) => {

@@ -313,7 +313,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="w-full px-1 sm:px-6 lg:px-8 py-8">
+    <div className="w-full py-2 lg:py-0">
       <div className="bg-white rounded-lg shadow-xl p-6 mb-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">

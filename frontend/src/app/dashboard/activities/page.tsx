@@ -86,12 +86,13 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full p-2 sm:p-4 lg:p-8">
       <ListFilters 
         viewMode={viewMode} 
         onViewModeChange={setViewMode}
+        hideToggleOnMobile={true}
       >
-        <h1 className="text-3xl font-bold text-gray-900">Занятия команд</h1>
+        <h1 className="text-3xl font-bold text-gray-900 w-full text-center sm:text-left">Занятия команд</h1>
       </ListFilters>
 
       <div className="space-y-12">
@@ -105,8 +106,8 @@ export default function ActivitiesPage() {
             <div key={teamId} className="bg-gray-50 rounded-xl p-6">
               <div className="flex items-center mb-6">
                 <div className="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
-                <h2 className="text-2xl font-bold text-gray-800">{teamName}</h2>
-                <span className="ml-4 px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
+                <h2 className="text-lg font-bold text-gray-800">{teamName}</h2>
+                <span className="ml-4 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                   {teamEvents.length} {teamEvents.length === 1 ? 'занятие' : teamEvents.length < 5 ? 'занятия' : 'занятий'}
                 </span>
               </div>
