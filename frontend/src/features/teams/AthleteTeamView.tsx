@@ -60,7 +60,7 @@ const AthleteTeamView: React.FC<AthleteTeamViewProps & {
                   {isTrainer && onEditTeam && (
                      <button 
                        onClick={() => onEditTeam(team.id)}
-                       className="ml-2 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all"
+                       className="ml-2 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all flex-shrink-0"
                        title="Редактировать команду"
                      >
                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
