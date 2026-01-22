@@ -9,6 +9,7 @@ import { ExercisesModule } from './modules/exercises.module';
 import { StrengthResultsModule } from './modules/strength-results.module';
 import { OrganizationModule } from './modules/organization.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { UsersModule } from './modules/users.module';
 
 @Module({
   imports: [
@@ -19,7 +20,8 @@ import { PrismaModule } from './prisma/prisma.module';
     TeamsModule, 
     ExercisesModule, 
     StrengthResultsModule, 
-    OrganizationModule
+    OrganizationModule,
+    UsersModule
   ],
   controllers: [AppController],
   providers: [AppService],
