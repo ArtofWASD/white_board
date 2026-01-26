@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 
+import path from "path";
+
 const nextConfig: NextConfig = {
   /* config options here */
   output: "standalone",
-  turbopack: {},
+  turbopack: {
+    root: path.resolve(__dirname, ".."),
+  },
 };
 
 const withPWA = require("@ducanh2912/next-pwa").default({

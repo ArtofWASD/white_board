@@ -17,8 +17,26 @@ export class UsersService {
         lastName: true,
         email: true,
         role: true,
+        isBlocked: true,
         createdAt: true,
         organizationId: true,
+      },
+    });
+  }
+
+  async deleteUser(id: string) {
+    return this.prisma.user.delete({
+      where: { id },
+    });
+  }
+
+  async updateStatus(id: string, isBlocked: boolean) {
+    return this.prisma.user.update({
+      where: { id },
+      data: { isBlocked },
+      select: {
+        id: true,
+        isBlocked: true,
       },
     });
   }

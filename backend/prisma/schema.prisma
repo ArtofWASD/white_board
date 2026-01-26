@@ -59,6 +59,7 @@ model User {
   createdAt          DateTime     @default(now()) @map("created_at")
   updatedAt          DateTime     @updatedAt @map("updated_at")
   lastName           String?      @map("last_name")
+  isBlocked          Boolean      @default(false) @map("is_blocked")
   
   // Relations
   events             Event[]

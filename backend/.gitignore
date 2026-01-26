@@ -33,3 +33,6 @@ temp/
 
 # Typescript
 *.tsbuildinfo
+
+# Custom
+/temp_scripts
