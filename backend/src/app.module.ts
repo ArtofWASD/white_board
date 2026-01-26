@@ -10,6 +10,8 @@ import { StrengthResultsModule } from './modules/strength-results.module';
 import { OrganizationModule } from './modules/organization.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './modules/users.module';
+import { SettingsModule } from './modules/settings.module';
+import { StatisticsModule } from './modules/statistics.module';
 
 @Module({
   imports: [
@@ -21,7 +23,10 @@ import { UsersModule } from './modules/users.module';
     ExercisesModule, 
     StrengthResultsModule, 
     OrganizationModule,
-    UsersModule
+    OrganizationModule,
+    UsersModule,
+    SettingsModule,
+    StatisticsModule
   ],
   controllers: [AppController],
   providers: [AppService],

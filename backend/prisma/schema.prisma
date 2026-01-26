@@ -189,3 +189,11 @@ model StrengthWorkoutResult {
 
   @@map("strength_workout_results")
 }
+
+model SystemSetting {
+  key         String  @id
+  value       String  // JSON string or simple string
+  description String?
+
+  @@map("system_settings")
+}

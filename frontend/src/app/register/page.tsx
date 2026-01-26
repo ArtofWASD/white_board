@@ -32,6 +32,27 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
 
+  const [settings, setSettings] = useState<Record<string, boolean>>({});
+  const [loadingSettings, setLoadingSettings] = useState(true);
+
+  // Fetch settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch('/api/settings');
+            if (res.ok) {
+                const data = await res.json();
+                setSettings(data);
+            }
+        } catch (e) {
+            console.error('Failed to fetch settings', e);
+        } finally {
+            setLoadingSettings(false);
+        }
+    };
+    fetchSettings();
+  }, []);
+
   // Redirect to dashboard if already logged in or redirection for invite
   useEffect(() => {
     if (!isLoading && isAuthenticated && !showSuccessModal) {
@@ -42,6 +63,26 @@ export default function RegisterPage() {
       }
     }
   }, [isAuthenticated, router, showSuccessModal, isLoading, inviteCode]);
+  
+  if (loadingSettings) {
+      return <div className="min-h-screen flex items-center justify-center bg-gray-100">Загрузка...</div>;
+  }
+  
+  if (settings['MAINTENANCE_MODE']) {
+      return (
+          <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+              <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
+                  <h2 className="text-2xl font-bold mb-4 text-gray-800">Техническое обслуживание</h2>
+                  <p className="text-gray-600">
+                      В данный момент регистрация недоступна. Пожалуйста, попробуйте позже.
+                  </p>
+                  <Button href="/" variant="outline" className="mt-6">
+                      На главную
+                  </Button>
+              </div>
+          </div>
+      );
+  }
 
   const validateStep1 = () => {
     if (!email || !password || !confirmPassword) {
@@ -368,6 +409,7 @@ export default function RegisterPage() {
                   
                   <div className="grid grid-cols-1 gap-4">
                     {/* Athlete Card */}
+                    {settings['REGISTRATION_ATHLETE'] !== false && (
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         role === 'ATHLETE' && userType === 'individual'
@@ -395,8 +437,10 @@ export default function RegisterPage() {
                         </div>
                       </div>
                     </div>
+                    )}
 
                     {/* Trainer Card */}
+                    {settings['REGISTRATION_TRAINER'] !== false && (
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         role === 'TRAINER' && userType === 'individual'
@@ -424,8 +468,10 @@ export default function RegisterPage() {
                         </div>
                       </div>
                     </div>
+                    )}
 
                     {/* Organization Card */}
+                    {settings['REGISTRATION_ORGANIZATION'] !== false && (
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                         userType === 'organization'
@@ -454,6 +500,7 @@ export default function RegisterPage() {
                         </div>
                       </div>
                     </div>
+                    )}
                   </div>
 
                   {userType === 'organization' && (
