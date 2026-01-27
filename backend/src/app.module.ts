@@ -12,6 +12,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UsersModule } from './modules/users.module';
 import { SettingsModule } from './modules/settings.module';
 import { StatisticsModule } from './modules/statistics.module';
+import { WodsModule } from './modules/wods.module';
 
 @Module({
   imports: [
@@ -23,10 +24,11 @@ import { StatisticsModule } from './modules/statistics.module';
     ExercisesModule, 
     StrengthResultsModule, 
     OrganizationModule,
-    OrganizationModule,
     UsersModule,
     SettingsModule,
-    StatisticsModule
+
+    StatisticsModule,
+    WodsModule
   ],
   controllers: [AppController],
   providers: [AppService],

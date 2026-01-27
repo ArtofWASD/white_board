@@ -26,6 +26,24 @@ export class ExercisesService {
     return exercise;
   }
 
+  async createGlobalExercise(name: string, description?: string, videoUrl?: string) {
+    return this.prisma.exercise.create({
+        data: {
+            name,
+            description,
+            videoUrl,
+            userId: null // Global
+        }
+    });
+  }
+
+  async getGlobalExercises() {
+      return this.prisma.exercise.findMany({
+          where: { userId: null },
+          orderBy: { name: 'asc' }
+      });
+  }
+
   async getExercisesByUserId(userId: string) {
     const exercises = await this.prisma.exercise.findMany({
       where: {
@@ -89,8 +107,21 @@ export class ExercisesService {
     }
 
     return this.prisma.exercise.update({
-      where: { id },
-      data: { name },
+        where: { id },
+        data: { name },
     });
+  }
+
+  async updateExerciseDetails(id: string, data: { name?: string, description?: string, videoUrl?: string }) {
+      return this.prisma.exercise.update({
+          where: { id },
+          data
+      });
+  }
+
+  async deleteExercise(id: string) {
+      return this.prisma.exercise.delete({
+          where: { id }
+      });
   }
 }

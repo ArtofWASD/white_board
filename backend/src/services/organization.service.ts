@@ -141,4 +141,30 @@ export class OrganizationService {
         recentActivity: allActivity
     };
   }
+  async getAllForAdmin() {
+    const orgs = await (this.prisma as any).organization.findMany({
+      include: {
+        _count: {
+          select: { users: true, teams: true }
+        }
+      },
+      orderBy: { createdAt: 'desc' }
+    });
+    
+    return orgs.map((org: any) => ({
+      id: org.id,
+      name: org.name,
+      createdAt: org.createdAt,
+      isBlocked: org.isBlocked,
+      userCount: org._count.users,
+      teamCount: org._count.teams
+    }));
+  }
+
+  async toggleBlockStatus(id: string, isBlocked: boolean) {
+    return (this.prisma as any).organization.update({
+      where: { id },
+      data: { isBlocked }
+    });
+  }
 }

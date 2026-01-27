@@ -1,6 +1,7 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -42,6 +43,8 @@ model Organization {
   users     User[]
   teams     Team[]
 
+  isBlocked Boolean  @default(false) @map("is_blocked")
+
   @@map("organizations")
 }
 
@@ -82,16 +85,29 @@ model User {
 }
 
 model Exercise {
-  id        String           @id @default(uuid())
-  name      String
-  userId    String           @map("user_id")
-  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  records   ExerciseRecord[]
+  id          String           @id @default(uuid())
+  name        String
+  description String?
+  videoUrl    String?          @map("video_url")
+  userId      String?          @map("user_id")
+  user        User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  records     ExerciseRecord[]
   strengthResults StrengthWorkoutResult[]
-  createdAt DateTime         @default(now()) @map("created_at")
-  updatedAt DateTime         @updatedAt @map("updated_at")
+  createdAt   DateTime         @default(now()) @map("created_at")
+  updatedAt   DateTime         @updatedAt @map("updated_at")
 
   @@map("exercises")
+}
+
+model Wod {
+  id          String   @id @default(uuid())
+  name        String
+  description String
+  type        String   // GIRL, HERO, OTHER
+  isGlobal    Boolean  @default(true) @map("is_global")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("wods")
 }
 
 model ExerciseRecord {
@@ -197,3 +213,5 @@ model SystemSetting {
 
   @@map("system_settings")
 }
+
+

@@ -14,6 +14,37 @@ export class CreateExerciseDto {
   initialWeight?: number;
 }
 
+export class CreateGlobalExerciseDto {
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @IsString()
+  @IsOptional()
+  description?: string;
+
+  @IsString()
+  @IsOptional()
+  videoUrl?: string;
+}
+
+export class UpdateExerciseDto {
+    @IsString()
+    @IsNotEmpty()
+    @IsOptional()
+    name?: string;
+
+    @IsString()
+    @IsOptional()
+    description?: string;
+
+    @IsString()
+    @IsOptional()
+    @IsString()
+    @IsOptional()
+    videoUrl?: string;
+}
+
 export class AddExerciseRecordDto {
   @IsNumber()
   @IsNotEmpty()

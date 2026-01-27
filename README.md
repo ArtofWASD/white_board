@@ -1,6 +1,6 @@
 # Whiteboard Project
 
-Этот проект состоит из двух частей: фронтенда на Next.js и бэкенда на NestJS с PostgreSQL.
+Этот проект состоит из двух частей: фронтенда на Next.js и бэкенда на NestJS с PostgreSQL и Prisma.
 
 ## Структура проекта
 
@@ -8,17 +8,23 @@
 .
 ├── frontend/          # Next.js фронтенд
 │   ├── src/
-│   │   ├── app/       # App Router pages
-│   │   ├── components/ # React компоненты
-│   │   └── contexts/  # React контексты
+│   │   ├── app/       # App Router pages (включая /admin, /dashboard и др.)
+│   │   ├── components/
+│   │   │   ├── admin/ # Компоненты админ-панели (AdminSidebar, UsersTab и др.)
+│   │   │   ├── ui/    # Переиспользуемые UI компоненты
+│   │   │   └── ...
+│   │   ├── lib/
+│   │   │   ├── store/ # Zustand сторы (useAuthStore и др.)
+│   │   │   └── ...
+│   │   └── types/     # TypeScript типы
 │   └── ...
 └── backend/           # NestJS бэкенд
     ├── src/
     │   ├── controllers/ # API контроллеры
     │   ├── services/    # Бизнес-логика
-    │   ├── entities/    # TypeORM сущности
-    │   ├── dtos/        # Data Transfer Objects
-    │   └── modules/     # NestJS модули
+    │   ├── modules/     # NestJS модули
+    │   └── ...
+    ├── prisma/          # Схема базы данных и миграции
     └── ...
 ```
 
@@ -33,7 +39,16 @@ cd backend
 # Установите зависимости
 npm install
 
-# Запустите базу данных PostgreSQL (убедитесь, что она установлена и запущена)
+# Создайте файл .env на основе примера (см. "Переменные окружения" ниже)
+
+# Запустите базу данных (убедитесь, что PostgreSQL запущен)
+
+# Примените миграции и сиды
+npm run db:migrate
+npm run db:init
+
+# Запустите Prisma Studio (опционально, для просмотра БД)
+npm run db:studio
 
 # Запустите сервер разработки
 npm run start:dev
@@ -50,6 +65,8 @@ cd frontend
 # Установите зависимости
 npm install
 
+# Создайте файл .env.local (см. "Переменные окружения" ниже)
+
 # Запустите сервер разработки
 npm run dev
 ```
@@ -60,47 +77,35 @@ npm run dev
 
 ### Backend (.env)
 ```
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
-DB_PASSWORD=postgres
-DB_NAME=whiteboard
-JWT_SECRET=mySecretKey123
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/whiteboard?schema=public"
+JWT_SECRET="super-secret"
 PORT=3001
 ```
 
 ### Frontend (.env.local)
 ```
-BACKEND_URL=http://localhost:3001
+NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-## API эндпоинты
-
-### Аутентификация
-- `POST /auth/login` - Вход пользователя
-- `POST /auth/register` - Регистрация пользователя
-
-### События
-- `POST /events` - Создание события
-- `GET /events/:userId` - Получение всех событий пользователя
-- `GET /events/:userId/past` - Получение прошедших событий пользователя
-- `GET /events/:userId/future` - Получение предстоящих событий пользователя
-- `PUT /events/:eventId/status` - Обновление статуса события
-- `DELETE /events/:eventId` - Удаление события
-
-Более подробную информацию о работе с событиями можно найти в файле [EVENTS_API.md](backend/EVENTS_API.md)
+## Админ-панель
+Админ-панель доступна по адресу `/admin` для пользователей с ролью `SUPER_ADMIN`.
+Код админ-панели структурирован в `frontend/src/app/admin/page.tsx` (лэйаут) и компоненты в `frontend/src/components/admin/`.
 
 ## Технологии
 
 ### Frontend
-- Next.js 16.0.3
-- React 19.2.0
+- Next.js 16
+- React 19
 - TypeScript
 - Tailwind CSS
+- Zustand (State Management)
+- Recharts (Графики)
+- FullCalendar (Календарь)
+- DnD Kit (Drag & Drop)
 
 ### Backend
 - NestJS
 - TypeScript
 - PostgreSQL
-- TypeORM
+- Prisma ORM
 - JWT для аутентификации

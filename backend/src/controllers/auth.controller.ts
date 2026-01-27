@@ -27,7 +27,17 @@ export class AuthController {
   @Post('register')
   async register(@Body() body: any) {
 
-    return this.authService.register(body);
+    try {
+      return await this.authService.register(body);
+    } catch (error) {
+      console.error('Registration Error:', error);
+      return {
+        status: 'error',
+        message: error.message,
+        stack: error.stack,
+        details: error
+      };
+    }
   }
 
   @HttpCode(HttpStatus.OK)

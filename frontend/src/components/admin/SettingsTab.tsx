@@ -1,0 +1,102 @@
+import React, { useEffect, useState } from 'react';
+import { useAuthStore } from '../../lib/store/useAuthStore';
+
+export const SettingsTab: React.FC = () => {
+  const { token } = useAuthStore();
+  const [settings, setSettings] = useState<Record<string, string>>({});
+  const [loadingSettings, setLoadingSettings] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+        setLoadingSettings(true);
+        try {
+            const res = await fetch('/api/settings', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                // Convert array to object
+                const settingsMap: Record<string, string> = {};
+                data.forEach((s: any) => settingsMap[s.key] = s.value);
+                setSettings(settingsMap);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingSettings(false);
+        }
+    };
+    if (token) {
+        fetchSettings();
+    }
+  }, [token]);
+
+  const handleUpdateSetting = async (key: string, value: string) => {
+      // Optimistic update
+      setSettings(prev => ({ ...prev, [key]: value }));
+      
+      try {
+          await fetch(`/api/settings/${key}`, {
+              method: 'PATCH',
+              headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
+              },
+              body: JSON.stringify({ value })
+          });
+      } catch (e) {
+          console.error(e);
+          alert('Ошибка сохранения настройки');
+          // Revert logic could go here by refetching
+      }
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-lg shadow-md">
+        <h3 className="text-xl font-semibold mb-6 text-gray-800">Настройки Системы (Feature Flags)</h3>
+        
+        {loadingSettings ? (
+            <div className="flex justify-center p-4"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>
+        ) : (
+            <div className="space-y-6">
+                <div className="border-b pb-4">
+                    <h4 className="font-medium text-gray-700 mb-4">Регистрация пользователей</h4>
+                    <div className="space-y-4">
+                        {[
+                            { key: 'REGISTRATION_ATHLETE', label: 'Разрешить регистрацию Атлетов' },
+                            { key: 'REGISTRATION_TRAINER', label: 'Разрешить регистрацию Тренеров' },
+                            { key: 'REGISTRATION_ORGANIZATION', label: 'Разрешить регистрацию Организаций' },
+                        ].map(({ key, label }) => (
+                            <div key={key} className="flex items-center justify-between">
+                                <span className="text-gray-600">{label}</span>
+                                <button 
+                                    onClick={() => handleUpdateSetting(key, settings[key] === 'true' ? 'false' : 'true')}
+                                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${settings[key] === 'true' ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                                >
+                                    <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${settings[key] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div>
+                    <h4 className="font-medium text-gray-700 mb-4">Обслуживание</h4>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <span className="text-gray-600 block">Режим технического обслуживания</span>
+                            <span className="text-xs text-gray-400">Блокирует доступ для всех кроме админов</span>
+                        </div>
+                        <button 
+                            onClick={() => handleUpdateSetting('MAINTENANCE_MODE', settings['MAINTENANCE_MODE'] === 'true' ? 'false' : 'true')}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 ${settings['MAINTENANCE_MODE'] === 'true' ? 'bg-red-600' : 'bg-gray-200'}`}
+                        >
+                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${settings['MAINTENANCE_MODE'] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+    </div>
+  );
+};

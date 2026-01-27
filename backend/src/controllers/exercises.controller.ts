@@ -9,9 +9,15 @@ import {
   NotFoundException,
   BadRequestException,
   Put,
+  Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { ExercisesService } from '../services/exercises.service';
-import { CreateExerciseDto, AddExerciseRecordDto } from '../dtos/exercises.dto';
+import { CreateExerciseDto, AddExerciseRecordDto, CreateGlobalExerciseDto, UpdateExerciseDto } from '../dtos/exercises.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '@prisma/client';
 
 @Controller('exercises')
 export class ExercisesController {
@@ -30,6 +36,32 @@ export class ExercisesController {
       createExerciseDto.name,
       createExerciseDto.initialWeight,
     );
+  }
+
+  @Post('global')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
+  async createGlobalExercise(@Body() dto: CreateGlobalExerciseDto) {
+      return this.exercisesService.createGlobalExercise(dto.name, dto.description, dto.videoUrl);
+  }
+
+  @Get('global')
+  async getGlobalExercises() {
+      return this.exercisesService.getGlobalExercises();
+  }
+
+  @Put('global/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
+  async updateExerciseDetails(@Param('id') id: string, @Body() dto: UpdateExerciseDto) {
+      return this.exercisesService.updateExerciseDetails(id, dto);
+  }
+
+  @Delete('global/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
+  async deleteExercise(@Param('id') id: string) {
+      return this.exercisesService.deleteExercise(id);
   }
 
   @Get(':userId')
