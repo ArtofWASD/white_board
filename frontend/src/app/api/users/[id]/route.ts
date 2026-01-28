@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -14,7 +14,7 @@ export async function DELETE(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const id = params.id;
+    const { id } = await params;
 
     const response = await fetch(`${backendUrl}/users/${id}`, {
       method: 'DELETE',
@@ -38,7 +38,7 @@ export async function DELETE(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -49,7 +49,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const id = params.id;
+    const { id } = await params;
     const body = await request.json();
 
     // Check if it's a status update request (has isBlocked)

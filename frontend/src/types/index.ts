@@ -91,6 +91,7 @@ export interface CalendarEvent {
   status?: "FUTURE" | "COMPLETED" | "CANCELLED"
   description?: string;
   participants?: { id: string; name: string; lastName?: string }[];
+  teamName?: string;
 }
 
 export interface Event {

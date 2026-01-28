@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,7 +9,7 @@ import Button from '../../components/ui/Button';
 import SuccessModal from '../../components/ui/SuccessModal';
 import ErrorDisplay from '../../components/ui/ErrorDisplay';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [step, setStep] = useState(1);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -39,7 +39,7 @@ export default function RegisterPage() {
   useEffect(() => {
     const fetchSettings = async () => {
         try {
-            const res = await fetch('/api/settings');
+            const res = await fetch('/api/settings/public');
             if (res.ok) {
                 const data = await res.json();
                 setSettings(data);
@@ -596,5 +596,13 @@ export default function RegisterPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Загрузка...</div>}>
+      <RegisterForm />
+    </Suspense>
   );
 }

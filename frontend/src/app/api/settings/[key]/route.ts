@@ -3,7 +3,7 @@ import { headers } from 'next/headers';
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { key: string } }
+  { params }: { params: Promise<{ key: string }> }
 ) {
   try {
     const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
@@ -14,7 +14,7 @@ export async function PATCH(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const key = params.key;
+    const { key } = await params;
     const body = await request.json();
 
     const response = await fetch(`${backendUrl}/settings/${key}`, {

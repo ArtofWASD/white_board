@@ -13,9 +13,15 @@ import {
 import { AuthService } from '../services/auth.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 
+import { SettingsService } from '../services/settings.service';
+import { ForbiddenException, BadRequestException } from '@nestjs/common';
+
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(
+      private authService: AuthService,
+      private settingsService: SettingsService
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -26,11 +32,38 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   async register(@Body() body: any) {
+    // Check Feature Flags
+    const settings = await this.settingsService.getAll();
+    const settingsMap = settings.reduce((acc, curr) => {
+        acc[curr.key] = curr.value;
+        return acc;
+    }, {} as Record<string, string>);
+
+    if (settingsMap['MAINTENANCE_MODE'] === 'true') {
+        throw new ForbiddenException('Registration is currently disabled due to maintenance.');
+    }
+
+    const { role, userType } = body;
+
+    if (role === 'ATHLETE' && settingsMap['REGISTRATION_ATHLETE'] === 'false') {
+        throw new ForbiddenException('Athlete registration is currently disabled.');
+    }
+
+    if (role === 'TRAINER' && settingsMap['REGISTRATION_TRAINER'] === 'false') {
+        throw new ForbiddenException('Trainer registration is currently disabled.');
+    }
+
+    if (userType === 'organization' && settingsMap['REGISTRATION_ORGANIZATION'] === 'false') {
+        throw new ForbiddenException('Organization registration is currently disabled.');
+    }
 
     try {
       return await this.authService.register(body);
     } catch (error) {
       console.error('Registration Error:', error);
+      if (error instanceof ForbiddenException) {
+          throw error;
+      }
       return {
         status: 'error',
         message: error.message,

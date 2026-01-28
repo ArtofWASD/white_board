@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarEvent } from './hooks/useCalendarEvents';
+import { CalendarEvent } from '@/types';
 
 interface EventTooltipProps {
   event: CalendarEvent;
