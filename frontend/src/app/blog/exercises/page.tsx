@@ -8,28 +8,35 @@ import { ViewSwitcher } from '@/components/ui/ViewSwitcher';
 import Link from 'next/link';
 import { useFeatureFlagStore } from '@/lib/store/useFeatureFlagStore';
 
-export default function NewsPage() {
-  const [news, setNews] = useState([]);
+export default function ExercisesPage() {
+  const [exercises, setExercises] = useState([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [loading, setLoading] = useState(true);
   const { flags } = useFeatureFlagStore();
 
   useEffect(() => {
-    const fetchNews = async () => {
+    const fetchExercises = async () => {
       try {
-        const res = await fetch('/api/news');
+        const res = await fetch('/api/content-exercises');
         if (res.ok) {
-          const data = await res.json();
-          setNews(data);
+           const data = await res.json();
+           const mappedData = data.map((ex: any) => ({
+               id: ex.id,
+               title: ex.name,
+               description: ex.description,
+               videoUrl: ex.videoUrl,
+               type: 'exercise',
+           }));
+           setExercises(mappedData);
         }
       } catch (error) {
-        console.error('Failed to fetch news:', error);
+        console.error('Failed to fetch exercises:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNews();
+    fetchExercises();
   }, []);
 
   if (flags.hideBlogContent) {
@@ -53,10 +60,10 @@ export default function NewsPage() {
       
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
+           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Новости</h1>
-                <p className="mt-2 text-gray-600">Последние обновления и статьи</p>
+                <h1 className="text-3xl font-bold text-gray-900">Упражнения</h1>
+                <p className="mt-2 text-gray-600">Библиотека упражнений и техник</p>
              </div>
              
              <ViewSwitcher viewMode={viewMode} onChange={setViewMode} />
@@ -67,18 +74,18 @@ export default function NewsPage() {
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
             </div>
           ) : (
-            <>
-                {news.length > 0 ? (
-                    <ContentDisplay items={news} viewMode={viewMode} type="news" />
+             <>
+                {exercises.length > 0 ? (
+                    <ContentDisplay items={exercises} viewMode={viewMode} type="exercise" />
                 ) : (
                     <div className="text-center text-gray-500 py-12">
-                        Новостей пока нет
+                        Упражнений пока нет
                     </div>
                 )}
             </>
           )}
 
-          <div className="mt-12 text-center">
+           <div className="mt-12 text-center">
              <Link href="/blog" className="text-indigo-600 font-medium hover:text-indigo-800">
                 ← Назад в блог
              </Link>

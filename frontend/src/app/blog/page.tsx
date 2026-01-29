@@ -45,7 +45,7 @@ export default function BlogPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]); // For left menu events
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
-  const [showContent, setShowContent] = useState(false);
+  const [showContent, setShowContent] = useState(true);
   const [loadingConfig, setLoadingConfig] = useState(true);
   
   const { isAuthenticated, user } = useAuthStore();
@@ -87,7 +87,7 @@ export default function BlogPage() {
             const res = await fetch('/api/settings/public');
             if (res.ok) {
                 const settings = await res.json();
-                setShowContent(settings['ENABLE_BLOG_CONTENT'] === true);
+                setShowContent(settings['HIDE_BLOG_CONTENT'] !== true);
             }
         } catch (e) {
             console.error('Failed to fetch settings', e);
@@ -114,33 +114,33 @@ export default function BlogPage() {
     setSelectedEvent(null);
   };
 
-  // Sample news data
-  const newsItems: NewsItem[] = [
-    {
-      id: '1',
-      title: 'Новые возможности тренировочного календаря',
-      excerpt: 'Мы добавили новые функции в наш тренировочный календарь, которые помогут вам лучше планировать свои занятия.',
-      date: '15 ноября 2025',
-      readTime: '5 мин чтения',
-      content: 'В новом обновлении мы добавили возможность планирования групповых тренировок, интеграцию с популярными фитнес-приложениями и улучшенную систему напоминаний о предстоящих занятиях. Теперь вы можете легко делиться своими тренировками с друзьями и отслеживать прогресс всей команды.'
-    },
-    {
-      id: '2',
-      title: 'Советы по питанию для спортсменов',
-      excerpt: 'Правильное питание играет ключевую роль в достижении спортивных результатов. Узнайте больше о важных аспектах спортивного питания.',
-      date: '10 ноября 2025',
-      readTime: '7 мин чтения',
-      content: 'Спортивное питание должно быть сбалансированным и содержать все необходимые макро- и микроэлементы. Мы подготовили подробное руководство по питанию до, во время и после тренировок, которое поможет вам оптимизировать ваши спортивные результаты и ускорить восстановление.'
-    },
-    {
-      id: '3',
-      title: 'Как избежать перетренированности',
-      excerpt: 'Перетренированность - частая проблема среди активных спортсменов. Узнайте, как распознать признаки и предотвратить это состояние.',
-      date: '5 ноября 2025',
-      readTime: '6 мин чтения',
-      content: 'Перетренированность может серьезно повлиять на ваш спортивный прогресс и общее состояние здоровья. В этой статье мы рассмотрим основные симптомы перетренированности, методы диагностики и рекомендации по восстановлению. Также вы узнаете, как правильно планировать тренировочный процесс с учетом периодов отдыха и восстановления.'
+  // State for news
+  const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const res = await fetch('/api/news?limit=3');
+        if (res.ok) {
+          const data = await res.json();
+          setNewsItems(data.map((item: any) => ({
+            id: item.id,
+            title: item.title,
+            excerpt: item.excerpt,
+            date: new Date(item.createdAt).toLocaleDateString('ru-RU'),
+            readTime: '5 мин чтения', // Placeholder
+            content: item.content
+          })));
+        }
+      } catch (e) {
+        console.error('Failed to fetch news', e);
+      }
+    };
+
+    if (showContent) {
+      fetchNews();
     }
-  ];
+  }, [showContent]);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -167,18 +167,18 @@ export default function BlogPage() {
 
           {/* Temporary Content - Hidden */}
           <div className={!loadingConfig && showContent ? '' : 'hidden'}>
-            {/* Two large links for News and Workouts */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {/* Three large links for News, Workouts, and Exercises */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
               <Link 
                 href="/blog/news" 
-                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
+                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out hover:shadow-lg"
               >
                 <div className="flex flex-col h-full justify-center items-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Новости</h2>
-                  <div className="w-26 h-0.5 bg-black mt-2"></div>
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
-                    <span className="text-sm text-gray-600 whitespace-nowrap">
-                      Читайте последние новости и обновления
+                  <div className="w-16 h-0.5 bg-indigo-500 mt-2 transition-all group-hover:w-24"></div>
+                  <div className="mt-4 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="text-sm text-gray-600">
+                      Читайте последние новости
                     </span>
                   </div>
                 </div>
@@ -186,14 +186,29 @@ export default function BlogPage() {
               
               <Link 
                 href="/blog/workouts" 
-                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out"
+                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out hover:shadow-lg"
               >
                 <div className="flex flex-col h-full justify-center items-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Воркауты</h2>
-                  <div className="w-28 h-0.5 bg-black mt-2"></div>
-                  <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full opacity-0 group-hover:opacity-100 group-hover:translate-y-[10%] transition-all duration-300 ease-in-out pointer-events-none">
-                    <span className="text-sm text-gray-600 whitespace-nowrap">
-                      Откройте для себя новые тренировки
+                  <div className="w-16 h-0.5 bg-indigo-500 mt-2 transition-all group-hover:w-24"></div>
+                   <div className="mt-4 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="text-sm text-gray-600">
+                      Тренировки дня (WOD)
+                    </span>
+                  </div>
+                </div>
+              </Link>
+
+              <Link 
+                href="/blog/exercises" 
+                className="relative group block bg-white p-8 rounded-lg transition-all duration-300 ease-in-out hover:shadow-lg"
+              >
+                <div className="flex flex-col h-full justify-center items-center">
+                  <h2 className="text-2xl font-bold text-gray-800 mb-2 text-center">Упражнения</h2>
+                  <div className="w-16 h-0.5 bg-indigo-500 mt-2 transition-all group-hover:w-24"></div>
+                   <div className="mt-4 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <span className="text-sm text-gray-600">
+                      База упражнений
                     </span>
                   </div>
                 </div>

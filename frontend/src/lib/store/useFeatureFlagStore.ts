@@ -7,6 +7,7 @@ interface FeatureFlags {
   strengthTrainingCalculator: boolean;
   texasMethodCalculator: boolean;
   showUniversalCalculator: boolean;
+  hideBlogContent: boolean;
 }
 
 interface FeatureFlagState {
@@ -20,6 +21,7 @@ const defaultFlags: FeatureFlags = {
   strengthTrainingCalculator: false,
   texasMethodCalculator: false,
   showUniversalCalculator: true,
+  hideBlogContent: false,
 };
 
 export const useFeatureFlagStore = create<FeatureFlagState>()(

@@ -18,11 +18,11 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('content-exercises')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class ContentExercisesController {
   constructor(private contentExercisesService: ContentExercisesService) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
   @UsePipes(new ValidationPipe())
   async create(@Body() dto: CreateContentExerciseDto) {
@@ -35,6 +35,7 @@ export class ContentExercisesController {
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
   @UsePipes(new ValidationPipe())
   async update(@Param('id') id: string, @Body() dto: UpdateContentExerciseDto) {
@@ -42,6 +43,7 @@ export class ContentExercisesController {
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
   async remove(@Param('id') id: string) {
     return this.contentExercisesService.deleteContentExercise(id);
