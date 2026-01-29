@@ -13,6 +13,7 @@ import { UsersModule } from './modules/users.module';
 import { SettingsModule } from './modules/settings.module';
 import { StatisticsModule } from './modules/statistics.module';
 import { WodsModule } from './modules/wods.module';
+import { ContentExercisesModule } from './modules/content-exercises.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { WodsModule } from './modules/wods.module';
     SettingsModule,
 
     StatisticsModule,
-    WodsModule
+    WodsModule,
+    ContentExercisesModule
   ],
   controllers: [AppController],
   providers: [AppService],

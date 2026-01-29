@@ -16,7 +16,7 @@ export async function PUT(
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${backendUrl}/exercises/global/${id}`, {
+    const response = await fetch(`${backendUrl}/content-exercises/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export async function DELETE(
         return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
       }
   
-      const response = await fetch(`${backendUrl}/exercises/global/${id}`, {
+      const response = await fetch(`${backendUrl}/content-exercises/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': authorization,

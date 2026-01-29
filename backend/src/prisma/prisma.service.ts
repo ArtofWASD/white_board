@@ -14,5 +14,9 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
 
   async onModuleInit() {
     await this.$connect();
+    console.log('PrismaService: Connected to DB.');
+    console.log('PrismaService: User model exists:', !!(this as any).user);
+    console.log('PrismaService: UserExercise model exists:', !!(this as any).userExercise);
+    console.log('PrismaService: ContentExercise model exists:', !!(this as any).contentExercise);
   }
 }

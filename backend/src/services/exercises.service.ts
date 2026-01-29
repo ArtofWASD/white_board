@@ -6,7 +6,7 @@ export class ExercisesService {
   constructor(private prisma: PrismaService) {}
 
   async createExercise(userId: string, name: string, initialWeight?: number) {
-    const exercise = await this.prisma.exercise.create({
+    const exercise = await this.prisma.userExercise.create({
       data: {
         name,
         userId,
@@ -26,26 +26,8 @@ export class ExercisesService {
     return exercise;
   }
 
-  async createGlobalExercise(name: string, description?: string, videoUrl?: string) {
-    return this.prisma.exercise.create({
-        data: {
-            name,
-            description,
-            videoUrl,
-            userId: null // Global
-        }
-    });
-  }
-
-  async getGlobalExercises() {
-      return this.prisma.exercise.findMany({
-          where: { userId: null },
-          orderBy: { name: 'asc' }
-      });
-  }
-
   async getExercisesByUserId(userId: string) {
-    const exercises = await this.prisma.exercise.findMany({
+    const exercises = await this.prisma.userExercise.findMany({
       where: {
         userId,
       },
@@ -74,7 +56,7 @@ export class ExercisesService {
   }
 
   async addExerciseRecord(exerciseId: string, weight: number, date?: Date) {
-    const exercise = await this.prisma.exercise.findUnique({
+    const exercise = await this.prisma.userExercise.findUnique({
       where: { id: exerciseId },
     });
 
@@ -98,7 +80,7 @@ export class ExercisesService {
     });
   }
   async updateExercise(id: string, name: string) {
-    const exercise = await this.prisma.exercise.findUnique({
+    const exercise = await this.prisma.userExercise.findUnique({
       where: { id },
     });
 
@@ -106,21 +88,14 @@ export class ExercisesService {
       throw new NotFoundException('Exercise not found');
     }
 
-    return this.prisma.exercise.update({
-        where: { id },
-        data: { name },
+    return this.prisma.userExercise.update({
+      where: { id },
+      data: { name },
     });
   }
 
-  async updateExerciseDetails(id: string, data: { name?: string, description?: string, videoUrl?: string }) {
-      return this.prisma.exercise.update({
-          where: { id },
-          data
-      });
-  }
-
   async deleteExercise(id: string) {
-      return this.prisma.exercise.delete({
+      return this.prisma.userExercise.delete({
           where: { id }
       });
   }

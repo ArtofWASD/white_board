@@ -38,32 +38,6 @@ export class ExercisesController {
     );
   }
 
-  @Post('global')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
-  async createGlobalExercise(@Body() dto: CreateGlobalExerciseDto) {
-      return this.exercisesService.createGlobalExercise(dto.name, dto.description, dto.videoUrl);
-  }
-
-  @Get('global')
-  async getGlobalExercises() {
-      return this.exercisesService.getGlobalExercises();
-  }
-
-  @Put('global/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
-  async updateExerciseDetails(@Param('id') id: string, @Body() dto: UpdateExerciseDto) {
-      return this.exercisesService.updateExerciseDetails(id, dto);
-  }
-
-  @Delete('global/:id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
-  async deleteExercise(@Param('id') id: string) {
-      return this.exercisesService.deleteExercise(id);
-  }
-
   @Get(':userId')
   async getExercises(@Param('userId') userId: string) {
     return this.exercisesService.getExercisesByUserId(userId);

@@ -69,7 +69,7 @@ model User {
   teamMemberships    TeamMember[]
   ownedTeams         Team[]       @relation("OwnedTeams")
   participatedEvents Event[]      @relation("EventParticipants")
-  exercises          Exercise[]
+  exercises          UserExercise[]
   strengthResults    StrengthWorkoutResult[]
   eventResults       EventResult[]
 
@@ -84,7 +84,7 @@ model User {
   @@map("users")
 }
 
-model Exercise {
+model UserExercise {
   id          String           @id @default(uuid())
   name        String
   description String?
@@ -96,7 +96,18 @@ model Exercise {
   createdAt   DateTime         @default(now()) @map("created_at")
   updatedAt   DateTime         @updatedAt @map("updated_at")
 
-  @@map("exercises")
+  @@map("user_exercises")
+}
+
+model ContentExercise {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  videoUrl    String?  @map("video_url")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("content_exercises")
 }
 
 model Wod {
@@ -115,7 +126,7 @@ model ExerciseRecord {
   weight     Float
   date       DateTime @default(now())
   exerciseId String   @map("exercise_id")
-  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exercise   UserExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now()) @map("created_at")
 
   @@map("exercise_records")
@@ -201,7 +212,7 @@ model StrengthWorkoutResult {
   reps       Int
   createdAt  DateTime @default(now()) @map("created_at")
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  exercise   UserExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
 
   @@map("strength_workout_results")
 }

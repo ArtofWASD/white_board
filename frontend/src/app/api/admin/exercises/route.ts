@@ -11,7 +11,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${backendUrl}/exercises/global`, {
+    const response = await fetch(`${backendUrl}/content-exercises`, {
       headers: {
         'Authorization': authorization,
       },
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const response = await fetch(`${backendUrl}/exercises/global`, {
+    const response = await fetch(`${backendUrl}/content-exercises`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
