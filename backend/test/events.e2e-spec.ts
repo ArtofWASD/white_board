@@ -27,7 +27,7 @@ describe('EventsController (e2e)', () => {
         name: 'Test User',
         email: 'test@example.com',
         password: 'password123',
-        role: 'athlete',
+        role: 'ATHLETE',
       },
     });
   });

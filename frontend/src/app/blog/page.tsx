@@ -45,6 +45,8 @@ export default function BlogPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]); // For left menu events
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const [loadingConfig, setLoadingConfig] = useState(true);
   
   const { isAuthenticated, user } = useAuthStore();
 
@@ -76,7 +78,25 @@ export default function BlogPage() {
     };
 
     fetchEvents();
+    fetchEvents();
   }, [isAuthenticated, user]);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch('/api/settings/public');
+            if (res.ok) {
+                const settings = await res.json();
+                setShowContent(settings['ENABLE_BLOG_CONTENT'] === true);
+            }
+        } catch (e) {
+            console.error('Failed to fetch settings', e);
+        } finally {
+            setLoadingConfig(false);
+        }
+    };
+    fetchSettings();
+  }, []);
 
 
 
@@ -131,20 +151,22 @@ export default function BlogPage() {
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
           {/* Development Message */}
-          <div className="flex flex-col items-center justify-center min-h-[50vh]">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
-            <div className="mt-8">
-              <Link 
-                href="/" 
-                className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
-              >
-                На главную
-              </Link>
+          {!loadingConfig && !showContent && (
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
+                <div className="mt-8">
+                <Link 
+                    href="/" 
+                    className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                >
+                    На главную
+                </Link>
+                </div>
             </div>
-          </div>
+          )}
 
           {/* Temporary Content - Hidden */}
-          <div className="hidden">
+          <div className={!loadingConfig && showContent ? '' : 'hidden'}>
             {/* Two large links for News and Workouts */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <Link 

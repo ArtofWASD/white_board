@@ -14,6 +14,7 @@ import { SettingsModule } from './modules/settings.module';
 import { StatisticsModule } from './modules/statistics.module';
 import { WodsModule } from './modules/wods.module';
 import { ContentExercisesModule } from './modules/content-exercises.module';
+import { NewsModule } from './modules/news.module';
 
 @Module({
   imports: [
@@ -30,7 +31,8 @@ import { ContentExercisesModule } from './modules/content-exercises.module';
 
     StatisticsModule,
     WodsModule,
-    ContentExercisesModule
+    ContentExercisesModule,
+    NewsModule
   ],
   controllers: [AppController],
   providers: [AppService],

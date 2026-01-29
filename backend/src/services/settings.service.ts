@@ -6,6 +6,7 @@ const DEFAULT_SETTINGS = {
   'REGISTRATION_TRAINER': 'true',
   'REGISTRATION_ORGANIZATION': 'true',
   'MAINTENANCE_MODE': 'false',
+  'HIDE_BLOG_CONTENT': 'false',
 };
 
 @Injectable()
@@ -40,7 +41,8 @@ export class SettingsService implements OnModuleInit {
                       'REGISTRATION_ATHLETE',
                       'REGISTRATION_TRAINER',
                       'REGISTRATION_ORGANIZATION',
-                      'MAINTENANCE_MODE'
+                      'MAINTENANCE_MODE',
+                      'HIDE_BLOG_CONTENT'
                   ]
               }
           }

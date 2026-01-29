@@ -20,8 +20,11 @@ export default function NewsPage() {
   const [showAuth, setShowAuth] = useState(false);
   const [displayedNews, setDisplayedNews] = useState<NewsItem[]>([]);
   const [page, setPage] = useState(1);
+
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [showContent, setShowContent] = useState(true);
+  const [loadingConfig, setLoadingConfig] = useState(true);
   
 
 
@@ -29,93 +32,64 @@ export default function NewsPage() {
     setShowAuth(!showAuth);
   };
 
-  // Sample news data (in a real app, this would come from an API)
-  const allNewsItems: NewsItem[] = [
-    {
-      id: '1',
-      title: 'Новые возможности тренировочного календаря',
-      excerpt: 'Мы добавили новые функции в наш тренировочный календарь, которые помогут вам лучше планировать свои занятия.',
-      date: '15 ноября 2025',
-      readTime: '5 мин чтения',
-      content: 'В новом обновлении мы добавили возможность планирования групповых тренировок, интеграцию с популярными фитнес-приложениями и улучшенную систему напоминаний о предстоящих занятиях. Теперь вы можете легко делиться своими тренировками с друзьями и отслеживать прогресс всей команды.'
-    },
-    {
-      id: '2',
-      title: 'Советы по питанию для спортсменов',
-      excerpt: 'Правильное питание играет ключевую роль в достижении спортивных результатов. Узнайте больше о важных аспектах спортивного питания.',
-      date: '10 ноября 2025',
-      readTime: '7 мин чтения',
-      content: 'Спортивное питание должно быть сбалансированным и содержать все необходимые макро- и микроэлементы. Мы подготовили подробное руководство по питанию до, во время и после тренировок, которое поможет вам оптимизировать ваши спортивные результаты и ускорить восстановление.'
-    },
-    {
-      id: '3',
-      title: 'Как избежать перетренированности',
-      excerpt: 'Перетренированность - частая проблема среди активных спортсменов. Узнайте, как распознать признаки и предотвратить это состояние.',
-      date: '5 ноября 2025',
-      readTime: '6 мин чтения',
-      content: 'Перетренированность может серьезно повлиять на ваш спортивный прогресс и общее состояние здоровья. В этой статье мы рассмотрим основные симптомы перетренированности, методы диагностики и рекомендации по восстановлению. Также вы узнаете, как правильно планировать тренировочный процесс с учетом периодов отдыха и восстановления.'
-    },
-    {
-      id: '4',
-      title: 'Новый год - новая цель!',
-      excerpt: 'С наступающим Новым годом! Пора ставить новые спортивные цели и достигать их с нашим приложением.',
-      date: '1 января 2025',
-      readTime: '3 мин чтения',
-      content: 'Новый год - отличное время для того, чтобы поставить перед собой новые спортивные цели. Мы подготовили специальный планировщик целей, который поможет вам определить приоритеты, разбить большие цели на маленькие шаги и отслеживать ваш прогресс в течение всего года. Не забывайте, что регулярность и последовательность - ключ к успеху!'
-    },
-    {
-      id: '5',
-      title: 'Как выбрать правильную обувь для бега',
-      excerpt: 'Выбор правильной обуви для бега может значительно повлиять на эффективность тренировок и предотвратить травмы.',
-      date: '20 декабря 2024',
-      readTime: '4 мин чтения',
-      content: 'Правильная обувь для бега должна соответствовать вашему типу стопы, стилю бега и поверхности, на которой вы чаще всего тренируетесь. В этой статье мы расскажем, как определить ваш тип стопы, какие характеристики следует учитывать при выборе обуви и когда пора менять обувь.'
-    },
-    {
-      id: '6',
-      title: 'Йога для восстановления после тренировок',
-      excerpt: 'Йога может стать отличным дополнением к вашей программе восстановления после интенсивных тренировок.',
-      date: '15 декабря 2024',
-      readTime: '5 мин чтения',
-      content: 'Йога помогает улучшить гибкость, снизить мышечное напряжение и ускорить восстановление после тренировок. Мы собрали для вас набор поз, которые можно выполнять сразу после тренировки для максимального эффекта восстановления.'
-    }
-  ];
+  // Fetch settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch('/api/settings/public');
+            if (res.ok) {
+                const settings = await res.json();
+                setShowContent(settings['HIDE_BLOG_CONTENT'] !== true);
+            }
+        } catch (e) {
+            console.error('Failed to fetch settings', e);
+        } finally {
+            setLoadingConfig(false);
+        }
+    };
+    fetchSettings();
+  }, []);
 
-  // Simulate fetching data with pagination
-  const loadNews = useCallback(() => {
+  // Fetch news from backend
+  const loadNews = useCallback(async () => {
     if (!hasMore || loading) return;
     
     setLoading(true);
-    
-    // Simulate API delay
-    setTimeout(() => {
-      const startIndex = (page - 1) * 3;
-      const newNews = allNewsItems.slice(startIndex, startIndex + 3);
-      
-      setDisplayedNews(prev => [...prev, ...newNews]);
-      setPage(prev => prev + 1);
-      setHasMore(startIndex + 3 < allNewsItems.length);
-      setLoading(false);
-    }, 500);
+    try {
+        // Fetch real data
+        const res = await fetch(`/api/news?limit=10`); // Simplified pagination for now
+        if (res.ok) {
+            const data = await res.json();
+            // In a real pagination scenario, we would append and check total count
+            // For now, just setting all data since we don't have pagination params in backend yet
+             const formattedData = data.map((item: any) => ({
+                id: item.id,
+                title: item.title,
+                excerpt: item.excerpt || '',
+                date: new Date(item.createdAt).toLocaleDateString('ru-RU'),
+                readTime: '5 мин чтения', // Placeholder
+                content: item.content
+            }));
+            
+            setDisplayedNews(formattedData);
+            setHasMore(false); // Disable infinite scroll for now
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setLoading(false);
+    }
   }, [page, hasMore, loading]);
+
+  // Simulate fetching data with pagination
+
 
   // Load initial data
   useEffect(() => {
-    const initialLoad = () => {
-      if (displayedNews.length === 0) {
-        setLoading(true);
-        setTimeout(() => {
-          const newNews = allNewsItems.slice(0, 3);
-          setDisplayedNews(newNews);
-          setPage(2);
-          setHasMore(3 < allNewsItems.length);
-          setLoading(false);
-        }, 500);
-      }
-    };
-    
-    initialLoad();
-  }, [displayedNews.length]);
+    if (showContent && displayedNews.length === 0) {
+        loadNews();
+    }
+  }, [showContent, displayedNews.length, loadNews]);
 
   // Handle scroll for infinite loading
   useEffect(() => {
@@ -138,20 +112,24 @@ export default function NewsPage() {
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
           {/* Development Message */}
-          <div className="flex flex-col items-center justify-center min-h-[50vh]">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
-            <div className="mt-8">
-              <Link 
-                href="/" 
-                className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
-              >
-                На главную
-              </Link>
+          {/* Development Message */}
+          {!loadingConfig && !showContent && (
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
+                <div className="mt-8">
+                <Link 
+                    href="/blog" 
+                    className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                >
+                    Назад в Блог
+                </Link>
+                </div>
             </div>
-          </div>
+          )}
 
           {/* Temporary Content - Hidden */}
-          <div className="hidden">
+          {!loadingConfig && showContent && (
+          <div className="">
             <div className="flex items-center justify-between mb-8">
               <Link 
                 href="/blog" 
@@ -195,6 +173,7 @@ export default function NewsPage() {
               </div>
             )}
           </div>
+          )}
         </div>
       </main>
       

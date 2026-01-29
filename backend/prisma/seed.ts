@@ -164,6 +164,48 @@ async function main() {
     }
   }
 
+  // Create WODs
+  const wodTitles = ['Murph', 'Fran', 'Cindy', 'Diane', 'Grace'];
+  for (const title of wodTitles) {
+    const wodCount = await prisma.wod.count({ where: { name: title } });
+    if (wodCount === 0) {
+      await prisma.wod.create({
+        data: {
+          name: title,
+          description: `Description for ${title}`,
+          type: 'CLASSIC',
+          isGlobal: true,
+        }
+      });
+      console.log(`Created WOD: ${title}`);
+    }
+  }
+
+  // Create News
+  const newsTitles = [
+    'New Gym Opening',
+    'Summer Competition',
+    'Nutrition Workshop',
+    'Athlete of the Month',
+    'Holiday Schedule'
+  ];
+
+  for (let i = 0; i < newsTitles.length; i++) {
+    const title = newsTitles[i];
+    const newsCount = await prisma.news.count({ where: { title } });
+    if (newsCount === 0) {
+      await prisma.news.create({
+        data: {
+          title: title,
+          excerpt: `This is a short excerpt for ${title}.`,
+          content: `Full content for ${title}. This is significantly longer than the excerpt and contains more details about the news item.`,
+          imageUrl: `https://picsum.photos/seed/${i}/800/600`,
+        }
+      });
+      console.log(`Created News: ${title}`);
+    }
+  }
+
   console.log('Seeding completed.');
 }
 

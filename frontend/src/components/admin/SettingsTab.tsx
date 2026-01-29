@@ -95,6 +95,22 @@ export const SettingsTab: React.FC = () => {
                         </button>
                     </div>
                 </div>
+
+                <div className="border-t pt-4">
+                    <h4 className="font-medium text-gray-700 mb-4">Контент</h4>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <span className="text-gray-600 block">Скрыть контент Блога (Заглушка)</span>
+                            <span className="text-xs text-gray-400">Включите, чтобы показывать заглушку "В разработке"</span>
+                        </div>
+                        <button 
+                            onClick={() => handleUpdateSetting('HIDE_BLOG_CONTENT', settings['HIDE_BLOG_CONTENT'] === 'true' ? 'false' : 'true')}
+                            className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 ${settings['HIDE_BLOG_CONTENT'] === 'true' ? 'bg-indigo-600' : 'bg-gray-200'}`}
+                        >
+                            <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${settings['HIDE_BLOG_CONTENT'] === 'true' ? 'translate-x-5' : 'translate-x-0'}`} />
+                        </button>
+                    </div>
+                </div>
             </div>
         )}
     </div>

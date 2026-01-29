@@ -21,6 +21,8 @@ export default function WorkoutsPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [showContent, setShowContent] = useState(true);
+  const [loadingConfig, setLoadingConfig] = useState(true);
 
 
 
@@ -114,7 +116,26 @@ export default function WorkoutsPage() {
     };
     
     initialLoad();
+    initialLoad();
   }, [displayedWorkouts.length, allWorkoutItems]);
+
+  // Fetch settings
+  useEffect(() => {
+    const fetchSettings = async () => {
+        try {
+            const res = await fetch('/api/settings/public');
+            if (res.ok) {
+                const settings = await res.json();
+                setShowContent(settings['HIDE_BLOG_CONTENT'] !== true);
+            }
+        } catch (e) {
+            console.error('Failed to fetch settings', e);
+        } finally {
+            setLoadingConfig(false);
+        }
+    };
+    fetchSettings();
+  }, []);
 
   // Handle scroll for infinite loading
   useEffect(() => {
@@ -137,20 +158,24 @@ export default function WorkoutsPage() {
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
           {/* Development Message */}
-          <div className="flex flex-col items-center justify-center min-h-[50vh]">
-            <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
-            <div className="mt-8">
-              <Link 
-                href="/" 
-                className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
-              >
-                На главную
-              </Link>
+          {/* Development Message */}
+          {!loadingConfig && !showContent && (
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+                <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
+                <div className="mt-8">
+                <Link 
+                    href="/blog" 
+                    className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300"
+                >
+                    Назад в Блог
+                </Link>
+                </div>
             </div>
-          </div>
+          )}
 
           {/* Temporary Content - Hidden */}
-          <div className="hidden">
+           {!loadingConfig && showContent && (
+          <div className="">
             <div className="flex items-center justify-between mb-8">
               <Link 
                 href="/blog" 
@@ -194,6 +219,7 @@ export default function WorkoutsPage() {
               </div>
             )}
           </div>
+          )}
         </div>
       </main>
       
