@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsEnum, IsBoolean, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsEnum, IsBoolean, IsOptional, IsArray } from 'class-validator';
 
 export class CreateWodDto {
   @IsString()
@@ -13,9 +13,18 @@ export class CreateWodDto {
   @IsNotEmpty()
   type: string;
 
+  @IsString()
+  @IsNotEmpty()
+  scheme: string;
+
   @IsBoolean()
   @IsOptional()
   isGlobal?: boolean;
+
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  muscleGroups?: string[];
 }
 
 export class UpdateWodDto {
@@ -31,7 +40,16 @@ export class UpdateWodDto {
   @IsOptional()
   type?: string;
 
+  @IsString()
+  @IsOptional()
+  scheme?: string;
+
   @IsBoolean()
   @IsOptional()
   isGlobal?: boolean;
+
+  @IsArray()
+  @IsOptional()
+  @IsString({ each: true })
+  muscleGroups?: string[];
 }

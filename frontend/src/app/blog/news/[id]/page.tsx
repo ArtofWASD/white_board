@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, use } from 'react';
 import Link from 'next/link';
 import Header from '../../../../components/layout/Header';
 import Footer from '../../../../components/layout/Footer';
@@ -15,7 +15,8 @@ interface NewsItem {
   content: string;
 }
 
-export default function NewsDetailPage({ params }: { params: { id: string } }) {
+export default function NewsDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [showAuth, setShowAuth] = useState(false);
 
   const toggleAuth = () => {
@@ -59,7 +60,7 @@ export default function NewsDetailPage({ params }: { params: { id: string } }) {
   ];
 
   // Find the news item by ID
-  const newsItem = newsItems.find(item => item.id === params.id);
+  const newsItem = newsItems.find(item => item.id === id);
 
   if (!newsItem) {
     return (

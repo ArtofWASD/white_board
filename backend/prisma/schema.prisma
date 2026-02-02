@@ -104,6 +104,8 @@ model ContentExercise {
   name        String
   description String?
   videoUrl    String?  @map("video_url")
+  muscleGroups String[] @map("muscle_groups")
+  rating      Float    @default(0)
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
@@ -115,7 +117,10 @@ model Wod {
   name        String
   description String
   type        String   // GIRL, HERO, OTHER
+  scheme      String   @default("FOR_TIME") // FOR_TIME, AMRAP, EMOM
   isGlobal    Boolean  @default(true) @map("is_global")
+  muscleGroups String[] @map("muscle_groups")
+  rating      Float    @default(0)
   createdAt   DateTime @default(now()) @map("created_at")
 
   @@map("wods")

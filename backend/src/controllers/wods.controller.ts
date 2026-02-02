@@ -4,6 +4,7 @@ import { CreateWodDto, UpdateWodDto } from '../dtos/wods.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { Public } from '../auth/decorators/public.decorator';
 import { UserRole } from '@prisma/client';
 
 @Controller('wods')
@@ -18,11 +19,13 @@ export class WodsController {
     return this.wodsService.create(createWodDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.wodsService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.wodsService.findOne(id);
@@ -33,6 +36,12 @@ export class WodsController {
   @UsePipes(new ValidationPipe())
   update(@Param('id') id: string, @Body() updateWodDto: UpdateWodDto) {
     return this.wodsService.update(id, updateWodDto);
+  }
+
+  @Public()
+  @Patch(':id/rate')
+  updateRating(@Param('id') id: string, @Body('delta') delta: number) {
+    return this.wodsService.updateRating(id, delta);
   }
 
   @Delete(':id')

@@ -14,9 +14,18 @@ export const ContentTab: React.FC = () => {
   const [isContentModalOpen, setIsContentModalOpen] = useState(false);
   const [contentModalType, setContentModalType] = useState<'wod' | 'exercise' | 'news'>('wod');
   const [editingItem, setEditingItem] = useState<any>(null); // If null, it's create mode
-  const [newWod, setNewWod] = useState({ name: '', description: '', type: 'CLASSIC', isGlobal: true });
-  const [newExercise, setNewExercise] = useState({ name: '', description: '', videoUrl: '' });
+  const [newWod, setNewWod] = useState({ name: '', description: '', type: 'CLASSIC', scheme: 'FOR_TIME', isGlobal: true, muscleGroups: [] as string[] });
+  const [newExercise, setNewExercise] = useState({ name: '', description: '', videoUrl: '', muscleGroups: [] as string[] });
   const [newNews, setNewNews] = useState({ title: '', content: '', excerpt: '', imageUrl: '' });
+
+  const MUSCLE_GROUPS = [
+    { id: 'CHEST', label: 'Грудные мышцы' },
+    { id: 'BACK', label: 'Мышцы спины' },
+    { id: 'LEGS', label: 'Мышцы ног' },
+    { id: 'SHOULDERS', label: 'Плечи' },
+    { id: 'ARMS', label: 'Руки' },
+    { id: 'CORE', label: 'Мышцы кора' },
+  ];
 
   useEffect(() => {
      fetchContent();
@@ -52,7 +61,7 @@ export const ContentTab: React.FC = () => {
               if (res.ok) {
                   fetchContent();
                   setIsContentModalOpen(false);
-                  setNewWod({ name: '', description: '', type: 'CLASSIC', isGlobal: true });
+                  setNewWod({ name: '', description: '', type: 'CLASSIC', scheme: 'FOR_TIME', isGlobal: true, muscleGroups: [] });
               } else {
                   alert('Ошибка создания WOD');
               }
@@ -82,7 +91,7 @@ export const ContentTab: React.FC = () => {
               if (res.ok) {
                   fetchContent();
                   setIsContentModalOpen(false);
-                  setNewExercise({ name: '', description: '', videoUrl: '' });
+                  setNewExercise({ name: '', description: '', videoUrl: '', muscleGroups: [] });
               } else {
                   alert('Ошибка создания упражнения');
               }
@@ -103,7 +112,7 @@ export const ContentTab: React.FC = () => {
                   fetchContent();
                   setIsContentModalOpen(false);
                   setEditingItem(null);
-                  setNewWod({ name: '', description: '', type: 'CLASSIC', isGlobal: true });
+                  setNewWod({ name: '', description: '', type: 'CLASSIC', scheme: 'FOR_TIME', isGlobal: true, muscleGroups: [] });
               } else {
                   alert('Ошибка обновления WOD');
               }
@@ -135,7 +144,7 @@ export const ContentTab: React.FC = () => {
                     fetchContent();
                     setIsContentModalOpen(false);
                     setEditingItem(null);
-                    setNewExercise({ name: '', description: '', videoUrl: '' });
+                    setNewExercise({ name: '', description: '', videoUrl: '', muscleGroups: [] });
                 } else {
                     alert('Ошибка обновления упражнения');
                 }
@@ -171,13 +180,16 @@ export const ContentTab: React.FC = () => {
               name: item.name,
               description: item.description,
               type: item.type,
-              isGlobal: item.isGlobal
+              scheme: item.scheme || 'FOR_TIME',
+              isGlobal: item.isGlobal,
+              muscleGroups: item.muscleGroups || []
           });
       } else {
            setNewExercise({
               name: item.name,
               description: item.description || '',
-              videoUrl: item.videoUrl || ''
+              videoUrl: item.videoUrl || '',
+              muscleGroups: item.muscleGroups || []
            });
       }
       setIsContentModalOpen(true);
@@ -212,9 +224,9 @@ export const ContentTab: React.FC = () => {
                     setEditingItem(null);
 
                     setContentModalType(activeContentTab === 'wods' ? 'wod' : activeContentTab === 'exercises' ? 'exercise' : 'news');
-                    if (activeContentTab === 'wods') setNewWod({ name: '', description: '', type: 'CLASSIC', isGlobal: true });
+                    if (activeContentTab === 'wods') setNewWod({ name: '', description: '', type: 'CLASSIC', scheme: 'FOR_TIME', isGlobal: true, muscleGroups: [] });
                     else if (activeContentTab === 'news') setNewNews({ title: '', content: '', excerpt: '', imageUrl: '' });
-                    else setNewExercise({ name: '', description: '', videoUrl: '' });
+                    else setNewExercise({ name: '', description: '', videoUrl: '', muscleGroups: [] });
                     setIsContentModalOpen(true);
                 }}
                 className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition flex items-center"
@@ -331,12 +343,50 @@ export const ContentTab: React.FC = () => {
                           </select>
                       </div>
                       <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Схема</label>
+                          <select 
+                              className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                              value={newWod.scheme}
+                              onChange={(e) => setNewWod({...newWod, scheme: e.target.value})}
+                          >
+                              <option value="FOR_TIME">FOR TIME (На время)</option>
+                              <option value="AMRAP">AMRAP (Закончить как можно больше раундов)</option>
+                              <option value="EMOM">EMOM (Каждую минуту в начале минуты)</option>
+                              <option value="TABATA">TABATA (Табата)</option>
+                              <option value="NOT_SPECIFIED">Не указано</option>
+                          </select>
+                      </div>
+                      <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Описание</label>
                           <textarea 
                               className="w-full border border-gray-300 rounded px-3 py-2 h-32 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                               value={newWod.description}
                               onChange={(e) => setNewWod({...newWod, description: e.target.value})}
                           />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Группы мышц</label>
+                          <div className="flex flex-wrap gap-2">
+                              {MUSCLE_GROUPS.map(group => (
+                                  <button
+                                      key={group.id}
+                                      type="button"
+                                      onClick={() => {
+                                          const groups = newWod.muscleGroups.includes(group.id)
+                                              ? newWod.muscleGroups.filter(g => g !== group.id)
+                                              : [...newWod.muscleGroups, group.id];
+                                          setNewWod({...newWod, muscleGroups: groups});
+                                      }}
+                                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                                          newWod.muscleGroups.includes(group.id)
+                                          ? 'bg-indigo-600 text-white'
+                                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                                      }`}
+                                  >
+                                      {group.label}
+                                  </button>
+                              ))}
+                          </div>
                       </div>
                   </div>
               ) : (
@@ -367,6 +417,30 @@ export const ContentTab: React.FC = () => {
                               value={newExercise.videoUrl}
                               onChange={(e) => setNewExercise({...newExercise, videoUrl: e.target.value})}
                           />
+                      </div>
+                      <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Группы мышц</label>
+                          <div className="flex flex-wrap gap-2">
+                              {MUSCLE_GROUPS.map(group => (
+                                  <button
+                                      key={group.id}
+                                      type="button"
+                                      onClick={() => {
+                                          const groups = newExercise.muscleGroups.includes(group.id)
+                                              ? newExercise.muscleGroups.filter(g => g !== group.id)
+                                              : [...newExercise.muscleGroups, group.id];
+                                          setNewExercise({...newExercise, muscleGroups: groups});
+                                      }}
+                                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                                          newExercise.muscleGroups.includes(group.id)
+                                          ? 'bg-indigo-600 text-white'
+                                          : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                                      }`}
+                                  >
+                                      {group.label}
+                                  </button>
+                              ))}
+                          </div>
                       </div>
                   </div>
               )}

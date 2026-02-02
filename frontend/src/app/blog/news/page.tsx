@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
-import { ContentDisplay } from '@/components/ui/ContentDisplay';
+import { ContentCards } from '@/components/ui/ContentCards';
 import { ViewSwitcher } from '@/components/ui/ViewSwitcher';
 import Link from 'next/link';
 import { useFeatureFlagStore } from '@/lib/store/useFeatureFlagStore';
@@ -69,7 +69,7 @@ export default function NewsPage() {
           ) : (
             <>
                 {news.length > 0 ? (
-                    <ContentDisplay items={news} viewMode={viewMode} type="news" />
+                    <ContentCards items={news} viewMode={viewMode} type="news" />
                 ) : (
                     <div className="text-center text-gray-500 py-12">
                         Новостей пока нет

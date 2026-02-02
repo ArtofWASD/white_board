@@ -1,162 +1,256 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
-import Header from '../../../../components/layout/Header';
+import { useParams, useRouter } from 'next/navigation';
+import { useFeatureFlagStore } from '@/lib/store/useFeatureFlagStore';
+import { AddToCalendarModal } from '@/components/dashboard/AddToCalendarModal';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useToast } from '@/lib/context/ToastContext';
+import { RatingStar } from '@/components/ui/RatingStar';
 
-import Footer from '../../../../components/layout/Footer';
-
-// Define types for workouts
-interface WorkoutItem {
+interface WodDetail {
   id: string;
-  title: string;
-  excerpt: string;
-  date: string;
-  difficulty: string;
-  content: string;
+  name: string;
+  description: string;
+  type: string;
+  scheme: string;
+  muscleGroups: string[];
+  rating: number;
 }
 
-export default function WorkoutDetailPage({ params }: { params: { id: string } }) {
-  const [showAuth, setShowAuth] = useState(false);
+const MUSCLE_GROUPS_MAP: Record<string, string> = {
+  CHEST: 'Грудные мышцы',
+  BACK: 'Мышцы спины',
+  LEGS: 'Мышцы ног',
+  SHOULDERS: 'Плечи',
+  ARMS: 'Руки',
+  CORE: 'Мышцы кора',
+};
 
-  const toggleAuth = () => {
-    setShowAuth(!showAuth);
+const SCHEME_MAP: Record<string, string> = {
+  FOR_TIME: 'For Time',
+  AMRAP: 'AMRAP',
+  EMOM: 'EMOM',
+  TABATA: 'Tabata',
+  NOT_SPECIFIED: 'Other',
+};
+
+export default function WodDetailsPage() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [wod, setWod] = useState<WodDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { flags } = useFeatureFlagStore();
+  const { user } = useAuthStore();
+  const { success, error: toastError } = useToast();
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchWod = async () => {
+      try {
+        const res = await fetch(`/api/wods/${id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setWod(data);
+        } else {
+          console.error(`Failed to fetch wod: ${res.status} ${res.statusText}`);
+          const text = await res.text();
+          console.error('Response body:', text);
+        }
+      } catch (error) {
+        console.error('Error fetching wod:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchWod();
+    }
+  }, [id]);
+
+  const handleAddToCalendar = async (date: Date) => {
+    if (!user || !wod) return;
+    
+    try {
+      const response = await fetch('/api/events', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          title: wod.name,
+          description: wod.description,
+          eventDate: date.toISOString(),
+          exerciseType: 'wod',
+        }),
+      });
+
+      if (response.ok) {
+        success('Событие добавлено в календарь');
+        setIsCalendarModalOpen(false);
+      } else {
+        toastError('Не удалось добавить событие');
+      }
+    } catch (error) {
+      toastError('Ошибка при добавлении события');
+    }
   };
 
-  // Sample workout data
-  const workoutItems: WorkoutItem[] = [
-    {
-      id: '1',
-      title: 'HIIT тренировка для начинающих',
-      excerpt: 'Интенсивная интервальная тренировка для тех, кто только начинает свой путь в фитнесе.',
-      date: '15 ноября 2025',
-      difficulty: 'Начинающий',
-      content: 'Эта HIIT тренировка состоит из 8 упражнений, выполняемых по 30 секунд с 15-секундным отдыхом между ними. Цикл повторяется 3 раза с минутным перерывом между циклами. Тренировка включает приседания, отжимания, берпи, скакалку, планку, выпады, бег на месте и прыжки. Подходит для новичков и не требует специального оборудования.\n\nРазминка (5 минут):\n- Вращения суставов\n- Легкая растяжка мышц\n- Прыжки на месте\n\nОсновная часть (20 минут):\n1. Приседания - 30 секунд\n   Отдых - 15 секунд\n2. Отжимания от стены - 30 секунд\n   Отдых - 15 секунд\n3. Берпи - 30 секунд\n   Отдых - 15 секунд\n4. Скакалка (или имитация) - 30 секунд\n   Отдых - 15 секунд\n5. Планка - 30 секунд\n   Отдых - 15 секунд\n6. Выпады - 30 секунд\n   Отдых - 15 секунд\n7. Бег на месте - 30 секунд\n   Отдых - 15 секунд\n8. Прыжки - 30 секунд\n   Отдых - 15 секунд\n\nЗавершение (5 минут):\n- Медленная растяжка всех групп мышц\n- Дыхательные упражнения'
-    },
-    {
-      id: '2',
-      title: 'Силовая тренировка для спины',
-      excerpt: 'Комплекс упражнений для укрепления мышц спины и улучшения осанки.',
-      date: '10 ноября 2025',
-      difficulty: 'Средний',
-      content: 'Тренировка направлена на развитие всех групп мышц спины: трапеций, широчайших, ромбовидных и поясничных мышц. В комплекс входят становая тяга, подтягивания, гиперэкстензия, тяга штанги в наклоне, обратные разведения в тренажере и планка. Рекомендуется выполнять 3-4 подхода по 8-12 повторений с рабочим весом 60-80% от одноповторного максимума.\n\nРазминка (10 минут):\n- Кардио на велотренажере или беговой дорожке\n- Динамическая растяжка спины\n- Ротации корпуса\n\nОсновная часть (45 минут):\n1. Становая тяга\n   4 подхода по 8-10 повторений\n   Вес: 60-70% от 1ПМ\n2. Подтягивания (или тяга верхнего блока)\n   3 подхода по 8-12 повторений\n3. Гиперэкстензия\n   3 подхода по 12-15 повторений\n4. Тяга штанги в наклоне\n   3 подхода по 10-12 повторений\n   Вес: 60-70% от 1ПМ\n5. Обратные разведения в тренажере\n   3 подхода по 12-15 повторений\n6. Планка\n   3 подхода по 30-60 секунд\n\nЗавершение (5 минут):\n- Статическая растяжка мышц спины\n- Релаксация'
-    },
-    {
-      id: '3',
-      title: 'Кардио тренировка на улице',
-      excerpt: 'Эффективная кардио тренировка, которую можно провести на свежем воздухе без специального оборудования.',
-      date: '5 ноября 2025',
-      difficulty: 'Начинающий',
-      content: 'Прогулка на свежем воздухе может быть отличной кардио тренировкой. Мы предлагаем маршрут длиной 5 км с элементами интервальной нагрузки: чередование быстрой ходьбы и легкого бега трусцой. Также включены упражнения на каждой остановке: приседания, отжимания от стены, прыжки и растяжка. Общая продолжительность тренировки 45 минут.\n\nМаршрут (5 км):\n1. Стартовая точка - 5 минут легкой ходьбы\n2. Первый интервал - 1 км быстрой ходьбы\n3. Первая остановка - 5 приседаний, 5 отжиманий от стены\n4. Второй интервал - 1 км бег трусцой\n5. Вторая остановка - 10 прыжков, растяжка икр\n6. Третий интервал - 1 км быстрой ходьбы\n7. Третья остановка - 5 приседаний, 5 отжиманий от стены\n8. Четвертый интервал - 1 км бег трусцой\n9. Четвертая остановка - 10 прыжков, растяжка квадрицепсов\n10. Финишный интервал - 1 км быстрой ходьбы\n\nЗавершение:\n- 5 минут медленной ходьбы для восстановления\n- Комплекс растяжки всех групп мышц'
-    },
-    {
-      id: '4',
-      title: 'Тренировка для пресса',
-      excerpt: 'Эффективный комплекс упражнений для развития мышц кора.',
-      date: '1 ноября 2025',
-      difficulty: 'Средний',
-      content: 'Эта тренировка включает 6 упражнений для развития всех отделов мышц кора: верхние, нижние и боковые мышцы пресса, а также косые мышцы живота. В комплекс входят скручивания, подъем ног, планка, велосипед, боковая планка и подъем туловища. Рекомендуется выполнять 3 подхода по 15-20 повторений каждого упражнения с 30-секундным отдыхом между подходами.\n\nРазминка (5 минут):\n- Легкая кардио активность\n- Вращения корпуса\n- Растяжка мышц живота\n\nОсновная часть (25 минут):\n1. Скручивания\n   3 подхода по 15-20 повторений\n2. Подъем ног (лежа)\n   3 подхода по 12-15 повторений\n3. Планка\n   3 подхода по 30-45 секунд\n4. Велосипед\n   3 подхода по 20 повторений (10 на каждую сторону)\n5. Боковая планка\n   3 подхода по 20-30 секунд на каждую сторону\n6. Подъем туловища (обратные скручивания)\n   3 подхода по 12-15 повторений\n\nЗавершение (5 минут):\n- Глубокая растяжка мышц кора\n- Дыхательные упражнения для расслабления'
-    }
-  ];
-
-  // Find the workout item by ID
-  const workoutItem = workoutItems.find(item => item.id === params.id);
-
-  if (!workoutItem) {
+  const renderStars = (rating: number = 0) => {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header 
-          onRightMenuClick={() => {}} 
-        />
-        
-        <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <Link 
-                href="/blog/workouts" 
-                className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                </svg>
-                Назад к воркаутам
-              </Link>
-              <h1 className="text-3xl font-bold text-center flex-grow">Тренировка не найдена</h1>
-              <div className="w-24"></div> {/* Spacer for alignment */}
-            </div>
-            
-            <div className="bg-white rounded-xl shadow-md p-8 text-center">
-              <p className="text-gray-600 mb-6">Запрашиваемая тренировка не найдена.</p>
-              <Link 
-                href="/blog/workouts" 
-                className="inline-block px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Вернуться к списку тренировок
-              </Link>
-            </div>
-          </div>
-        </main>
-        
-        <Footer />
-      </div>
+        <div className="flex items-center space-x-1">
+            <svg 
+                className="w-5 h-5 text-yellow-400 fill-current" 
+                viewBox="0 0 20 20"
+            >
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            </svg>
+             <span className="text-lg font-medium text-gray-700">{Math.round(rating)}</span>
+        </div>
     );
+  };
+
+  if (flags.hideBlogContent) {
+      return (
+        <div className="min-h-screen flex flex-col">
+          <Header onRightMenuClick={() => {}} />
+          <main className="flex-grow flex items-center justify-center">
+             <div className="text-center">
+                <h1 className="text-3xl font-bold mb-4">Раздел находится в разработке</h1>
+                <Link href="/" className="text-indigo-600 hover:text-indigo-800">На главную</Link>
+             </div>
+          </main>
+          <Footer />
+        </div>
+      )
+  }
+
+  if (loading) {
+     return (
+        <div className="min-h-screen flex flex-col bg-gray-50">
+            <Header onRightMenuClick={() => {}} />
+            <div className="flex-grow flex items-center justify-center">
+               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+            <Footer />
+        </div>
+     );
+  }
+
+  if (!wod) {
+      return (
+        <div className="min-h-screen flex flex-col bg-gray-50">
+            <Header onRightMenuClick={() => {}} />
+            <div className="flex-grow flex items-center justify-center">
+               <div className="text-center">
+                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Воркаут не найден</h2>
+                   <Link href="/blog/workouts" className="text-indigo-600 hover:text-indigo-800">
+                       Вернуться к списку
+                   </Link>
+               </div>
+            </div>
+            <Footer />
+        </div>
+      );
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header 
-        onRightMenuClick={() => {}} 
-      />
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header onRightMenuClick={() => {}} />
       
-      <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <Link 
-              href="/blog/workouts" 
-              className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-              </svg>
-              Назад к воркаутам
-            </Link>
-            <h1 className="text-3xl font-bold text-center flex-grow">Воркауты</h1>
-            <div className="w-24"></div> {/* Spacer for alignment */}
-          </div>
-          
-          <article className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-6 md:p-8">
-              <div className="flex flex-wrap justify-between items-start mb-6">
-                <h1 className="text-3xl font-bold mb-4 text-gray-800">{workoutItem.title}</h1>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm whitespace-nowrap">
-                  {workoutItem.difficulty}
-                </span>
-              </div>
-              <div className="text-sm text-gray-500 mb-6">
-                {workoutItem.date}
-              </div>
-              <div className="prose max-w-none">
-                {workoutItem.content.split('\n\n').map((paragraph, index) => (
-                  <p key={index} className="mb-4 text-gray-700 leading-relaxed">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
-            </div>
-          </article>
-          
-          <div className="mt-8 flex justify-between">
-            <Link 
-              href="/blog/workouts" 
-              className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-            >
-              Назад к воркаутам
-            </Link>
-          </div>
+      <main className="flex-grow py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Breadcrumb / Back Link */}
+           <div className="mb-6">
+              <Link href="/blog/workouts" className="text-indigo-600 font-medium hover:text-indigo-800 flex items-center">
+                 <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                 </svg>
+                 Вернуться к воркаутам
+              </Link>
+           </div>
+
+           <article className="bg-white rounded-2xl shadow-lg overflow-hidden">
+               {/* Header Section */}
+               <div className="p-6 md:p-8 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                   <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                       <div>
+                           <div className="flex items-center gap-3 mb-2">
+                                <h1 className="text-3xl font-bold text-gray-900">{wod.name}</h1>
+                                {wod.type && (
+                                    <span className="px-2.5 py-1 text-xs font-semibold rounded-md bg-gray-900 text-white shadow-sm">
+                                        {wod.type}
+                                    </span>
+                                )}
+                           </div>
+                           
+                           <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
+                               {wod.scheme && (
+                                   <span className="flex items-center">
+                                       <span className="font-semibold text-gray-900 mr-1">Схема:</span>
+                                       {SCHEME_MAP[wod.scheme] || wod.scheme}
+                                   </span>
+                               )}
+                           </div>
+                           
+                           {wod.muscleGroups && wod.muscleGroups.length > 0 && (
+                               <div className="flex flex-wrap gap-2 mt-4">
+                                   {wod.muscleGroups.map(mg => (
+                                       <span key={mg} className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800 border border-indigo-200">
+                                           {MUSCLE_GROUPS_MAP[mg] || mg}
+                                       </span>
+                                   ))}
+                               </div>
+                           )}
+                       </div>
+                       
+                       <div className="flex flex-col items-end gap-3">
+                           <RatingStar 
+                             initialRating={wod.rating || 0} 
+                             id={wod.id} 
+                             type="workout" 
+                             size={20}
+                           />
+                           <button 
+                                onClick={() => setIsCalendarModalOpen(true)}
+                                className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                Добавить в календарь
+                            </button>
+                       </div>
+                   </div>
+               </div>
+
+               {/* Content Section */}
+               <div className="p-6 md:p-8">
+                   <div className="prose prose-indigo max-w-none">
+                       <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">Задание</h3>
+                       <div className="whitespace-pre-wrap text-gray-800 font-medium text-lg bg-gray-50 p-6 rounded-xl border border-gray-100">
+                           {wod.description}
+                       </div>
+                   </div>
+               </div>
+           </article>
         </div>
       </main>
-      
+
       <Footer />
+      
+      <AddToCalendarModal
+        isOpen={isCalendarModalOpen}
+        onClose={() => setIsCalendarModalOpen(false)}
+        onSave={handleAddToCalendar}
+        title={wod.name}
+        description={wod.description}
+      />
     </div>
   );
 }

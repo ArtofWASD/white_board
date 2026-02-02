@@ -39,6 +39,21 @@ export class WodsService {
     }
   }
 
+  async updateRating(id: string, delta: number) {
+    try {
+      return await this.prisma.wod.update({
+        where: { id },
+        data: {
+          rating: {
+            increment: delta,
+          },
+        },
+      });
+    } catch (error) {
+      throw new NotFoundException(`WOD with ID ${id} not found`);
+    }
+  }
+
   async remove(id: string) {
     try {
         return await this.prisma.wod.delete({

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "wods" ADD COLUMN     "scheme" TEXT NOT NULL DEFAULT 'FOR_TIME';

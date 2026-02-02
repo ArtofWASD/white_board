@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsArray } from 'class-validator';
 
 export class CreateContentExerciseDto {
   @IsString()
@@ -12,6 +12,10 @@ export class CreateContentExerciseDto {
   @IsString()
   @IsOptional()
   videoUrl?: string;
+
+  @IsArray()
+  @IsOptional()
+  muscleGroups?: string[];
 }
 
 export class UpdateContentExerciseDto {
@@ -26,4 +30,8 @@ export class UpdateContentExerciseDto {
   @IsString()
   @IsOptional()
   videoUrl?: string;
+
+  @IsArray()
+  @IsOptional()
+  muscleGroups?: string[];
 }
