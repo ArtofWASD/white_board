@@ -115,7 +115,8 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
           rounds: event.rounds,
           description: event.description,
           userId: event.userId,
-          participants: event.participants
+          participants: event.participants,
+          scheme: event.scheme
         };
       }));
 
@@ -244,14 +245,17 @@ export const useCalendarEvents = ({ teamId, onUpdateEvents }: UseCalendarEventsP
   const addResult = async (eventId: string, resultData: any) => {
       if (!user) return false;
       try {
-        const response = await fetch(`/api/events/${eventId}/results`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+        const payload = {
                 ...resultData,
                 userId: user.id,
                 username: user.name 
-            }),
+            };
+        console.log('useCalendarEvents: addResult payload:', payload);
+
+        const response = await fetch(`/api/events/${eventId}/results`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
         });
         
         if (response.ok) {

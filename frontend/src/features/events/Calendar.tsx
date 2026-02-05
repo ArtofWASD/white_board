@@ -392,6 +392,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
           onClose={handleCloseAddResultModal}
           onSave={handleSaveResult}
           eventName={eventToAddResult.title}
+          scheme={eventToAddResult.scheme || 'FOR_TIME'}
         />
       )}
       

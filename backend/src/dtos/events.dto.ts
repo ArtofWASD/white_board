@@ -5,6 +5,7 @@ import {
   IsUUID,
   IsArray,
   IsDateString,
+  IsNumber,
 } from 'class-validator';
 
 export class ExerciseDto {
@@ -78,7 +79,13 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsString()
+  @IsOptional()
+  @IsString()
   teamId?: string;
+
+  @IsOptional()
+  @IsString()
+  scheme?: string;
 }
 
 export class UpdateEventStatusDto {
@@ -88,9 +95,9 @@ export class UpdateEventStatusDto {
 }
 
 export class CreateEventResultDto {
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
-  eventId: string;
+  eventId?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -103,4 +110,16 @@ export class CreateEventResultDto {
   @IsOptional()
   @IsString()
   userId?: string;
+
+  @IsOptional()
+  @IsNumber()
+  value?: number;
+
+  @IsOptional()
+  @IsString()
+  scaling?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }

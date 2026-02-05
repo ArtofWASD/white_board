@@ -67,6 +67,9 @@ export interface Exercise {
   rxReps?: string
   scWeight?: string
   scReps?: string
+  measurement?: 'weight' | 'calories'
+  rxCalories?: string
+  scCalories?: string
 }
 
 export interface EventResult {
@@ -75,6 +78,9 @@ export interface EventResult {
   dateAdded: string
   username: string
   userId?: string
+  value?: number
+  scaling?: string
+  notes?: string
 }
 
 export interface CalendarEvent {
@@ -92,6 +98,7 @@ export interface CalendarEvent {
   description?: string;
   participants?: { id: string; name: string; lastName?: string }[];
   teamName?: string;
+  scheme?: string;
 }
 
 export interface Event {
@@ -101,6 +108,7 @@ export interface Event {
   eventDate: string
   status: "FUTURE" | "COMPLETED" | "CANCELLED"
   exerciseType?: string
+  scheme?: string
   userId: string
   createdAt: string
   updatedAt: string

@@ -72,6 +72,8 @@ model User {
   exercises          UserExercise[]
   strengthResults    StrengthWorkoutResult[]
   eventResults       EventResult[]
+  eventResultLikes   EventResultLike[]
+  notifications      Notification[]
 
   // Organization
   organizationId     String?       @map("organization_id")
@@ -143,6 +145,7 @@ model Event {
   description  String?
   eventDate    DateTime      @map("event_date")
   status       EventStatus   @default(FUTURE)
+  scheme       String        @default("FOR_TIME") // FOR_TIME, AMRAP, EMOM, WEIGHTLIFTING
   exerciseType String?       @map("exercise_type")
   exercises    Json?
   userId       String        @map("user_id")
@@ -195,6 +198,9 @@ model TeamMember {
 model EventResult {
   id        String   @id @default(uuid())
   time      String
+  value     Float    @default(0)
+  scaling   String   @default("RX") // RX, SCALED, INDIVIDUAL
+  notes     Json?    @default("[]")
   dateAdded DateTime @default(now()) @map("date_added")
   eventId   String   @map("event_id")
   event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
@@ -203,6 +209,8 @@ model EventResult {
   userId    String?  @map("user_id")
   user      User?    @relation(fields: [userId], references: [id])
   username  String   // Kept for backward compatibility
+  
+  likes     EventResultLike[]
 
   @@map("event_results")
 }
@@ -241,4 +249,33 @@ model News {
   updatedAt DateTime @updatedAt @map("updated_at")
   
   @@map("news")
+}
+
+model EventResultLike {
+  id            String      @id @default(uuid())
+  eventResultId String      @map("event_result_id")
+  userId        String      @map("user_id")
+  createdAt     DateTime    @default(now()) @map("created_at")
+
+
+  eventResult   EventResult @relation(fields: [eventResultId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventResultId, userId])
+  @@map("event_result_likes")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  type      String   // LIKE, COMMENT
+  title     String?
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  data      Json?    @default("{}") // Store related entity IDs (eventResultId, actorId, etc.)
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
 }

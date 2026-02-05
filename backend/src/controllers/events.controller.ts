@@ -45,6 +45,7 @@ export class EventsController {
         createEventDto.timeCap,
         createEventDto.rounds,
         createEventDto.teamId,
+        createEventDto.scheme,
       );
     } catch (error: unknown) {
       // Handle specific errors
@@ -109,17 +110,20 @@ export class EventsController {
 
   @Post(':eventId/results')
   @HttpCode(HttpStatus.CREATED)
-  @UsePipes(new ValidationPipe())
   async createEventResult(
     @Param('eventId') eventId: string,
     @Body() createEventResultDto: CreateEventResultDto,
   ) {
+    console.log('Backend Create Result DTO:', createEventResultDto);
     try {
       return await this.eventsService.createEventResult(
         eventId,
         createEventResultDto.time,
         createEventResultDto.username,
         createEventResultDto.userId, // Pass userId
+        createEventResultDto.value,
+        createEventResultDto.scaling,
+        createEventResultDto.notes,
       );
     } catch (error: unknown) {
       if (error instanceof NotFoundException) {
@@ -135,9 +139,31 @@ export class EventsController {
     return this.eventsService.getEventResults(eventId);
   }
 
+  @Post('results/:resultId/notes')
+  @HttpCode(HttpStatus.OK)
+  async updateEventResultNotes(
+    @Param('resultId') resultId: string,
+    @Body('notes') notes: string,
+    @Body('userId') userId: string, // Expect userId in body
+  ) {
+    return this.eventsService.updateEventResult(resultId, notes, userId);
+  }
+
   @Get('results/user/:userId')
   async getEventResultsByUserId(@Param('userId') userId: string) {
     return this.eventsService.getEventResultsByUserId(userId);
+  }
+
+  @Post('results/:resultId/like')
+  @HttpCode(HttpStatus.OK)
+  async toggleResultLike(
+    @Param('resultId') resultId: string,
+    @Body() body: { userId: string },
+  ) {
+    if (!body.userId) {
+       throw new BadRequestException('User ID is required');
+    }
+    return this.eventsService.toggleResultLike(resultId, body.userId);
   }
 
   @Put(':eventId')
@@ -159,6 +185,7 @@ export class EventsController {
         updateEventDto.timeCap,
         updateEventDto.rounds,
         updateEventDto.teamId,
+        updateEventDto.scheme,
       );
     } catch (error: unknown) {
       // Handle specific errors

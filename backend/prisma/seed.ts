@@ -1,4 +1,4 @@
-import { PrismaClient, User } from '@prisma/client';
+import { PrismaClient, UserRole, Gender } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -17,23 +17,6 @@ async function main() {
   // Hash password once
   const password = await bcrypt.hash('password123', 10);
 
-  const trainersData = [
-    { name: 'Ivan Drago', email: 'ivan@example.com', gender: 'male' },
-    { name: 'Rocky Balboa', email: 'rocky@example.com', gender: 'male' },
-    { name: 'Mickey Goldmill', email: 'mickey@example.com', gender: 'male' },
-    { name: 'Apollo Creed', email: 'apollo@example.com', gender: 'male' },
-    { name: 'Adrian Pennino', email: 'adrian@example.com', gender: 'female' },
-  ];
-
-  const athletesNames = [
-    'John Doe', 'Jane Smith', 'Michael Johnson', 'Emily Davis', 'Chris Brown',
-    'Patricia Wilson', 'Matthew Taylor', 'Jessica Anderson', 'David Thomas', 'Sarah Martinez',
-    'James Jackson', 'Linda White', 'Robert Harris', 'Barbara Martin', 'William Thompson'
-  ];
-
-  const trainers: User[] = [];
-  const athletes: User[] = [];
-
   // Create Organization
   const org = await prisma.organization.create({
     data: {
@@ -41,169 +24,49 @@ async function main() {
     }
   });
 
-  // Create Trainers
-  for (const trainer of trainersData) {
-    const user = await prisma.user.upsert({
-      where: { email: trainer.email },
-      update: {
-        role: 'TRAINER',
-      },
-      create: {
-        name: trainer.name,
-        email: trainer.email,
+  // Create Organizer
+  await prisma.user.create({
+    data: {
+        name: 'Organizer',
+        email: 'organizer@example.com',
         password,
-        role: 'TRAINER',
-        gender: trainer.gender === 'male' ? 'MALE' : 'FEMALE',
+        role: UserRole.ORGANIZATION_ADMIN,
+        organizationId: org.id
+    }
+  });
+  console.log('Created Organizer: organizer@example.com');
+
+  // Create Trainers (2)
+  for (let i = 1; i <= 2; i++) {
+    const user = await prisma.user.create({
+      data: {
+        name: `Trainer ${i}`,
+        email: `trainer${i}@example.com`,
+        password,
+        role: UserRole.TRAINER,
+        gender: Gender.MALE,
         organizationId: org.id,
         isAdmin: true
       },
     });
-    trainers.push(user);
-    console.log(`Created/Updated trainer: ${user.name}`);
+    console.log(`Created trainer: ${user.email}`);
   }
 
-  // Create Athletes
-  for (let i = 0; i < athletesNames.length; i++) {
-    const name = athletesNames[i];
-    const email = `athlete${i + 1}@example.com`;
-    // Athletes join the same org for demo? Or null? Let's say null for individuals, or same org.
-    // Spec says individuals exist.
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        role: 'ATHLETE',
-      },
-      create: {
-        name,
-        email,
+  // Create Athletes (10)
+  for (let i = 1; i <= 10; i++) {
+    const user = await prisma.user.create({
+      data: {
+        name: `Athlete ${i}`,
+        email: `athlete${i}@example.com`,
         password,
-        role: 'ATHLETE',
-        gender: i % 2 === 0 ? 'MALE' : 'FEMALE',
+        role: UserRole.ATHLETE,
+        gender: i % 2 === 0 ? Gender.MALE : Gender.FEMALE,
         height: 170 + Math.floor(Math.random() * 20),
         weight: 60 + Math.floor(Math.random() * 30),
+        organizationId: org.id,
       },
     });
-    athletes.push(user);
-    console.log(`Created/Updated athlete: ${user.name}`);
-  }
-
-  // Create Teams
-  const teamNames = ['Thunderbolts', 'Iron Pumpers', 'Cardio Kings'];
-  for (let i = 0; i < teamNames.length; i++) {
-    const owner = trainers[i % trainers.length];
-    
-    let team = await prisma.team.findFirst({
-        where: { name: teamNames[i], ownerId: owner.id }
-    });
-
-    if (!team) {
-        team = await prisma.team.create({
-            data: {
-              name: teamNames[i],
-              description: `Training team led by ${owner.name}`,
-              ownerId: owner.id,
-              organizationId: org.id // Link to org
-            },
-          });
-          console.log(`Created team: ${team.name} owned by ${owner.name}`);
-    } else {
-        console.log(`Team already exists: ${team.name}`);
-    }
-
-
-    // Add random athletes to team
-    const teamAthletes = athletes.slice(i * 5, (i + 1) * 5);
-    for (const athlete of teamAthletes) {
-        // Check membership
-        const membership = await prisma.teamMember.findUnique({
-             where: {
-                 teamId_userId: {
-                     teamId: team.id,
-                     userId: athlete.id
-                 }
-             }
-        });
-
-        if (!membership) {
-            await prisma.teamMember.create({
-                data: {
-                  teamId: team.id,
-                  userId: athlete.id,
-                  role: 'MEMBER', 
-                },
-              });
-        }
-    }
-  }
-
-  // Create Events
-  const allUsers = [...trainers, ...athletes];
-  const eventTitles = ['Morning Run', 'Strength Session', 'Yoga Class', 'HIIT Workout'];
-
-  for (const user of allUsers) {
-    const eventCount = await prisma.event.count({ where: { userId: user.id } });
-    
-    if (eventCount < 2) {
-        const numEvents = 2 + Math.floor(Math.random() * 2);
-        for (let i = 0; i < numEvents; i++) {
-            const eventDate = new Date();
-            eventDate.setDate(eventDate.getDate() + Math.floor(Math.random() * 10) - 2); 
-
-            await prisma.event.create({
-                data: {
-                    title: eventTitles[Math.floor(Math.random() * eventTitles.length)],
-                    description: 'Test event description',
-                    eventDate: eventDate,
-                    userId: user.id,
-                    status: 'FUTURE',
-                    exerciseType: 'General',
-                }
-            });
-        }
-        console.log(`Added events for ${user.name}`);
-    }
-  }
-
-  // Create WODs
-  const wodTitles = ['Murph', 'Fran', 'Cindy', 'Diane', 'Grace'];
-  for (const title of wodTitles) {
-    const wodCount = await prisma.wod.count({ where: { name: title } });
-    if (wodCount === 0) {
-      await prisma.wod.create({
-        data: {
-          name: title,
-          description: `Description for ${title}`,
-          type: 'CLASSIC',
-          isGlobal: true,
-        }
-      });
-      console.log(`Created WOD: ${title}`);
-    }
-  }
-
-  // Create News
-  const newsTitles = [
-    'New Gym Opening',
-    'Summer Competition',
-    'Nutrition Workshop',
-    'Athlete of the Month',
-    'Holiday Schedule'
-  ];
-
-  for (let i = 0; i < newsTitles.length; i++) {
-    const title = newsTitles[i];
-    const newsCount = await prisma.news.count({ where: { title } });
-    if (newsCount === 0) {
-      await prisma.news.create({
-        data: {
-          title: title,
-          excerpt: `This is a short excerpt for ${title}.`,
-          content: `Full content for ${title}. This is significantly longer than the excerpt and contains more details about the news item.`,
-          imageUrl: `https://picsum.photos/seed/${i}/800/600`,
-        }
-      });
-      console.log(`Created News: ${title}`);
-    }
+    console.log(`Created athlete: ${user.email}`);
   }
 
   console.log('Seeding completed.');

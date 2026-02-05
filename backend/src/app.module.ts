@@ -15,6 +15,7 @@ import { StatisticsModule } from './modules/statistics.module';
 import { WodsModule } from './modules/wods.module';
 import { ContentExercisesModule } from './modules/content-exercises.module';
 import { NewsModule } from './modules/news.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -32,7 +33,8 @@ import { NewsModule } from './modules/news.module';
     StatisticsModule,
     WodsModule,
     ContentExercisesModule,
-    NewsModule
+    NewsModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

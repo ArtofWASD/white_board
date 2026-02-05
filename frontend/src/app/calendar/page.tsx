@@ -42,6 +42,16 @@ export default function CalendarPage() {
         icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
         tooltip: 'Главная'
       },
+      {
+        label: 'Лидерборд',
+        href: '/dashboard/leaderboard',
+        icon: (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0V9.499a2.25 2.25 0 00-2.25-2.25H11.525a2.25 2.25 0 00-2.25 2.25v2.875M12 2.25v4.5" />
+          </svg>
+        ),
+        tooltip: 'Лидерборд'
+      },
       { 
         label: 'Команды', 
         href: '/dashboard/teams',

@@ -30,9 +30,20 @@ export const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onC
         </div>
       )}
       <h3 className="font-bold text-lg mb-2">{event.title}</h3>
+      {event.scheme && (
+        <p className="text-sm text-gray-600 mb-2">
+          <span className="font-semibold">Тип:</span> {
+            event.scheme === 'FOR_TIME' ? 'For Time' :
+            event.scheme === 'AMRAP' ? 'AMRAP' :
+            event.scheme === 'EMOM' ? 'EMOM' :
+            event.scheme === 'WEIGHTLIFTING' ? 'Weightlifting' :
+            event.scheme
+          }
+        </p>
+      )}
       {event.exerciseType && (
         <p className="text-sm text-gray-600 mb-2">
-          <span className="font-semibold">Тип:</span> {event.exerciseType}
+          <span className="font-semibold">Комплекс:</span> {event.exerciseType}
         </p>
       )}
       {event.description && (
@@ -61,20 +72,7 @@ export const EventTooltip: React.FC<EventTooltipProps> = ({ event, position, onC
           </ul>
         </div>
       )}
-      {event.results && event.results.length > 0 && (
-        <div className="mt-2 text-sm border-t pt-2 border-gray-100">
-          <p className="font-semibold text-sm mb-1">Результаты:</p>
-          <ul className="list-disc pl-4 text-gray-700">
-            {event.results.slice(0, 3).map((result, idx) => (
-              <li key={idx} className="flex flex-col">
-                 <span className="font-medium">{result.time}</span>
-                 <span className="text-xs text-gray-500">{result.username}</span>
-              </li>
-            ))}
-            {event.results.length > 3 && <li>...</li>}
-          </ul>
-        </div>
-      )}
+
     </div>
   );
 };

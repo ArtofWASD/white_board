@@ -108,10 +108,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
     const url = `${backendUrl}/teams/${teamId}/members/add`
 
 
+    // Get token from request
+    const authHeader = await getToken(request)
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader && { Authorization: authHeader }),
       },
       body: JSON.stringify(body),
     })
@@ -181,10 +185,14 @@ export async function DELETE(
     const url = `${backendUrl}/teams/${teamId}/members/remove`
 
 
+    // Get token from request
+    const authHeader = await getToken(request)
+
     const response = await fetch(url, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        ...(authHeader && { Authorization: authHeader }),
       },
       body: JSON.stringify(body),
     })

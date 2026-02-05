@@ -7,10 +7,14 @@ import {
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '../prisma/prisma.service';
 
-@Injectable()
+import { NotificationsService } from './notifications.service';
+
 @Injectable()
 export class EventsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private notificationsService: NotificationsService
+  ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
   async updatePastEventsStatus() {
@@ -79,6 +83,7 @@ export class EventsService {
     timeCap?: string,
     rounds?: string,
     teamId?: string,
+    scheme?: string, // Add scheme
   ) {
 
 
@@ -123,6 +128,7 @@ export class EventsService {
       timeCap,
       rounds,
       teamId,
+      scheme: scheme || 'FOR_TIME',
     };
 
     // Add participants if provided
@@ -470,7 +476,15 @@ export class EventsService {
 
   }
 
-  async createEventResult(eventId: string, time: string, username: string, userId?: string) {
+  async createEventResult(
+    eventId: string, 
+    time: string, 
+    username: string, 
+    userId?: string, 
+    value?: number, 
+    scaling?: string, 
+    notes?: string
+  ) {
     // Check if event exists
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
@@ -480,16 +494,96 @@ export class EventsService {
     }
 
     // Create event result
+    // Initialize notes as array if provided
+    const initialNotes = notes ? [notes] : [];
+
     const eventResult = await (this.prisma as any).eventResult.create({
       data: {
         time,
         username,
         eventId,
         userId,
+        value: value || 0,
+        scaling: scaling || 'RX',
+        notes: initialNotes,
       },
     });
 
     return eventResult;
+  }
+
+  async updateEventResult(resultId: string, info: string, actorId?: string) {
+    const result = await (this.prisma as any).eventResult.findUnique({
+      where: { id: resultId },
+    });
+    if (!result) {
+      throw new NotFoundException('Result not found');
+    }
+
+    // Parse existing notes
+    let currentNotes: string[] = [];
+    if (result.notes) {
+        if (Array.isArray(result.notes)) {
+            currentNotes = result.notes as string[];
+        } else if (typeof result.notes === 'string') {
+            // Handle legacy string data if any
+            try {
+                const parsed = JSON.parse(result.notes);
+                 if (Array.isArray(parsed)) {
+                    currentNotes = parsed;
+                 } else {
+                    currentNotes = [result.notes];
+                 }
+            } catch {
+                currentNotes = [result.notes];
+            }
+        }
+    }
+
+    // Append new note
+    const updatedNotes = [...currentNotes, info];
+
+    const updatedResult = await (this.prisma as any).eventResult.update({
+      where: { id: resultId },
+      data: { notes: updatedNotes },
+    });
+
+    // Notify owner if actor is not the owner
+    // Note: info usually contains the name, e.g. "Name: comment"
+    let targetUserId = result.userId;
+
+    // Fallback: If no userId, try to find user by username matches (exact match)
+    if (!targetUserId && result.username) {
+        const potentialUser = await (this.prisma as any).user.findFirst({
+            where: {
+                OR: [
+                    { name: result.username },
+                    { email: result.username } // Just in case username is email
+                ]
+            }
+        });
+        if (potentialUser) {
+            targetUserId = potentialUser.id;
+        }
+    }
+
+    if (targetUserId && actorId && targetUserId !== actorId) {
+        const actor = await (this.prisma as any).user.findUnique({ where: { id: actorId }, select: { name: true, lastName: true } });
+        const name = actor ? `${actor.name} ${actor.lastName || ''}`.trim() : 'Someone';
+
+        const event = await (this.prisma as any).event.findUnique({ where: { id: result.eventId }, select: { title: true } });
+        const eventTitle = event ? event.title : 'Unknown Event';
+
+        await this.notificationsService.createNotification(
+            targetUserId,
+            'COMMENT',
+            `${name} commented on your result for "${eventTitle}": "${info.substring(info.indexOf(':') + 1).trim() || 'View comment'}"`,
+             { eventResultId: resultId, eventId: result.eventId, actorId },
+             'New Comment'
+        );
+    }
+
+    return updatedResult;
   }
 
   async getEventResults(eventId: string) {
@@ -502,10 +596,96 @@ export class EventsService {
     }
 
     // Get all results for the event
-    return (this.prisma as any).eventResult.findMany({
-      where: { eventId: eventId },
-      orderBy: { dateAdded: 'desc' },
+    try {
+      return await (this.prisma as any).eventResult.findMany({
+        where: { eventId: eventId },
+        include: {
+          likes: {
+             select: { userId: true }
+          }
+        },
+        orderBy: { dateAdded: 'desc' },
+      });
+    } catch (error) {
+      console.error(`Error getting results for event ${eventId}:`, error);
+      // Return empty array instead of crashing if possible, or handle appropriately
+      // But keeping it crashing with more info is also fine for debugging. 
+      // For now, let's rethrow a more descriptive error or return empty to stop the frontend loop crash.
+      // Returning empty array allows the page to load at least.
+      return [];
+    }
+  }
+
+  async toggleResultLike(resultId: string, userId: string) {
+    // Check if result exists
+    const result = await (this.prisma as any).eventResult.findUnique({
+      where: { id: resultId },
     });
+    if (!result) {
+      throw new NotFoundException('Result not found');
+    }
+
+    // Check if like exists
+    const existingLike = await (this.prisma as any).eventResultLike.findUnique({
+      where: {
+        eventResultId_userId: {
+          eventResultId: resultId,
+          userId: userId,
+        },
+      },
+    });
+
+    if (existingLike) {
+      // Unlike
+      await (this.prisma as any).eventResultLike.delete({
+        where: { id: existingLike.id },
+      });
+      return { liked: false };
+    } else {
+      // Like
+      await (this.prisma as any).eventResultLike.create({
+        data: {
+          eventResultId: resultId,
+          userId: userId,
+        },
+      });
+
+      // Notify owner if liker is not the owner
+      let targetUserId = result.userId;
+      
+      // Fallback: If no userId, try to find user by username matches (exact match)
+      if (!targetUserId && result.username) {
+          const potentialUser = await (this.prisma as any).user.findFirst({
+              where: {
+                  OR: [
+                      { name: result.username },
+                      { email: result.username }
+                  ]
+              }
+          });
+          if (potentialUser) {
+              targetUserId = potentialUser.id;
+          }
+      }
+
+      if (targetUserId && targetUserId !== userId) {
+        const liker = await (this.prisma as any).user.findUnique({ where: { id: userId }, select: { name: true, lastName: true } });
+        const name = liker ? `${liker.name} ${liker.lastName || ''}`.trim() : 'Someone';
+        
+        const event = await (this.prisma as any).event.findUnique({ where: { id: result.eventId }, select: { title: true } });
+        const eventTitle = event ? event.title : 'Unknown Event';
+
+        await this.notificationsService.createNotification(
+          targetUserId,
+          'LIKE',
+          `${name} liked your result on event "${eventTitle}"`, 
+          { eventResultId: resultId, eventId: result.eventId, actorId: userId },
+          'New Like'
+        );
+      }
+
+      return { liked: true };
+    }
   }
 
   async getEventResultsByUserId(userId: string) {
@@ -535,6 +715,7 @@ export class EventsService {
     timeCap?: string,
     rounds?: string,
     teamId?: string,
+    scheme?: string,
   ) {
 
 
@@ -572,6 +753,7 @@ export class EventsService {
       timeCap,
       rounds,
       teamId,
+      scheme,
     };
 
 
