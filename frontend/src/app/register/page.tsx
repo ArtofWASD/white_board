@@ -16,7 +16,7 @@ function RegisterForm() {
   const inviteCode = searchParams.get('inviteCode');
   const { register, isAuthenticated, isLoading } = useAuthStore();
   
-  // Form state
+  // Состояние формы
   const [name, setName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -35,7 +35,7 @@ function RegisterForm() {
   const [settings, setSettings] = useState<Record<string, boolean>>({});
   const [loadingSettings, setLoadingSettings] = useState(true);
 
-  // Fetch settings
+  // Получение настроек
   useEffect(() => {
     const fetchSettings = async () => {
         try {
@@ -53,7 +53,7 @@ function RegisterForm() {
     fetchSettings();
   }, []);
 
-  // Redirect to dashboard if already logged in or redirection for invite
+  // Перенаправление на панель управления, если уже выполнен вход, или перенаправление по приглашению
   useEffect(() => {
     if (!isLoading && isAuthenticated && !showSuccessModal) {
       if (inviteCode) {
@@ -155,7 +155,7 @@ function RegisterForm() {
           gender.toUpperCase(), 
           userType, 
           lastName, 
-          organizationName || '' // Ensure string
+          organizationName || '' // Гарантируем строку
       );
       if (!success) {
         setError('Не удалось зарегистрироваться. Попробуйте еще раз.');
@@ -238,7 +238,7 @@ function RegisterForm() {
       <SuccessModal isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
       
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
-        {/* Left Side - Image (Visible on md+) */}
+        {/* Левая сторона - Изображение (Видно на md+) */}
         <div className="hidden md:block md:w-1/2 relative min-h-[500px] rounded-2xl overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -260,7 +260,7 @@ function RegisterForm() {
           </AnimatePresence>
         </div>
 
-        {/* Right Side - Form */}
+        {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
           <h2 className="text-3xl font-bold text-center mb-6">Регистрация</h2>
           
@@ -408,7 +408,7 @@ function RegisterForm() {
                   </div>
                   
                   <div className="grid grid-cols-1 gap-4">
-                    {/* Athlete Card */}
+                    {/* Карточка атлета */}
                     {settings['REGISTRATION_ATHLETE'] !== false && (
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -439,7 +439,7 @@ function RegisterForm() {
                     </div>
                     )}
 
-                    {/* Trainer Card */}
+                    {/* Карточка тренера */}
                     {settings['REGISTRATION_TRAINER'] !== false && (
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
@@ -470,7 +470,7 @@ function RegisterForm() {
                     </div>
                     )}
 
-                    {/* Organization Card */}
+                    {/* Карточка организации */}
                     {settings['REGISTRATION_ORGANIZATION'] !== false && (
                     <div 
                       className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${

@@ -35,7 +35,7 @@ export function ExerciseTracker({
   const [newExerciseName, setNewExerciseName] = useState('');
   const [initialWeight, setInitialWeight] = useState('');
 
-  // const [isCollapsed, setIsCollapsed] = useState(false); // REMOVED local state
+  // const [isCollapsed, setIsCollapsed] = useState(false); // УДАЛЕНО локальное состояние
 
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +69,7 @@ export function ExerciseTracker({
               {isCreating ? 'Отмена' : 'Добавить'}
             </Button>
           )}
-          {/* Collapse button - only visible on mobile/tablet */}
+          {/* Кнопка сворачивания - видна только на мобильных/планшетах */}
           <button 
             onClick={onToggle}
             className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"

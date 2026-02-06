@@ -44,7 +44,7 @@ export default function AdminDashboard() {
             setIsMobileMenuOpen={setIsMobileMenuOpen} 
           />
 
-          {/* Overlay */}
+          {/* Оверлей */}
           {isMobileMenuOpen && (
               <div 
                   className="fixed inset-0 z-20 bg-black opacity-50 md:hidden"

@@ -27,8 +27,8 @@ export class RegisterDto {
   name: string;
 
   @IsString()
-  @IsOptional() // Last name is optional
-  lastName?: string; // Adding last name field
+  @IsOptional() // Фамилия необязательна
+  lastName?: string; // Добавляем поле фамилии
 
   @IsEmail()
   @IsNotEmpty()
@@ -41,7 +41,7 @@ export class RegisterDto {
 
   @IsString()
   @IsNotEmpty()
-  // Validate against string values of the enum
+  // Валидация строковых значений перечисления
   @IsEnum(['ATHLETE', 'TRAINER', 'ORGANIZATION_ADMIN', 'SUPER_ADMIN'])
   role: 'ATHLETE' | 'TRAINER' | 'ORGANIZATION_ADMIN' | 'SUPER_ADMIN';
 
@@ -51,11 +51,11 @@ export class RegisterDto {
 
   @IsString()
   @IsOptional()
-  userType?: string; // Keep for backward compat, but ignore in logic
+  userType?: string; // Оставляем для обратной совместимости, но игнорируем в логике
 
   @IsString()
   @IsOptional()
-  organizationName?: string; // Used to create/find Organization
+  organizationName?: string; // Используется для создания/поиска организации
 }
 
 export class UpdateProfileDto {
@@ -94,7 +94,7 @@ export class UpdateProfileDto {
   dashboardLayoutMode?: string;
 }
 
-// Team DTOs
+// DTO команд
 export class CreateTeamDto {
   @IsString()
   @IsNotEmpty()

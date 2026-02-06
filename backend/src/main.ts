@@ -8,7 +8,7 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  // Add validation pipe
+  // Добавляем глобальный pipe валидации
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -25,9 +25,9 @@ async function bootstrap() {
     ],
     credentials: true,
   });
-  // Use PORT environment variable or default to 3001 (to match frontend configuration)
+  // Используем переменную окружения PORT или значение по умолчанию 3001 (соответствует конфигурации фронтенда)
   const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
-  // Bind to all interfaces
+  // Прослушиваем все интерфейсы
   await app.listen(port, '0.0.0.0');
 
 }

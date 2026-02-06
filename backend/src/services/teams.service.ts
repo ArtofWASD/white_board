@@ -18,7 +18,7 @@ export class TeamsService {
   constructor(private prisma: PrismaService) {}
 
   async createTeam(createTeamDto: CreateTeamDto, ownerId: string) {
-    // First check if owner exists
+    // Сначала проверяем, существует ли владелец
     const owner = await (this.prisma as any).user.findUnique({
       where: { id: ownerId },
     });
@@ -32,7 +32,7 @@ export class TeamsService {
         name: createTeamDto.name,
         description: createTeamDto.description,
         ownerId: ownerId,
-        organizationName: owner.organizationName, // Copy organization name from owner
+        organizationName: owner.organizationName, // Копируем имя организации от владельца
         members: {
           create: [],
         },
@@ -43,7 +43,7 @@ export class TeamsService {
   }
 
   async addTeamMember(teamId: string, addTeamMemberDto: AddTeamMemberDto) {
-    // Check if team exists
+    // Проверяем, существует ли команда
     const team = await (this.prisma as any).team.findUnique({
       where: { id: teamId },
     });
@@ -52,7 +52,7 @@ export class TeamsService {
       throw new NotFoundException('Team not found');
     }
 
-    // Check if user exists
+    // Проверяем, существует ли пользователь
     const user = await (this.prisma as any).user.findUnique({
       where: { id: addTeamMemberDto.userId },
     });
@@ -61,7 +61,7 @@ export class TeamsService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if member already exists in team
+    // Проверяем, существует ли уже участник в команде
     const existingMember = await (this.prisma as any).teamMember.findUnique({
       where: {
         teamId_userId: {
@@ -75,7 +75,7 @@ export class TeamsService {
       throw new NotFoundException('User is already a member of this team');
     }
 
-    // Add member to team
+    // Добавляем участника в команду
     const teamMember = await (this.prisma as any).teamMember.create({
       data: {
         teamId: teamId,
@@ -91,7 +91,7 @@ export class TeamsService {
     teamId: string,
     removeTeamMemberDto: RemoveTeamMemberDto,
   ) {
-    // Check if team exists
+    // Проверяем, существует ли команда
     const team = await (this.prisma as any).team.findUnique({
       where: { id: teamId },
     });
@@ -100,7 +100,7 @@ export class TeamsService {
       throw new NotFoundException('Team not found');
     }
 
-    // Check if user exists
+    // Проверяем, существует ли пользователь
     const user = await (this.prisma as any).user.findUnique({
       where: { id: removeTeamMemberDto.userId },
     });
@@ -109,7 +109,7 @@ export class TeamsService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if member exists in team
+    // Проверяем, существует ли участник в команде
     const existingMember = await (this.prisma as any).teamMember.findUnique({
       where: {
         teamId_userId: {
@@ -123,7 +123,7 @@ export class TeamsService {
       throw new NotFoundException('User is not a member of this team');
     }
 
-    // Remove member from team
+    // Удаляем участника из команды
     await (this.prisma as any).teamMember.delete({
       where: {
         teamId_userId: {
@@ -139,7 +139,7 @@ export class TeamsService {
   async getTeamMembers(teamId: string) {
 
 
-    // Check if team exists
+    // Проверяем, существует ли команда
     const team = await (this.prisma as any).team.findUnique({
       where: { id: teamId },
     });
@@ -150,7 +150,7 @@ export class TeamsService {
       throw new NotFoundException('Team not found');
     }
 
-    // Get all members of the team
+    // Получаем всех участников команды
     const members = await (this.prisma as any).teamMember.findMany({
       where: { teamId: teamId },
       include: {
@@ -170,7 +170,7 @@ export class TeamsService {
   }
 
   async getUserTeams(userId: string) {
-    // Check if user exists
+    // Проверяем, существует ли пользователь
     const user = await (this.prisma as any).user.findUnique({
       where: { id: userId },
     });
@@ -179,7 +179,7 @@ export class TeamsService {
       throw new NotFoundException('User not found');
     }
 
-    // Get all teams where the user is the owner
+    // Получаем все команды, где пользователь является владельцем
     const ownedTeams = await (this.prisma as any).team.findMany({
       where: { ownerId: userId },
       include: {
@@ -207,7 +207,7 @@ export class TeamsService {
       },
     });
 
-    // Get all teams the user belongs to as a member
+    // Получаем все команды, в которых пользователь является участником
     const teamMemberships = await (this.prisma as any).teamMember.findMany({
       where: { userId: userId },
       include: {
@@ -242,7 +242,7 @@ export class TeamsService {
     const memberTeams = teamMemberships.map((tm: any) => tm.team);
     let allTeams = [...ownedTeams, ...memberTeams];
 
-    // If user is organization admin, add all teams from the organization
+    // Если пользователь является администратором организации, добавляем все команды из организации
     if (user.role === 'organization_admin' && user.organizationName) {
         const orgTeams = await (this.prisma as any).team.findMany({
             where: { organizationName: user.organizationName }
@@ -250,7 +250,7 @@ export class TeamsService {
         allTeams = [...allTeams, ...orgTeams];
     }
 
-    // Remove duplicates by id
+    // Удаляем дубликаты по id
     const uniqueTeams = allTeams.filter(
       (team, index, self) => index === self.findIndex((t) => t.id === team.id),
     );
@@ -330,7 +330,7 @@ export class TeamsService {
       throw new ForbiddenException('Only the owner can generate invite codes');
     }
 
-    // Generate a random 8-character hex string (e.g., "a1b2c3d4")
+    // Генерируем случайную 8-символьную шестнадцатеричную строку (например, "a1b2c3d4")
     const inviteCode = randomBytes(4).toString('hex');
 
     const updatedTeam = await (this.prisma as any).team.update({
@@ -345,7 +345,7 @@ export class TeamsService {
   }
 
   async joinTeamByInvite(code: string, userId: string) {
-    // Find team by invite code
+    // Находим команду по коду приглашения
     const team = await (this.prisma as any).team.findUnique({
       where: { inviteCode: code },
     });
@@ -354,7 +354,7 @@ export class TeamsService {
       throw new NotFoundException('Invalid or expired invite code');
     }
 
-    // Check if user exists
+    // Проверяем, существует ли пользователь
     const user = await (this.prisma as any).user.findUnique({
       where: { id: userId },
     });
@@ -363,7 +363,7 @@ export class TeamsService {
       throw new NotFoundException('User not found');
     }
 
-    // Check if member already exists in team
+    // Проверяем, уже ли участник есть в команде
     const existingMember = await (this.prisma as any).teamMember.findUnique({
       where: {
         teamId_userId: {
@@ -377,12 +377,12 @@ export class TeamsService {
       return { message: 'Already a member of this team', teamId: team.id };
     }
 
-    // Add member to team
+    // Добавляем участника в команду
     await (this.prisma as any).teamMember.create({
       data: {
         teamId: team.id,
         userId: userId,
-        role: 'MEMBER', // Default role for invited users
+        role: 'MEMBER', // Должность по умолчанию для приглашенных пользователей
       },
     });
 

@@ -27,7 +27,7 @@ export function ExerciseCard({ exercise, onAddRecord, onUpdateExercise }: Exerci
   const [isAdding, setIsAdding] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   
-  // Edit logic
+  // Логика редактирования
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(exercise.name);
 

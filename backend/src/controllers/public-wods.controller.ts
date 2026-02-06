@@ -8,8 +8,8 @@ export class PublicWodsController {
 
   @Get()
   findAll(@Query('limit') limit?: number) {
-    // Determine how to filter safe WODs. For now return all as WODs are generally public info in this app contest.
-    // Or filter by isGlobal if that flag exists.
+    // Определите, как фильтровать безопасные WOD. Пока возвращаем все, так как WOD, как правило, являются общедоступной информацией в этом конкурсе приложений.
+    // Или фильтруем по isGlobal, если этот флаг существует.
     return this.wodsService.findAll();
   }
 }

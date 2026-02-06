@@ -12,19 +12,19 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('Seeding database...');
+  console.log('Заполнение базы данных...');
 
-  // Hash password once
+  // Хэшируем пароль один раз
   const password = await bcrypt.hash('password123', 10);
 
-  // Create Organization
+  // Создаем организацию
   const org = await prisma.organization.create({
     data: {
         name: 'Global Gym'
     }
   });
 
-  // Create Organizer
+  // Создаем организатора
   await prisma.user.create({
     data: {
         name: 'Organizer',
@@ -34,9 +34,9 @@ async function main() {
         organizationId: org.id
     }
   });
-  console.log('Created Organizer: organizer@example.com');
+  console.log('Создан организатор: organizer@example.com');
 
-  // Create Trainers (2)
+  // Создаем тренеров (2)
   for (let i = 1; i <= 2; i++) {
     const user = await prisma.user.create({
       data: {
@@ -49,10 +49,10 @@ async function main() {
         isAdmin: true
       },
     });
-    console.log(`Created trainer: ${user.email}`);
+    console.log(`Создан тренер: ${user.email}`);
   }
 
-  // Create Athletes (10)
+  // Создаем атлетов (10)
   for (let i = 1; i <= 10; i++) {
     const user = await prisma.user.create({
       data: {
@@ -66,10 +66,10 @@ async function main() {
         organizationId: org.id,
       },
     });
-    console.log(`Created athlete: ${user.email}`);
+    console.log(`Создан атлет: ${user.email}`);
   }
 
-  console.log('Seeding completed.');
+  console.log('Заполнение завершено.');
 }
 
 main()

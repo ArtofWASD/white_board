@@ -32,7 +32,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
   async register(@Body() body: any) {
-    // Check Feature Flags
+    // Проверяем флаги функций
     const settings = await this.settingsService.getAll();
     const settingsMap = settings.reduce((acc, curr) => {
         acc[curr.key] = curr.value;
@@ -101,7 +101,7 @@ export class AuthController {
     return this.authService.getAthletes();
   }
   @HttpCode(HttpStatus.OK)
-  // Get user details for verification
+  // Получаем данные пользователя для верификации
   @Get('user/:userId')
   async getUser(@Param('userId') userId: string) {
     return this.authService.getUser(userId);

@@ -20,7 +20,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
   const currentWeight = user.weight || 0;
   const weightHistory = user.weightHistory || [];
 
-  // Calculate progress
+  // Расчет прогресса
   const startWeight = weightHistory.length > 0 ? weightHistory[0].weight : currentWeight;
   const weightChange = currentWeight - startWeight;
   const isWeightLoss = weightChange <= 0;
@@ -31,7 +31,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
     const weightValue = parseFloat(newWeight);
     setIsLoading(true);
     try {
-      // Update backend (only weight for now)
+      // Обновление бэкенда (пока только вес)
       const response = await fetch(`/api/auth/profile/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -41,7 +41,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
       const data = await response.json();
 
       if (response.ok && data.user) {
-        // Create new history entry
+        // Создание новой записи истории
         const newEntry = {
           weight: weightValue,
           date: new Date().toISOString(),
@@ -50,8 +50,8 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
 
 
 
-        // Update local user with new weight AND history
-        // We merge the backend response (which has updated weight) with our local history
+        // Обновление локального пользователя с новым весом И историей
+        // Мы объединяем ответ бэкенда (в котором обновлен вес) с нашей локальной историей
         const updatedUser = {
           ...data.user,
           weightHistory: [...(user.weightHistory || []), newEntry],
@@ -73,7 +73,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
     }
   };
 
-  // Chart helpers
+  // Помощники диаграммы
   const getChartPath = (width: number, height: number) => {
     if (weightHistory.length < 2) return '';
 
@@ -141,7 +141,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
           {weightHistory.length > 1 ? (
             <svg className="absolute inset-0 w-full h-full text-blue-500" preserveAspectRatio="none">
               <path 
-                d={getChartPath(300, 128)} // Approximate width, exact height
+                d={getChartPath(300, 128)} // Приблизительная ширина, точная высота
                 fill="none" 
                 stroke="currentColor" 
                 strokeWidth="2" 
@@ -165,7 +165,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
           )}
         </div>
 
-        {/* Weight History List */}
+        {/* Список истории веса */}
         <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-2">
           <h3 className="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wider">История</h3>
           {weightHistory.length === 0 ? (

@@ -9,7 +9,7 @@ import { useTeamStore } from '../../lib/store/useTeamStore';
 import Footer from '../../components/layout/Footer';
 import { NavItem, CalendarEvent, EventResult } from '../../types';
 
-// Define type for API response
+// Определение типа для ответа API
 interface ApiEvent {
   id: string;
   title: string;
@@ -25,9 +25,9 @@ import LeftMenu from '../../components/layout/LeftMenu';
 export default function CalendarPage() {
   const [showAuth, setShowAuth] = useState(false);
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false);
-  const [events, setEvents] = useState<CalendarEvent[]>([]); // Store events for displaying results
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // For showing event details
-  const [showEventModal, setShowEventModal] = useState(false); // Control event modal visibility
+  const [events, setEvents] = useState<CalendarEvent[]>([]); // Хранение событий для отображения результатов
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null); // Для отображения деталей события
+  const [showEventModal, setShowEventModal] = useState(false); // Управление видимостью модального окна события
   
   const { isAuthenticated, user, logout } = useAuthStore();
   const { selectedTeam, fetchTeams, teams } = useTeamStore();
@@ -91,7 +91,7 @@ export default function CalendarPage() {
         items.push({
             label: 'Админ',
             href: '/admin',
-            // No icon for now, or use a generic one
+            // Пока без иконки или используйте общую
             icon: (
                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
@@ -133,21 +133,21 @@ export default function CalendarPage() {
     return items;
   }, [user, logout]);
 
-  // Ensure teams are loaded if accessed directly
+  // Убеждаемся, что команды загружены, если доступ прямой
   useEffect(() => {
     if (isAuthenticated && teams.length === 0) {
         fetchTeams(); 
     }
   }, [isAuthenticated, teams.length, fetchTeams]);
   
-  // Local state for calendar viewing preference. 
-  // Initialize with global selected team if available, or 'my' for "My Events"
+  // Локальное состояние для предпочтений просмотра календаря. 
+  // Инициализируем глобальной выбранной командой, если доступна, или 'my' для "Мои события"
   const [calendarTeamId, setCalendarTeamId] = useState<string | null>(selectedTeam?.id || 'my');
 
-  // Sync with global store initially or if store changes? 
-  // User might want to browse other teams without changing global context.
-  // let's keep it independent after init, but maybe update if selectedTeam changes from outside?
-  // simpler to just init with it.
+  // Синхронизировать с глобальным хранилищем изначально или при изменении хранилища? 
+  // Пользователь может захотеть просматривать другие команды, не меняя глобальный контекст.
+  // давайте оставим его независимым после инициализации, но, может быть, обновим, если selectedTeam изменится извне?
+  // проще просто инициализировать с ним.
   
   useEffect(() => {
       if (selectedTeam) {
@@ -155,27 +155,26 @@ export default function CalendarPage() {
       }
   }, [selectedTeam]);
 
-  // Function to update events in the calendar page
+  // Функция для обновления событий на странице календаря
   const updateEvents = useCallback((newEvents: CalendarEvent[]) => {
     setEvents(newEvents);
   }, []);
 
 
 
-  // This function is no longer needed as dashboard is a separate page
-  // const handleRightMenuClick = () => {};
+  // Эта функция больше не нужна, так как панель управления является отдельной страницей
 
   const toggleAuth = () => {
     setShowAuth(!showAuth);
   };
 
-  // Function to show event details when clicking on event name
+  // Функция для отображения деталей события при клике на название события
   const handleShowEventDetails = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setShowEventModal(true);
   };
 
-  // Function to close event modal
+  // Функция для закрытия модального окна события
   const handleCloseEventModal = () => {
     setShowEventModal(false);
     setSelectedEvent(null);
@@ -216,7 +215,7 @@ export default function CalendarPage() {
       
       <Footer />
       
-      {/* Event Details Modal */}
+      {/* Модальное окно деталей события */}
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleCloseEventModal}></div>

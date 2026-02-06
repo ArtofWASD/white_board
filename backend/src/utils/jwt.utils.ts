@@ -4,7 +4,7 @@ import { jwtConfig } from '../config/jwt.config';
 
 export interface JwtPayload {
   email: string;
-  sub: string; // user ID
+  sub: string; // ID пользователя
   role: string;
   iat?: number;
   exp?: number;
@@ -17,7 +17,7 @@ export function extractUserIdFromToken(
     return null;
   }
 
-  // Use regex for case-insensitive 'Bearer ' check and handle extra spaces
+  // Используем regex для нечувствительной к регистру проверки 'Bearer ' и обработки лишних пробелов
   const match = authHeader.match(/^bearer\s+(.+)$/i);
   if (!match) {
     return null;
@@ -27,7 +27,7 @@ export function extractUserIdFromToken(
 
   try {
     const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;
-    return decoded.sub; // 'sub' contains the user ID
+    return decoded.sub; // 'sub' содержит ID пользователя
   } catch (error) {
 
     return null;

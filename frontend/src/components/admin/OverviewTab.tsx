@@ -13,7 +13,7 @@ export const OverviewTab: React.FC = () => {
   const [roleDistribution, setRoleDistribution] = useState<any[]>([]);
   const [loadingStats, setLoadingStats] = useState(false);
 
-  // Custom colors for pie chart
+  // Пользовательские цвета для круговой диаграммы
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export const OverviewTab: React.FC = () => {
     }
   }, [token]);
 
-  // Calculate retention (mock roughly based on active users vs total)
+  // Расчет удержания (примерно на основе активных пользователей к общему числу)
   const retentionRate = (dashboardStats && dashboardStats.totalUsers > 0) ? Math.round((dashboardStats.activeUsersLast30Days / dashboardStats.totalUsers) * 100) : 0;
 
   if (loadingStats) {

@@ -19,55 +19,8 @@ export class EventsService {
   @Cron(CronExpression.EVERY_HOUR)
   async updatePastEventsStatus() {
     const now = new Date();
-    // Use prisma.$transaction if consistent read/write is critical, but for this bulk update direct updateMany is fine.
-    
-    // Find and update all events that are in the past but marked as FUTURE
-    // Note: status 'COMPLETED' matches the enum value for 'past' events logic I want to enforce.
-    // The user request said "past" status. The enum has "COMPLETED".
-    // Let's verify the enum again. 
-    // Enum EventStatus { FUTURE, COMPLETED, CANCELLED }
-    // The user wants "past". I will assume COMPLETED is the intended status for past events, 
-    // or checks in getPastEventsByUserId use 'past'.
-    // Looking at getPastEventsByUserId (line 215): where: { status: 'past' }
-    // Wait, the prisma schema uses Enum EventStatus { FUTURE, COMPLETED, CANCELLED }
-    // But getPastEventsByUserId uses string 'past'? 
-    // This implies there might be a mismatch or 'past' is just a string literal in the query that prisma might map?
-    // Actually, looking at the schema: model Event { status EventStatus ... }
-    // So status MUST be one of the enum values.
-    // Line 215: status: 'past' looks suspicious if the enum is key-based.
-    // Let's check updateEventStatuses implementation in lines 262-290.
-    // It uses 'past' and 'future'. This is very strange if the enum is FUTURE/COMPLETED.
-    // Ah, prisma might be mapping strings? Or the schema I saw earlier:
-    // enum EventStatus { FUTURE, COMPLETED, CANCELLED }
-    // If the code is using 'past' and 'future', then maybe the enum values are lower cased?
-    // Or I misread the schema or there is a type mismatch in the existing code.
-    // I see `status: 'future'` in lines 236, 271, 287.
-    // I see `status: 'past'` in lines 215, 274, 284.
-    // The schema I read in step 22:
-    // enum EventStatus { FUTURE, COMPLETED, CANCELLED }
-    // Providing 'past' to an enum field usually fails in Prisma unless mapped.
-    // However, the existing `updateEventStatuses` function (lines 262-290) is ALREADY implementing this logic!
-    // It updates `future` to `past` and `past` to `future` based on date.
-    // Is it possible the enum in the DB is different or I am seeing an old file version?
-    // Or `EventStatus` is not used in the specific lines despite the model definition?
-    // Let's look at `updateEventStatuses` (lines 262-290) again. 
-    // It updates events where date < now AND status = 'future' to 'past'.
-    // If the user says "currently events that passed are still upcoming", maybe `updateEventStatuses` is NOT being called automatically?
-    // Lines 209 and 229 call `this.updateEventStatuses()` whenever `getPastEventsByUserId` or `getFutureEventsByUserId` is called.
-    // The user wants it to happen for ALL events, not just when a user checks their list.
-    // So the logic exists, but it's only triggered on read for a specific user?
-    // Actually `updateEventStatuses` calls `updateMany` globally! 
-    // `await (this.prisma as any).event.updateMany(...)` 
-    // This updates ALL events.
-    // So existing logic DOES update all events, but it's lazy-loaded.
-    // If no one calls `getPastEventsByUserId`, no updates happen.
-    // The User wants to organize the process of changing status not just for chosen athlete but for ALL events.
-    // So scheduling this existing method is the way to go.
-    
-    // One catch: The schema says FUTURE/COMPLETED. The code says 'future'/'past'.
-    // If this code currently works, then the Enum might handle lowercase or the schema IS 'future'/'past'.
-    // Let's trust the existing code pattern for values, but I will double check schema if I get errors.
-    // actually, I should just Call the existing `updateEventStatuses` from the Cron job!
+    // Обновляем статусы прошедших событий
+    // Используем prisma.$transaction, если критична согласованность чтения/записи, но для массового обновления updateMany вполне достаточно.
     
 
   }
@@ -83,11 +36,11 @@ export class EventsService {
     timeCap?: string,
     rounds?: string,
     teamId?: string,
-    scheme?: string, // Add scheme
+    scheme?: string, // Добавляем схему
   ) {
 
 
-    // Check if user exists
+    // Проверяем существование пользователя
     const user = await (this.prisma as any).user.findUnique({
       where: { id: userId },
     });
@@ -96,7 +49,7 @@ export class EventsService {
       throw new NotFoundException('User not found');
     }
 
-    // Validate participants if provided
+    // Проверяем участников, если они указаны
     if (participantIds && participantIds.length > 0) {
       const participants = await (this.prisma as any).user.findMany({
         where: { id: { in: participantIds } },
@@ -108,7 +61,7 @@ export class EventsService {
       }
     }
 
-    // Convert string date to Date object and validate
+    // Преобразуем строковую дату в объект Date и проверяем валидность
     const eventDateObj = new Date(eventDate);
     if (isNaN(eventDateObj.getTime())) {
 
@@ -117,13 +70,13 @@ export class EventsService {
 
 
 
-    // Prepare event data
+    // Подготавливаем данные события
     const baseEventData = {
       title,
       eventDate: eventDateObj,
       description,
       exerciseType,
-      exercises: exercises || undefined, // Add exercises to the event data
+      exercises: exercises || undefined, // Добавляем упражнения в данные события
       userId,
       timeCap,
       rounds,
@@ -131,7 +84,7 @@ export class EventsService {
       scheme: scheme || 'FOR_TIME',
     };
 
-    // Add participants if provided
+    // Добавляем участников, если они указаны
     const createData =
       participantIds && participantIds.length > 0
         ? {
@@ -153,7 +106,7 @@ export class EventsService {
 
   async getEventsByUserId(userId: string, teamId?: string) {
     if (teamId) {
-      // Specific Team View
+      // Просмотр для конкретной команды
       const teamMembers = await (this.prisma as any).teamMember.findMany({
         where: { teamId },
         select: { userId: true },
@@ -185,23 +138,23 @@ export class EventsService {
         },
       });
     } else {
-      // Normal User View / All Teams View
+      // Обычный просмотр пользователя / Просмотр всех команд
       
-      // 1. Check if user is Organization Admin
+      // 1. Проверяем, является ли пользователь администратором организации
       const user = await (this.prisma as any).user.findUnique({
           where: { id: userId },
           select: { id: true, role: true, organizationName: true }
       });
 
       if (user?.role === 'organization_admin' && user.organizationName) {
-          // Find all users in org
+          // Находим всех пользователей в организации
           const orgUsers = await (this.prisma as any).user.findMany({
               where: { organizationName: user.organizationName },
               select: { id: true }
           });
           const orgUserIds = orgUsers.map((u: any) => u.id);
 
-          // Find all teams in org
+          // Находим все команды в организации
           const orgTeams = await (this.prisma as any).team.findMany({
               where: { organizationName: user.organizationName },
               select: { id: true }
@@ -233,8 +186,8 @@ export class EventsService {
           });
       }
 
-      // 2. Normal User View (Personal + Member Teams + Owned Teams)
-      // Fetch teams where user is a member
+      // 2. Обычный просмотр пользователя (Личные + Команды участника + Владеемые команды)
+      // Получаем команды, где пользователь является участником
       const userTeams = await (this.prisma as any).teamMember.findMany({
         where: { userId },
         select: { teamId: true },
@@ -242,30 +195,30 @@ export class EventsService {
       
       const memberTeamIds = userTeams.map((t: any) => t.teamId);
 
-      // Fetch teams where user is owner
+      // Получаем команды, где пользователь является владельцем
       const ownedTeams = await (this.prisma as any).team.findMany({
         where: { ownerId: userId },
         select: { id: true }
       });
       const ownedTeamIds = ownedTeams.map((t: any) => t.id);
 
-      // Combine and unique
+      // Объединяем и удаляем дубликаты
       const teamIds = [...new Set([...memberTeamIds, ...ownedTeamIds])];
 
-      // Fetch ALL members of these teams
+      // Получаем ВСЕХ участников этих команд
       const teamMembers = await (this.prisma as any).teamMember.findMany({
         where: { teamId: { in: teamIds } },
         select: { userId: true }
       });
-      // Unique member IDs
+      // Уникальные ID участников
       const allMemberIds = [...new Set(teamMembers.map((m: any) => m.userId))];
 
       return (this.prisma as any).event.findMany({
         where: {
           OR: [
-            { userId: userId }, // Personal events
-            { teamId: { in: teamIds } }, // Events assigned to teams
-            { userId: { in: allMemberIds } } // Events from other team members
+            { userId: userId }, // Личные события
+            { teamId: { in: teamIds } }, // События, назначенные командам
+            { userId: { in: allMemberIds } } // События от других участников команды
           ],
         },
         orderBy: { eventDate: 'asc' },
@@ -289,7 +242,7 @@ export class EventsService {
 
 
   async getPastEventsByUserId(userId: string) {
-    // First update event statuses based on current date
+    // Сначала обновляем статусы событий на основании текущей даты
     await this.updateEventStatuses();
 
     return (this.prisma as any).event.findMany({
@@ -316,7 +269,7 @@ export class EventsService {
   }
 
   async getFutureEventsByUserId(userId: string) {
-    // First update event statuses based on current date
+    // Сначала обновляем статусы событий на основании текущей даты
     await this.updateEventStatuses();
 
     return (this.prisma as any).event.findMany({
@@ -352,7 +305,7 @@ export class EventsService {
   async updateEventStatuses(): Promise<void> {
     const now = new Date();
 
-    // Update past events
+    // Обновляем прошедшие события
     await (this.prisma as any).event.updateMany({
       where: {
         eventDate: {
@@ -365,7 +318,7 @@ export class EventsService {
       },
     });
 
-    // Update future events
+    // Обновляем предстоящие события
     await (this.prisma as any).event.updateMany({
       where: {
         eventDate: {
@@ -392,11 +345,11 @@ export class EventsService {
 
 
 
-    // Check if the user is the owner of the event
+    // Проверяем, является ли пользователь владельцем события
     let hasPermission = event.userId === userId;
 
     if (!hasPermission && event.teamId) {
-        // Check if user is owner of the team
+        // Проверяем, является ли пользователь владельцем команды
         const team = await (this.prisma as any).team.findUnique({
             where: { id: event.teamId },
             select: { ownerId: true }
@@ -406,16 +359,16 @@ export class EventsService {
         }
     }
 
-    // Check if the requestor is a Coach (Owner or Admin) of a team the event owner belongs to
+    // Проверяем, является ли запрашивающий Тренером (Владельцем или Админом) команды, к которой принадлежит владелец события
     if (!hasPermission) {
-        // Get teams where requestor is Owner
+        // Получаем команды, где запрашивающий является Владельцем
         const ownedTeams = await (this.prisma as any).team.findMany({
             where: { ownerId: userId },
             select: { id: true }
         });
         const requestorTeamIds = ownedTeams.map((t: any) => t.id);
 
-        // Get teams where requestor is Admin
+        // Получаем команды, где запрашивающий является Админом
         const adminMemberships = await (this.prisma as any).teamMember.findMany({
             where: {
                 userId: userId,
@@ -427,7 +380,7 @@ export class EventsService {
         const allAdminTeamIds = [...new Set([...requestorTeamIds, ...adminMemberships.map((m: any) => m.teamId)])];
 
         if (allAdminTeamIds.length > 0) {
-             // Check if event owner is a member of any of these teams
+             // Проверяем, является ли владелец события участником любой из этих команд
              const targetMembership = await (this.prisma as any).teamMember.findFirst({
                  where: {
                      userId: event.userId,
@@ -441,7 +394,7 @@ export class EventsService {
         }
     }
 
-    // Extended permission check for Organization Admins and Super Admins
+    // Расширенная проверка прав для Админов организации и Супер-админов
 
     if (!hasPermission) {
         const requestor = await (this.prisma as any).user.findUnique({
@@ -452,8 +405,8 @@ export class EventsService {
              if (requestor.role === 'SUPER_ADMIN') {
                  hasPermission = true;
              } else if (requestor.role === 'ORGANIZATION_ADMIN' && requestor.organizationId) {
-                 // Check if event owner belongs to the same organization
-                 // We need to fetch event owner's org
+                  // Проверяем, принадлежит ли владелец события к той же организации
+                 // Нам нужно получить организацию владельца события
                  const eventOwner = await (this.prisma as any).user.findUnique({
                       where: { id: event.userId },
                       select: { organizationId: true }
@@ -485,7 +438,7 @@ export class EventsService {
     scaling?: string, 
     notes?: string
   ) {
-    // Check if event exists
+    // Проверяем, существует ли событие
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
     });
@@ -493,8 +446,8 @@ export class EventsService {
       throw new NotFoundException('Event not found');
     }
 
-    // Create event result
-    // Initialize notes as array if provided
+    // Создаем результат события
+    // Инициализируем заметки как массив, если они предоставлены
     const initialNotes = notes ? [notes] : [];
 
     const eventResult = await (this.prisma as any).eventResult.create({
@@ -520,13 +473,13 @@ export class EventsService {
       throw new NotFoundException('Result not found');
     }
 
-    // Parse existing notes
+    // Парсим существующие заметки
     let currentNotes: string[] = [];
     if (result.notes) {
         if (Array.isArray(result.notes)) {
             currentNotes = result.notes as string[];
         } else if (typeof result.notes === 'string') {
-            // Handle legacy string data if any
+            // Обработка устаревших строковых данных, если есть
             try {
                 const parsed = JSON.parse(result.notes);
                  if (Array.isArray(parsed)) {
@@ -540,7 +493,7 @@ export class EventsService {
         }
     }
 
-    // Append new note
+    // Добавляем новую заметку
     const updatedNotes = [...currentNotes, info];
 
     const updatedResult = await (this.prisma as any).eventResult.update({
@@ -548,17 +501,17 @@ export class EventsService {
       data: { notes: updatedNotes },
     });
 
-    // Notify owner if actor is not the owner
-    // Note: info usually contains the name, e.g. "Name: comment"
+    // Уведомляем владельца, если автор не является владельцем
+    // Примечание: info обычно содержит имя, например "Name: comment"
     let targetUserId = result.userId;
 
-    // Fallback: If no userId, try to find user by username matches (exact match)
+    // Фолбек: Если нет userId, пробуем найти пользователя по совпадению username (точное совпадение)
     if (!targetUserId && result.username) {
         const potentialUser = await (this.prisma as any).user.findFirst({
             where: {
                 OR: [
                     { name: result.username },
-                    { email: result.username } // Just in case username is email
+                    { email: result.username } // На случай, если username это email
                 ]
             }
         });
@@ -587,7 +540,7 @@ export class EventsService {
   }
 
   async getEventResults(eventId: string) {
-    // Check if event exists
+    // Проверяем, существует ли событие
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
     });
@@ -595,7 +548,7 @@ export class EventsService {
       throw new NotFoundException('Event not found');
     }
 
-    // Get all results for the event
+    // Получаем все результаты для события
     try {
       return await (this.prisma as any).eventResult.findMany({
         where: { eventId: eventId },
@@ -608,16 +561,16 @@ export class EventsService {
       });
     } catch (error) {
       console.error(`Error getting results for event ${eventId}:`, error);
-      // Return empty array instead of crashing if possible, or handle appropriately
-      // But keeping it crashing with more info is also fine for debugging. 
-      // For now, let's rethrow a more descriptive error or return empty to stop the frontend loop crash.
-      // Returning empty array allows the page to load at least.
+      // Возвращаем пустой массив вместо падения, если возможно, или обрабатываем соответствующим образом
+      // Но оставить падение с большей информацией тоже нормально для отладки.
+      // Пока что вернем пустой массив, чтобы остановить падение цикла на фронтенде.
+      // Возврат пустого массива позволяет странице загрузиться.
       return [];
     }
   }
 
   async toggleResultLike(resultId: string, userId: string) {
-    // Check if result exists
+    // Проверяем, существует ли результат
     const result = await (this.prisma as any).eventResult.findUnique({
       where: { id: resultId },
     });
@@ -625,7 +578,7 @@ export class EventsService {
       throw new NotFoundException('Result not found');
     }
 
-    // Check if like exists
+    // Проверяем, существует ли лайк
     const existingLike = await (this.prisma as any).eventResultLike.findUnique({
       where: {
         eventResultId_userId: {
@@ -650,10 +603,10 @@ export class EventsService {
         },
       });
 
-      // Notify owner if liker is not the owner
+      // Уведомляем владельца, если лайкнувший не является владельцем
       let targetUserId = result.userId;
       
-      // Fallback: If no userId, try to find user by username matches (exact match)
+      // Фолбек: Если нет userId, пробуем найти пользователя по совпадению username (точное совпадение)
       if (!targetUserId && result.username) {
           const potentialUser = await (this.prisma as any).user.findFirst({
               where: {
@@ -719,7 +672,7 @@ export class EventsService {
   ) {
 
 
-    // Check if event exists
+    // Проверяем, существует ли событие
     const event = await (this.prisma as any).event.findUnique({
       where: { id: eventId },
     });
@@ -728,13 +681,13 @@ export class EventsService {
       throw new NotFoundException('Event not found');
     }
 
-    // Check if the user is the owner of the event
+    // Проверяем, является ли пользователь владельцем события
     if (event.userId !== userId) {
 
       throw new ForbiddenException('You can only update your own events');
     }
 
-    // Convert string date to Date object and validate
+    // Преобразуем строковую дату в объект Date и проверяем валидность
     const eventDateObj = new Date(eventDate);
     if (isNaN(eventDateObj.getTime())) {
 
@@ -743,13 +696,13 @@ export class EventsService {
 
 
 
-    // Prepare event data
+    // Подготавливаем данные события
     const updateData = {
       title,
       eventDate: eventDateObj,
       description,
       exerciseType,
-      exercises: exercises || undefined, // Add exercises to the event data
+      exercises: exercises || undefined, // Добавляем упражнения в данные события
       timeCap,
       rounds,
       teamId,

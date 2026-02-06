@@ -7,7 +7,7 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 
-// Define types for news
+// Определение типов для новостей
 interface NewsItem {
   id: string;
   title: string;
@@ -17,7 +17,7 @@ interface NewsItem {
   content: string;
 }
 
-// Define types for events and results
+// Определение типов для событий и результатов
 interface EventResult {
   id: string;
   time: string;
@@ -32,7 +32,7 @@ interface CalendarEvent {
   results?: EventResult[];
 }
 
-// Define type for API response
+// Определение типа для ответа API
 interface ApiEvent {
   id: string;
   title: string;
@@ -42,7 +42,7 @@ interface ApiEvent {
 
 export default function BlogPage() {
   const [showAuth, setShowAuth] = useState(false);
-  const [events, setEvents] = useState<CalendarEvent[]>([]); // For left menu events
+  const [events, setEvents] = useState<CalendarEvent[]>([]); // Для событий левого меню
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showContent, setShowContent] = useState(true);
@@ -50,7 +50,7 @@ export default function BlogPage() {
   
   const { isAuthenticated, user } = useAuthStore();
 
-  // Fetch events from the backend
+  // Получение событий с бэкенда
   useEffect(() => {
     const fetchEvents = async () => {
       if (isAuthenticated && user) {
@@ -59,11 +59,11 @@ export default function BlogPage() {
           const data: ApiEvent[] = await response.json();
           
           if (response.ok) {
-            // Transform the data to match our CalendarEvent interface
+            // Преобразование данных для соответствия нашему интерфейсу CalendarEvent
             const transformedEvents = data.map((event) => ({
               id: event.id,
               title: event.title,
-              date: event.eventDate.split('T')[0], // Format date as YYYY-MM-DD
+              date: event.eventDate.split('T')[0], // Форматирование даты как ГГГГ-ММ-ДД
               results: event.results ? event.results.map(result => ({
                 ...result,
                 dateAdded: new Date(result.dateAdded).toLocaleDateString('ru-RU')
@@ -114,7 +114,7 @@ export default function BlogPage() {
     setSelectedEvent(null);
   };
 
-  // State for news
+  // Состояние для новостей
   const [newsItems, setNewsItems] = useState<NewsItem[]>([]);
 
   useEffect(() => {
@@ -128,7 +128,7 @@ export default function BlogPage() {
             title: item.title,
             excerpt: item.excerpt,
             date: new Date(item.createdAt).toLocaleDateString('ru-RU'),
-            readTime: '5 мин чтения', // Placeholder
+            readTime: '5 мин чтения', // Заглушка
             content: item.content
           })));
         }
@@ -150,7 +150,7 @@ export default function BlogPage() {
       
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-4`}>
         <div className="max-w-4xl mx-auto">
-          {/* Development Message */}
+          {/* Сообщение о разработке */}
           {!loadingConfig && !showContent && (
             <div className="flex flex-col items-center justify-center min-h-[50vh]">
                 <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">Раздел находится в стадии разработки</h1>
@@ -165,9 +165,9 @@ export default function BlogPage() {
             </div>
           )}
 
-          {/* Temporary Content - Hidden */}
+          {/* Временный контент - Скрытый */}
           <div className={!loadingConfig && showContent ? '' : 'hidden'}>
-            {/* Three large links for News, Workouts, and Exercises */}
+            {/* Три большие ссылки для Новостей, Воркаутов и Упражнений */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
               <Link 
                 href="/blog/news" 
@@ -253,7 +253,7 @@ export default function BlogPage() {
       
       <Footer />
       
-      {/* Event Details Modal */}
+      {/* Модальное окно деталей события */}
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black bg-opacity-50" onClick={handleCloseEventModal}></div>

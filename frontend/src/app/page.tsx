@@ -10,9 +10,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Main split-screen content */}
+      {/* Основной контент разделенного экрана */}
       <main className="flex-grow flex flex-col md:flex-row h-screen">
-        {/* Blog Section - Top Half on Mobile, Left Half on Desktop */}
+        {/* Раздел блога - Верхняя половина на мобильных, Левая половина на десктопе */}
         <Link 
           href="/blog"
           className={`transition-all duration-300 ease-in-out p-8 flex flex-col justify-center relative ${
@@ -21,7 +21,7 @@ export default function Home() {
           onMouseEnter={() => setHoveredSection('blog')}
           onMouseLeave={() => setHoveredSection(null)}
         >
-          {/* Blog image that appears on hover */}
+          {/* Изображение блога, появляющееся при наведении */}
           <div className={`absolute inset-0 transition-opacity duration-300 flex items-center justify-center ${
             hoveredSection === 'blog' ? 'opacity-30' : 'opacity-0'
           }`}>
@@ -33,7 +33,7 @@ export default function Home() {
             />
           </div>
           
-          {/* Text content with higher z-index to stay on top */}
+          {/* Текстовый контент с высоким z-index, чтобы оставаться сверху */}
           <div className="max-w-2xl mx-auto w-full text-center relative z-10">
             <h1 className={`text-4xl font-bold mb-6 transition-all duration-300 ${
               hoveredSection === 'blog' ? 'text-5xl' : ''
@@ -46,7 +46,7 @@ export default function Home() {
           </div>
         </Link>
         
-        {/* Calendar Section - Bottom Half on Mobile, Right Half on Desktop */}
+        {/* Раздел календаря - Нижняя половина на мобильных, Правая половина на десктопе */}
         <Link 
           href="/calendar"
           className={`transition-all duration-300 ease-in-out p-8 flex flex-col justify-center relative ${
@@ -55,7 +55,7 @@ export default function Home() {
           onMouseEnter={() => setHoveredSection('calendar')}
           onMouseLeave={() => setHoveredSection(null)}
         >
-          {/* Calendar image that appears on hover */}
+          {/* Изображение календаря, появляющееся при наведении */}
           <div className={`absolute inset-0 transition-opacity duration-300 flex items-center justify-center ${
             hoveredSection === 'calendar' ? 'opacity-30' : 'opacity-0'
           }`}>
@@ -67,7 +67,7 @@ export default function Home() {
             />
           </div>
           
-          {/* Text content with higher z-index to stay on top */}
+          {/* Текстовый контент с высоким z-index, чтобы оставаться сверху */}
           <div className="max-w-2xl mx-auto w-full text-center relative z-10">
             <h1 className={`text-4xl font-bold mb-6 transition-all duration-300 ${
               hoveredSection === 'calendar' ? 'text-5xl' : ''

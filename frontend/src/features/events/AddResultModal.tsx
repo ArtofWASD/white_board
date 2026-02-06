@@ -8,25 +8,25 @@ interface AddResultModalProps {
   onClose: () => void;
   onSave: (data: { time: string; value: number; scaling: string; notes?: string }) => void;
   eventName: string;
-  scheme: string; // Receive scheme to determine input type
+  scheme: string; // Получение схемы для определения типа ввода
 }
 
 const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave, eventName, scheme }) => {
   const { user, isAuthenticated } = useAuthStore();
 
-  // Common State
+  // Общее состояние
   const [scaling, setScaling] = useState('RX');
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
 
-  // Scheme Specific State
+  // Специфичное состояние для схемы
   const [time, setTime] = useState(''); // FOR_TIME
   const [rounds, setRounds] = useState(''); // AMRAP
   const [reps, setReps] = useState(''); // AMRAP
-  const [weight, setWeight] = useState(''); // WEIGHTLIFTING, EMOM(sometimes)
+  const [weight, setWeight] = useState(''); // WEIGHTLIFTING, EMOM(иногда)
   const [customValue, setCustomValue] = useState(''); // EMOM, Generic
 
-  // Reset form when modal opens
+  // Сброс формы при открытии модального окна
   React.useEffect(() => {
     if (isOpen) {
       setTime('');
@@ -57,14 +57,14 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
             return;
         }
         resultTimeStr = time;
-        // Parse time mm:ss to seconds for sorting
+        // Парсинг времени mm:ss в секунды для сортировки
         const parts = time.split(':');
         if (parts.length === 2) {
              resultValue = parseInt(parts[0]) * 60 + parseInt(parts[1]);
         } else if (parts.length === 3) {
              resultValue = parseInt(parts[0]) * 3600 + parseInt(parts[1]) * 60 + parseInt(parts[2]);
         } else {
-             // Try to parse basic seconds or single number
+             // Попытка парсинга секунд или числа
              resultValue = parseFloat(time);
         }
     } else if (scheme === 'AMRAP') {
@@ -75,7 +75,7 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
          const r = parseInt(rounds) || 0;
          const p = parseInt(reps) || 0;
          resultTimeStr = `${r} rds + ${p} reps`;
-         // Calculation for sorting: Rounds * 1000 + Reps
+         // Расчет для сортировки: Раунды * 1000 + Повторы
          resultValue = r * 1000 + p;
     } else if (scheme === 'WEIGHTLIFTING') {
          if (!weight) {
@@ -85,16 +85,16 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
          resultTimeStr = `${weight} kg`;
          resultValue = parseFloat(weight);
     } else if (scheme === 'EMOM') {
-        // EMOM can be weight or reps, usually simple number
+        // EMOM может быть весом или повторами, обычно простое число
         if (!customValue) {
              setError('Введите результат');
              return;
         }
-        // Try to guess unit or just save value
+        // Попытка угадать единицу измерения или просто сохранить значение
         resultTimeStr = customValue; 
         resultValue = parseFloat(customValue.replace(/[^0-9.]/g, ''));
     } else {
-        // Fallback for unknown schemes
+        // Обратная совместимость для неизвестных схем
         if (!customValue) {
             setError('Введите результат');
             return;
@@ -140,7 +140,7 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
              <div className="font-medium">{user?.name} {user?.lastName}</div>
           </div>
           
-          {/* DYNAMIC INPUTS BASED ON SCHEME */}
+          {/* ДИНАМИЧЕСКИЕ ПОЛЯ ВВОДА НА ОСНОВЕ СХЕМЫ */}
           
           {scheme === 'FOR_TIME' && (
               <div className="mb-4">
@@ -227,7 +227,7 @@ const AddResultModal: React.FC<AddResultModalProps> = ({ isOpen, onClose, onSave
               </div>
           )}
 
-          {/* SCALING OPTIONS */}
+          {/* ВАРИАНТЫ МАСШТАБИРОВАНИЯ */}
           <div className="mb-4">
              <label className="block text-sm font-medium text-gray-700 mb-2">Вариант выполнения</label>
              <div className="flex flex-wrap gap-2 sm:gap-4">

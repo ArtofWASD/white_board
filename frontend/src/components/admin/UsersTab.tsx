@@ -10,7 +10,7 @@ export const UsersTab: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('ALL');
 
-  // Action states
+  // Состояния действий
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
   const [newRole, setNewRole] = useState<string>('');
@@ -50,7 +50,7 @@ export const UsersTab: React.FC = () => {
       if (!selectedUser || !newRole) return;
       
       setActionLoading(true);
-      // Optimistic update
+      // Оптимистичное обновление
       const oldUsers = [...users];
       setUsers(users.map(u => u.id === selectedUser.id ? { ...u, role: newRole as any } : u));
       
@@ -139,7 +139,7 @@ export const UsersTab: React.FC = () => {
 
   const filteredUsers = useMemo(() => {
       return users.filter(u => {
-          if (user && u.id === user.id) return false; // Don't show current user
+          if (user && u.id === user.id) return false; // Не показывать текущего пользователя
 
           const matchesSearch = (
               (u.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -157,7 +157,7 @@ export const UsersTab: React.FC = () => {
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
-      {/* Filters */}
+      {/* Фильтры */}
       <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-4">
           <input 
             type="text" 
@@ -179,7 +179,7 @@ export const UsersTab: React.FC = () => {
           </select>
       </div>
 
-      {/* Mobile View (Cards) */}
+      {/* Мобильный вид (Карточки) */}
       <div className="md:hidden space-y-4 p-4">
           {filteredUsers.map(u => (
               <div key={u.id} className={`bg-white rounded-lg shadow p-4 ${u.isBlocked ? 'opacity-75' : ''}`}>
@@ -212,7 +212,7 @@ export const UsersTab: React.FC = () => {
           ))}
       </div>
 
-      {/* Desktop View (Table) */}
+      {/* Настольный вид (Таблица) */}
       <div className="hidden md:block overflow-x-auto">
         <table className="min-w-full leading-normal">
             <thead>

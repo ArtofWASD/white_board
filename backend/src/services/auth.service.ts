@@ -74,7 +74,7 @@ export class AuthService {
 
     
     let organizationData: any = {};
-    // Check if organizationName is provided and not empty
+    // Проверяем, указано ли имя организации и не пустое ли оно
     if (registerDto.organizationName && registerDto.organizationName.trim().length > 0) {
         organizationData = {
             organization: {
@@ -99,7 +99,7 @@ export class AuthService {
         isAdmin:
           registerDto.role === 'TRAINER' ||
           registerDto.role === 'ORGANIZATION_ADMIN',
-        // Legacy fields mapping
+        // Маппинг устаревших полей
         userType: computedUserType,
         organizationName: registerDto.organizationName,
         ...organizationData
@@ -143,7 +143,7 @@ export class AuthService {
     // Log the incoming data
 
 
-    // Build update data object with only provided fields
+    // Создаем объект обновления только с предоставленными полями
     const updateData: Partial<User> = {};
     if (updateProfileDto.lastName !== undefined) {
       updateData.lastName = updateProfileDto.lastName;
@@ -161,7 +161,7 @@ export class AuthService {
       updateData.dashboardLayoutMode = updateProfileDto.dashboardLayoutMode;
     }
 
-    // Handle Email Update
+    // Обработка обновления Email
     if (updateProfileDto.email && updateProfileDto.email !== user.email) {
       const existingUser = await (this.prisma as any).user.findUnique({
         where: { email: updateProfileDto.email },
@@ -172,7 +172,7 @@ export class AuthService {
       updateData.email = updateProfileDto.email;
     }
 
-    // Handle Password Update
+    // Обработка обновления пароля
     if (updateProfileDto.password) {
       if (!updateProfileDto.currentPassword) {
         throw new UnauthorizedException('Current password is required to set a new password');
@@ -191,7 +191,7 @@ export class AuthService {
       updateData.password = hashedPassword;
     }
 
-    // Update user with new data
+    // Обновляем пользователя новыми данными
     const updatedUser = await (this.prisma as any).user.update({
       where: { id: userId },
       data: updateData,
@@ -257,7 +257,7 @@ export class AuthService {
 
       return users;
     } catch (error) {
-      // Log error internally if needed, or just rethrow
+      // Логируем ошибку внутри, если нужно, или просто пробрасываем
 
       throw error;
     }

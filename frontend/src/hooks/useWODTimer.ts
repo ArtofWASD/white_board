@@ -7,23 +7,23 @@ export type TimerPhase = 'WARMUP' | 'WORK' | 'REST';
 
 export interface TimerConfig {
   mode: TimerMode;
-  timeCap?: number; // in seconds, for FOR_TIME
-  duration?: number; // in seconds, for AMRAP
-  intervalWork?: number; // in seconds, for EMOM/TABATA/INTERVALS
-  intervalRest?: number; // in seconds, for TABATA/INTERVALS
-  rounds?: number; // for TABATA/INTERVALS/EMOM
+  timeCap?: number; // в секундах, для FOR_TIME
+  duration?: number; // в секундах, для AMRAP
+  intervalWork?: number; // в секундах, для EMOM/TABATA/INTERVALS
+  intervalRest?: number; // в секундах, для TABATA/INTERVALS
+  rounds?: number; // для TABATA/INTERVALS/EMOM
 }
 
 export interface TimerState {
   status: TimerStatus;
   phase: TimerPhase;
-  timeLeft: number; // in milliseconds
-  elapsedTime: number; // in milliseconds
+  timeLeft: number; // в миллисекундах
+  elapsedTime: number; // в миллисекундах
   currentRound: number;
   totalRounds: number;
 }
 
-const WARMUP_TIME = 10 * 1000; // 10 seconds
+const WARMUP_TIME = 10 * 1000; // 10 секунд
 
 export const useWODTimer = (config: TimerConfig) => {
   const [state, setState] = useState<TimerState>({
@@ -37,29 +37,29 @@ export const useWODTimer = (config: TimerConfig) => {
 
   const requestRef = useRef<number | undefined>(undefined);
   const startTimeRef = useRef<number | undefined>(undefined);
-  const baseTimeRef = useRef<number>(0); // Time accumulated before current run segment
+  const baseTimeRef = useRef<number>(0); // Время, накопленное до текущего сегмента запуска
   const lastTickRef = useRef<number>(0);
 
-  // Helper to handle phase transitions
+  // Помощник для обработки смены фаз
   const transitionPhase = useCallback((currentPhase: TimerPhase, currentRound: number): { nextPhase: TimerPhase, nextRound: number, nextTime: number } | null => {
-    // WARMUP -> WORK
+    // РАЗМИНКА -> РАБОТА
     if (currentPhase === 'WARMUP') {
       let workTime = 0;
       if (config.mode === 'AMRAP') workTime = (config.duration || 0) * 1000;
       else if (['EMOM', 'TABATA', 'INTERVALS'].includes(config.mode)) workTime = (config.intervalWork || 0) * 1000;
-      else if (config.mode === 'FOR_TIME') workTime = (config.timeCap || 0) * 1000; // For Time typically counts up, check logic below
+      else if (config.mode === 'FOR_TIME') workTime = (config.timeCap || 0) * 1000; // FOR_TIME обычно считает вверх, см. логику ниже
       
-      // FOR_TIME is special, it counts UP, but we can model it as counting down from cap or just infinite up
-      // Let's standardise: timeLeft is what's displayed. 
-      // For AMRAP/Intervals: timeLeft decreases.
-      // For FOR_TIME: timeLeft increases? Or timeLeft is remaining to cap?
-      // Let's use timeLeft as remaining time for the current phase.
+      // FOR_TIME особенный, он считает ВВЕРХ, но мы можем моделировать его как обратный отсчет от лимита или просто бесконечный вверх.
+      // Давайте стандартизируем: timeLeft - это то, что отображается.
+      // Для AMRAP/Intervals: timeLeft уменьшается.
+      // Для FOR_TIME: timeLeft увеличивается? Или timeLeft оставшееся до лимита?
+      // Давайте использовать timeLeft как оставшееся время для текущей фазы.
       
       audioController.playStart();
       return { nextPhase: 'WORK', nextRound: 1, nextTime: workTime };
     }
 
-    // WORK -> REST or WORK -> FINISHED or WORK -> WORK (next round)
+    // РАБОТА -> ОТДЫХ или РАБОТА -> ГОТОВО или РАБОТА -> РАБОТА (след. раунд)
     if (currentPhase === 'WORK') {
       audioController.playRoundComplete();
       
@@ -69,10 +69,10 @@ export const useWODTimer = (config: TimerConfig) => {
 
       if (['TABATA', 'INTERVALS'].includes(config.mode)) {
         if (config.intervalRest && config.intervalRest > 0) {
-           // Go to REST
+           // Переход к ОТДЫХУ
            return { nextPhase: 'REST', nextRound: currentRound, nextTime: (config.intervalRest || 0) * 1000 };
         } else {
-           // No rest, check rounds
+           // Без отдыха, проверка раундов
            if (currentRound < (config.rounds || 1)) {
               return { nextPhase: 'WORK', nextRound: currentRound + 1, nextTime: (config.intervalWork || 0) * 1000 };
            }
@@ -81,7 +81,7 @@ export const useWODTimer = (config: TimerConfig) => {
       }
 
       if (config.mode === 'EMOM') {
-        // EMOM usually doesn't have explicit rest, just next minute
+        // EMOM обычно не имеет явного отдыха, просто следующая минута
         if (currentRound < (config.rounds || 1)) {
            return { nextPhase: 'WORK', nextRound: currentRound + 1, nextTime: (config.intervalWork || 60) * 1000 };
         }
@@ -89,7 +89,7 @@ export const useWODTimer = (config: TimerConfig) => {
       }
     }
 
-    // REST -> WORK or REST -> FINISHED
+    // ОТДЫХ -> РАБОТА или ОТДЫХ -> ГОТОВО
     if (currentPhase === 'REST') {
       audioController.playStart();
       if (currentRound < (config.rounds || 1)) {
@@ -104,19 +104,19 @@ export const useWODTimer = (config: TimerConfig) => {
   const tick = useCallback((timestamp: number) => {
     if (!startTimeRef.current) startTimeRef.current = timestamp;
 
-    // Calculate delta since start of this RUNNING segment
-    // We add baseTimeRef (accumulated time before pause)
-    // But actually, simpler logic:
-    // We track `endTime` for the current phase?
-    // Or just `remaining = initialDuration - (now - start)`.
+    // Расчет дельты с начала этого сегмента RUNNING
+    // Мы добавляем baseTimeRef (накопленное время до паузы)
+    // Но на самом деле, более простая логика:
+    // Мы отслеживаем `endTime` для текущей фазы?
+    // Или просто `remaining = initialDuration - (now - start)`.
     
-    // Better approach for precision:
-    // Store `endTime` of current phase.
-    // pause: `remaining = endTime - now`.
-    // resume: `endTime = now + remaining`.
+    // Лучший подход для точности:
+    // Хранить `endTime` текущей фазы.
+    // пауза: `remaining = endTime - now`.
+    // возобновление: `endTime = now + remaining`.
   }, []);
 
-  // Revised Tick Logic with useEffect
+  // Пересмотренная логика тика с useEffect
   useEffect(() => {
     if (state.status !== 'RUNNING') {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
@@ -128,7 +128,7 @@ export const useWODTimer = (config: TimerConfig) => {
     const animate = (time: number) => {
       const deltaTime = time - pPreviousTime;
       
-      if (deltaTime > 100) { // check for big jumps (throttling), mostly ignore small jitters
+      if (deltaTime > 100) { // проверка больших скачков (троттлинг), в основном игнорируем мелкие дрожания
          // console.log('delta', deltaTime); 
       }
       pPreviousTime = time;
@@ -136,7 +136,7 @@ export const useWODTimer = (config: TimerConfig) => {
       setState(prev => {
         let newTimeLeft = prev.timeLeft - deltaTime;
         
-        // Audio Checks for countdown (3, 2, 1)
+        // Аудио проверки для отсчета (3, 2, 1)
         const prevSeconds = Math.ceil((prev.timeLeft) / 1000);
         const newSeconds = Math.ceil(newTimeLeft / 1000);
         if (newSeconds < prevSeconds && newSeconds <= 3 && newSeconds > 0) {
@@ -144,17 +144,17 @@ export const useWODTimer = (config: TimerConfig) => {
         }
 
         if (newTimeLeft <= 0) {
-           // Phase complete
+           // Фаза завершена
            const next = transitionPhase(prev.phase, prev.currentRound);
            if (next) {
              return {
                ...prev,
                phase: next.nextPhase,
                currentRound: next.nextRound,
-               timeLeft: next.nextTime, // Reset timer for next phase
+               timeLeft: next.nextTime, // Сброс таймера для следующей фазы
              };
            } else {
-             // Finished completely
+             // Полностью завершено
              audioController.playStop();
              return {
                ...prev,
@@ -179,9 +179,9 @@ export const useWODTimer = (config: TimerConfig) => {
     return () => {
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [state.status, transitionPhase]); // Re-binds when status changes to RUNNING
+  }, [state.status, transitionPhase]); // Перепривязывается, когда статус меняется на RUNNING
 
-  // Controls
+  // Управление
   const start = () => setState(prev => ({ ...prev, status: 'RUNNING' }));
   const pause = () => setState(prev => ({ ...prev, status: 'PAUSED' }));
   const reset = () => {
@@ -204,7 +204,7 @@ export const useWODTimer = (config: TimerConfig) => {
             phase: next.nextPhase,
             currentRound: next.nextRound,
             timeLeft: next.nextTime,
-            status: prev.status === 'RUNNING' ? 'RUNNING' : 'IDLE' // Keep status if implied
+            status: prev.status === 'RUNNING' ? 'RUNNING' : 'IDLE' // Сохранить статус, если подразумевается
           }));
         }
      }

@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { Team, EventResult, TeamMember, Exercise } from '../../types';
 
-// Removed local Exercise interface to avoid conflict or need to update it to use string id matching global type
+// Удален локальный интерфейс Exercise, чтобы избежать конфликтов или необходимости обновления для использования строкового id, соответствующего глобальному типу
 
 interface EventData {
   title?: string;
-  scheme?: string; // Add scheme
+  scheme?: string; // Добавить схему
   exerciseType?: string;
   exercises?: Exercise[];
   results?: EventResult[];
@@ -36,22 +36,22 @@ const EventModal: React.FC<EventModalProps> = ({
 }) => {
   const { user, token } = useAuthStore();
   
-  // Form state
+  // Состояние формы
   const [eventTitle, setEventTitle] = useState(eventData?.title || '');
-  const [scheme, setScheme] = useState(eventData?.scheme || 'FOR_TIME'); // Default to FOR_TIME
+  const [scheme, setScheme] = useState(eventData?.scheme || 'FOR_TIME'); // По умолчанию FOR_TIME
   const [exerciseType, setExerciseType] = useState(eventData?.exerciseType || '');
   const [exercises, setExercises] = useState<Exercise[]>(eventData?.exercises || []);
   const [timeCap, setTimeCap] = useState(eventData?.timeCap || '');
   const [rounds, setRounds] = useState(eventData?.rounds || '');
   
-  // Exercise input state
+  // Состояние ввода упражнений
   const [exerciseName, setExerciseName] = useState('');
   const [rxWeight, setRxWeight] = useState('');
   const [rxReps, setRxReps] = useState('');
   const [scWeight, setScWeight] = useState('');
   const [scReps, setScReps] = useState('');
   
-  // Exercise measurement state
+  // Состояние измерения упражнений
   const [exerciseMeasurement, setExerciseMeasurement] = useState<'weight' | 'calories'>('weight');
   const [rxCalories, setRxCalories] = useState('');
   const [scCalories, setScCalories] = useState('');
@@ -61,16 +61,16 @@ const EventModal: React.FC<EventModalProps> = ({
   const [sortedResults, setSortedResults] = useState<EventResult[]>(eventData?.results || []);
   const [isSorted, setIsSorted] = useState(false);
   
-  // Team state
+  // Состояние команды
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeamId, setSelectedTeamId] = useState<string>(eventData?.teamId || initialTeamId || '');
   
-  // Member assignment state
+  // Состояние назначения участников
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [assignMode, setAssignMode] = useState<'all' | 'selected'>('all');
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
 
-  // Fetch teams
+  // Получение команд
   useEffect(() => {
     const fetchTeams = async () => {
       if (user && token) {
@@ -92,7 +92,7 @@ const EventModal: React.FC<EventModalProps> = ({
     fetchTeams();
   }, [user, token]);
 
-  // Fetch team members when team changes
+  // Получение участников команды при изменении команды
   useEffect(() => {
     const fetchMembers = async () => {
         if (selectedTeamId && token) {
@@ -117,7 +117,7 @@ const EventModal: React.FC<EventModalProps> = ({
     fetchMembers();
   }, [selectedTeamId, token]);
 
-  // Handle form initialization and updates
+  // Обработка инициализации и обновлений формы
   useEffect(() => {
     if (isOpen && eventData) {
       setEventTitle(eventData.title || '');
@@ -129,7 +129,7 @@ const EventModal: React.FC<EventModalProps> = ({
       setTimeCap(eventData.timeCap || '');
       setRounds(eventData.rounds || '');
       
-      // Initialize assignment state
+      // Инициализация состояния назначения
       if (eventData.participants && eventData.participants.length > 0) {
           setAssignMode('selected');
           setSelectedMemberIds(eventData.participants.map(p => p.id));
@@ -138,7 +138,7 @@ const EventModal: React.FC<EventModalProps> = ({
           setSelectedMemberIds([]);
       }
     } else if (isOpen) {
-      // Reset form when opening without eventData
+      // Сброс формы при открытии без данных события
       setEventTitle('');
       setScheme('FOR_TIME');
       setExerciseType('');
@@ -189,7 +189,7 @@ const EventModal: React.FC<EventModalProps> = ({
     e.preventDefault();
     setError(null);
 
-    // Validation
+    // Валидация
     if (!eventTitle.trim()) {
       setError('Название события обязательно для заполнения');
       return;
@@ -209,14 +209,14 @@ const EventModal: React.FC<EventModalProps> = ({
         teamId: selectedTeamId || undefined,
         timeCap,
         rounds,
-        // Pass assignment info. If 'all', assignedUserIds is undefined or empty implies whole team
+        // Передача информации о назначении. Если 'all', assignedUserIds не определен или пуст, что подразумевает всю команду
         assignedUserIds: assignMode === 'selected' ? selectedMemberIds : undefined
       });
     }
   };
 
   const handleClose = () => {
-    // Check if we are in edit mode (eventData exists)
+    // Проверка, находимся ли мы в режиме редактирования (данные события существуют)
     if (eventData) {
       const confirmClose = window.confirm('Внесенные изменения не сохранятся. Вы уверены, что хотите закрыть?');
       if (confirmClose) {
@@ -224,7 +224,7 @@ const EventModal: React.FC<EventModalProps> = ({
         onClose();
       }
     } else {
-      // Creation mode - just close
+      // Режим создания - просто закрыть
       resetForm();
       onClose();
     }
@@ -233,11 +233,11 @@ const EventModal: React.FC<EventModalProps> = ({
   const handleAddExercise = () => {
     if (exerciseName.trim()) {
       const newExercise: Exercise = {
-        id: Date.now().toString(), // Use string ID
+        id: Date.now().toString(), // Используем строковый ID
         name: exerciseName.trim(),
-        weight: rxWeight, // Default to Rx values
+        weight: rxWeight, // Значения Rx по умолчанию
         repetitions: rxReps,
-        scWeight, // Add scWeight
+        scWeight, // Добавить scWeight
         scReps,
         measurement: exerciseMeasurement,
         rxCalories: exerciseMeasurement === 'calories' ? rxCalories : undefined,
@@ -604,7 +604,7 @@ const EventModal: React.FC<EventModalProps> = ({
             )}
           </div>
 
-          {/* Results section */}
+          {/* Раздел результатов */}
           {eventData?.results && eventData.results.length > 0 && (
             <div className="mb-4 pt-4 border-t border-dotted border-gray-300">
               <div className="flex justify-between items-center mb-2">
@@ -622,7 +622,7 @@ const EventModal: React.FC<EventModalProps> = ({
                        let valA = a.value;
                        let valB = b.value;
                        
-                       // Fallback for legacy FOR_TIME data without 'value'
+                       // Обратная совместимость для устаревших данных FOR_TIME без 'value'
                        if (valA === undefined || valA === null) {
                            const parts = a.time.split(':');
                            if (parts.length >= 2) {
@@ -641,11 +641,11 @@ const EventModal: React.FC<EventModalProps> = ({
                            }
                        }
 
-                       // Sort Direction
+                       // Направление сортировки
                        if (currentScheme === 'FOR_TIME') {
-                           return (valA || 0) - (valB || 0); // Ascending
+                           return (valA || 0) - (valB || 0); // По возрастанию
                        } else {
-                           return (valB || 0) - (valA || 0); // Descending
+                           return (valB || 0) - (valA || 0); // По убыванию
                        }
                     });
                     setSortedResults(sorted);

@@ -43,14 +43,14 @@ export const useTeamStore = create<TeamState>()(
             if (Array.isArray(data)) {
               set({ teams: data });
               
-              // Logic to ensure selectedTeam is valid or default to first
+              // Логика для обеспечения валидности selectedTeam или выбор первого по умолчанию
               const currentSelected = get().selectedTeam;
               if (currentSelected) {
                  const stillExists = data.find(t => t.id === currentSelected.id);
                  if (!stillExists) {
                     set({ selectedTeam: data.length > 0 ? data[0] : null });
                  } else {
-                    // Update the selected team data in case it changed
+                    // Обновление данных выбранной команды, если они изменились
                     set({ selectedTeam: stillExists });
                  }
               } else if (data.length > 0) {
@@ -81,7 +81,7 @@ export const useTeamStore = create<TeamState>()(
     {
       name: 'team-storage',
       storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ selectedTeam: state.selectedTeam }), // Only persist selectedTeam
+      partialize: (state) => ({ selectedTeam: state.selectedTeam }), // Сохранять только selectedTeam
     }
   )
 );

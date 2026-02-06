@@ -16,13 +16,13 @@ const MODES: { id: TimerMode; label: string; desc: string }[] = [
 export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
   const [selectedMode, setSelectedMode] = useState<TimerMode | null>(null);
   
-  // Local state for form inputs
-  const [durationMinutes, setDurationMinutes] = useState(10); // AMRAP default
-  const [timeCapMinutes, setTimeCapMinutes] = useState(20); // For Time cap
-  const [emomInterval, setEmomInterval] = useState(60); // EMOM seconds
+  // Локальное состояние для полей формы
+  const [durationMinutes, setDurationMinutes] = useState(10); // По умолчанию для AMRAP
+  const [timeCapMinutes, setTimeCapMinutes] = useState(20); // Лимит времени для For Time
+  const [emomInterval, setEmomInterval] = useState(60); // Секунды для EMOM
   const [emomRounds, setEmomRounds] = useState(10);
   
-  const [workBytes, setWorkBytes] = useState(20); // Tabata/Interval default
+  const [workBytes, setWorkBytes] = useState(20); // По умолчанию для Табата/Интервалов
   const [restBytes, setRestBytes] = useState(10);
   const [rounds, setRounds] = useState(8);
 

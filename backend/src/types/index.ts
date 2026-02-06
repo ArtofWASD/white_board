@@ -15,7 +15,7 @@ export interface User {
 
 export type SafeUser = Omit<User, 'password'>;
 
-// Prisma User type with mapped field names
+// Тип пользователя Prisma с сопоставленными именами полей
 export interface PrismaUser {
   id: string;
   name: string;
@@ -33,7 +33,7 @@ export interface PrismaUser {
 
 export type SafePrismaUser = Omit<PrismaUser, 'password'>;
 
-// Type for the user object after Prisma processing
+// Тип для объекта пользователя после обработки Prisma
 export interface ProcessedUser {
   id: string;
   name: string;
@@ -50,7 +50,7 @@ export interface ProcessedUser {
 
 export type SafeProcessedUser = Omit<ProcessedUser, 'password'>;
 
-// Interface for the user response object
+// Интерфейс для объекта ответа пользователя
 export interface UserResponse {
   id: string;
   name: string;

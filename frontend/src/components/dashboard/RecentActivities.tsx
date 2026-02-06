@@ -36,12 +36,12 @@ interface Activity {
   name: string;
   value: string;
   date: string;
-  originalId: string; // exerciseId or eventId
+  originalId: string; // ID упражнения или ID события
 }
 
 export function RecentActivities({ exercises, events, isExpanded = true, onToggle }: RecentActivitiesProps) {
   // const [isCollapsed, setIsCollapsed] = useState(false);
-  // Flatten exercise records
+  // Разворачивание записей упражнений
   const exerciseActivities: Activity[] = exercises.flatMap((exercise) => 
     exercise.records.map((record) => ({
       id: record.id,
@@ -53,7 +53,7 @@ export function RecentActivities({ exercises, events, isExpanded = true, onToggl
     }))
   );
 
-  // Flatten event results
+  // Разворачивание результатов событий
   const eventActivities: Activity[] = events.flatMap((event) => 
     event.results.map((result) => ({
       id: result.id,
@@ -65,12 +65,12 @@ export function RecentActivities({ exercises, events, isExpanded = true, onToggl
     }))
   );
 
-  // Merge and sort by date descending
+  // Объединение и сортировка по убыванию даты
   const allActivities = [...exerciseActivities, ...eventActivities].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
 
-  // Take top 10
+  // Взять топ-10
   const recentActivities = allActivities.slice(0, 10);
 
   const formatDate = (dateString: string) => {

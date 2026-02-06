@@ -9,16 +9,16 @@ import { RatingStar } from './RatingStar';
 interface ContentItem {
   id: string;
   title: string;
-  content?: string; // for news
-  description?: string; // for workouts/exercises
-  imageUrl?: string; // for news
-  videoUrl?: string; // for exercises
-  date?: string; // for news/workouts
+  content?: string; // для новостей
+  description?: string; // для воркаутов/упражнений
+  imageUrl?: string; // для новостей
+  videoUrl?: string; // для упражнений
+  date?: string; // для новостей/воркаутов
   type?: string;
   rating?: number;
   muscleGroups?: string[];
-  wodType?: string; // e.g. GIRL, HERO
-  wodScheme?: string; // e.g. FOR_TIME, AMRAP
+  wodType?: string; // напр. GIRL, HERO
+  wodScheme?: string; // напр. FOR_TIME, AMRAP
 }
 
 interface ContentCardsProps {
@@ -125,7 +125,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
             >
               <ContentWrapper>
                 <div className={`${viewMode === 'list' ? 'flex flex-row items-center w-full p-4' : 'flex flex-col h-full'}`}>
-                  {/* Image for News */}
+                  {/* Изображение для Новости */}
                   {type === 'news' && item.imageUrl && viewMode === 'grid' && (
                       <div className="h-48 w-full relative">
                           <Image src={item.imageUrl} alt={item.title} fill className="object-cover" />
@@ -135,7 +135,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                   <div className={`flex-1 ${viewMode === 'grid' ? 'p-6' : 'pl-4'}`}>
                     <div className="flex justify-between items-start mb-2">
                         <h3 className="text-xl font-bold text-gray-800">{item.title}</h3>
-                        {/* Render WOD Type and Scheme badges */}
+                        {/* Отображение бейджей типа и схемы WOD */}
                         {type === 'workout' && (
                             <div className="flex space-x-2 ml-auto">
                                 {item.wodType && (
@@ -152,7 +152,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         )}
                     </div>
 
-                     {/* Muscle Groups Chips */}
+                     {/* Чипсы групп мышц */}
                      {item.muscleGroups && item.muscleGroups.length > 0 && (
                          <div className="flex flex-wrap gap-2 mb-3">
                              {item.muscleGroups.map(mg => (
@@ -191,7 +191,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                               <span>Добавить в календарь</span>
                           </button>
                       )}
-                       {/* Render Rating at the bottom for workouts/exercises */}
+                       {/* Отображение рейтинга внизу для воркаутов/упражнений */}
                        {(type === 'workout' || type === 'exercise') && (
                            <div className="ml-auto">
                                <RatingStar 

@@ -39,22 +39,22 @@ export class AudioController {
   }
 
   playStart() {
-    // High pitched beep for start
+    // Высокий сигнал для старта
     this.playBeep(1046.5, 0.3, 'triangle'); // C6
   }
 
   playStop() {
-    // Low pitched beep for stop
+    // Низкий сигнал для остановки
     this.playBeep(440, 0.3, 'sine'); // A4
   }
 
   playCountdown() {
-    // Short ticks for countdown
+    // Короткие тики для обратного отсчета
     this.playBeep(880, 0.1, 'square');
   }
 
   playRoundComplete() {
-    // Double beep
+    // Двойной сигнал
     this.playBeep(1200, 0.1, 'sine');
     setTimeout(() => this.playBeep(1200, 0.1, 'sine'), 150);
   }

@@ -33,7 +33,7 @@ export class SettingsService implements OnModuleInit {
   }
 
   async getPublic() {
-      // Filter only public safe settings
+      // Фильтруем только публичные безопасные настройки
       const settings = await this.prisma.systemSetting.findMany({
           where: {
               key: {
@@ -48,7 +48,7 @@ export class SettingsService implements OnModuleInit {
           }
       });
       
-      // Convert to boolean map
+      // Преобразуем в карту логических значений
       return settings.reduce((acc, curr) => {
           acc[curr.key] = curr.value === 'true';
           return acc;

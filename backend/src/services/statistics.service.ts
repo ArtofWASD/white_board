@@ -13,12 +13,12 @@ export class StatisticsService {
       this.prisma.event.count(),
     ]);
 
-    // Active users last 30 days based on event creation or results (heuristic)
-    // Finding users who have created an event or result in last 30 days
+    // Активные пользователи за последние 30 дней на основе создания событий или результатов (эвристика)
+    // Находим пользователей, которые создали событие или результат за последние 30 дней
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    // activeUserCount query
+    // activeUserCount запрос
     const activeUserCount = await this.prisma.user.count({
         where: {
             OR: [
@@ -53,10 +53,10 @@ export class StatisticsService {
       },
     });
 
-    // We need to aggregate by day manually because prisma groupBy doesn't support date truncation directly easily in all dialects uniformly via the API without raw query.
-    // However, for simplicity and portable code, we fetch valid users and aggregate in JS or use raw query.
-    // Let's use raw query for performance if possible, or simple JS aggregation if data set is small.
-    // Given the constraints and to stay safe, let's fetch created_at dates only.
+    // Нам нужно агрегировать по дням вручную, так как groupBy в prisma не поддерживает усечение дат напрямую и просто во всех диалектах через API без сырых запросов.
+    // Однако, для простоты и переносимости кода, мы получаем валидных пользователей и агрегируем в JS или используем сырой запрос.
+    // Давайте используем сырой запрос для производительности, если возможно, или простую JS агрегацию, если набор данных небольшой.
+    // Учитывая ограничения и для безопасности, давайте получим только даты создания.
     
     const newUsers = await this.prisma.user.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
@@ -64,7 +64,7 @@ export class StatisticsService {
     });
 
     const map = new Map<string, number>();
-    // Fill last 30 days with 0
+    // Заполняем последние 30 дней нулями
     for (let i = 0; i < 30; i++) {
         const d = new Date();
         d.setDate(d.getDate() - i);
@@ -73,7 +73,7 @@ export class StatisticsService {
 
     newUsers.forEach(u => {
         const date = u.createdAt.toISOString().split('T')[0];
-        // Only count if within our map range (it should be due to query)
+        // Считаем только если в пределах нашего диапазона карты (должно быть так из-за запроса)
         if (map.has(date)) {
             map.set(date, (map.get(date) || 0) + 1);
         }

@@ -44,10 +44,10 @@ const Header: React.FC<HeaderProps> = ({ onRightMenuClick, onLeftMenuClick, navI
 
   const [unreadCount, setUnreadCount] = React.useState(0);
 
-  // WebSocket Integration
+  // Интеграция с WebSocket
   React.useEffect(() => {
     if (isAuthenticated && user) {
-        // Initial fetch
+        // Первоначальная загрузка
         const fetchUnreadCount = async () => {
              const { getUnreadNotificationCount } = await import('../../lib/api/notifications');
              const count = await getUnreadNotificationCount();
@@ -55,12 +55,12 @@ const Header: React.FC<HeaderProps> = ({ onRightMenuClick, onLeftMenuClick, navI
         };
         fetchUnreadCount();
 
-        // Connect to Socket.IO
-        // Note: Using a fixed URL for now, assumes backend on port 3001
-        // In prod, this should come from env or be relative if proxied
+        // Подключение к Socket.IO
+        // Примечание: Используется фиксированный URL, предполагается бэкенд на порту 3001
+        // В продакшене это должно браться из env или быть относительным, если используется прокси
         const { io } = require('socket.io-client');
         const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-        // Extract connection string from API_URL (fallback to 3001 if local)
+        // Извлечение строки подключения из API_URL (резервный вариант 3001, если локально)
         const socketUrl = 'http://localhost:3001'; 
         
         const socket = io(socketUrl);
@@ -72,7 +72,7 @@ const Header: React.FC<HeaderProps> = ({ onRightMenuClick, onLeftMenuClick, navI
 
         socket.on('newNotification', () => {
             console.log('New notification received');
-            fetchUnreadCount(); // Refresh count on new notification
+            fetchUnreadCount(); // Обновление счетчика при новом уведомлении
         });
 
         return () => {
@@ -159,7 +159,7 @@ const Header: React.FC<HeaderProps> = ({ onRightMenuClick, onLeftMenuClick, navI
               <Image src="/logo.png" alt="Logo" width={180} height={60} className="h-10 sm:h-14 w-auto object-contain" />
             </Link>
           ) : (
-             // Logo centered on mobile for dashboard
+             // Логотип по центру на мобильных для панели управления
              <div className="flex flex-col items-center">
                <Link href="/" className="lg:hidden flex items-center">
                  <Image src="/logo.png" alt="Logo" width={180} height={60} priority className="w-auto h-10 sm:h-14 object-contain" />
@@ -221,7 +221,7 @@ const Header: React.FC<HeaderProps> = ({ onRightMenuClick, onLeftMenuClick, navI
                 )}
               </button>
               
-              {/* Tooltip */}
+              {/* Подсказка */}
               <div className="absolute top-full right-0 mt-2 w-max bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
                   {unreadCount > 0 ? `${unreadCount} новых уведомлений` : 'Нет новых уведомлений'}
                   <div className="absolute -top-1 right-3 w-2 h-2 bg-gray-900 transform rotate-45"></div>

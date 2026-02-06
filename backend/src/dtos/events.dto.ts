@@ -62,7 +62,7 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsArray()
-  exercises?: ExerciseDto[]; // Exercises as array of objects
+  exercises?: ExerciseDto[]; // Упражнения как массив объектов
 
   @IsOptional()
   @IsArray()

@@ -65,39 +65,32 @@ export default function EditTeamModal({
         } else {
           const text = await response.text();
 
-          setError('Received unexpected response format from server');
+          setError('Получен неожиданный формат ответа от сервера');
           setTeamMembers([]);
         }
       } else {
         // Handle error responses
         const contentType = response.headers.get('content-type');
         
-        if (contentType && contentType.includes('application/json')) {
-          try {
+        try {
+          if (contentType && contentType.includes('application/json')) {
             const errorData = await response.json();
-
-            // Show the specific error message from the backend
-            const errorMessage = errorData.message || errorData.error || `Server error: ${response.status} ${response.statusText}`;
+            // Показываем конкретное сообщение об ошибке с бэкенда
+            const errorMessage = errorData.message || errorData.error || `Ошибка сервера: ${response.status} ${response.statusText}`;
             setError(errorMessage);
-          } catch (parseError) {
-
-            setError(`Server error: ${response.status} ${response.statusText}`);
-          }
-        } else {
-          try {
+          } else {
             const errorText = await response.text();
-
-            setError(errorText || `Server error: ${response.status} ${response.statusText}`);
-          } catch (textError) {
-
-            setError(`Server error: ${response.status} ${response.statusText}`);
+            setError(errorText || `Ошибка сервера: ${response.status} ${response.statusText}`);
           }
+        } catch (error) {
+          setError(`Ошибка сервера: ${response.status} ${response.statusText}`);
         }
+
         setTeamMembers([]);
       }
     } catch (err) {
 
-      setError('Failed to fetch team members: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      setError('Не удалось загрузить участников команды: ' + (err instanceof Error ? err.message : 'Неизвестная ошибка'));
       setTeamMembers([]);
     } finally {
       setLoading(false);
@@ -141,10 +134,10 @@ export default function EditTeamModal({
         setInviteCode(data.inviteCode);
         setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`);
       } else {
-        setError('Failed to generate invite code');
+        setError('Не удалось создать код приглашения');
       }
     } catch (err) {
-      setError('Failed to generate invite code');
+      setError('Не удалось создать код приглашения');
     } finally {
       setLoading(false);
     }
@@ -183,18 +176,18 @@ export default function EditTeamModal({
         fetchTeamMembers();
         onTeamUpdated();
       } else {
-        // Try to parse error response as JSON, but handle case where it's not JSON
-        let errorMessage = 'Failed to remove member';
+        // Попытка распарсить ошибку как JSON
+        let errorMessage = 'Не удалось удалить участника';
         try {
           const errorData = await response.json();
           errorMessage = errorData.message || errorData.error || errorMessage;
         } catch {
-          errorMessage = response.statusText || 'Failed to remove member';
+          errorMessage = response.statusText || 'Не удалось удалить участника';
         }
         setError(errorMessage);
       }
     } catch (err) {
-      setError('Failed to remove member');
+      setError('Не удалось удалить участника');
 
     } finally {
       setLoading(false);

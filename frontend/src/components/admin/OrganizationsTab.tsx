@@ -58,14 +58,14 @@ export const OrganizationsTab: React.FC = () => {
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
        <div className="p-4 border-b border-gray-200">
-            {/* Potential Filters for Organizations could go here */}
+             {/* Здесь могли бы быть потенциальные фильтры для организаций */}
        </div>
        
        {loadingOrganizations ? (
            <div className="flex justify-center p-20"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div></div>
        ) : (
            <>
-               {/* Mobile View (Cards) */}
+               {/* Мобильный вид (Карточки) */}
                <div className="md:hidden space-y-4 p-4">
                    {organizations.map(org => (
                        <div key={org.id} className={`bg-white rounded-lg shadow p-4 ${org.isBlocked ? 'opacity-75' : ''} border border-gray-100`}>
@@ -94,7 +94,7 @@ export const OrganizationsTab: React.FC = () => {
                    ))}
                </div>
 
-               {/* Desktop View (Table) */}
+               {/* Настольный вид (Таблица) */}
                <div className="hidden md:block overflow-x-auto">
                    <table className="min-w-full leading-normal">
                        <thead>

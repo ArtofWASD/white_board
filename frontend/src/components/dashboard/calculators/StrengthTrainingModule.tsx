@@ -37,7 +37,7 @@ export function StrengthTrainingModule({
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   
-  // Logging state
+  // Состояние логирования
   const [loggingWeek, setLoggingWeek] = useState<number | null>(null);
   const [logWeight, setLogWeight] = useState<number>(0);
   const [logReps, setLogReps] = useState<number>(0);
@@ -56,7 +56,7 @@ export function StrengthTrainingModule({
   }, [selectedExerciseId, exercises]);
 
   useEffect(() => {
-    // Training Max is typically 90% of 1RM
+    // Тренировочный Максимум обычно составляет 90% от 1ПМ
     setTrainingMax(Math.round(oneRepMax * 0.9));
   }, [oneRepMax]);
 
@@ -176,7 +176,7 @@ export function StrengthTrainingModule({
             </tr>
           </thead>
           <tbody>
-            {/* Week 1 */}
+            {/* Неделя 1 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">1</td>
               <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
@@ -241,7 +241,7 @@ export function StrengthTrainingModule({
               </td>
             </tr>
 
-            {/* Week 2 */}
+            {/* Неделя 2 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">2</td>
               <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
@@ -306,7 +306,7 @@ export function StrengthTrainingModule({
               </td>
             </tr>
 
-            {/* Week 3 */}
+            {/* Неделя 3 */}
             <tr className="bg-white border-b hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">3</td>
               <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
@@ -371,7 +371,7 @@ export function StrengthTrainingModule({
               </td>
             </tr>
 
-            {/* Week 4 (Deload) */}
+            {/* Неделя 4 (Разгрузка) */}
             <tr className="bg-white hover:bg-gray-50 align-top">
               <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">4</td>
               <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
@@ -409,7 +409,7 @@ export function StrengthTrainingModule({
         </Button>
       </div>
 
-      {/* History Modal */}
+      {/* Модальное окно истории */}
       {showHistory && (
         <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-sm p-4 flex flex-col rounded-lg animate-in fade-in duration-200">
             <div className="flex justify-between items-center mb-4">

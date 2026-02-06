@@ -37,23 +37,21 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
       });
 
       if (response.ok) {
-        // Reset form
+        // Сброс формы
         setTeamName('');
         setTeamDescription('');
         
-        // Notify parent component and close modal
+        // Уведомление родительского компонента и закрытие модального окна
         onTeamCreated();
         onClose();
         
-        onClose();
-        
-        success('Team created successfully!');
+        success('Команда успешно создана!');
       } else {
         const errorData = await response.json();
-        setError(errorData.error || 'Failed to create team');
+        setError(errorData.error || 'Не удалось создать команду');
       }
     } catch (err) {
-      setError('Failed to create team');
+      setError('Не удалось создать команду');
 
     } finally {
       setLoading(false);
@@ -67,7 +65,7 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Create New Team</h2>
+            <h2 className="text-xl font-bold">Создать новую команду</h2>
             <button 
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
@@ -83,7 +81,7 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-1">
-                Team Name *
+                Название команды *
               </label>
               <input
                 type="text"
@@ -97,7 +95,7 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
             
             <div>
               <label htmlFor="teamDescription" className="block text-sm font-medium text-gray-700 mb-1">
-                Description
+                Описание
               </label>
               <textarea
                 id="teamDescription"
@@ -115,14 +113,14 @@ export default function CreateTeamModal({ isOpen, onClose, onTeamCreated }: Crea
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 disabled={loading}
               >
-                Cancel
+                Отмена
               </button>
               <button
                 type="submit"
                 disabled={loading}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Create Team'}
+                {loading ? 'Создание...' : 'Создать команду'}
               </button>
             </div>
           </form>

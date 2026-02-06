@@ -27,17 +27,17 @@ export function TexasMethodModule({
     if (selectedExerciseId) {
       const exercise = exercises.find(ex => ex.id === selectedExerciseId);
       if (exercise) {
-        // Assuming maxWeight in DB is 1RM. For Texas Method we need 5RM.
-        // We can estimate 5RM from 1RM (approx 85-87%) or let user input it.
-        // Let's use 85% estimate as default but allow override.
+        // Предполагаем, что maxWeight в БД - это 1ПМ. Для Техасского метода нужен 5ПМ.
+        // Мы можем оценить 5ПМ из 1ПМ (примерно 85-87%) или позволить пользователю ввести его.
+        // Будем использовать оценку 85% по умолчанию, но разрешим переопределение.
         setFiveRepMax(Math.round(exercise.maxWeight * 0.85));
       }
     }
   }, [selectedExerciseId, exercises]);
 
-  // Calculations for 4 weeks
+  // Расчеты на 4 недели
   const weeks = [0, 1, 2, 3].map(weekIndex => {
-      const weekly5RM = fiveRepMax + (weekIndex * 2.5); // +2.5kg per week progression
+      const weekly5RM = fiveRepMax + (weekIndex * 2.5); // Прогрессия +2.5 кг в неделю
       
       const day1Weight = Math.round(weekly5RM * 0.9);
       const day2Weight = Math.round(day1Weight * 0.8);

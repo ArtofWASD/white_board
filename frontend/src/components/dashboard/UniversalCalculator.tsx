@@ -25,16 +25,16 @@ export function UniversalCalculator({ exercises, isExpanded, onToggle }: Univers
   const { success, error: toastError } = useToast();
   const [activeModule, setActiveModule] = useState<'texas' | '531'>('texas');
   
-  // Calendar Modal State
+  // Состояние модального окна календаря
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [calendarModalData, setCalendarModalData] = useState<{title: string, description: string} | null>(null);
 
-  // Determine available modules based on feature flags
+  // Определение доступных модулей на основе флагов функций
   const showTexas = flags.texasMethodCalculator;
   const show531 = flags.strengthTrainingCalculator;
 
   useEffect(() => {
-    // Set default active module based on availability
+    // Установка активного модуля по умолчанию на основе доступности
     if (showTexas && !show531) {
         setActiveModule('texas');
     } else if (!showTexas && show531) {
@@ -42,8 +42,8 @@ export function UniversalCalculator({ exercises, isExpanded, onToggle }: Univers
     }
   }, [showTexas, show531]);
 
-  // If neither is enabled, we still render the widget to show the "Select available module" message
-  // so the user isn't confused why the widget disappeared.
+  // Если ни один не включен, мы все равно рендерим виджет, чтобы показать сообщение "Выберите доступный модуль"
+  // чтобы пользователь не запутался, почему виджет исчез.
   // if (!showTexas && !show531) {
   //     return null;
   // }
@@ -121,8 +121,8 @@ export function UniversalCalculator({ exercises, isExpanded, onToggle }: Univers
               <TexasMethodModule 
                 exercises={exercises} 
                 onAddToCalendar={openCalendarModal}
-                handleInputPointerDown={() => {}} // Deprecated, handled by Wrapper
-                handleInputKeyDown={() => {}} // Deprecated
+                handleInputPointerDown={() => {}} // Устарело, обрабатывается Wrapper
+                handleInputKeyDown={() => {}} // Устарело
               />
           )}
           {activeModule === '531' && show531 && (

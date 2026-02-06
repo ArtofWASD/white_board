@@ -51,8 +51,8 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Initialize state from user object or defaults
-  // Default to universal calculator, but support all IDs
+  // Инициализируем состояние из объекта пользователя или значений по умолчанию
+  // По умолчанию универсальный калькулятор, но поддерживаются все ID
   const [items, setItems] = useState<string[]>(['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator']);
   const [layoutMode, setLayoutMode] = useState<'asymmetric' | 'symmetric' | 'symmetric-1-1'>('asymmetric');
   const [expandedItems, setExpandedItems] = useState<Record<string, boolean>>({});
@@ -60,7 +60,7 @@ export default function DashboardPage() {
   const handleToggleExpand = (id: string) => {
     setExpandedItems(prev => ({
       ...prev,
-      [id]: !(prev[id] ?? true) // Default to true if undefined
+      [id]: !(prev[id] ?? true) // По умолчанию true, если undefined
     }));
   };
 
@@ -75,16 +75,16 @@ export default function DashboardPage() {
     if (user) {
       fetchData();
       
-      // Sync state with user profile
+      // Синхронизируем состояние с профилем пользователя
       if (user.dashboardLayout && user.dashboardLayout.length > 0) {
         const savedLayout = user.dashboardLayout;
         const allWidgets = ['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator', 'trainer-stats-widget'];
         
-        // We support all IDs now, so no need to migrate forcedly unless we want to standardise.
-        // User asked for flexibility, so we respect savedLayout IDs.
+        // Теперь мы поддерживаем все ID, поэтому нет необходимости принудительно выполнять миграцию, если мы не хотим стандартизации.
+        // Пользователь попросил гибкости, поэтому мы уважаем ID из сохраненного макета.
         
         const missingWidgets = allWidgets.filter(w => !savedLayout.includes(w));
-        setItems([...savedLayout, ...missingWidgets]); // Append new widgets to the end
+        setItems([...savedLayout, ...missingWidgets]); // Добавляем новые виджеты в конец
       } else {
         setItems(['exercise-tracker', 'weight-tracker', 'recent-activities', 'universal-calculator', 'trainer-stats-widget']);
       }
@@ -134,7 +134,7 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json();
-        // Update local user store to reflect changes
+        // Обновляем локальное хранилище пользователя для отображения изменений
         if (data.user) {
             updateUser({
                 ...user,
@@ -227,9 +227,9 @@ export default function DashboardPage() {
     saveLayout(items, mode);
   };
 
-    // Filter items based on feature flags and user state
+    // Фильтруем элементы на основе флагов функций и состояния пользователя
   const visibleItems = items.filter(id => {
-    // Organization Admins should not see training widgets
+    // Администраторы организации не должны видеть виджеты тренировок
     if (user?.role === 'ORGANIZATION_ADMIN') {
        const trainingWidgets = [
          'exercise-tracker', 
@@ -243,15 +243,15 @@ export default function DashboardPage() {
     if (id === 'exercise-tracker' && !flags.showExerciseTracker) return false;
     if (id === 'weight-tracker' && (!flags.showWeightTracker || !user)) return false;
     
-    // Universal Calculator Logic
+    // Логика универсального калькулятора
     if (id === 'universal-calculator') {
-        // Show if universal mode is ON. 
-        // We no longer strictly require a sub-calculator to be enabled to show the widget container,
-        // so the user can at least see the empty widget and know they need to enable something or select one.
+        // Показываем, если универсальный режим включен. 
+        // Мы больше не требуем строгого включения подкалькулятора для отображения контейнера виджета,
+        // чтобы пользователь мог хотя бы видеть пустой виджет и знать, что ему нужно что-то включить или выбрать.
         return flags.showUniversalCalculator;
     }
 
-    // Deprecated calculators
+    // Устаревшие калькуляторы
     if (id === 'strength-training-calculator' || id === 'texas-method-calculator') {
         return false;
     }
@@ -262,7 +262,7 @@ export default function DashboardPage() {
   const renderWidget = (id: string) => {
     const isExpanded = expandedItems[id] ?? true;
 
-    // Common props for all widgets
+    // Общие свойства для всех виджетов
     const commonProps = {
         isExpanded,
         onToggle: () => handleToggleExpand(id),
@@ -419,7 +419,7 @@ export default function DashboardPage() {
             {visibleItems.map((id, index) => {
               const isWide = (index % 4 === 0 || index % 4 === 3) && layoutMode === 'asymmetric';
               
-              // Mobile height calculation
+              // Расчет высоты для мобильных устройств
               const isExpanded = expandedItems[id] ?? true;
               const visibleExpandedCount = visibleItems.filter(i => expandedItems[i] ?? true).length;
               
@@ -427,20 +427,20 @@ export default function DashboardPage() {
               if (!isExpanded) {
                   mobileClass = 'h-[50px]';
               } else {
-                  // User requested no height limit on mobile (was limited to 600px/450px previously)
-                  // We use h-auto to let it grow as needed by content.
+                  // Пользователь попросил не ограничивать высоту на мобильных (ранее было ограничено 600px/450px)
+                  // Мы используем h-auto, чтобы он рос по мере необходимости контента.
                   mobileClass = 'h-auto min-h-[300px]';
               }
               
-              // Combine with desktop classes
-              // On desktop (lg), we generally keep the fixed height 450px OR allow auto if we want.
-              // But user request specifically focused on "smartphones and tablets".
-              // So I will override mobile height with `lg:h-[450px]` (standard)
-              // UNLESS we want collapse on desktop too? Plan said "Collapse button visible only on mobile/tablet".
-              // So on desktop, it's always "Expanded" effectively in UI, but state might be whatever.
-              // But if the button is hidden on desktop, user can't toggle it. 
-              // So `isExpanded` state is effectively ignored visually on desktop OR we respect it if we let them.
-              // I will keep `lg:h-[450px]` fixed for desktop to ensure grid stability.
+              // Объединяем с классами для десктопа
+              // На десктопе (lg), мы обычно сохраняем фиксированную высоту 450px ИЛИ разрешаем авто, если хотим.
+              // Но запрос пользователя был специально сфокусирован на "смартфонах и планшетах".
+              // Поэтому я переопределю высоту для мобильных устройств с помощью lg:h-[450px] (стандарт)
+              // ЕСЛИ мы не хотим сворачивания и на десктопе? План говорил "Кнопка сворачивания видна только на мобильных/планшетах".
+              // Так что на десктопе это всегда "Развернуто" визуально в UI, но состояние может быть любым.
+              // Но если кнопка скрыта на десктопе, пользователь не может ее переключить. 
+              // Так что состояние isExpanded фактически игнорируется визуально на десктопе ИЛИ мы уважаем его, если позволяем им.
+              // Я сохраню lg:h-[450px] фиксированным для десктопа, чтобы обеспечить стабильность сетки.
               
               const className = `${mobileClass} lg:h-[450px] overflow-hidden ${isWide ? 'lg:col-span-2' : 'lg:col-span-1'} transition-all duration-300`;
               

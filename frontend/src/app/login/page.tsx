@@ -33,7 +33,7 @@ function LoginForm() {
     try {
       const success = await login(email, password);
       if (success) {
-        // Redirect to intended page or home
+        // Перенаправление на целевую страницу или на главную
         router.push(redirect || '/');
       } else {
         setError('Не удалось войти. Пожалуйста, проверьте учетные данные.');
@@ -53,7 +53,7 @@ function LoginForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
-        {/* Left Side - Image (Visible on md+) */}
+        {/* Левая сторона - Изображение (Видно на md+) */}
         <div className="hidden md:block md:w-1/2 relative min-h-[500px] rounded-2xl overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -74,7 +74,7 @@ function LoginForm() {
           </AnimatePresence>
         </div>
 
-        {/* Right Side - Form */}
+        {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
           <h2 className="text-3xl font-bold text-center mb-6">Вход</h2>
           

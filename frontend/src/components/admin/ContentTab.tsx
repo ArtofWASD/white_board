@@ -13,7 +13,7 @@ export const ContentTab: React.FC = () => {
   
   const [isContentModalOpen, setIsContentModalOpen] = useState(false);
   const [contentModalType, setContentModalType] = useState<'wod' | 'exercise' | 'news'>('wod');
-  const [editingItem, setEditingItem] = useState<any>(null); // If null, it's create mode
+  const [editingItem, setEditingItem] = useState<any>(null); // Если null, это режим создания
   const [newWod, setNewWod] = useState({ name: '', description: '', type: 'CLASSIC', scheme: 'FOR_TIME', isGlobal: true, muscleGroups: [] as string[] });
   const [newExercise, setNewExercise] = useState({ name: '', description: '', videoUrl: '', muscleGroups: [] as string[] });
   const [newNews, setNewNews] = useState({ title: '', content: '', excerpt: '', imageUrl: '' });

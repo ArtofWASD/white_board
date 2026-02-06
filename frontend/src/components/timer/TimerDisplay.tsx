@@ -3,7 +3,7 @@ import { TimerState, TimerPhase, TimerStatus, TimerConfig } from '../../hooks/us
 
 interface TimerDisplayProps {
   state: TimerState;
-  config: TimerConfig; // Added config to know the mode
+  config: TimerConfig; // Добавлен конфиг, чтобы знать режим
   onPause: () => void;
   onResume: () => void;
   onReset: () => void;
@@ -50,7 +50,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ state, config, onPau
   return (
     <div className="flex flex-col items-center justify-center min-h-[50vh] w-full bg-white rounded-3xl p-8 shadow-xl border border-gray-100 space-y-8">
       
-      {/* Header Info */}
+      {/* Информация в заголовке */}
       <div className="flex w-full justify-between items-end px-4 text-gray-500 font-mono">
         <div className="flex flex-col items-start">
            <span className="text-sm uppercase tracking-widest text-gray-400">Фаза</span>
@@ -66,12 +66,12 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ state, config, onPau
         </div>
       </div>
 
-      {/* Main Timer */}
+      {/* Основной таймер */}
       <div className={`text-[12rem] leading-none font-bold tabular-nums tracking-tighter transition-colors duration-300 ${getPhaseColor(phase, status)}`}>
         {formatTime(timeLeft)}
       </div>
 
-      {/* Controls */}
+      {/* Управление */}
       <div className="flex flex-wrap justify-center gap-4 mt-8">
         {status === 'RUNNING' && (
            <button 
@@ -93,7 +93,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ state, config, onPau
         
         {(status === 'PAUSED' || status === 'IDLE') && (
            <button 
-             onClick={onResume} // Starts or Resumes
+             onClick={onResume} // Запуск или продолжение
              className="px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-xl text-xl font-bold transition-all active:scale-95 shadow-lg shadow-green-200"
            >
              {status === 'IDLE' ? 'СТАРТ' : 'ПРОДОЛЖИТЬ'}

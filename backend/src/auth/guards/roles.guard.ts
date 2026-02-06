@@ -27,7 +27,7 @@ export class RolesGuard implements CanActivate {
     }
     const { user } = context.switchToHttp().getRequest();
     
-    // Fallback if role is not in the request object yet (e.g. if JwtAuthGuard wasn't used)
+    // Резервный вариант, если роль еще не находится в объекте запроса (например, если JwtAuthGuard не использовался)
     if (!user || !user.role) {
       return false;
     }

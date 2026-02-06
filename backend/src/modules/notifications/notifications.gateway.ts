@@ -12,7 +12,7 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // Adjust this in production to match your frontend URL
+    origin: '*', // Настройте это в продакшене, чтобы соответствовать URL вашего фронтенда
   },
 })
 export class NotificationsGateway

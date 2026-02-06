@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useTeamStore } from '../../lib/store/useTeamStore';
 
-// Define types locally if not available, or import them. 
-// Based on usage:
+// Определение типов локально, если недоступны, или импорт.
+// На основе использования:
 interface EventResult {
   id: string;
   time: string;
@@ -40,7 +40,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
     const fetchTeamMembers = async () => {
       if (selectedTeam) {
         try {
-          // const token = localStorage.getItem('token'); // Removed direct access
+          // const token = localStorage.getItem('token'); // Удален прямой доступ
           const response = await fetch(`/api/teams/${selectedTeam.id}/members`, {
             headers: {
               'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
     fetchTeamMembers();
   }, [selectedTeam]);
 
-  // Extract recent results from all events
+  // Извлечение последних результатов из всех событий
   const getRecentResults = () => {
     const allResults: (EventResult & { eventName: string; eventId: string })[] = [];
     
@@ -83,13 +83,13 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
       }
     });
     
-    // Sort by dateAdded (newest first) and take top 5
+    // Сортировка по дате добавления (сначала новые) и взятие топ-5
     return allResults
       .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
       .slice(0, 5);
   };
 
-  // Get upcoming events (events with dates today or in the future)
+  // Получение предстоящих событий (события с датами сегодня или в будущем)
   const getUpcomingEvents = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -101,7 +101,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
         return eventDate >= today;
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 5); // Limit to 5 upcoming events
+      .slice(0, 5); // Ограничение до 5 предстоящих событий
   };
 
   const recentResults = getRecentResults();
@@ -109,7 +109,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
 
   return (
     <>
-      {/* Sliding Left Menu */}
+      {/* Выдвижное левое меню */}
       <div 
         className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-80 bg-white transform transition-transform duration-300 ease-in-out overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
@@ -126,7 +126,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
             </button>
           </div>
           
-          {/* Navigation Items (Mobile) */}
+          {/* Элементы навигации (Мобильные) */}
           {navItems && (
             <div className="mb-6">
               <ul className="space-y-2">
@@ -161,7 +161,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
           <div className="mt-4">
             {isAuthenticated && user ? (
               <div className="mb-4">
-                {/* Team Members Section */}
+                {/* Раздел участников команды */}
                 {selectedTeam && (
                   <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                     <h3 className="font-bold text-lg mb-2">Состав команды</h3>
@@ -190,7 +190,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
                   </div>
                 )}
                 
-                {/* Upcoming Events Section */}
+                {/* Раздел предстоящих событий */}
                 <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-2">Будущие события</h3>
                   {upcomingEventsList.length > 0 ? (
@@ -214,7 +214,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
                   )}
                 </div>
                 
-                {/* Recent Results Section */}
+                {/* Раздел последних результатов */}
                 <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-2">Последние результаты</h3>
                   {recentResults.length > 0 ? (
@@ -257,7 +257,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
         </div>
       </div>
       
-      {/* Overlay for closing left menu */}
+      {/* Наложение для закрытия левого меню */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-40 bg-transparent backdrop-blur-sm"

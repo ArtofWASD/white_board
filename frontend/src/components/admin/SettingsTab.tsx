@@ -15,7 +15,7 @@ export const SettingsTab: React.FC = () => {
             });
             if (res.ok) {
                 const data = await res.json();
-                // Convert array to object
+                // Преобразование массива в объект
                 const settingsMap: Record<string, string> = {};
                 data.forEach((s: any) => settingsMap[s.key] = s.value);
                 setSettings(settingsMap);
@@ -32,7 +32,7 @@ export const SettingsTab: React.FC = () => {
   }, [token]);
 
   const handleUpdateSetting = async (key: string, value: string) => {
-      // Optimistic update
+      // Оптимистичное обновление
       setSettings(prev => ({ ...prev, [key]: value }));
       
       try {
@@ -47,7 +47,7 @@ export const SettingsTab: React.FC = () => {
       } catch (e) {
           console.error(e);
           alert('Ошибка сохранения настройки');
-          // Revert logic could go here by refetching
+          // Логика отката могла бы быть здесь через повторный запрос
       }
   };
 

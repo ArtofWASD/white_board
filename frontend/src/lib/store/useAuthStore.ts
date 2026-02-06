@@ -111,12 +111,12 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initializeAuth: () => {
-        // With persist middleware, we might not need this explicit initialization 
-        // if we trust the persisted state. However, to match the original logic 
-        // which checked localStorage manually, we can keep a simple check or rely on persist.
-        // The original AuthContext checked localStorage in useEffect.
-        // The persist middleware handles rehydration automatically.
-        // We just need to set isLoading to false after hydration.
+        // С middleware persist нам может не понадобиться эта явная инициализация,
+        // если мы доверяем сохраненному состоянию. Однако, чтобы соответствовать оригинальной логике,
+        // которая проверяла localStorage вручную, мы можем оставить простую проверку или полагаться на persist.
+        // Оригинальный AuthContext проверял localStorage в useEffect.
+        // Middleware persist обрабатывает регидратацию автоматически.
+        // Нам просто нужно установить isLoading в false после гидратации.
         set({ isLoading: false });
       },
 
@@ -136,32 +136,32 @@ export const useAuthStore = create<AuthState>()(
             });
 
             if (!response.ok) {
-                // If user not found or unauthorized, logout
+                // Если пользователь не найден или не авторизован, выйти
 
                 get().logout();
                 return false;
             }
             
-            // Optionally update user data here if needed
+            // При необходимости обновите данные пользователя здесь
             return true;
         } catch (error) {
 
-            // On network error we might not want to logout immediately, but for now let's be safe
-            // or just return false and let the caller decide. 
-            // Better to only logout on explicit 401/404. 
-            // For now, if request fails completely, we do nothing to avoid logging out offline users?
-            // But the user specifically asked for "if database is empty". That implies 404/401.
+            // При сетевой ошибке мы можем не хотеть немедленно выходить, но пока будем осторожны
+            // или просто вернем false и позволим вызывающему решать. 
+            // Лучше выходить только при явном 401/404. 
+            // Пока, если запрос полностью не удался, мы ничего не делаем, чтобы избежать выхода офлайн пользователей?
+            // Но пользователь специально просил "если база данных пуста". Это подразумевает 404/401.
             return false;
         }
       },
     }),
     {
-      name: 'auth-storage', // name of the item in the storage (must be unique)
-      storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+      name: 'auth-storage', // имя элемента в хранилище (должно быть уникальным)
+      storage: createJSONStorage(() => localStorage), // (необязательно) по умолчанию используется 'localStorage'
       onRehydrateStorage: () => (state) => {
         if (state) {
             state.isLoading = false;
-            // Verify user existence on rehydration (app load)
+            // Проверка существования пользователя при регидратации (загрузка приложения)
             if (state.isAuthenticated && state.user) {
                 state.verifyUser();
             }

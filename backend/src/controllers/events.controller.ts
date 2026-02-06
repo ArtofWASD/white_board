@@ -40,7 +40,7 @@ export class EventsController {
         createEventDto.eventDate,
         createEventDto.description,
         createEventDto.exerciseType,
-        createEventDto.exercises, // Add exercises parameter
+        createEventDto.exercises, // Добавляем параметр упражнений
         createEventDto.participantIds,
         createEventDto.timeCap,
         createEventDto.rounds,
@@ -120,7 +120,7 @@ export class EventsController {
         eventId,
         createEventResultDto.time,
         createEventResultDto.username,
-        createEventResultDto.userId, // Pass userId
+        createEventResultDto.userId, // Передаем userId
         createEventResultDto.value,
         createEventResultDto.scaling,
         createEventResultDto.notes,
@@ -144,7 +144,7 @@ export class EventsController {
   async updateEventResultNotes(
     @Param('resultId') resultId: string,
     @Body('notes') notes: string,
-    @Body('userId') userId: string, // Expect userId in body
+    @Body('userId') userId: string, // Ожидаем userId в теле запроса
   ) {
     return this.eventsService.updateEventResult(resultId, notes, userId);
   }
@@ -181,7 +181,7 @@ export class EventsController {
         updateEventDto.eventDate,
         updateEventDto.description,
         updateEventDto.exerciseType,
-        updateEventDto.exercises, // Add exercises parameter
+        updateEventDto.exercises, // Добавляем параметр упражнений
         updateEventDto.timeCap,
         updateEventDto.rounds,
         updateEventDto.teamId,

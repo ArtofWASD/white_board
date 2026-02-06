@@ -120,7 +120,7 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
 
   const handleAddEvent = () => {
     setShowAddEventButton(false);
-    setEventToEdit(null); // Ensure we are not in edit mode
+    setEventToEdit(null); // Убеждаемся, что мы не в режиме редактирования
     setShowEditModal(true);
   };
 
@@ -158,19 +158,19 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
       // Update
       const success = await updateEvent(eventToEdit.id, {
           ...eventData,
-          date: new Date(eventToEdit.date).toISOString() // Or keep date as is? The modal probably returns correct date
-          // wait, the logic was:
+          date: new Date(eventToEdit.date).toISOString() // Или оставить дату как есть? Модальное окно, вероятно, возвращает правильную дату
+          // подождите, логика была:
           // const validDate = eventToEdit ? eventToEdit.date : selectedDate;
-          // But here eventData usually comes from the form.
-          // Let's assume eventData has the fields from the form.
-          // The previous logic used `validDate` to set `eventDate`.
+          // Но здесь eventData обычно приходит из формы.
+          // Предположим, что eventData содержит поля из формы.
+          // Предыдущая логика использовала `validDate` для установки `eventDate`.
       });
-      // Correcting to match original logic simplifed:
+        // Исправление для соответствия упрощенной оригинальной логике:
       const validDate = eventToEdit ? eventToEdit.date : selectedDate;
       const body = {
         ...eventData,
         date: validDate, 
-        // Allow moving event to another team if changed in modal
+        // Разрешить перенос события в другую команду, если изменено в модальном окне
         teamId: eventData.teamId || teamId || eventToEdit?.teamId,
       };
       
@@ -178,12 +178,12 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
       if (updateSuccess) handleCloseEditModal();
       
     } else {
-      // Create
+      // Создание
       const { assignedUserIds, ...restData } = eventData;
       
-      // Map assignedUserIds to participantIds for the backend
-      // We keep the teamId as is (selectedTeamId from modal), allowing "Assigned Team Event"
-      // or "Personal Event" if no team selected (though modal restricts assignment to teams)
+      // Сопоставление assignedUserIds с participantIds для бэкенда
+      // Мы оставляем teamId как есть (selectedTeamId из модального окна), позволяя "Событие команды"
+      // или "Личное событие", если команда не выбрана (хотя модальное окно ограничивает назначение командам)
       const createSuccess = await createEvent({
           ...restData,
           participantIds: assignedUserIds
@@ -210,12 +210,12 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
     if (success) handleCloseAddResultModal();
   };
 
-  // Close menus when clicking outside
+  // Закрытие меню при клике снаружи
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       
-      // Don't close if clicking inside the menu or button
+      // Не закрывать, если клик внутри меню или кнопки
       if (target.closest('.event-action-menu') || target.closest('.add-event-button')) {
         return;
       }
@@ -258,10 +258,10 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
   const handleStartTimer = () => {
     if (!selectedEvent) return;
     
-    // Parse time cap or duration
+    // Парсинг лимита времени или длительности
     let timeCapSeconds = 0;
     if (selectedEvent.timeCap) {
-       // Normalize: replace comma with dot, remove non-numeric except dot and colon
+       // Нормализация: замена запятой на точку, удаление нечисловых символов, кроме точки и двоеточия
        const raw = selectedEvent.timeCap.replace(',', '.').replace(/[^0-9:.]/g, '');
        
        if (raw.includes(':')) {
@@ -270,12 +270,12 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
              timeCapSeconds = parts[0] * 60 + parts[1];
            }
        } else {
-           // Assume format like "15" means 15 minutes if no colon is present? 
-           // Or should we assume seconds? 
-           // The placeholder says "15:00". "1" usually means 1 minute in this context.
-           // Let's assume minutes if parsed value < 100, wait, ambiguity.
-           // Standard WOD notation: "20 min" or "20:00".
-           // If user typed "1", it likely means 1 minute.
+           // Предполагаем, что формат "15" означает 15 минут, если нет двоеточия? 
+           // Или мы должны предполагать секунды? 
+           // Плейсхолдер говорит "15:00". "1" обычно означает 1 минуту в этом контексте.
+           // Давайте предположим минуты, если значение < 100, подождите, двусмысленность.
+           // Стандартная нотация WOD: "20 мин" или "20:00".
+           // Если пользователь ввел "1", это, вероятно, означает 1 минуту.
            const val = parseFloat(raw);
            if (!isNaN(val)) {
                timeCapSeconds = val * 60;
@@ -283,16 +283,16 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
        }
     }
 
-    // Determine mode
+    // Определение режима
     let mode = '';
     switch (selectedEvent.exerciseType) {
       case 'For Time': mode = 'FOR_TIME'; break;
       case 'AMRAP': mode = 'AMRAP'; break;
       case 'EMOM': mode = 'EMOM'; break;
-      case 'Not for Time': mode = 'INTERVALS'; break; // Or regular timer?
+      case 'Not for Time': mode = 'INTERVALS'; break; // Или обычный таймер?
     }
     
-    if (!mode) return; // Should we show error or just default to something? Defaulting to not navigating is safer.
+    if (!mode) return; // Должны ли мы показать ошибку или использовать значение по умолчанию? Безопаснее не переходить.
     
     const params = new URLSearchParams();
     params.set('mode', mode);
@@ -302,14 +302,14 @@ const Calendar: React.FC<CalendarProps> = ({ isMenuOpen, teamId, onUpdateEvents 
     if (mode === 'FOR_TIME' && timeCapSeconds > 0) {
        params.set('timeCap', timeCapSeconds.toString());
     } else if (mode === 'AMRAP' && timeCapSeconds > 0) {
-       // Assuming timeCap field is used for AMRAP duration too in the UI per EventModal logic
-       // EventModal uses timeCap field for AMRAP duration as well ("Time Cap (Лимит времени)")
+       // Предполагая, что поле timeCap используется и для длительности AMRAP в UI согласно логике EventModal
+       // EventModal использует поле timeCap также для длительности AMRAP ("Time Cap (Лимит времени)")
        params.set('duration', timeCapSeconds.toString());
     }
 
     if (mode === 'EMOM') {
-        // EMOM usually needs interval and rounds.
-        // If we only have rounds, we might default interval to 60s.
+        // EMOM обычно требует интервала и раундов.
+        // Если у нас есть только раунды, мы можем установить интервал по умолчанию 60 с.
         params.set('intervalWork', '60');
     }
     

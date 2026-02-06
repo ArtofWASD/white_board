@@ -23,21 +23,21 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   // const [isCollapsed, setIsCollapsed] = useState(false);
 
   const handlePointerDown = (e: React.PointerEvent) => {
-    // Only stop propagation if we are interacting with interactive elements inside the widget
-    // But usually for dnd-kit grid, we want the *header* or specific handle to drag, 
-    // and the content to be interactive. 
-    // However, the current issue described in the audit is that dnd-kit interferes with inputs.
-    // So we should stop bubbling for pointer events on the content area if strictly needed, 
-    // OR just rely on dnd-kit's sensor configuration.
-    // A common pattern for cards in dnd-grids is to have a specific drag handle or 
-    // ensure inputs stop propagation.
+  // Останавливать распространение только при взаимодействии с интерактивными элементами внутри виджета
+    // Но обычно для сетки dnd-kit мы хотим перетаскивать *заголовок* или специальную ручку,
+    // а контент должен быть интерактивным.
+    // Однако текущая проблема, описанная в аудите, заключается в том, что dnd-kit мешает вводу.
+    // Поэтому мы должны остановить всплытие событий указателя в области контента, если это строго необходимо,
+    // ИЛИ просто полагаться на конфигурацию сенсора dnd-kit.
+    // Распространенный паттерн для карточек в dnd-сетках - иметь специальную ручку перетаскивания или
+    // убедиться, что ввод останавливает распространение.
     
-    // For this 'Smart Widget', let's just provide the structure. 
-    // The specific stopPropagation usually needs to happen ON the input itself or a wrapper of the input.
-    // If we stop propagation on the whole card content, we might break dragging if the user grabs the body? 
-    // Typically in these dashboards, the whole card is draggable.
+    // Для этого 'Smart Widget' давайте просто предоставим структуру.
+    // Конкретный stopPropagation обычно должен происходить НА самом вводе или его обертке.
+    // Если мы остановим распространение на всем контенте карточки, мы можем сломать перетаскивание, если пользователь схватит тело?
+    // Обычно в этих панелях управления вся карточка перетаскиваемая.
     
-    // Strategy: We will provide a helper or wrapper for content that should remain interactive (inputs, buttons).
+    // Стратегия: Мы предоставим помощник или обертку для контента, который должен оставаться интерактивным (вводы, кнопки).
   };
 
   return (
@@ -47,7 +47,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
            {title && <h2 className={`font-bold text-gray-900 transition-all ${!isExpanded ? 'text-base' : 'text-xl'}`}>{title}</h2>}
            <div className="flex items-center gap-2">
              {headerActions && <div>{headerActions}</div>}
-             {/* Collapse button - only visible on mobile/tablet */}
+             {/* Кнопка сворачивания - видна только на мобильных/планшетах */}
              <button 
                 onClick={onToggle}
                 className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
@@ -76,7 +76,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
       {isExpanded && (
       <div 
         className={`flex-1 overflow-hidden ${!noPadding ? 'p-4' : ''}`}
-        // We can add a class here to mark it as "no-drag" region if we configure dnd-sensor to ignore it
+        // Мы можем добавить здесь класс, чтобы пометить его как область "без перетаскивания", если настроим dnd-sensor на его игнорирование
       >
         {children}
       </div>
@@ -85,7 +85,7 @@ export const DashboardWidget: React.FC<DashboardWidgetProps> = ({
   );
 };
 
-// Helper to wrap interactive elements
+// Помощник для обертки интерактивных элементов
 export const InteractiveArea: React.FC<{children: React.ReactNode, className?: string}> = ({ children, className = '' }) => {
     return (
         <div 

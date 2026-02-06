@@ -13,17 +13,17 @@ export default function ProfilePage() {
   const { flags, toggleFlag } = useFeatureFlagStore();
   const { success, error: toastError } = useToast();
   
-  // Email state
+  // Состояние Email
   const [email, setEmail] = useState(user?.email || '');
   const [isEmailEditing, setIsEmailEditing] = useState(false);
   
-  // Password state
+  // Состояние пароля
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isPasswordEditing, setIsPasswordEditing] = useState(false);
 
-  // Loading states
+  // Состояния загрузки
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUpdateEmail = async (e: React.FormEvent) => {
@@ -115,7 +115,7 @@ export default function ProfilePage() {
         </Link>
       </div>
 
-      {/* Email Settings */}
+      {/* Настройки Email */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-gray-900">Email</h3>
@@ -163,7 +163,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Password Settings */}
+      {/* Настройки пароля */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-gray-900">Пароль</h3>
@@ -235,7 +235,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* Feature Flags - Hide for organization_admin */}
+      {/* Флаги функций - Скрыть для администратора организации */}
       {user.role !== 'ORGANIZATION_ADMIN' && (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>

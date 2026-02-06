@@ -55,14 +55,14 @@ const EventActionMenu: React.FC<EventActionMenuProps> = ({
         <button 
           onClick={onEdit}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100"
-          disabled={!isAuthenticated} // Disable if not authenticated
+          disabled={!isAuthenticated} // Отключить, если не авторизован
         >
           Редактировать
         </button>
         <button 
           onClick={onDelete}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 text-red-600"
-          disabled={!isAuthenticated} // Disable if not authenticated
+          disabled={!isAuthenticated} // Отключить, если не авторизован
         >
           Удалить
         </button>
@@ -76,7 +76,7 @@ const EventActionMenu: React.FC<EventActionMenuProps> = ({
         <button 
           onClick={onAddResult}
           className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-100 border-t border-gray-200 mt-1"
-          disabled={!isAuthenticated} // Disable if not authenticated
+          disabled={!isAuthenticated} // Отключить, если не авторизован
         >
           Добавить результат
         </button>
