@@ -16,16 +16,17 @@ import { WodsModule } from './modules/wods.module';
 import { ContentExercisesModule } from './modules/content-exercises.module';
 import { NewsModule } from './modules/news.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { ChatModule } from './modules/chat.module';
 
 @Module({
   imports: [
     ScheduleModule.forRoot(),
-    PrismaModule, 
-    AuthModule, 
-    EventsModule, 
-    TeamsModule, 
-    ExercisesModule, 
-    StrengthResultsModule, 
+    PrismaModule,
+    AuthModule,
+    EventsModule,
+    TeamsModule,
+    ExercisesModule,
+    StrengthResultsModule,
     OrganizationModule,
     UsersModule,
     SettingsModule,
@@ -34,7 +35,8 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
     WodsModule,
     ContentExercisesModule,
     NewsModule,
-    NotificationsModule
+    NotificationsModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -75,6 +75,10 @@ model User {
   eventResultLikes   EventResultLike[]
   notifications      Notification[]
 
+  // Chat Relations
+  chatParticipations ChatParticipant[]
+  messagesSent       Message[]
+
   // Organization
   organizationId     String?       @map("organization_id")
   organization       Organization? @relation(fields: [organizationId], references: [id])
@@ -172,6 +176,7 @@ model Team {
   members     TeamMember[]
   owner       User         @relation("OwnedTeams", fields: [ownerId], references: [id])
   events      Event[]
+  chats       Chat[]       // Relation to chats (e.g., team group chat)
 
   organizationId String?       @map("organization_id")
   organization   Organization? @relation(fields: [organizationId], references: [id])
@@ -278,4 +283,51 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+// Chat System
+
+model Chat {
+  id        String            @id @default(uuid())
+  type      String            // 'direct' or 'group'
+  name      String?           // For group chats
+  createdAt DateTime          @default(now()) @map("created_at")
+  updatedAt DateTime          @updatedAt @map("updated_at")
+
+  participants ChatParticipant[]
+  messages     Message[]
+
+  teamId    String?           @map("team_id")
+  team      Team?             @relation(fields: [teamId], references: [id])
+
+  @@map("chats")
+}
+
+model ChatParticipant {
+  id        String   @id @default(uuid())
+  chatId    String   @map("chat_id")
+  userId    String   @map("user_id")
+  role      String?  // 'coach', 'athlete'
+  joinedAt  DateTime @default(now()) @map("joined_at")
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([chatId, userId])
+  @@map("chat_participants")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String   @map("chat_id")
+  senderId  String   @map("sender_id")
+  content   String   @db.Text
+  type      String   @default("text") // 'text', 'image', 'video_link'
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
 }
