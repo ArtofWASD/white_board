@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Chat, Message } from "../../types/chat.types"
+import data from "@emoji-mart/data"
+import Picker from "@emoji-mart/react"
 
 interface ChatWindowProps {
   chatId: string
@@ -23,6 +25,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const [isLoading, setIsLoading] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [skip, setSkip] = useState(0)
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
@@ -290,8 +293,49 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* Input */}
       <form
         onSubmit={sendMessage}
-        className="p-3 border-t border-gray-100 bg-white rounded-b-lg">
+        className="p-3 border-t border-gray-100 bg-white rounded-b-lg relative">
         <div className="flex gap-2">
+          {/* Emoji Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </button>
+
+          {/* Emoji Picker Popover */}
+          {showEmojiPicker && (
+            <div className="absolute bottom-16 left-2 z-50">
+              <div className="shadow-xl rounded-lg overflow-hidden border border-gray-200">
+                <Picker
+                  data={data}
+                  onEmojiSelect={(emoji: any) => {
+                    setNewMessage((prev) => prev + emoji.native)
+                    setShowEmojiPicker(false)
+                  }}
+                  theme="light"
+                  set="native"
+                />
+              </div>
+              {/* Click outside backdrop (transparent) */}
+              <div
+                className="fixed inset-0 z-[-1]"
+                onClick={() => setShowEmojiPicker(false)}></div>
+            </div>
+          )}
+
           <input
             type="text"
             value={newMessage}
