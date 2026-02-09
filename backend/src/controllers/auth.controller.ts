@@ -9,6 +9,7 @@ import {
   Get,
   Query,
   NotFoundException,
+  Req,
 } from '@nestjs/common';
 import { AuthService } from '../services/auth.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
@@ -19,8 +20,8 @@ import { ForbiddenException, BadRequestException } from '@nestjs/common';
 @Controller('auth')
 export class AuthController {
   constructor(
-      private authService: AuthService,
-      private settingsService: SettingsService
+    private authService: AuthService,
+    private settingsService: SettingsService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -31,44 +32,62 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  async register(@Body() body: any) {
+  async register(@Body() body: any, @Req() request: any) {
     // Проверяем флаги функций
     const settings = await this.settingsService.getAll();
-    const settingsMap = settings.reduce((acc, curr) => {
+    const settingsMap = settings.reduce(
+      (acc, curr) => {
         acc[curr.key] = curr.value;
         return acc;
-    }, {} as Record<string, string>);
+      },
+      {} as Record<string, string>,
+    );
 
     if (settingsMap['MAINTENANCE_MODE'] === 'true') {
-        throw new ForbiddenException('Registration is currently disabled due to maintenance.');
+      throw new ForbiddenException(
+        'Registration is currently disabled due to maintenance.',
+      );
     }
 
     const { role, userType } = body;
 
     if (role === 'ATHLETE' && settingsMap['REGISTRATION_ATHLETE'] === 'false') {
-        throw new ForbiddenException('Athlete registration is currently disabled.');
+      throw new ForbiddenException(
+        'Athlete registration is currently disabled.',
+      );
     }
 
     if (role === 'TRAINER' && settingsMap['REGISTRATION_TRAINER'] === 'false') {
-        throw new ForbiddenException('Trainer registration is currently disabled.');
+      throw new ForbiddenException(
+        'Trainer registration is currently disabled.',
+      );
     }
 
-    if (userType === 'organization' && settingsMap['REGISTRATION_ORGANIZATION'] === 'false') {
-        throw new ForbiddenException('Organization registration is currently disabled.');
+    if (
+      userType === 'organization' &&
+      settingsMap['REGISTRATION_ORGANIZATION'] === 'false'
+    ) {
+      throw new ForbiddenException(
+        'Organization registration is currently disabled.',
+      );
     }
+
+    // Получаем IP-адрес из запроса
+    const ipAddress =
+      request.ip || request.connection?.remoteAddress || 'unknown';
 
     try {
-      return await this.authService.register(body);
+      return await this.authService.register(body, ipAddress);
     } catch (error) {
       console.error('Registration Error:', error);
       if (error instanceof ForbiddenException) {
-          throw error;
+        throw error;
       }
       return {
         status: 'error',
         message: error.message,
         stack: error.stack,
-        details: error
+        details: error,
       };
     }
   }

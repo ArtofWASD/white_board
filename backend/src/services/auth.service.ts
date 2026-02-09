@@ -60,7 +60,7 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(registerDto: RegisterDto, ipAddress: string = 'unknown') {
     const existingUser = await (this.prisma as any).user.findUnique({
       where: { email: registerDto.email },
     });
@@ -70,23 +70,29 @@ export class AuthService {
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
-    
 
-    
     let organizationData: any = {};
     // Проверяем, указано ли имя организации и не пустое ли оно
-    if (registerDto.organizationName && registerDto.organizationName.trim().length > 0) {
-        organizationData = {
-            organization: {
-                create: {
-                    name: registerDto.organizationName
-                }
-            }
-        };
+    if (
+      registerDto.organizationName &&
+      registerDto.organizationName.trim().length > 0
+    ) {
+      organizationData = {
+        organization: {
+          create: {
+            name: registerDto.organizationName,
+          },
+        },
+      };
     }
 
     const isOrgRegistration = !!organizationData.organization;
-    const computedUserType = isOrgRegistration ? 'organization' : (registerDto.userType || 'individual');
+    const computedUserType = isOrgRegistration
+      ? 'organization'
+      : registerDto.userType || 'individual';
+
+    // Текущая версия документов (дата в формате YYYY-MM-DD)
+    const currentVersion = new Date().toISOString().split('T')[0];
 
     const newUser = await (this.prisma as any).user.create({
       data: {
@@ -94,7 +100,7 @@ export class AuthService {
         lastName: registerDto.lastName,
         email: registerDto.email,
         password: hashedPassword,
-        role: registerDto.role, 
+        role: registerDto.role,
         gender: registerDto.gender,
         isAdmin:
           registerDto.role === 'TRAINER' ||
@@ -102,18 +108,29 @@ export class AuthService {
         // Маппинг устаревших полей
         userType: computedUserType,
         organizationName: registerDto.organizationName,
-        ...organizationData
+        // Согласия на обработку персональных данных (152-ФЗ)
+        termsAccepted: true,
+        termsAcceptedAt: new Date(),
+        termsVersion: currentVersion,
+        privacyAccepted: true,
+        privacyAcceptedAt: new Date(),
+        privacyVersion: currentVersion,
+        consentAccepted: true,
+        consentAcceptedAt: new Date(),
+        consentVersion: currentVersion,
+        registrationIp: ipAddress,
+        ...organizationData,
       },
       include: {
-        organization: true
-      }
+        organization: true,
+      },
     });
 
     const payload = {
       email: newUser.email,
       sub: newUser.id,
       role: newUser.role,
-      organizationId: newUser.organization?.id 
+      organizationId: newUser.organization?.id,
     };
     return {
       user: {
@@ -126,7 +143,7 @@ export class AuthService {
         weight: newUser.weight,
         dashboardLayout: newUser.dashboardLayout,
         dashboardLayoutMode: newUser.dashboardLayoutMode,
-        organizationId: newUser.organization?.id
+        organizationId: newUser.organization?.id,
       } as UserResponse,
       token: this.jwtService.sign(payload),
     };
@@ -141,7 +158,6 @@ export class AuthService {
     }
 
     // Log the incoming data
-
 
     // Создаем объект обновления только с предоставленными полями
     const updateData: Partial<User> = {};
@@ -175,9 +191,11 @@ export class AuthService {
     // Обработка обновления пароля
     if (updateProfileDto.password) {
       if (!updateProfileDto.currentPassword) {
-        throw new UnauthorizedException('Current password is required to set a new password');
+        throw new UnauthorizedException(
+          'Current password is required to set a new password',
+        );
       }
-      
+
       const isPasswordValid = await bcrypt.compare(
         updateProfileDto.currentPassword,
         user.password,
@@ -196,8 +214,6 @@ export class AuthService {
       where: { id: userId },
       data: updateData,
     });
-
-
 
     return {
       user: {
@@ -234,7 +250,6 @@ export class AuthService {
 
   async getAthletes() {
     try {
-
       const users = await (this.prisma as any).user.findMany({
         where: { role: UserRole.ATHLETE },
         select: {
@@ -247,11 +262,11 @@ export class AuthService {
             select: {
               team: {
                 select: {
-                  name: true
-                }
-              }
-            }
-          }
+                  name: true,
+                },
+              },
+            },
+          },
         },
       });
 
@@ -282,7 +297,7 @@ export class AuthService {
         weight: user.weight,
         dashboardLayout: user.dashboardLayout,
         dashboardLayoutMode: user.dashboardLayoutMode,
-        organizationId: user.organizationId
+        organizationId: user.organizationId,
       } as UserResponse,
     };
   }

@@ -84,6 +84,22 @@ model User {
   organization       Organization? @relation(fields: [organizationId], references: [id])
   organizationName   String?       @map("organization_name") // Deprecated: use organization relation
 
+  // Согласия на обработку персональных данных (152-ФЗ)
+  termsAccepted         Boolean   @default(false) @map("terms_accepted")
+  termsAcceptedAt       DateTime? @map("terms_accepted_at")
+  termsVersion          String?   @map("terms_version")
+  
+  privacyAccepted       Boolean   @default(false) @map("privacy_accepted")
+  privacyAcceptedAt     DateTime? @map("privacy_accepted_at")
+  privacyVersion        String?   @map("privacy_version")
+  
+  consentAccepted       Boolean   @default(false) @map("consent_accepted")
+  consentAcceptedAt     DateTime? @map("consent_accepted_at")
+  consentVersion        String?   @map("consent_version")
+  
+  // IP-адрес при регистрации (требование 152-ФЗ)
+  registrationIp        String?   @map("registration_ip")
+
   dashboardLayout    String[]      @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
   dashboardLayoutMode String       @default("asymmetric") @map("dashboard_layout_mode")
 
