@@ -44,6 +44,10 @@ export class AuthService {
       sub: user.id,
       role: user.role,
     };
+
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = await this.generateRefreshToken(user.id);
+
     return {
       user: {
         id: user.id,
@@ -56,7 +60,8 @@ export class AuthService {
         dashboardLayout: user.dashboardLayout,
         dashboardLayoutMode: user.dashboardLayoutMode,
       } as UserResponse,
-      token: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,
     };
   }
 
@@ -132,6 +137,10 @@ export class AuthService {
       role: newUser.role,
       organizationId: newUser.organization?.id,
     };
+
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = await this.generateRefreshToken(newUser.id);
+
     return {
       user: {
         id: newUser.id,
@@ -145,7 +154,8 @@ export class AuthService {
         dashboardLayoutMode: newUser.dashboardLayoutMode,
         organizationId: newUser.organization?.id,
       } as UserResponse,
-      token: this.jwtService.sign(payload),
+      accessToken,
+      refreshToken,
     };
   }
 
@@ -300,5 +310,99 @@ export class AuthService {
         organizationId: user.organizationId,
       } as UserResponse,
     };
+  }
+
+  /**
+   * Генерация refresh токена
+   */
+  async generateRefreshToken(userId: string): Promise<string> {
+    const token = this.jwtService.sign(
+      { sub: userId, type: 'refresh' },
+      { expiresIn: '7d' },
+    );
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // 7 дней
+
+    await (this.prisma as any).refreshToken.create({
+      data: {
+        token,
+        userId,
+        expiresAt,
+      },
+    });
+
+    return token;
+  }
+
+  /**
+   * Валидация и обновление токенов через refresh token
+   */
+  async refreshAccessToken(refreshToken: string) {
+    try {
+      // Проверяем, существует ли токен в базе
+      const storedToken = await (this.prisma as any).refreshToken.findUnique({
+        where: { token: refreshToken },
+        include: { user: true },
+      });
+
+      if (!storedToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      // Проверяем, не истек ли токен
+      if (new Date() > storedToken.expiresAt) {
+        // Удаляем истекший токен
+        await (this.prisma as any).refreshToken.delete({
+          where: { id: storedToken.id },
+        });
+        throw new UnauthorizedException('Refresh token expired');
+      }
+
+      // Генерируем новый access token
+      const payload = {
+        email: storedToken.user.email,
+        sub: storedToken.user.id,
+        role: storedToken.user.role,
+      };
+
+      const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+
+      return {
+        accessToken,
+        user: {
+          id: storedToken.user.id,
+          name: storedToken.user.name,
+          lastName: storedToken.user.lastName,
+          email: storedToken.user.email,
+          role: storedToken.user.role,
+          height: storedToken.user.height,
+          weight: storedToken.user.weight,
+          dashboardLayout: storedToken.user.dashboardLayout,
+          dashboardLayoutMode: storedToken.user.dashboardLayoutMode,
+          organizationId: storedToken.user.organizationId,
+        } as UserResponse,
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
+
+  /**
+   * Удаление refresh токена (logout)
+   */
+  async revokeRefreshToken(refreshToken: string): Promise<void> {
+    await (this.prisma as any).refreshToken.deleteMany({
+      where: { token: refreshToken },
+    });
+  }
+
+  /**
+   * Удаление всех refresh токенов пользователя
+   */
+  async revokeAllUserTokens(userId: string): Promise<void> {
+    await (this.prisma as any).refreshToken.deleteMany({
+      where: { userId },
+    });
   }
 }

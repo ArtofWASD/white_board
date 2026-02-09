@@ -1,32 +1,18 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-
-async function getToken(request: Request) {
-  const authHeader =
-    request.headers.get("Authorization") || request.headers.get("authorization")
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader
-  }
-  const cookieStore = await cookies()
-  const token = cookieStore.get("token")
-  return token ? `Bearer ${token.value}` : null
-}
+import { NextRequest, NextResponse } from "next/server"
+import { createBackendHeaders } from "@/lib/api/cookieHelpers"
 
 export async function GET(
-  request: Request,
-  props: { params: Promise<{ teamId: string }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ teamId: string }> },
 ) {
-  const params = await props.params
   try {
-    const authHeader = await getToken(request)
+    const { teamId } = await params
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const headers = await createBackendHeaders(request)
 
-    const response = await fetch(`${backendUrl}/chats/team/${params.teamId}`, {
+    const response = await fetch(`${backendUrl}/chats/team/${teamId}`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader && { Authorization: authHeader }),
-      },
+      headers,
     })
 
     const data = await response.json()

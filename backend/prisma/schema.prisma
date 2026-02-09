@@ -102,9 +102,26 @@ model User {
 
   dashboardLayout    String[]      @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
   dashboardLayoutMode String       @default("asymmetric") @map("dashboard_layout_mode")
+  
+  // Refresh tokens for secure authentication
+  refreshTokens      RefreshToken[]
 
   @@map("users")
 }
+
+model RefreshToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  @@index([userId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
 
 model UserExercise {
   id          String           @id @default(uuid())

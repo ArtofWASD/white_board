@@ -10,7 +10,9 @@ import {
   Query,
   NotFoundException,
   Req,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { AuthService } from '../services/auth.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 
@@ -26,8 +28,31 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.authService.login(loginDto);
+
+    // Устанавливаем httpOnly cookies
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    response.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000, // 15 минут
+    });
+
+    response.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+    });
+
+    // Возвращаем только данные пользователя (без токенов)
+    return { user: result.user };
   }
 
   @HttpCode(HttpStatus.CREATED)
@@ -77,7 +102,27 @@ export class AuthController {
       request.ip || request.connection?.remoteAddress || 'unknown';
 
     try {
-      return await this.authService.register(body, ipAddress);
+      const result = await this.authService.register(body, ipAddress);
+
+      // Устанавливаем httpOnly cookies
+      const isProduction = process.env.NODE_ENV === 'production';
+      const response: Response = request.res;
+
+      response.cookie('access_token', result.accessToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        maxAge: 15 * 60 * 1000,
+      });
+
+      response.cookie('refresh_token', result.refreshToken, {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return { user: result.user };
     } catch (error) {
       console.error('Registration Error:', error);
       if (error instanceof ForbiddenException) {
@@ -124,5 +169,50 @@ export class AuthController {
   @Get('user/:userId')
   async getUser(@Param('userId') userId: string) {
     return this.authService.getUser(userId);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  async logout(
+    @Req() request: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = request.cookies?.refresh_token;
+
+    if (refreshToken) {
+      await this.authService.revokeRefreshToken(refreshToken);
+    }
+
+    // Очищаем cookies
+    response.clearCookie('access_token');
+    response.clearCookie('refresh_token');
+
+    return { message: 'Logged out successfully' };
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('refresh')
+  async refresh(
+    @Req() request: any,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const refreshToken = request.cookies?.refresh_token;
+
+    if (!refreshToken) {
+      throw new ForbiddenException('Refresh token not found');
+    }
+
+    const result = await this.authService.refreshAccessToken(refreshToken);
+
+    // Обновляем access token cookie
+    const isProduction = process.env.NODE_ENV === 'production';
+    response.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 15 * 60 * 1000,
+    });
+
+    return { user: result.user };
   }
 }

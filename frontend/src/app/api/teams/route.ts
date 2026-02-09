@@ -1,37 +1,18 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
-
-// Helper function to get token from localStorage (we'll get it from cookies in the request)
-async function getToken(request: Request) {
-  // Try to get token from Authorization header first
-  const authHeader =
-    request.headers.get("Authorization") || request.headers.get("authorization")
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader
-  }
-
-  // Fallback to cookies
-  const cookieStore = await cookies()
-  const token = cookieStore.get("token")
-  return token ? `Bearer ${token.value}` : null
-}
+import { NextResponse, NextRequest } from "next/server"
+import { createBackendHeaders } from "@/lib/api/cookieHelpers"
 
 // Create a new team
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    // Get token from request
-    const authHeader = await getToken(request)
-
-    // Forward the request to our NestJS backend
+    // Forward the request to our NestJS backend with cookies
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const headers = await createBackendHeaders(request)
+
     const backendRequest = {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader && { Authorization: authHeader }),
-      },
+      headers,
       body: JSON.stringify(body),
     }
 
@@ -48,7 +29,6 @@ export async function POST(request: Request) {
       )
     }
   } catch (error) {
-
     // Check if the error is due to the backend being unreachable
     if (error instanceof Error) {
       const isConnectionError =
@@ -69,7 +49,7 @@ export async function POST(request: Request) {
 }
 
 // Get user's teams
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const userId = searchParams.get("userId")
@@ -78,17 +58,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ message: "User ID is required" }, { status: 400 })
     }
 
-    // Get token from request
-    const authHeader = await getToken(request)
-
-    // Forward the request to our NestJS backend
+    // Forward the request to our NestJS backend with cookies
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const headers = await createBackendHeaders(request)
+
     const backendRequest = {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader && { Authorization: authHeader }),
-      },
+      headers,
     }
 
     const response = await fetch(`${backendUrl}/teams/user/${userId}`, backendRequest)
@@ -104,7 +80,6 @@ export async function GET(request: Request) {
       )
     }
   } catch (error) {
-
     // Check if the error is due to the backend being unreachable
     if (error instanceof Error) {
       const isConnectionError =

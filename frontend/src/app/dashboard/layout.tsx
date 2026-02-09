@@ -15,16 +15,16 @@ import { createDirectChat } from "../../lib/api/chat"
 import { MessageSquare } from "lucide-react"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, isAuthenticated, logout, isLoading, verifyUser, token } = useAuthStore()
+  const { user, isAuthenticated, logout, isLoading, verifyUser } = useAuthStore()
   const { fetchTeams, teams, selectedTeam } = useTeamStore()
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false)
   const router = useRouter()
 
   // Initialize Socket
   useEffect(() => {
-    if (isAuthenticated && user && token) {
+    if (typeof window !== "undefined" && user) {
       import("../../lib/socket").then(({ initializeSocket, disconnectSocket }) => {
-        initializeSocket(token, user.id)
+        initializeSocket(user.id)
       })
     }
 
@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         disconnectSocket()
       })
     }
-  }, [isAuthenticated, user, token])
+  }, [user])
 
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [activeChatId, setActiveChatId] = useState<string | null>(null)

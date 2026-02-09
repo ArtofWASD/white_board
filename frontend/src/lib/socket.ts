@@ -2,11 +2,11 @@ import { io, Socket } from "socket.io-client"
 
 let socket: Socket | null = null
 
-export const initializeSocket = (token: string, userId: string) => {
+export const initializeSocket = (userId: string) => {
   if (socket?.connected) return socket
 
   socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001", {
-    auth: { token },
+    withCredentials: true, // Важно! Отправляет cookies автоматически
     transports: ["websocket", "polling"],
   })
 

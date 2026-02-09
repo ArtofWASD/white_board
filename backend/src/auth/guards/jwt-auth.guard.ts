@@ -25,18 +25,24 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
 
-    if (!authHeader) {
+    // Пытаемся получить токен из cookie (приоритет)
+    let token = request.cookies?.access_token;
+
+    // Если нет в cookie, проверяем Authorization header (для обратной совместимости)
+    if (!token) {
+      const authHeader = request.headers.authorization;
+      if (authHeader) {
+        const match = authHeader.match(/^bearer\s+(.+)$/i);
+        if (match) {
+          token = match[1];
+        }
+      }
+    }
+
+    if (!token) {
       throw new UnauthorizedException('Authentication required');
     }
-
-    const match = authHeader.match(/^bearer\s+(.+)$/i);
-    if (!match) {
-      throw new UnauthorizedException('Invalid token format');
-    }
-
-    const token = match[1];
 
     try {
       const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;

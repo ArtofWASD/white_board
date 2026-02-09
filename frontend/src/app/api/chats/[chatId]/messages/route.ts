@@ -1,38 +1,25 @@
-import { NextResponse } from "next/server"
-import { cookies } from "next/headers"
+import { NextRequest, NextResponse } from "next/server"
+import { createBackendHeaders } from "@/lib/api/cookieHelpers"
 
-async function getToken(request: Request) {
-  const authHeader =
-    request.headers.get("Authorization") || request.headers.get("authorization")
-  if (authHeader && authHeader.startsWith("Bearer ")) {
-    return authHeader
-  }
-  const cookieStore = await cookies()
-  const token = cookieStore.get("token")
-  return token ? `Bearer ${token.value}` : null
-}
-
+// Get messages for a chat
 export async function GET(
-  request: Request,
-  props: { params: Promise<{ chatId: string }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
-  const params = await props.params
   try {
+    const { chatId } = await params
     const { searchParams } = new URL(request.url)
     const limit = searchParams.get("limit") || "50"
     const skip = searchParams.get("skip") || "0"
 
-    const authHeader = await getToken(request)
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const headers = await createBackendHeaders(request)
 
     const response = await fetch(
-      `${backendUrl}/chats/${params.chatId}/messages?limit=${limit}&skip=${skip}`,
+      `${backendUrl}/chats/${chatId}/messages?limit=${limit}&skip=${skip}`,
       {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(authHeader && { Authorization: authHeader }),
-        },
+        headers,
       },
     )
 
@@ -51,22 +38,21 @@ export async function GET(
   }
 }
 
+// Send a message to a chat
 export async function POST(
-  request: Request,
-  props: { params: Promise<{ chatId: string }> },
+  request: NextRequest,
+  { params }: { params: Promise<{ chatId: string }> },
 ) {
-  const params = await props.params
   try {
+    const { chatId } = await params
     const body = await request.json()
-    const authHeader = await getToken(request)
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
 
-    const response = await fetch(`${backendUrl}/chats/${params.chatId}/messages`, {
+    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const headers = await createBackendHeaders(request)
+
+    const response = await fetch(`${backendUrl}/chats/${chatId}/messages`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(authHeader && { Authorization: authHeader }),
-      },
+      headers,
       body: JSON.stringify(body),
     })
 
