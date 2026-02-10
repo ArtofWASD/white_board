@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
 
 // Delete an event
 export async function DELETE(
@@ -6,19 +7,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-
-
     // Await the params promise to get the actual params
     const resolvedParams = await params
-
 
     // Extract event ID from params
     const eventId = resolvedParams?.id
 
-
-
     if (!eventId) {
-
       return NextResponse.json({ message: "Event ID is required" }, { status: 400 })
     }
 
@@ -26,26 +21,22 @@ export async function DELETE(
     const body = await request.json()
     const userId = body.userId
 
-
-
     if (!userId) {
-
       return NextResponse.json({ message: "User ID is required" }, { status: 400 })
     }
 
-
-
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const csrfToken = await getCsrfTokenFromCookie()
     const response = await fetch(`${backendUrl}/events/${eventId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
       body: JSON.stringify({ userId }),
     })
-
-
 
     if (response.ok) {
       return new NextResponse(null, { status: 204 })
@@ -58,7 +49,6 @@ export async function DELETE(
       )
     }
   } catch (error) {
-
     return NextResponse.json(
       { message: "Произошла ошибка при удалении события" },
       { status: 500 },
@@ -72,40 +62,41 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> },
 ) {
   try {
-
-
     // Await the params promise to get the actual params
     const resolvedParams = await params
-
 
     // Extract event ID from params
     const eventId = resolvedParams?.id
 
-
-
     if (!eventId) {
-
       return NextResponse.json({ message: "Event ID is required" }, { status: 400 })
     }
 
-    const { userId, title, eventDate, description, exerciseType, exercises, teamId, timeCap, rounds } =
-      await request.json()
-
-
+    const {
+      userId,
+      title,
+      eventDate,
+      description,
+      exerciseType,
+      exercises,
+      teamId,
+      timeCap,
+      rounds,
+    } = await request.json()
 
     if (!userId) {
-
       return NextResponse.json({ message: "User ID is required" }, { status: 400 })
     }
 
-
-
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const csrfToken = await getCsrfTokenFromCookie()
     const response = await fetch(`${backendUrl}/events/${eventId}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
       body: JSON.stringify({
         userId,
@@ -120,8 +111,6 @@ export async function PUT(
       }),
     })
 
-
-
     const data = await response.json()
 
     if (response.ok) {
@@ -130,14 +119,12 @@ export async function PUT(
         message: "Событие успешно обновлено",
       })
     } else {
-
       return NextResponse.json(
         { message: data.message || "Ошибка при обновлении события" },
         { status: response.status },
       )
     }
   } catch (error) {
-
     return NextResponse.json(
       { message: "Произошла ошибка при обновлении события" },
       { status: 500 },

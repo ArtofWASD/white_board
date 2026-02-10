@@ -35,16 +35,31 @@ export class CsrfGuard implements CanActivate {
       const csrfTokenFromHeader = request.headers['x-csrf-token'];
       const csrfTokenFromCookie = request.cookies?.csrf_token;
 
-      // Для development можно временно отключить строгую проверку
-      // TODO: Включить в production
-      if (process.env.NODE_ENV === 'production') {
-        if (!csrfTokenFromHeader || !csrfTokenFromCookie) {
-          throw new ForbiddenException('CSRF token is required');
-        }
+      // Проверяем наличие токенов
+      if (!csrfTokenFromHeader || !csrfTokenFromCookie) {
+        console.warn(
+          `CSRF validation failed: Missing token. Method: ${request.method}, Path: ${request.url}`,
+        );
+        throw new ForbiddenException(
+          'CSRF token is required. Please obtain a CSRF token from /csrf/token',
+        );
+      }
 
-        if (csrfTokenFromHeader !== csrfTokenFromCookie) {
-          throw new ForbiddenException('Invalid CSRF token');
-        }
+      // Сравниваем токены (простое сравнение, для продвинутой защиты используйте crypto.timingSafeEqual)
+      if (csrfTokenFromHeader !== csrfTokenFromCookie) {
+        console.warn(
+          `CSRF validation failed: Token mismatch. Method: ${request.method}, Path: ${request.url}`,
+        );
+        throw new ForbiddenException(
+          'Invalid CSRF token. The token from header does not match the token from cookie.',
+        );
+      }
+
+      // Логируем успешную валидацию в development для отладки
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(
+          `CSRF validation successful. Method: ${request.method}, Path: ${request.url}`,
+        );
       }
     }
 

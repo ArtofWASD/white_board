@@ -1,15 +1,20 @@
 import { NextRequest, NextResponse } from "next/server"
-import { forwardSetCookieHeaders } from "@/lib/api/cookieHelpers"
+import { forwardSetCookieHeaders, getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
 
+    // Получаем CSRF токен из cookie
+    const csrfToken = await getCsrfTokenFromCookie()
+
     const response = await fetch(`${backendUrl}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
       body: JSON.stringify(body),
     })

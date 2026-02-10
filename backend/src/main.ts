@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import { CsrfGuard } from './auth/guards/csrf.guard';
+import { Reflector } from '@nestjs/core';
 
 // Загружаем переменные окружения
 dotenv.config();
@@ -21,6 +23,10 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Добавляем глобальный CSRF guard для защиты от CSRF атак
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new CsrfGuard(reflector));
 
   // CORS с поддержкой credentials для cookies
   app.enableCors({

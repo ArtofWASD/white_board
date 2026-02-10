@@ -12,6 +12,7 @@ import { Modal } from "../../components/ui/Modal"
 import { ChatWindow } from "../../components/chat/ChatWindow"
 import { ChatList } from "../../components/chat/ChatList"
 import { createDirectChat } from "../../lib/api/chat"
+import { logApiError } from "../../lib/logger"
 import { MessageSquare } from "lucide-react"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -47,7 +48,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           setActiveChatId(chat.id)
           setIsChatOpen(true)
         } catch (error) {
-          console.error("Failed to crate chat", error)
+          logApiError("/api/chats/direct", error, { targetUserId: team.ownerId })
         }
       }
     } else {

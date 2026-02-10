@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createBackendHeaders } from "@/lib/api/cookieHelpers"
+import { createBackendHeadersWithCsrf } from "@/lib/api/cookieHelpers"
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const headers = await createBackendHeaders(request)
+    const headers = await createBackendHeadersWithCsrf(request)
 
     const response = await fetch(`${backendUrl}/chats/direct`, {
       method: "POST",

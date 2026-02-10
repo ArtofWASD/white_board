@@ -1,74 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '../../lib/store/useAuthStore';
-import { Team, EventResult, TeamMember, Exercise } from '../../types';
+import React, { useState, useEffect } from "react"
+import { useAuthStore } from "../../lib/store/useAuthStore"
+import { Team, EventResult, TeamMember, Exercise } from "../../types"
+import { logApiError } from "../../lib/logger"
 
 // Удален локальный интерфейс Exercise, чтобы избежать конфликтов или необходимости обновления для использования строкового id, соответствующего глобальному типу
 
 interface EventData {
-  title?: string;
-  scheme?: string; // Добавить схему
-  exerciseType?: string;
-  exercises?: Exercise[];
-  results?: EventResult[];
-  teamId?: string;
-  timeCap?: string;
-  rounds?: string;
-  participants?: { id: string; name: string; lastName?: string }[];
+  title?: string
+  scheme?: string // Добавить схему
+  exerciseType?: string
+  exercises?: Exercise[]
+  results?: EventResult[]
+  teamId?: string
+  timeCap?: string
+  rounds?: string
+  participants?: { id: string; name: string; lastName?: string }[]
 }
-
 
 interface EventModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSave: (data: any) => void;
-  date: string;
-  eventData?: EventData;
-  initialTeamId?: string;
+  isOpen: boolean
+  onClose: () => void
+  onSave: (data: any) => void
+  date: string
+  eventData?: EventData
+  initialTeamId?: string
 }
 
-const EventModal: React.FC<EventModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  date, 
+const EventModal: React.FC<EventModalProps> = ({
+  isOpen,
+  onClose,
+  onSave,
+  date,
   eventData,
-  initialTeamId 
+  initialTeamId,
 }) => {
-  const { user, token } = useAuthStore();
-  
+  const { user, token } = useAuthStore()
+
   // Состояние формы
-  const [eventTitle, setEventTitle] = useState(eventData?.title || '');
-  const [scheme, setScheme] = useState(eventData?.scheme || 'FOR_TIME'); // По умолчанию FOR_TIME
-  const [exerciseType, setExerciseType] = useState(eventData?.exerciseType || '');
-  const [exercises, setExercises] = useState<Exercise[]>(eventData?.exercises || []);
-  const [timeCap, setTimeCap] = useState(eventData?.timeCap || '');
-  const [rounds, setRounds] = useState(eventData?.rounds || '');
-  
+  const [eventTitle, setEventTitle] = useState(eventData?.title || "")
+  const [scheme, setScheme] = useState(eventData?.scheme || "FOR_TIME") // По умолчанию FOR_TIME
+  const [exerciseType, setExerciseType] = useState(eventData?.exerciseType || "")
+  const [exercises, setExercises] = useState<Exercise[]>(eventData?.exercises || [])
+  const [timeCap, setTimeCap] = useState(eventData?.timeCap || "")
+  const [rounds, setRounds] = useState(eventData?.rounds || "")
+
   // Состояние ввода упражнений
-  const [exerciseName, setExerciseName] = useState('');
-  const [rxWeight, setRxWeight] = useState('');
-  const [rxReps, setRxReps] = useState('');
-  const [scWeight, setScWeight] = useState('');
-  const [scReps, setScReps] = useState('');
-  
+  const [exerciseName, setExerciseName] = useState("")
+  const [rxWeight, setRxWeight] = useState("")
+  const [rxReps, setRxReps] = useState("")
+  const [scWeight, setScWeight] = useState("")
+  const [scReps, setScReps] = useState("")
+
   // Состояние измерения упражнений
-  const [exerciseMeasurement, setExerciseMeasurement] = useState<'weight' | 'calories'>('weight');
-  const [rxCalories, setRxCalories] = useState('');
-  const [scCalories, setScCalories] = useState('');
-  
-  const [error, setError] = useState<string | null>(null);
-  
-  const [sortedResults, setSortedResults] = useState<EventResult[]>(eventData?.results || []);
-  const [isSorted, setIsSorted] = useState(false);
-  
+  const [exerciseMeasurement, setExerciseMeasurement] = useState<"weight" | "calories">(
+    "weight",
+  )
+  const [rxCalories, setRxCalories] = useState("")
+  const [scCalories, setScCalories] = useState("")
+
+  const [error, setError] = useState<string | null>(null)
+
+  const [sortedResults, setSortedResults] = useState<EventResult[]>(
+    eventData?.results || [],
+  )
+  const [isSorted, setIsSorted] = useState(false)
+
   // Состояние команды
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeamId, setSelectedTeamId] = useState<string>(eventData?.teamId || initialTeamId || '');
-  
+  const [teams, setTeams] = useState<Team[]>([])
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(
+    eventData?.teamId || initialTeamId || "",
+  )
+
   // Состояние назначения участников
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [assignMode, setAssignMode] = useState<'all' | 'selected'>('all');
-  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
+  const [assignMode, setAssignMode] = useState<"all" | "selected">("all")
+  const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([])
 
   // Получение команд
   useEffect(() => {
@@ -77,127 +83,127 @@ const EventModal: React.FC<EventModalProps> = ({
         try {
           const response = await fetch(`/api/teams?userId=${user.id}`, {
             headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
+              Authorization: `Bearer ${token}`,
+            },
+          })
           if (response.ok) {
-            const data = await response.json();
-            setTeams(data);
+            const data = await response.json()
+            setTeams(data)
           }
         } catch (error) {
-           console.error("Failed to fetch teams", error);
+          logApiError(`/api/teams?userId=${user.id}`, error)
         }
       }
-    };
-    fetchTeams();
-  }, [user, token]);
+    }
+    fetchTeams()
+  }, [user, token])
 
   // Получение участников команды при изменении команды
   useEffect(() => {
     const fetchMembers = async () => {
-        if (selectedTeamId && token) {
-            try {
-                const response = await fetch(`/api/teams/${selectedTeamId}/members`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (response.ok) {
-                    const data = await response.json();
-                    setTeamMembers(data);
-                } else {
-                    setTeamMembers([]);
-                }
-            } catch (error) {
-                console.error("Failed to fetch team members", error);
-                setTeamMembers([]);
-            }
-        } else {
-            setTeamMembers([]);
+      if (selectedTeamId && token) {
+        try {
+          const response = await fetch(`/api/teams/${selectedTeamId}/members`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (response.ok) {
+            const data = await response.json()
+            setTeamMembers(data)
+          } else {
+            setTeamMembers([])
+          }
+        } catch (error) {
+          logApiError(`/api/teams/${selectedTeamId}/members`, error)
+          setTeamMembers([])
         }
-    };
-    fetchMembers();
-  }, [selectedTeamId, token]);
+      } else {
+        setTeamMembers([])
+      }
+    }
+    fetchMembers()
+  }, [selectedTeamId, token])
 
   // Обработка инициализации и обновлений формы
   useEffect(() => {
     if (isOpen && eventData) {
-      setEventTitle(eventData.title || '');
-      setScheme(eventData.scheme || 'FOR_TIME');
-      setExerciseType(eventData.exerciseType || '');
-      setExercises(eventData.exercises || []);
-      setSortedResults(eventData.results || []);
-      setSelectedTeamId(eventData.teamId || '');
-      setTimeCap(eventData.timeCap || '');
-      setRounds(eventData.rounds || '');
-      
+      setEventTitle(eventData.title || "")
+      setScheme(eventData.scheme || "FOR_TIME")
+      setExerciseType(eventData.exerciseType || "")
+      setExercises(eventData.exercises || [])
+      setSortedResults(eventData.results || [])
+      setSelectedTeamId(eventData.teamId || "")
+      setTimeCap(eventData.timeCap || "")
+      setRounds(eventData.rounds || "")
+
       // Инициализация состояния назначения
       if (eventData.participants && eventData.participants.length > 0) {
-          setAssignMode('selected');
-          setSelectedMemberIds(eventData.participants.map(p => p.id));
+        setAssignMode("selected")
+        setSelectedMemberIds(eventData.participants.map((p) => p.id))
       } else {
-          setAssignMode('all');
-          setSelectedMemberIds([]);
+        setAssignMode("all")
+        setSelectedMemberIds([])
       }
     } else if (isOpen) {
       // Сброс формы при открытии без данных события
-      setEventTitle('');
-      setScheme('FOR_TIME');
-      setExerciseType('');
-      setExercises([]);
-      setExerciseName('');
-      setRxWeight('');
-      setRxReps('');
-      setScWeight('');
-      setScReps('');
-      setExerciseMeasurement('weight');
-      setRxCalories('');
-      setScCalories('');
-      setError(null);
-      setSortedResults([]);
-      setIsSorted(false);
-      setSelectedTeamId(initialTeamId || '');
-      setTimeCap('');
-      setRounds('');
-      setAssignMode('all');
-      setSelectedMemberIds([]);
+      setEventTitle("")
+      setScheme("FOR_TIME")
+      setExerciseType("")
+      setExercises([])
+      setExerciseName("")
+      setRxWeight("")
+      setRxReps("")
+      setScWeight("")
+      setScReps("")
+      setExerciseMeasurement("weight")
+      setRxCalories("")
+      setScCalories("")
+      setError(null)
+      setSortedResults([])
+      setIsSorted(false)
+      setSelectedTeamId(initialTeamId || "")
+      setTimeCap("")
+      setRounds("")
+      setAssignMode("all")
+      setSelectedMemberIds([])
     }
-  }, [isOpen, eventData, initialTeamId]);
+  }, [isOpen, eventData, initialTeamId])
 
   const resetForm = () => {
-    setEventTitle(eventData?.title || '');
-    setScheme(eventData?.scheme || 'FOR_TIME');
-    setExerciseType(eventData?.exerciseType || '');
-    setExercises(eventData?.exercises || []);
-    setExerciseName('');
-    setRxWeight('');
-    setRxReps('');
-    setScWeight('');
-    setScReps('');
-    setExerciseMeasurement('weight');
-    setRxCalories('');
-    setScCalories('');
-    setError(null);
-    setSortedResults(eventData?.results || []);
-    setIsSorted(false);
-    setSelectedTeamId(eventData?.teamId || initialTeamId || '');
-    setTimeCap(eventData?.timeCap || '');
-    setRounds(eventData?.rounds || '');
-    setAssignMode('all');
-    setSelectedMemberIds([]);
-  };
+    setEventTitle(eventData?.title || "")
+    setScheme(eventData?.scheme || "FOR_TIME")
+    setExerciseType(eventData?.exerciseType || "")
+    setExercises(eventData?.exercises || [])
+    setExerciseName("")
+    setRxWeight("")
+    setRxReps("")
+    setScWeight("")
+    setScReps("")
+    setExerciseMeasurement("weight")
+    setRxCalories("")
+    setScCalories("")
+    setError(null)
+    setSortedResults(eventData?.results || [])
+    setIsSorted(false)
+    setSelectedTeamId(eventData?.teamId || initialTeamId || "")
+    setTimeCap(eventData?.timeCap || "")
+    setRounds(eventData?.rounds || "")
+    setAssignMode("all")
+    setSelectedMemberIds([])
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
+    e.preventDefault()
+    setError(null)
 
     // Валидация
     if (!eventTitle.trim()) {
-      setError('Название события обязательно для заполнения');
-      return;
+      setError("Название события обязательно для заполнения")
+      return
     }
 
     if (exercises.length === 0) {
-      setError('Необходимо добавить хотя бы одно упражнение');
-      return;
+      setError("Необходимо добавить хотя бы одно упражнение")
+      return
     }
 
     if (eventTitle.trim()) {
@@ -210,25 +216,27 @@ const EventModal: React.FC<EventModalProps> = ({
         timeCap,
         rounds,
         // Передача информации о назначении. Если 'all', assignedUserIds не определен или пуст, что подразумевает всю команду
-        assignedUserIds: assignMode === 'selected' ? selectedMemberIds : undefined
-      });
+        assignedUserIds: assignMode === "selected" ? selectedMemberIds : undefined,
+      })
     }
-  };
+  }
 
   const handleClose = () => {
     // Проверка, находимся ли мы в режиме редактирования (данные события существуют)
     if (eventData) {
-      const confirmClose = window.confirm('Внесенные изменения не сохранятся. Вы уверены, что хотите закрыть?');
+      const confirmClose = window.confirm(
+        "Внесенные изменения не сохранятся. Вы уверены, что хотите закрыть?",
+      )
       if (confirmClose) {
-        resetForm();
-        onClose();
+        resetForm()
+        onClose()
       }
     } else {
       // Режим создания - просто закрыть
-      resetForm();
-      onClose();
+      resetForm()
+      onClose()
     }
-  };
+  }
 
   const handleAddExercise = () => {
     if (exerciseName.trim()) {
@@ -240,56 +248,61 @@ const EventModal: React.FC<EventModalProps> = ({
         scWeight, // Добавить scWeight
         scReps,
         measurement: exerciseMeasurement,
-        rxCalories: exerciseMeasurement === 'calories' ? rxCalories : undefined,
-        scCalories: exerciseMeasurement === 'calories' ? scCalories : undefined
-      };
-      setExercises([...exercises, newExercise]);
-      setExerciseName('');
-      setRxWeight('');
-      setRxReps('');
-      setScWeight('');
-      setScReps('');
-      setRxCalories('');
-      setScCalories('');
+        rxCalories: exerciseMeasurement === "calories" ? rxCalories : undefined,
+        scCalories: exerciseMeasurement === "calories" ? scCalories : undefined,
+      }
+      setExercises([...exercises, newExercise])
+      setExerciseName("")
+      setRxWeight("")
+      setRxReps("")
+      setScWeight("")
+      setScReps("")
+      setRxCalories("")
+      setScCalories("")
     }
-  };
+  }
 
   const handleRemoveExercise = (id: string) => {
-    setExercises(exercises.filter(exercise => exercise.id !== id));
-  };
-  
-  const toggleMemberSelection = (userId: string) => {
-      setSelectedMemberIds(prev => 
-        prev.includes(userId) 
-            ? prev.filter(id => id !== userId)
-            : [...prev, userId]
-      );
-  };
+    setExercises(exercises.filter((exercise) => exercise.id !== id))
+  }
 
-  if (!isOpen) return null;
+  const toggleMemberSelection = (userId: string) => {
+    setSelectedMemberIds((prev) =>
+      prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId],
+    )
+  }
+
+  if (!isOpen) return null
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-transparent backdrop-blur-sm flex items-center justify-center z-50 event-modal"
       onClick={handleClose}
-      data-event-modal="true"
-    >
-      <div 
+      data-event-modal="true">
+      <div
         className="bg-white p-4 sm:p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto sm:m-4"
         onClick={(e) => e.stopPropagation()}
-        data-event-modal-content="true"
-      >
+        data-event-modal-content="true">
         <div className="flex justify-between items-start mb-4">
           <h3 className="text-lg font-semibold">
-            {eventData ? 'Редактировать событие для' : 'Добавить событие для'} {date}
+            {eventData ? "Редактировать событие для" : "Добавить событие для"} {date}
           </h3>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 focus:outline-none"
-            aria-label="Close"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            aria-label="Close">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-6 w-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -300,7 +313,9 @@ const EventModal: React.FC<EventModalProps> = ({
             </div>
           )}
           <div className="mb-4">
-            <label htmlFor="eventTitle" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="eventTitle"
+              className="block text-sm font-medium text-gray-700 mb-1">
               Название события <span className="text-red-500">*</span>
             </label>
             <input
@@ -313,17 +328,18 @@ const EventModal: React.FC<EventModalProps> = ({
               autoFocus
             />
           </div>
-          
+
           <div className="mb-4">
-            <label htmlFor="team" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="team"
+              className="block text-sm font-medium text-gray-700 mb-1">
               Команда (необязательно)
             </label>
             <select
               id="team"
               value={selectedTeamId}
               onChange={(e) => setSelectedTeamId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="">Личное событие</option>
               {teams.map((team) => (
                 <option key={team.id} value={team.id}>
@@ -332,63 +348,72 @@ const EventModal: React.FC<EventModalProps> = ({
               ))}
             </select>
           </div>
-          
+
           {/* Athlete Assignment UI */}
           {selectedTeamId && teamMembers.length > 0 && (
-              <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Назначить:</label>
-                  <div className="flex gap-4 mb-3">
-                      <label className="flex items-center gap-2 text-sm cursor-pointer">
-                          <input 
-                            type="radio" 
-                            name="assignMode" 
-                            checked={assignMode === 'all'} 
-                            onChange={() => setAssignMode('all')}
-                            className="text-blue-600 focus:ring-blue-500"
-                          />
-                          Всей команде
-                      </label>
-                      <label className="flex items-center gap-2 text-sm cursor-pointer">
-                          <input 
-                            type="radio" 
-                            name="assignMode" 
-                            checked={assignMode === 'selected'} 
-                            onChange={() => setAssignMode('selected')}
-                             className="text-blue-600 focus:ring-blue-500"
-                          />
-                          Выбрать атлетов
-                      </label>
-                  </div>
-                  
-                  {assignMode === 'selected' && (
-                      <div className="max-h-40 overflow-y-auto border border-gray-300 rounded bg-white p-2">
-                          <div className="text-xs text-gray-500 mb-2">Выберите одного или нескольких</div>
-                          {teamMembers.map(member => (
-                              <label key={member.id} className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 cursor-pointer rounded">
-                                  <input 
-                                    type="checkbox"
-                                    checked={selectedMemberIds.includes(member.user.id)}
-                                    onChange={() => toggleMemberSelection(member.user.id)}
-                                    className="rounded text-blue-600 focus:ring-blue-500"
-                                  />
-                                  <span className="text-sm">{member.user.name} {member.user.lastName || ''}</span>
-                              </label>
-                          ))}
-                      </div>
-                  )}
+            <div className="mb-4 p-3 bg-gray-50 rounded-md border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Назначить:
+              </label>
+              <div className="flex gap-4 mb-3">
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="assignMode"
+                    checked={assignMode === "all"}
+                    onChange={() => setAssignMode("all")}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  Всей команде
+                </label>
+                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                  <input
+                    type="radio"
+                    name="assignMode"
+                    checked={assignMode === "selected"}
+                    onChange={() => setAssignMode("selected")}
+                    className="text-blue-600 focus:ring-blue-500"
+                  />
+                  Выбрать атлетов
+                </label>
               </div>
+
+              {assignMode === "selected" && (
+                <div className="max-h-40 overflow-y-auto border border-gray-300 rounded bg-white p-2">
+                  <div className="text-xs text-gray-500 mb-2">
+                    Выберите одного или нескольких
+                  </div>
+                  {teamMembers.map((member) => (
+                    <label
+                      key={member.id}
+                      className="flex items-center gap-2 py-1 px-2 hover:bg-gray-50 cursor-pointer rounded">
+                      <input
+                        type="checkbox"
+                        checked={selectedMemberIds.includes(member.user.id)}
+                        onChange={() => toggleMemberSelection(member.user.id)}
+                        className="rounded text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm">
+                        {member.user.name} {member.user.lastName || ""}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
 
           <div className="mb-4">
-            <label htmlFor="scheme" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="scheme"
+              className="block text-sm font-medium text-gray-700 mb-1">
               Тип задания (Scheme)
             </label>
             <select
               id="scheme"
               value={scheme}
               onChange={(e) => setScheme(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               <option value="FOR_TIME">For Time (На время)</option>
               <option value="AMRAP">AMRAP (Макс. раундов)</option>
               <option value="EMOM">EMOM (Каждую минуту)</option>
@@ -396,10 +421,12 @@ const EventModal: React.FC<EventModalProps> = ({
             </select>
           </div>
 
-          {(scheme === 'FOR_TIME' || scheme === 'AMRAP' || scheme === 'EMOM') && (
+          {(scheme === "FOR_TIME" || scheme === "AMRAP" || scheme === "EMOM") && (
             <div className="mb-4 grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="timeCap" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="timeCap"
+                  className="block text-sm font-medium text-gray-700 mb-1">
                   Time Cap (Лимит времени)
                 </label>
                 <input
@@ -411,9 +438,11 @@ const EventModal: React.FC<EventModalProps> = ({
                   placeholder="Например: 15:00"
                 />
               </div>
-              {scheme === 'EMOM' && (
+              {scheme === "EMOM" && (
                 <div>
-                  <label htmlFor="rounds" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="rounds"
+                    className="block text-sm font-medium text-gray-700 mb-1">
                     Количество раундов
                   </label>
                   <input
@@ -430,10 +459,12 @@ const EventModal: React.FC<EventModalProps> = ({
           )}
 
           <div className="mb-4">
-            <label htmlFor="exerciseType" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="exerciseType"
+              className="block text-sm font-medium text-gray-700 mb-1">
               Название комплекса (опционально)
             </label>
-             <input
+            <input
               type="text"
               id="exerciseType"
               value={exerciseType}
@@ -447,10 +478,12 @@ const EventModal: React.FC<EventModalProps> = ({
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Упражнения
             </label>
-            
+
             <div className="grid grid-cols-1 gap-4 mb-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Название</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Название
+                </label>
                 <input
                   type="text"
                   value={exerciseName}
@@ -459,37 +492,37 @@ const EventModal: React.FC<EventModalProps> = ({
                   placeholder="Например: Трастеры"
                 />
               </div>
-              
+
               <div className="flex gap-2 mb-3">
                 <button
                   type="button"
-                  onClick={() => setExerciseMeasurement('weight')}
+                  onClick={() => setExerciseMeasurement("weight")}
                   className={`px-3 py-1 text-xs font-medium rounded ${
-                    exerciseMeasurement === 'weight'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
+                    exerciseMeasurement === "weight"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}>
                   Вес / Повторы
                 </button>
                 <button
                   type="button"
-                  onClick={() => setExerciseMeasurement('calories')}
+                  onClick={() => setExerciseMeasurement("calories")}
                   className={`px-3 py-1 text-xs font-medium rounded ${
-                    exerciseMeasurement === 'calories'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
+                    exerciseMeasurement === "calories"
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}>
                   Каллории
                 </button>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-blue-50 p-3 rounded">
-                  <div className="text-center font-semibold text-blue-800 mb-2 text-sm">Rx</div>
+                  <div className="text-center font-semibold text-blue-800 mb-2 text-sm">
+                    Rx
+                  </div>
                   <div className="space-y-2">
-                    {exerciseMeasurement === 'weight' ? (
+                    {exerciseMeasurement === "weight" ? (
                       <>
                         <input
                           type="text"
@@ -517,11 +550,13 @@ const EventModal: React.FC<EventModalProps> = ({
                     )}
                   </div>
                 </div>
-                
+
                 <div className="bg-green-50 p-3 rounded">
-                  <div className="text-center font-semibold text-green-800 mb-2 text-sm">Sc</div>
+                  <div className="text-center font-semibold text-green-800 mb-2 text-sm">
+                    Sc
+                  </div>
                   <div className="space-y-2">
-                    {exerciseMeasurement === 'weight' ? (
+                    {exerciseMeasurement === "weight" ? (
                       <>
                         <input
                           type="text"
@@ -550,39 +585,38 @@ const EventModal: React.FC<EventModalProps> = ({
                   </div>
                 </div>
               </div>
-              
+
               <button
                 type="button"
                 onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  handleAddExercise();
+                  e.stopPropagation()
+                  e.preventDefault()
+                  handleAddExercise()
                 }}
-                className="w-full py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition text-sm"
-              >
+                className="w-full py-2 bg-indigo-500 text-white rounded hover:bg-indigo-600 transition text-sm">
                 Добавить упражнение
               </button>
             </div>
-            
+
             {exercises.length > 0 && (
               <ul className="border border-gray-200 rounded-md max-h-40 overflow-y-auto bg-white">
                 {exercises.map((exercise) => (
-                  <li 
-                    key={exercise.id} 
-                    className="flex justify-between items-center px-3 py-2 border-b border-gray-100 last:border-b-0"
-                  >
+                  <li
+                    key={exercise.id}
+                    className="flex justify-between items-center px-3 py-2 border-b border-gray-100 last:border-b-0">
                     <div>
                       <div className="font-medium text-sm">{exercise.name}</div>
                       <div className="text-xs text-gray-500">
-                        {exercise.measurement === 'calories' ? (
+                        {exercise.measurement === "calories" ? (
                           <>
-                            Rx: {exercise.rxCalories || '-'} кал. | 
-                            Sc: {exercise.scCalories || '-'} кал.
+                            Rx: {exercise.rxCalories || "-"} кал. | Sc:{" "}
+                            {exercise.scCalories || "-"} кал.
                           </>
                         ) : (
                           <>
-                            Rx: {exercise.rxWeight || exercise.weight || '-'} кг. / {exercise.rxReps || exercise.repetitions || '-'} пов. | 
-                            Sc: {exercise.scWeight || '-'} кг. / {exercise.scReps || '-'} пов.
+                            Rx: {exercise.rxWeight || exercise.weight || "-"} кг. /{" "}
+                            {exercise.rxReps || exercise.repetitions || "-"} пов. | Sc:{" "}
+                            {exercise.scWeight || "-"} кг. / {exercise.scReps || "-"} пов.
                           </>
                         )}
                       </div>
@@ -590,12 +624,11 @@ const EventModal: React.FC<EventModalProps> = ({
                     <button
                       type="button"
                       onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        handleRemoveExercise(exercise.id);
+                        e.stopPropagation()
+                        e.preventDefault()
+                        handleRemoveExercise(exercise.id)
                       }}
-                      className="text-red-500 hover:text-red-700 text-sm px-2"
-                    >
+                      className="text-red-500 hover:text-red-700 text-sm px-2">
                       ✕
                     </button>
                   </li>
@@ -611,57 +644,57 @@ const EventModal: React.FC<EventModalProps> = ({
                 <label className="block text-sm font-medium text-gray-700">
                   Результаты
                 </label>
-                <button 
+                <button
                   onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    
-                    const currentScheme = eventData?.scheme || 'FOR_TIME';
-                    
-                    const sorted = [...(isSorted ? eventData?.results! : sortedResults)].sort((a, b) => {
-                       let valA = a.value;
-                       let valB = b.value;
-                       
-                       // Обратная совместимость для устаревших данных FOR_TIME без 'value'
-                       if (valA === undefined || valA === null) {
-                           const parts = a.time.split(':');
-                           if (parts.length >= 2) {
-                             valA = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-                           } else {
-                             valA = parseFloat(a.time) || 0;
-                           }
-                       }
-                       
-                       if (valB === undefined || valB === null) {
-                           const parts = b.time.split(':');
-                           if (parts.length >= 2) {
-                             valB = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-                           } else {
-                             valB = parseFloat(b.time) || 0;
-                           }
-                       }
+                    e.stopPropagation()
+                    e.preventDefault()
 
-                       // Направление сортировки
-                       if (currentScheme === 'FOR_TIME') {
-                           return (valA || 0) - (valB || 0); // По возрастанию
-                       } else {
-                           return (valB || 0) - (valA || 0); // По убыванию
-                       }
-                    });
-                    setSortedResults(sorted);
-                    setIsSorted(!isSorted);
+                    const currentScheme = eventData?.scheme || "FOR_TIME"
+
+                    const sorted = [
+                      ...(isSorted ? eventData?.results! : sortedResults),
+                    ].sort((a, b) => {
+                      let valA = a.value
+                      let valB = b.value
+
+                      // Обратная совместимость для устаревших данных FOR_TIME без 'value'
+                      if (valA === undefined || valA === null) {
+                        const parts = a.time.split(":")
+                        if (parts.length >= 2) {
+                          valA = parseInt(parts[0]) * 60 + parseInt(parts[1])
+                        } else {
+                          valA = parseFloat(a.time) || 0
+                        }
+                      }
+
+                      if (valB === undefined || valB === null) {
+                        const parts = b.time.split(":")
+                        if (parts.length >= 2) {
+                          valB = parseInt(parts[0]) * 60 + parseInt(parts[1])
+                        } else {
+                          valB = parseFloat(b.time) || 0
+                        }
+                      }
+
+                      // Направление сортировки
+                      if (currentScheme === "FOR_TIME") {
+                        return (valA || 0) - (valB || 0) // По возрастанию
+                      } else {
+                        return (valB || 0) - (valA || 0) // По убыванию
+                      }
+                    })
+                    setSortedResults(sorted)
+                    setIsSorted(!isSorted)
                   }}
-                  className="text-xs text-blue-500 hover:text-blue-700"
-                >
-                  {isSorted ? 'Отменить сортировку' : 'Сортировать по результату'}
+                  className="text-xs text-blue-500 hover:text-blue-700">
+                  {isSorted ? "Отменить сортировку" : "Сортировать по результату"}
                 </button>
               </div>
               <ul className="border border-gray-200 rounded-md max-h-32 overflow-y-auto bg-gray-50">
                 {(isSorted ? sortedResults : eventData.results).map((result) => (
-                  <li 
-                    key={result.id} 
-                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 py-2 border-b border-gray-100 last:border-b-0 text-sm gap-1"
-                  >
+                  <li
+                    key={result.id}
+                    className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 py-2 border-b border-gray-100 last:border-b-0 text-sm gap-1">
                     <span className="font-medium">{result.time}</span>
                     <div className="text-gray-500 text-xs">
                       <div>{result.dateAdded}</div>
@@ -672,37 +705,35 @@ const EventModal: React.FC<EventModalProps> = ({
               </ul>
             </div>
           )}
-          
+
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 mt-4">
             <button
               type="button"
               onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                e.stopPropagation();
-                e.preventDefault();
-                handleClose();
+                e.stopPropagation()
+                e.preventDefault()
+                e.stopPropagation()
+                e.preventDefault()
+                handleClose()
               }}
-              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none w-full sm:w-auto"
-            >
+              className="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300 focus:outline-none w-full sm:w-auto">
               Отмена
             </button>
             <button
               type="submit"
               onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                handleSubmit(e as React.FormEvent);
+                e.stopPropagation()
+                e.preventDefault()
+                handleSubmit(e as React.FormEvent)
               }}
-              className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none w-full sm:w-auto"
-            >
-              {eventData ? 'Сохранить изменения' : 'Сохранить'}
+              className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none w-full sm:w-auto">
+              {eventData ? "Сохранить изменения" : "Сохранить"}
             </button>
           </div>
         </form>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default EventModal;
+export default EventModal

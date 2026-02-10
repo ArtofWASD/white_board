@@ -1,8 +1,11 @@
+"use client"
+
 import React, { useState, useEffect } from "react"
 import { Chat } from "../../types/chat.types"
 import { getUserChats } from "../../lib/api/chat"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { MessageSquare, Users } from "lucide-react"
+import { logApiError } from "../../lib/logger"
 
 interface ChatListProps {
   onSelectChat: (chatId: string) => void
@@ -20,7 +23,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
         const data = await getUserChats()
         setChats(data)
       } catch (error) {
-        console.error("Failed to fetch chats", error)
+        logApiError("/api/chats", error)
       } finally {
         setLoading(false)
       }

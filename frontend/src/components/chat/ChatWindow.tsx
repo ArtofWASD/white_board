@@ -1,8 +1,11 @@
+"use client"
+
 import React, { useState, useEffect, useRef, useLayoutEffect } from "react"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Chat, Message } from "../../types/chat.types"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
+import { logApiError } from "../../lib/logger"
 
 interface ChatWindowProps {
   chatId: string
@@ -19,7 +22,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   title,
   className = "",
 }) => {
-  const { user, token } = useAuthStore()
+  const { user } = useAuthStore()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -58,7 +61,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         if (isMatch) {
           try {
             const response = await fetch(`/api/chats/${chatId}/messages?limit=1&skip=0`, {
-              headers: { Authorization: `Bearer ${token}` },
+              credentials: "include",
             })
 
             if (response.ok) {
@@ -87,7 +90,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
               }
             }
           } catch (e) {
-            console.error("ChatWindow: Failed to fetch new message", e)
+            logApiError(`/api/chats/${chatId}/messages`, e, { chatId })
           }
         }
       }
@@ -101,7 +104,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         socketInstance.off("newNotification", listenerRef)
       }
     }
-  }, [chatId, token])
+  }, [chatId])
 
   const fetchMessages = async (offset: number, isLoadMore: boolean = false) => {
     if (isLoading) return
@@ -111,9 +114,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       const response = await fetch(
         `/api/chats/${chatId}/messages?limit=${MESSAGES_PER_PAGE}&skip=${offset}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          credentials: "include",
         },
       )
       if (response.ok) {
@@ -132,7 +133,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         })
       }
     } catch (error) {
-      console.error("Failed to fetch messages", error)
+      logApiError(`/api/chats/${chatId}/messages`, error, { chatId })
     } finally {
       setIsLoading(false)
     }
@@ -201,8 +202,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ content: newMessage, type: "text" }),
       })
 
@@ -218,7 +219,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         }, 50)
       }
     } catch (error) {
-      console.error("Failed to send message", error)
+      logApiError(`/api/chats/${chatId}/messages`, error, { chatId })
     }
   }
 

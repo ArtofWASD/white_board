@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createBackendHeaders, forwardSetCookieHeaders } from "@/lib/api/cookieHelpers"
+import {
+  createBackendHeadersWithCsrf,
+  forwardSetCookieHeaders,
+} from "@/lib/api/cookieHelpers"
 
 export async function POST(request: NextRequest) {
   try {
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const headers = await createBackendHeaders(request)
+    const headers = await createBackendHeadersWithCsrf(request)
 
     const response = await fetch(`${backendUrl}/auth/logout`, {
       method: "POST",

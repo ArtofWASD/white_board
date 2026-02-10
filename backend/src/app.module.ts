@@ -17,6 +17,7 @@ import { ContentExercisesModule } from './modules/content-exercises.module';
 import { NewsModule } from './modules/news.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ChatModule } from './modules/chat.module';
+import { CsrfModule } from './modules/csrf.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { ChatModule } from './modules/chat.module';
     NewsModule,
     NotificationsModule,
     ChatModule,
+    CsrfModule,
   ],
   controllers: [AppController],
   providers: [AppService],

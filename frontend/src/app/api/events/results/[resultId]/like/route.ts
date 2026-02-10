@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
+import { getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
 
 export async function POST(
   request: NextRequest,
@@ -11,11 +12,14 @@ export async function POST(
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const csrfToken = await getCsrfTokenFromCookie()
 
     const response = await fetch(`${backendUrl}/events/results/${resultId}/like`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
       body: JSON.stringify(body),
     })

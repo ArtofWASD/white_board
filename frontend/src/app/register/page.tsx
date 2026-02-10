@@ -8,6 +8,7 @@ import { useAuthStore } from "../../lib/store/useAuthStore"
 import Button from "../../components/ui/Button"
 import SuccessModal from "../../components/ui/SuccessModal"
 import ErrorDisplay from "../../components/ui/ErrorDisplay"
+import { logApiError } from "../../lib/logger"
 
 function RegisterForm() {
   const [step, setStep] = useState(1)
@@ -48,7 +49,7 @@ function RegisterForm() {
           setSettings(data)
         }
       } catch (e) {
-        console.error("Failed to fetch settings", e)
+        logApiError("/api/settings/public", e)
       } finally {
         setLoadingSettings(false)
       }

@@ -7,7 +7,9 @@ import { useMediaQuery } from "../../hooks/useMediaQuery"
 import { Modal } from "../../components/ui/Modal"
 import { ChatWindow } from "../../components/chat/ChatWindow"
 import { useAuthStore } from "../../lib/store/useAuthStore"
-import { createDirectChat } from "../../lib/api/chat"
+import { createDirectChat, getTeamChat } from "../../lib/api/chat"
+import { useRouter } from "next/navigation"
+import { logApiError } from "../../lib/logger"
 import { MessageSquare, UserPlus } from "lucide-react"
 
 interface AthleteTeamViewProps {
@@ -30,7 +32,7 @@ const AthleteTeamView: React.FC<
   const [isChatOpen, setIsChatOpen] = useState(false)
   const [activeTeamChat, setActiveTeamChat] = useState<string | null>(null)
   const [activeTeamName, setActiveTeamName] = useState<string>("")
-  const { token, user } = useAuthStore()
+  const { user } = useAuthStore()
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -49,9 +51,7 @@ const AthleteTeamView: React.FC<
 
     try {
       const response = await fetch(`/api/chats/team/${team.id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        credentials: "include",
       })
       if (response.ok) {
         const chat = await response.json()
@@ -59,7 +59,7 @@ const AthleteTeamView: React.FC<
         setIsChatOpen(true)
       }
     } catch (error) {
-      console.error("Failed to fetch team chat", error)
+      logApiError(`/api/chats/team/${team.id}`, error, { teamId: team.id })
     }
   }
 
@@ -154,7 +154,9 @@ const AthleteTeamView: React.FC<
                           setActiveTeamName(`Чат с тренером: ${team.owner?.name}`)
                           setIsChatOpen(true)
                         } catch (error) {
-                          console.error("Failed to open trainer chat", error)
+                          logApiError("/api/chats/direct", error, {
+                            targetUserId: team.ownerId,
+                          })
                         }
                       }
                     }}

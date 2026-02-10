@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server"
 import { cookies } from "next/headers"
+import { getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
 
 async function getToken(request: Request) {
-  const authHeader = request.headers.get("Authorization") || request.headers.get("authorization")
+  const authHeader =
+    request.headers.get("Authorization") || request.headers.get("authorization")
   if (authHeader && authHeader.startsWith("Bearer ")) {
     return authHeader
   }
@@ -14,13 +16,16 @@ async function getToken(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const authHeader = await getToken(request)
+    const csrfToken = await getCsrfTokenFromCookie()
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    
+
     const response = await fetch(`${backendUrl}/notifications/read-all`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
         ...(authHeader && { Authorization: authHeader }),
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
     })
 

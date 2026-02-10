@@ -1,256 +1,256 @@
-'use client';
+"use client"
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useAuthStore } from '../../lib/store/useAuthStore';
-import { useToast } from '../../lib/context/ToastContext';
-import { QRCodeCanvas } from 'qrcode.react';
-
-import { TeamManagementUser as User, TeamMember, Team } from '../../types/TeamManagement.types';
-import { User as FullUser } from '../../types';
-import { UserDetailModal } from './UserDetailModal';
-import { AddMemberModal } from './AddMemberModal';
-import Button from '../../components/ui/Button';
+import React, { useState, useEffect, useCallback } from "react"
+import { useAuthStore } from "../../lib/store/useAuthStore"
+import { useToast } from "../../lib/context/ToastContext"
+import { logApiError } from "../../lib/logger"
+import {
+  TeamManagementUser as User,
+  TeamMember,
+  Team,
+} from "../../types/TeamManagement.types"
+import { User as FullUser } from "../../types"
+import { UserDetailModal } from "./UserDetailModal"
+import { AddMemberModal } from "./AddMemberModal"
+import Button from "../../components/ui/Button"
+import { QRCodeSVG } from "qrcode.react"
 
 export default function TeamManagement() {
-  const { user, token } = useAuthStore();
-  const { success, error: toastError } = useToast();
-  const [teams, setTeams] = useState<Team[]>([]);
-  const [teamMembers, setTeamMembers] = useState<{[key: string]: TeamMember[]}>({});
-  const [newTeamName, setNewTeamName] = useState('');
-  const [newTeamDescription, setNewTeamDescription] = useState('');
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [inviteCode, setInviteCode] = useState<string | null>(null);
-  const [inviteLink, setInviteLink] = useState<string | null>(null);
-  
+  const { user } = useAuthStore()
+  const { success, error: toastError } = useToast()
+  const [teams, setTeams] = useState<Team[]>([])
+  const [teamMembers, setTeamMembers] = useState<{ [key: string]: TeamMember[] }>({})
+  const [newTeamName, setNewTeamName] = useState("")
+  const [newTeamDescription, setNewTeamDescription] = useState("")
+  const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
+  const [inviteLink, setInviteLink] = useState<string | null>(null)
+
   // User detail modal state
-  const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(
+    null,
+  )
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
 
   // Add Member Modal state
-  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false);
+  const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false)
 
   const handleUserClick = (user: any) => {
-    setSelectedUserForDetail(user as FullUser);
-    setIsDetailModalOpen(true);
-  };
+    setSelectedUserForDetail(user as FullUser)
+    setIsDetailModalOpen(true)
+  }
 
   const fetchUserTeams = useCallback(async () => {
     try {
-      setLoading(true);
+      setLoading(true)
       const response = await fetch(`/api/teams/user/${user?.id}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const data = await response.json();
-      setTeams(data);
+        credentials: "include",
+      })
+      const data = await response.json()
+      setTeams(data)
     } catch (err) {
-      toastError('Не удалось загрузить команды');
-
+      toastError("Не удалось загрузить команды")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [user?.id]);
+  }, [user?.id])
 
   const fetchTeamMembers = useCallback(async (teamId: string) => {
     try {
       const response = await fetch(`/api/teams/${teamId}/members`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
+        credentials: "include",
+      })
       if (response.ok) {
-        const data = await response.json();
-        setTeamMembers(prev => ({...prev, [teamId]: data}));
+        const data = await response.json()
+        setTeamMembers((prev) => ({ ...prev, [teamId]: data }))
       } else {
         // Попытка распарсить ошибку как JSON, но обработка случая, если это не JSON
-        let errorMessage = 'Не удалось загрузить участников команды';
+        let errorMessage = "Не удалось загрузить участников команды"
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
         } catch {
           // Если парсинг JSON не удался, используем текст статуса или общее сообщение
-          errorMessage = response.statusText || 'Не удалось загрузить участников команды';
+          errorMessage = response.statusText || "Не удалось загрузить участников команды"
         }
-        toastError(errorMessage);
+        toastError(errorMessage)
       }
     } catch (err) {
-      toastError('Не удалось загрузить участников команды');
-
+      toastError("Не удалось загрузить участников команды")
     }
-  }, []);
+  }, [])
 
   // Получение команд пользователя
   useEffect(() => {
     if (user) {
-      fetchUserTeams();
+      fetchUserTeams()
     }
-  }, [user, fetchUserTeams]);
+  }, [user, fetchUserTeams])
 
   // Получение участников команды при выборе команды
   useEffect(() => {
     if (selectedTeam) {
-      fetchTeamMembers(selectedTeam);
-      fetchInviteCode(selectedTeam);
+      fetchTeamMembers(selectedTeam)
+      fetchInviteCode(selectedTeam)
     } else {
-        setInviteCode(null);
-        setInviteLink(null);
+      setInviteCode(null)
+      setInviteLink(null)
     }
-  }, [selectedTeam, fetchTeamMembers]);
+  }, [selectedTeam, fetchTeamMembers])
 
   const fetchInviteCode = async (teamId: string) => {
     try {
       const response = await fetch(`/api/teams/${teamId}`, {
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
         },
-      });
+        credentials: "include",
+      })
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await response.json()
         if (data.inviteCode) {
-          setInviteCode(data.inviteCode);
-          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`);
+          setInviteCode(data.inviteCode)
+          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
         } else {
-            setInviteCode(null);
-            setInviteLink(null);
+          setInviteCode(null)
+          setInviteLink(null)
         }
       }
     } catch (err) {
-      console.error('Failed to fetch invite code', err);
+      logApiError(`/api/teams/${teamId}/invite`, err, { teamId })
     }
-  };
+  }
 
   const generateInviteCode = async () => {
-    if (!selectedTeam) return;
+    if (!selectedTeam) return
     try {
-      setLoading(true);
+      setLoading(true)
       const response = await fetch(`/api/teams/${selectedTeam}/invite`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
         },
-      });
+        credentials: "include",
+      })
 
       if (response.ok) {
-        const data = await response.json();
-        setInviteCode(data.inviteCode);
-        setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`);
-        success('Ссылка для приглашения успешно создана');
+        const data = await response.json()
+        setInviteCode(data.inviteCode)
+        setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
+        success("Ссылка для приглашения успешно создана")
       } else {
-        toastError('Не удалось создать код приглашения');
+        toastError("Не удалось создать код приглашения")
       }
     } catch (err) {
-      toastError('Не удалось создать код приглашения');
+      toastError("Не удалось создать код приглашения")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const createTeam = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTeamName.trim() || !user) return;
+    e.preventDefault()
+    if (!newTeamName.trim() || !user) return
 
     try {
-      setLoading(true);
-      const response = await fetch('/api/teams', {
-        method: 'POST',
+      setLoading(true)
+      const response = await fetch("/api/teams", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           name: newTeamName,
           description: newTeamDescription,
         }),
-      });
-      
+      })
+
       if (response.ok) {
-        const newTeam = await response.json();
-        setTeams(prev => [...prev, newTeam]);
-        
+        const newTeam = await response.json()
+        setTeams((prev) => [...prev, newTeam])
+
         // Сброс формы
-        setNewTeamName('');
-        setNewTeamDescription('');
-        
-        success('Команда успешно создана!');
+        setNewTeamName("")
+        setNewTeamDescription("")
+
+        success("Команда успешно создана!")
       } else {
         if (response.status === 401) {
-          toastError('Сессия истекла. Пожалуйста, войдите снова.');
+          toastError("Сессия истекла. Пожалуйста, войдите снова.")
           // Опционально: можно перенаправить на вход или очистить стор
         } else {
-          toastError('Не удалось создать команду');
+          toastError("Не удалось создать команду")
         }
       }
     } catch (err) {
-      toastError('Произошла ошибка');
-
+      toastError("Произошла ошибка")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const removeTeamMember = async (teamId: string, userId: string) => {
-    if (!user) return;
+    if (!user) return
 
     try {
-      setLoading(true);
+      setLoading(true)
       const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({
           userId: userId,
         }),
-      });
-      
+      })
+
       if (response.ok) {
         // Обновление участников команды
-        fetchTeamMembers(teamId);
-        success('Участник успешно удален!');
+        fetchTeamMembers(teamId)
+        success("Участник успешно удален!")
       } else {
         // Попытка распарсить ошибку как JSON
-        let errorMessage = 'Не удалось удалить участника';
+        let errorMessage = "Не удалось удалить участника"
         try {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorData.error || errorMessage;
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorData.error || errorMessage
         } catch {
-          errorMessage = response.statusText || 'Не удалось удалить участника';
+          errorMessage = response.statusText || "Не удалось удалить участника"
         }
-        toastError(errorMessage);
+        toastError(errorMessage)
       }
     } catch (err) {
-      toastError('Не удалось удалить участника');
-
+      toastError("Не удалось удалить участника")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  if (!user || user.role !== 'TRAINER') {
+  if (!user || user.role !== "TRAINER") {
     return (
       <div className="bg-white rounded-lg shadow-md p-6">
         <h2 className="text-xl font-bold mb-4">Управление командами</h2>
         <p className="text-gray-600">Только тренеры могут управлять командами.</p>
       </div>
-    );
+    )
   }
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <h2 className="text-xl font-bold mb-4">Управление командами</h2>
-      
+
       {/* Форма создания команды */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-3">Создать новую команду</h3>
         <form onSubmit={createTeam} className="space-y-4">
           <div>
-            <label htmlFor="teamName" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="teamName"
+              className="block text-sm font-medium text-gray-700 mb-1">
               Название команды *
             </label>
             <input
@@ -262,9 +262,11 @@ export default function TeamManagement() {
               required
             />
           </div>
-          
+
           <div>
-            <label htmlFor="teamDescription" className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="teamDescription"
+              className="block text-sm font-medium text-gray-700 mb-1">
               Описание
             </label>
             <textarea
@@ -275,17 +277,16 @@ export default function TeamManagement() {
               rows={3}
             />
           </div>
-          
+
           <button
             type="submit"
             disabled={loading}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {loading ? 'Создание...' : 'Создать команду'}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
+            {loading ? "Создание..." : "Создать команду"}
           </button>
         </form>
       </div>
-      
+
       {/* Список команд */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-3">Ваши команды</h3>
@@ -294,13 +295,16 @@ export default function TeamManagement() {
         ) : (
           <div className="space-y-4">
             {teams.map((team) => (
-              <div 
-                key={team.id} 
+              <div
+                key={team.id}
                 className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                  selectedTeam === team.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                  selectedTeam === team.id
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-gray-200 hover:bg-gray-50"
                 }`}
-                onClick={() => setSelectedTeam(selectedTeam === team.id ? null : team.id)}
-              >
+                onClick={() =>
+                  setSelectedTeam(selectedTeam === team.id ? null : team.id)
+                }>
                 <div className="flex justify-between items-center">
                   <h4 className="font-medium">{team.name}</h4>
                   <span className="text-sm text-gray-500">
@@ -315,70 +319,69 @@ export default function TeamManagement() {
           </div>
         )}
       </div>
-      
+
       {/* Управление участниками команды */}
       {selectedTeam && (
         <div className="border-t pt-6">
           <h3 className="text-lg font-semibold mb-3">Управление участниками</h3>
-          
+
           {/* Раздел приглашений */}
           <div className="mb-6 p-4 bg-blue-50 rounded-lg">
             <h4 className="font-medium mb-3">Приглашение в команду</h4>
-            
+
             <div className="flex flex-col md:flex-row gap-6 items-start">
-               <div className="flex-1 w-full">
-                  {!inviteCode ? (
+              <div className="flex-1 w-full">
+                {!inviteCode ? (
+                  <button
+                    onClick={generateInviteCode}
+                    disabled={loading}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium">
+                    Создать ссылку-приглашение
+                  </button>
+                ) : (
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">
+                        Ссылка для приглашения
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          readOnly
+                          value={inviteLink || ""}
+                          className="flex-1 text-sm p-2 border rounded bg-white"
+                        />
+                        <button
+                          onClick={() => {
+                            if (inviteLink) {
+                              navigator.clipboard.writeText(inviteLink)
+                              success("Ссылка скопирована!")
+                            }
+                          }}
+                          className="px-3 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300 text-sm">
+                          Копировать
+                        </button>
+                      </div>
+                    </div>
                     <button
                       onClick={generateInviteCode}
                       disabled={loading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-medium"
-                    >
-                      Создать ссылку-приглашение
+                      className="text-xs text-blue-600 hover:underline">
+                      Сгенерировать новую ссылку
                     </button>
-                  ) : (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">Ссылка для приглашения</label>
-                        <div className="flex gap-2">
-                          <input 
-                            type="text" 
-                            readOnly 
-                            value={inviteLink || ''} 
-                            className="flex-1 text-sm p-2 border rounded bg-white"
-                          />
-                          <button 
-                             onClick={() => {
-                               if (inviteLink) {
-                                 navigator.clipboard.writeText(inviteLink);
-                                 success('Ссылка скопирована!');
-                               }
-                             }}
-                             className="px-3 py-2 bg-gray-200 rounded text-gray-700 hover:bg-gray-300 text-sm"
-                          >
-                            Копировать
-                          </button>
-                        </div>
-                      </div>
-                      <button 
-                        onClick={generateInviteCode}
-                        disabled={loading}
-                        className="text-xs text-blue-600 hover:underline"
-                      >
-                        Сгенерировать новую ссылку
-                      </button>
-                    </div>
-                  )}
-               </div>
-               
-               {inviteLink && (
-                 <div className="flex flex-col items-center p-2 bg-white rounded shadow-sm">
-                    <QRCodeCanvas value={inviteLink} size={100} />
-                    <span className="text-xs text-gray-500 mt-1">QR код</span>
-                 </div>
-               )}
+                  </div>
+                )}
+              </div>
+
+              {inviteLink && (
+                <div className="flex flex-col items-center p-2 bg-white rounded shadow-sm">
+                  <QRCodeSVG value={inviteLink} size={100} />
+                  <span className="text-xs text-gray-500 mt-1">QR код</span>
+                </div>
+              )}
             </div>
           </div>
-          
+
           {/* Список участников */}
           <div>
             <h4 className="font-medium mb-3">Участники команды</h4>
@@ -389,13 +392,19 @@ export default function TeamManagement() {
                 <table className="min-w-full divide-y divide-gray-300">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      <th
+                        scope="col"
+                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                         Имя
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Email
                       </th>
-                      <th scope="col" className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                         Роль
                       </th>
                       <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -406,30 +415,29 @@ export default function TeamManagement() {
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {teamMembers[selectedTeam]?.map((member) => (
                       <tr key={member.id}>
-                        <td 
+                        <td
                           className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6 cursor-pointer hover:underline"
-                          onClick={() => handleUserClick(member.user)}
-                        >
+                          onClick={() => handleUserClick(member.user)}>
                           {member.user.name}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {member.user.email}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            member.user.role === 'TRAINER' 
-                              ? 'bg-purple-100 text-purple-800' 
-                              : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {member.user.role === 'TRAINER' ? 'Тренер' : 'Атлет'}
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              member.user.role === "TRAINER"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}>
+                            {member.user.role === "TRAINER" ? "Тренер" : "Атлет"}
                           </span>
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                           <button
                             onClick={() => removeTeamMember(selectedTeam, member.userId)}
                             disabled={loading}
-                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                          >
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50">
                             Удалить
                           </button>
                         </td>
@@ -439,38 +447,36 @@ export default function TeamManagement() {
                 </table>
               </div>
             )}
-            
+
             <div className="flex justify-end">
-               <Button
-                  onClick={() => setIsAddMemberModalOpen(true)}
-                  variant="outline"
-                  className="!py-2 !px-4"
-               >
-                  <span>Добавить</span>
-               </Button>
+              <Button
+                onClick={() => setIsAddMemberModalOpen(true)}
+                variant="outline"
+                className="!py-2 !px-4">
+                <span>Добавить</span>
+              </Button>
             </div>
           </div>
         </div>
       )}
-      
+
       <UserDetailModal
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         user={selectedUserForDetail}
       />
 
-       {selectedTeam && (
-          <AddMemberModal
-            isOpen={isAddMemberModalOpen}
-            onClose={() => setIsAddMemberModalOpen(false)}
-            teamId={selectedTeam}
-            existingMemberIds={teamMembers[selectedTeam]?.map(m => m.userId) || []}
-            onMemberAdded={() => {
-               fetchTeamMembers(selectedTeam);
-            }}
-            token={token}
-          />
-       )}
+      {selectedTeam && (
+        <AddMemberModal
+          isOpen={isAddMemberModalOpen}
+          onClose={() => setIsAddMemberModalOpen(false)}
+          teamId={selectedTeam}
+          existingMemberIds={teamMembers[selectedTeam]?.map((m) => m.userId) || []}
+          onMemberAdded={() => {
+            fetchTeamMembers(selectedTeam)
+          }}
+        />
+      )}
     </div>
-  );
+  )
 }

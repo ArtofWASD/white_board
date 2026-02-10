@@ -33,6 +33,12 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email, password) => {
         try {
+          // Получаем CSRF токен перед логином
+          await fetch("/api/csrf", {
+            method: "GET",
+            credentials: "include",
+          })
+
           const response = await fetch("/api/auth/login", {
             method: "POST",
             headers: {
@@ -69,6 +75,12 @@ export const useAuthStore = create<AuthState>()(
         organizationName,
       ) => {
         try {
+          // Получаем CSRF токен перед регистрацией
+          await fetch("/api/csrf", {
+            method: "GET",
+            credentials: "include",
+          })
+
           const response = await fetch("/api/auth/register", {
             method: "POST",
             headers: {

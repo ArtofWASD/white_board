@@ -1,5 +1,8 @@
 import { NextResponse, NextRequest } from "next/server"
-import { createBackendHeaders } from "@/lib/api/cookieHelpers"
+import {
+  createBackendHeaders,
+  createBackendHeadersWithCsrf,
+} from "@/lib/api/cookieHelpers"
 
 // Create a new team
 export async function POST(request: NextRequest) {
@@ -8,7 +11,7 @@ export async function POST(request: NextRequest) {
 
     // Forward the request to our NestJS backend with cookies
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const headers = await createBackendHeaders(request)
+    const headers = await createBackendHeadersWithCsrf(request)
 
     const backendRequest = {
       method: "POST",

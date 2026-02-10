@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 
 import { cookies } from "next/headers"
+import { getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
 
 // Helper function to get token from localStorage (we'll get it from cookies in the request)
 async function getToken(request: Request) {
@@ -18,14 +19,15 @@ async function getToken(request: Request) {
 }
 
 // Get all members of a team
-export async function GET(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ teamId: string }> },
+) {
   try {
     const { teamId } = await params
 
-
     // Validate teamId
     if (!teamId || typeof teamId !== "string") {
-
       return NextResponse.json({ message: "Invalid team ID" }, { status: 400 })
     }
 
@@ -36,7 +38,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members`
 
-
     const response = await fetch(url, {
       method: "GET",
       cache: "no-store",
@@ -46,15 +47,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       },
     })
 
-
-
     // Check if response is OK and content type is JSON
     const contentType = response.headers.get("content-type")
 
-
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json()
-
 
       if (response.ok) {
         return NextResponse.json(data)
@@ -70,7 +67,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       // Handle non-JSON responses
       const text = await response.text()
 
-
       if (response.ok) {
         return new NextResponse(text, {
           status: response.status,
@@ -84,7 +80,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
       }
     }
   } catch (error) {
-
     return NextResponse.json(
       {
         error:
@@ -97,38 +92,38 @@ export async function GET(request: Request, { params }: { params: Promise<{ team
 }
 
 // Add a member to a team
-export async function POST(request: Request, { params }: { params: Promise<{ teamId: string }> }) {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ teamId: string }> },
+) {
   try {
     const { teamId } = await params
     const body = await request.json()
-
 
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members/add`
 
-
     // Get token from request
     const authHeader = await getToken(request)
+    const csrfToken = await getCsrfTokenFromCookie()
 
     const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         ...(authHeader && { Authorization: authHeader }),
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
       body: JSON.stringify(body),
     })
 
-
-
     // Check if response is OK and content type is JSON
     const contentType = response.headers.get("content-type")
 
-
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json()
-
 
       if (response.ok) {
         return NextResponse.json(data, { status: 201 })
@@ -144,7 +139,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       // Handle non-JSON responses
       const text = await response.text()
 
-
       if (response.ok) {
         return new NextResponse(text, {
           status: response.status,
@@ -158,7 +152,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ tea
       }
     }
   } catch (error) {
-
     return NextResponse.json(
       {
         error:
@@ -179,33 +172,30 @@ export async function DELETE(
     const { teamId } = await params
     const body = await request.json()
 
-
     // Forward the request to our NestJS backend
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
     const url = `${backendUrl}/teams/${teamId}/members/remove`
 
-
     // Get token from request
     const authHeader = await getToken(request)
+    const csrfToken = await getCsrfTokenFromCookie()
 
     const response = await fetch(url, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
         ...(authHeader && { Authorization: authHeader }),
+        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
+        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
       },
       body: JSON.stringify(body),
     })
 
-
-
     // Check if response is OK and content type is JSON
     const contentType = response.headers.get("content-type")
 
-
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json()
-
 
       if (response.ok) {
         return NextResponse.json(data)
@@ -221,7 +211,6 @@ export async function DELETE(
       // Handle non-JSON responses
       const text = await response.text()
 
-
       if (response.ok) {
         return new NextResponse(text, {
           status: response.status,
@@ -235,7 +224,6 @@ export async function DELETE(
       }
     }
   } catch (error) {
-
     return NextResponse.json(
       {
         error:

@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { createBackendHeaders } from "@/lib/api/cookieHelpers"
+import {
+  createBackendHeaders,
+  createBackendHeadersWithCsrf,
+} from "@/lib/api/cookieHelpers"
 
 // Create a new event
 export async function POST(request: NextRequest) {
@@ -17,7 +20,7 @@ export async function POST(request: NextRequest) {
     } = await request.json()
 
     const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const headers = await createBackendHeaders(request)
+    const headers = await createBackendHeadersWithCsrf(request)
 
     const response = await fetch(`${backendUrl}/events`, {
       method: "POST",

@@ -6,6 +6,7 @@ import { useAuthStore } from "../../../lib/store/useAuthStore"
 import { Event, UserEventResult } from "../../../types"
 import { Heart, MessageSquare } from "lucide-react"
 import { Modal } from "../../../components/ui/Modal"
+import { logApiError } from "../../../lib/logger"
 
 export default function LeaderboardPage() {
   const { user } = useAuthStore()
@@ -36,7 +37,7 @@ export default function LeaderboardPage() {
             }
           }
         } catch (error) {
-          console.error("Failed to fetch events", error)
+          logApiError(`/api/events?userId=${user.id}`, error)
           setLoading(false)
         }
       }
@@ -62,7 +63,7 @@ export default function LeaderboardPage() {
             setResults(data)
           }
         } catch (error) {
-          console.error("Failed to fetch results", error)
+          logApiError(`/api/events/${selectedEventId}/results`, error)
         } finally {
           setLoading(false)
         }
@@ -148,10 +149,13 @@ export default function LeaderboardPage() {
 
       if (!response.ok) {
         // Revert on failure? For now silent fail or console error
-        console.error("Failed to toggle like")
+        logApiError(
+          `/api/events/results/${resultId}/like`,
+          new Error("Failed to toggle like"),
+        )
       }
     } catch (error) {
-      console.error("Error toggling like", error)
+      logApiError(`/api/events/results/${resultId}/like`, error)
     }
   }
 
@@ -196,11 +200,15 @@ export default function LeaderboardPage() {
 
       if (!response.ok) {
         const errText = await response.text()
-        console.error(`Failed to save comment: ${response.status} ${errText}`)
+        logApiError(
+          `/api/events/results/${resultToComment}/notes`,
+          new Error(`Failed to save comment: ${response.status}`),
+          { errText },
+        )
         // Revert optimistic update if needed?
       }
     } catch (error) {
-      console.error("Error saving comment", error)
+      logApiError(`/api/events/results/${resultToComment}/notes`, error)
     } finally {
       setSendingComment(false)
       setCommentModalOpen(false)

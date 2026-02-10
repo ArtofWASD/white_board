@@ -1,12 +1,10 @@
 import { useAuthStore } from "../store/useAuthStore"
+import { logApiError, logApiSuccess } from "../logger"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
 
+// No longer need auth headers - using cookies
 const getAuthHeader = (): Record<string, string> => {
-  const token = useAuthStore.getState().token
-  if (token) {
-    return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
-  }
   return { "Content-Type": "application/json" }
 }
 
@@ -32,15 +30,19 @@ export const getNotifications = async (): Promise<Notification[]> => {
       if (Array.isArray(data)) {
         return data
       } else {
-        console.error("Unexpected notifications response format:", data)
+        logApiError("/api/notifications", new Error("Unexpected response format"), {
+          data,
+        })
         return []
       }
     } else {
-      console.error("Failed to fetch notifications:", response.status)
+      logApiError("/api/notifications", new Error("Failed to fetch"), {
+        status: response.status,
+      })
       return []
     }
   } catch (error) {
-    console.error("Error fetching notifications:", error)
+    logApiError("/api/notifications", error)
     return []
   }
 }
@@ -56,7 +58,7 @@ export const getUnreadNotificationCount = async (): Promise<number> => {
     }
     return 0
   } catch (error) {
-    console.error("Error fetching unread count:", error)
+    logApiError("/api/notifications/unread-count", error)
     return 0
   }
 }
@@ -68,7 +70,7 @@ export const markNotificationAsRead = async (notificationId: string): Promise<vo
       headers: getAuthHeader(),
     })
   } catch (error) {
-    console.error("Error marking notification as read:", error)
+    logApiError(`/api/notifications/${notificationId}/read`, error)
   }
 }
 
@@ -79,6 +81,6 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
       headers: getAuthHeader(),
     })
   } catch (error) {
-    console.error("Error marking all notifications as read:", error)
+    logApiError("/api/notifications/read-all", error)
   }
 }

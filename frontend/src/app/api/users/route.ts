@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createBackendHeaders } from "@/lib/api/cookieHelpers"
+import { logApiError } from "@/lib/logger"
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,7 +23,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
-    console.error("Error fetching users:", error)
+    logApiError("/users", error)
     return NextResponse.json({ message: "Error fetching users" }, { status: 500 })
   }
 }

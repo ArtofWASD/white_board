@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Modal } from "../../components/ui/Modal"
 import { User, StrengthWorkoutResult, UserEventResult } from "../../types"
 import { useAuthStore } from "../../lib/store/useAuthStore"
+import { logApiError } from "../../lib/logger"
 import { Loader } from "../../components/ui/Loader"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChatWindow } from "../../components/chat/ChatWindow"
@@ -24,7 +25,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const [eventResults, setEventResults] = useState<UserEventResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [chatId, setChatId] = useState<string | null>(null)
-  const { token, user: currentUser } = useAuthStore()
+  const { user: currentUser } = useAuthStore()
 
   useEffect(() => {
     if (isOpen && user) {
@@ -41,8 +42,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
+        credentials: "include",
         body: JSON.stringify({ targetUserId: user.id }),
       })
 
@@ -51,7 +52,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         setChatId(chat.id)
       }
     } catch (error) {
-      console.error("Failed to init chat", error)
+      logApiError("/api/chat/init", error)
     }
   }
 
@@ -59,13 +60,9 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     if (!user) return
     setIsLoading(true)
     try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-      }
-
       const [strengthRes, eventsRes] = await Promise.all([
-        fetch(`/api/strength-results?userId=${user.id}`, { headers }),
-        fetch(`/api/events/results/user/${user.id}`, { headers }),
+        fetch(`/api/strength-results?userId=${user.id}`, { credentials: "include" }),
+        fetch(`/api/events/results/user/${user.id}`, { credentials: "include" }),
       ])
 
       if (strengthRes.ok) {
@@ -78,7 +75,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
         setEventResults(data)
       }
     } catch (error) {
-      console.error("Failed to fetch user data:", error)
+      logApiError(`/api/users/${user.id}/records`, error)
     } finally {
       setIsLoading(false)
     }
