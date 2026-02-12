@@ -1,29 +1,6 @@
-import { NextRequest, NextResponse } from "next/server"
-import { createBackendHeaders } from "@/lib/api/cookieHelpers"
-import { logApiError } from "@/lib/logger"
+import { NextRequest } from "next/server"
+import { BackendClient } from "@/lib/api/backendClient"
 
 export async function GET(request: NextRequest) {
-  try {
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const headers = await createBackendHeaders(request)
-
-    const response = await fetch(`${backendUrl}/users`, {
-      method: "GET",
-      headers,
-    })
-
-    if (!response.ok) {
-      const errorData = await response.json()
-      return NextResponse.json(
-        { message: errorData.message || "Failed to fetch users" },
-        { status: response.status },
-      )
-    }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    logApiError("/users", error)
-    return NextResponse.json({ message: "Error fetching users" }, { status: 500 })
-  }
+  return BackendClient.forwardRequest(request, "/users")
 }

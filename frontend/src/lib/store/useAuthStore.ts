@@ -1,6 +1,7 @@
 import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import { User } from "../../types"
+import { authApi } from "../api/auth"
 
 interface AuthState {
   user: User | null
@@ -33,32 +34,17 @@ export const useAuthStore = create<AuthState>()(
 
       login: async (email, password) => {
         try {
-          // Получаем CSRF токен перед логином
-          await fetch("/api/csrf", {
-            method: "GET",
-            credentials: "include",
-          })
+          // authApi.login returns { user, message }
+          const response = await authApi.login(email, password)
 
-          const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include", // Важно! Отправляет и получает cookies
-            body: JSON.stringify({ email, password }),
-          })
-
-          const data = await response.json()
-
-          if (response.ok && data.user) {
+          if (response && response.user) {
             set({
-              user: data.user,
+              user: response.user,
               isAuthenticated: true,
             })
             return true
-          } else {
-            return false
           }
+          return false
         } catch (error) {
           return false
         }
@@ -75,41 +61,25 @@ export const useAuthStore = create<AuthState>()(
         organizationName,
       ) => {
         try {
-          // Получаем CSRF токен перед регистрацией
-          await fetch("/api/csrf", {
-            method: "GET",
-            credentials: "include",
+          const response = await authApi.register({
+            name,
+            lastName,
+            email,
+            password,
+            role,
+            gender,
+            userType,
+            organizationName: organizationName || undefined,
           })
 
-          const response = await fetch("/api/auth/register", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include", // Важно! Отправляет и получает cookies
-            body: JSON.stringify({
-              name,
-              lastName,
-              email,
-              password,
-              role,
-              gender,
-              userType,
-              organizationName: organizationName || null,
-            }),
-          })
-
-          const data = await response.json()
-
-          if (response.ok && data.user) {
+          if (response && response.user) {
             set({
-              user: data.user,
+              user: response.user,
               isAuthenticated: true,
             })
             return true
-          } else {
-            return false
           }
+          return false
         } catch (error) {
           return false
         }
@@ -117,12 +87,9 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await fetch("/api/auth/logout", {
-            method: "POST",
-            credentials: "include",
-          })
+          await authApi.logout()
         } catch (error) {
-          // Игнорируем ошибки logout на сервере
+          // Игнорируем ошибки logout
         }
         set({
           user: null,
@@ -146,17 +113,10 @@ export const useAuthStore = create<AuthState>()(
 
       refreshToken: async () => {
         try {
-          const response = await fetch("/api/auth/refresh", {
-            method: "POST",
-            credentials: "include",
-          })
-
-          if (response.ok) {
-            const data = await response.json()
-            if (data.user) {
-              set({ user: data.user, isAuthenticated: true })
-              return true
-            }
+          const response = await authApi.refreshToken()
+          if (response && response.user) {
+            set({ user: response.user, isAuthenticated: true })
+            return true
           }
           return false
         } catch (error) {
@@ -169,22 +129,13 @@ export const useAuthStore = create<AuthState>()(
         if (!state.user) return false
 
         try {
-          const response = await fetch(`/api/auth/user/${state.user.id}`, {
-            credentials: "include",
-          })
-
-          if (!response.ok) {
-            // Пытаемся обновить токен
-            const refreshed = await get().refreshToken()
-            if (!refreshed) {
-              get().logout()
-              return false
-            }
-            return true
-          }
-
+          // Проверяем токен, запрашивая профиль
+          await authApi.getProfile(state.user.id)
           return true
         } catch (error) {
+          // Если ошибка (например 401), apiClient уже попытался обновить токен.
+          // Если все еще ошибка, значит токен невалиден.
+          get().logout()
           return false
         }
       },

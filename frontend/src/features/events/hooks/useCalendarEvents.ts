@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect } from "react"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { Event as BackendEvent, EventResult, CalendarEvent } from "@/types"
 import { logApiError } from "@/lib/logger"
+import { teamsApi } from "@/lib/api/teams"
+import { eventsApi } from "@/lib/api/events"
 
 interface UseCalendarEventsProps {
   teamId?: string
@@ -12,7 +14,7 @@ export const useCalendarEvents = ({
   teamId,
   onUpdateEvents,
 }: UseCalendarEventsProps = {}) => {
-  const { user, isAuthenticated, token } = useAuthStore()
+  const { user, isAuthenticated } = useAuthStore() // Removed token
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [teams, setTeams] = useState<any[]>([]) // Using any[] to avoid strict type issues if Team is not perfectly matched, or import Team
   const [loading, setLoading] = useState(false)
@@ -21,23 +23,16 @@ export const useCalendarEvents = ({
   // Fetch user teams to map names and colors
   useEffect(() => {
     const fetchTeams = async () => {
-      if (!user || !token) return
+      if (!user) return
       try {
-        const response = await fetch(`/api/teams?userId=${user.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (response.ok) {
-          const data = await response.json()
-          setTeams(data)
-        }
+        const data = await teamsApi.getUserTeams(user.id)
+        setTeams(data || [])
       } catch (e) {
         logApiError(`/api/teams?userId=${user.id}`, e)
       }
     }
     fetchTeams()
-  }, [user, token])
+  }, [user])
 
   const getTeamColor = useCallback(
     (teamId?: string) => {
@@ -87,36 +82,26 @@ export const useCalendarEvents = ({
     setLoading(true)
     setError(null)
     try {
-      const queryParams = new URLSearchParams({ userId: user.id })
       // Only append teamId if it is a specific UUID, not our special filter keywords
       const isSpecialFilter = ["all", "my", "all_teams"].includes(teamId || "")
+      const filterTeamId = teamId && !isSpecialFilter ? teamId : undefined
 
-      if (teamId && !isSpecialFilter) {
-        queryParams.append("teamId", teamId)
-      }
-
-      const response = await fetch(`/api/events?${queryParams.toString()}`)
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch events")
-      }
-
-      const data: BackendEvent[] = await response.json()
+      const data = await eventsApi.getUserEvents(user.id, filterTeamId)
 
       const calendarEvents: CalendarEvent[] = await Promise.all(
         data.map(async (event) => {
           // Fetch results for each event (optimization potential here: fetch all results in one go or side-load)
-          const resultsResponse = await fetch(`/api/events/${event.id}/results`)
           let results: EventResult[] = []
-
-          if (resultsResponse.ok) {
-            const resultsData = await resultsResponse.json()
+          try {
+            const resultsData = await eventsApi.getResults(event.id)
             results = resultsData.map((result: any) => ({
               id: result.id,
               time: result.time,
               dateAdded: new Date(result.dateAdded).toLocaleDateString("ru-RU"),
               username: result.username,
             }))
+          } catch (e) {
+            // ignore error fetching results
           }
 
           const team = teams.find((t: any) => t.id === event.teamId)
@@ -168,11 +153,11 @@ export const useCalendarEvents = ({
         onUpdateEvents(filteredEvents)
       }
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || "Failed to fetch events")
     } finally {
       setLoading(false)
     }
-  }, [isAuthenticated, user, teamId, onUpdateEvents, teams, getTeamColor, token])
+  }, [isAuthenticated, user, teamId, onUpdateEvents, teams, getTeamColor])
 
   // Initial fetch
   useEffect(() => {
@@ -181,17 +166,9 @@ export const useCalendarEvents = ({
 
   const deleteEvent = async (eventId: string) => {
     try {
-      const response = await fetch(`/api/events/${eventId}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: user?.id }),
-      })
-
-      if (response.ok) {
-        await fetchEvents()
-        return true
-      }
-      return false
+      await eventsApi.deleteEvent(eventId)
+      await fetchEvents()
+      return true
     } catch (error) {
       return false
     }
@@ -218,17 +195,9 @@ export const useCalendarEvents = ({
         teamId: finalTeamId,
       }
 
-      const response = await fetch("/api/events", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-
-      if (response.ok) {
-        await fetchEvents()
-        return true
-      }
-      return false
+      await eventsApi.createEvent(body)
+      await fetchEvents()
+      return true
     } catch (error) {
       return false
     }
@@ -245,17 +214,9 @@ export const useCalendarEvents = ({
         // The backend might handle partial updates or we verify the structure
       }
 
-      const response = await fetch(`/api/events/${eventId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-
-      if (response.ok) {
-        await fetchEvents()
-        return true
-      }
-      return false
+      await eventsApi.updateEvent(eventId, body)
+      await fetchEvents()
+      return true
     } catch (error) {
       return false
     }
@@ -270,17 +231,9 @@ export const useCalendarEvents = ({
         username: user.name,
       }
 
-      const response = await fetch(`/api/events/${eventId}/results`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      })
-
-      if (response.ok) {
-        await fetchEvents()
-        return true
-      }
-      return false
+      await eventsApi.addResult(eventId, payload)
+      await fetchEvents()
+      return true
     } catch (error) {
       return false
     }

@@ -3,6 +3,8 @@ import { Modal } from "../../components/ui/Modal"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { logApiError } from "../../lib/logger"
 import { User } from "../../types"
+import { usersApi } from "../../lib/api/users"
+import { teamsApi } from "../../lib/api/teams"
 import Button from "../../components/ui/Button"
 
 interface AddMemberModalProps {
@@ -36,22 +38,13 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
   const fetchAvailableAthletes = async () => {
     try {
-      const response = await fetch("/api/auth/athletes", {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (Array.isArray(data)) {
-          setAthletes(data)
-        } else {
-          setAthletes([])
-        }
+      const data = await usersApi.getAthletes()
+      if (Array.isArray(data)) {
+        setAthletes(data)
+      } else {
+        setAthletes([])
       }
-    } catch (err) {
+    } catch (err: any) {
       logApiError("/api/users?role=ATHLETE", err)
     }
   }
@@ -61,26 +54,11 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
       setAddingId(athleteId)
       setError(null)
 
-      const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          userId: athleteId,
-          role: "MEMBER",
-        }),
-      })
+      await teamsApi.addMember(teamId, athleteId, "MEMBER")
 
-      if (response.ok) {
-        onMemberAdded()
-      } else {
-        const errorData = await response.json().catch(() => ({}))
-        setError(errorData.message || "Не удалось добавить спортсмена")
-      }
-    } catch (err) {
-      setError("Ошибка при добавлении спортсмена")
+      onMemberAdded()
+    } catch (err: any) {
+      setError(err.message || "Ошибка при добавлении спортсмена")
     } finally {
       setAddingId(null)
     }

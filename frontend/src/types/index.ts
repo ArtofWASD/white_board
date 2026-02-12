@@ -1,11 +1,11 @@
-
 export interface Team {
   id: string
   name: string
   description?: string
   ownerId: string
-  created_at: string
-  updated_at: string
+  createdAt: string
+  updatedAt: string
+  inviteCode?: string
   organizationId?: string
   owner?: User
   members?: TeamMember[]
@@ -32,7 +32,7 @@ export interface User {
 
 export interface TeamMember {
   id: string
-  teamId: string 
+  teamId: string
   userId: string
   role: "OWNER" | "ADMIN" | "MEMBER"
   user: User
@@ -50,7 +50,7 @@ export interface AuthContextType {
     gender?: string,
     userType?: string,
     lastName?: string,
-    organizationName?: string
+    organizationName?: string,
   ) => Promise<boolean>
   logout: () => void
   isAuthenticated: boolean
@@ -59,7 +59,7 @@ export interface AuthContextType {
 
 // Exercise interface updated to match schema (UUID string id)
 export interface Exercise {
-  id: string 
+  id: string
   name: string
   weight: string
   repetitions: string
@@ -67,7 +67,7 @@ export interface Exercise {
   rxReps?: string
   scWeight?: string
   scReps?: string
-  measurement?: 'weight' | 'calories'
+  measurement?: "weight" | "calories"
   rxCalories?: string
   scCalories?: string
 }
@@ -95,10 +95,10 @@ export interface CalendarEvent {
   timeCap?: string
   rounds?: string
   status?: "FUTURE" | "COMPLETED" | "CANCELLED"
-  description?: string;
-  participants?: { id: string; name: string; lastName?: string }[];
-  teamName?: string;
-  scheme?: string;
+  description?: string
+  participants?: { id: string; name: string; lastName?: string }[]
+  teamName?: string
+  scheme?: string
 }
 
 export interface Event {
@@ -121,32 +121,32 @@ export interface Event {
 }
 
 export interface StrengthWorkoutResult {
-  id: string;
-  userId: string;
-  exerciseId: string;
-  date: string;
-  week: number;
-  weight: number;
-  reps: number;
-  createdAt: string;
+  id: string
+  userId: string
+  exerciseId: string
+  date: string
+  week: number
+  weight: number
+  reps: number
+  createdAt: string
   exercise?: {
-    id: string;
-    name: string;
-  };
+    id: string
+    name: string
+  }
 }
 
 export interface UserEventResult extends EventResult {
   event?: {
-    title: string;
-    eventDate: string;
-    exerciseType?: string;
-  };
+    title: string
+    eventDate: string
+    exerciseType?: string
+  }
 }
 
 export interface NavItem {
-  label: string;
-  href: string;
-  onClick?: () => void;
-  icon?: React.ReactNode;
-  tooltip?: string;
+  label: string
+  href: string
+  onClick?: () => void
+  icon?: React.ReactNode
+  tooltip?: string
 }

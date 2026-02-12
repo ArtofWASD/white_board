@@ -26,6 +26,13 @@ const NotificationsPage: React.FC = () => {
       return
     }
 
+    // Initialize socket for notifications page
+    if (user?.id) {
+      import("../../lib/socket").then(({ initializeSocket }) => {
+        initializeSocket(user.id)
+      })
+    }
+
     const fetchNotifications = async () => {
       const data = await getNotifications()
       setNotifications(data)
@@ -33,7 +40,15 @@ const NotificationsPage: React.FC = () => {
     }
 
     fetchNotifications()
-  }, [isAuthenticated, router])
+
+    return () => {
+      if (user?.id) {
+        import("../../lib/socket").then(({ disconnectSocket }) => {
+          disconnectSocket()
+        })
+      }
+    }
+  }, [isAuthenticated, router, user?.id])
 
   const [chatId, setChatId] = useState<string | null>(null)
   const [isChatOpen, setIsChatOpen] = useState(false)
@@ -58,8 +73,8 @@ const NotificationsPage: React.FC = () => {
       await handleMarkAsRead(notification.id)
     }
 
-    if (notification.type === "CHAT_MESSAGE" && notification.data?.chatId) {
-      setChatId(notification.data.chatId)
+    if (notification.type === "CHAT_MESSAGE" && (notification.data as any)?.chatId) {
+      setChatId((notification.data as any).chatId)
       setIsChatOpen(true)
     }
   }

@@ -1,131 +1,137 @@
-'use client';
+"use client"
 
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { useAuthStore } from '../../lib/store/useAuthStore';
-import { useTeamStore } from '../../lib/store/useTeamStore';
+import React, { useEffect, useState } from "react"
+import Link from "next/link"
+import { useAuthStore } from "../../lib/store/useAuthStore"
+import { useTeamStore } from "../../lib/store/useTeamStore"
+import { teamsApi } from "../../lib/api/teams"
 
 // Определение типов локально, если недоступны, или импорт.
 // На основе использования:
 interface EventResult {
-  id: string;
-  time: string;
-  dateAdded: string;
-  username: string;
+  id: string
+  time: string
+  dateAdded: string
+  username: string
 }
 
 interface CalendarEvent {
-  id: string;
-  title: string;
-  date: string;
-  results?: EventResult[];
+  id: string
+  title: string
+  date: string
+  results?: EventResult[]
 }
 
 interface LeftMenuProps {
-  isOpen: boolean;
-  onClose: () => void;
-  showAuth: boolean;
-  toggleAuth: () => void;
-  events: CalendarEvent[];
-  onShowEventDetails: (event: CalendarEvent) => void;
-  navItems?: { label: string; href: string; onClick?: () => void }[];
+  isOpen: boolean
+  onClose: () => void
+  showAuth: boolean
+  toggleAuth: () => void
+  events: CalendarEvent[]
+  onShowEventDetails: (event: CalendarEvent) => void
+  navItems?: { label: string; href: string; onClick?: () => void }[]
 }
 
-const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAuth, events, onShowEventDetails, navItems }) => {
-  const { user, isAuthenticated, token } = useAuthStore();
-  const { selectedTeam } = useTeamStore();
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+const LeftMenu: React.FC<LeftMenuProps> = ({
+  isOpen,
+  onClose,
+  showAuth,
+  toggleAuth,
+  events,
+  onShowEventDetails,
+  navItems,
+}) => {
+  const { user, isAuthenticated } = useAuthStore()
+  const { selectedTeam } = useTeamStore()
+  const [teamMembers, setTeamMembers] = useState<any[]>([])
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
-      if (selectedTeam) {
+      if (selectedTeam && isAuthenticated) {
         try {
-          // const token = localStorage.getItem('token'); // Удален прямой доступ
-          const response = await fetch(`/api/teams/${selectedTeam.id}/members`, {
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-          });
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (Array.isArray(data)) {
-              setTeamMembers(data);
-            } else {
-              setTeamMembers([]);
-            }
+          const data = await teamsApi.getMembers(selectedTeam.id)
+
+          if (Array.isArray(data)) {
+            setTeamMembers(data)
+          } else {
+            setTeamMembers([])
           }
         } catch (error) {
-
+          console.error("Error fetching team members:", error)
+          setTeamMembers([])
         }
       } else {
-        setTeamMembers([]);
+        setTeamMembers([])
       }
-    };
+    }
 
-    fetchTeamMembers();
-  }, [selectedTeam]);
+    fetchTeamMembers()
+  }, [selectedTeam, isAuthenticated])
 
   // Извлечение последних результатов из всех событий
   const getRecentResults = () => {
-    const allResults: (EventResult & { eventName: string; eventId: string })[] = [];
-    
-    events.forEach(event => {
+    const allResults: (EventResult & { eventName: string; eventId: string })[] = []
+
+    events.forEach((event) => {
       if (event.results && event.results.length > 0) {
         event.results.forEach((result) => {
           allResults.push({
             ...result,
             eventName: event.title,
-            eventId: event.id
-          });
-        });
+            eventId: event.id,
+          })
+        })
       }
-    });
-    
+    })
+
     // Сортировка по дате добавления (сначала новые) и взятие топ-5
     return allResults
       .sort((a, b) => new Date(b.dateAdded).getTime() - new Date(a.dateAdded).getTime())
-      .slice(0, 5);
-  };
+      .slice(0, 5)
+  }
 
   // Получение предстоящих событий (события с датами сегодня или в будущем)
   const getUpcomingEvents = () => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
     return events
-      .filter(event => {
-        const eventDate = new Date(event.date);
-        eventDate.setHours(0, 0, 0, 0);
-        return eventDate >= today;
+      .filter((event) => {
+        const eventDate = new Date(event.date)
+        eventDate.setHours(0, 0, 0, 0)
+        return eventDate >= today
       })
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-      .slice(0, 5); // Ограничение до 5 предстоящих событий
-  };
+      .slice(0, 5) // Ограничение до 5 предстоящих событий
+  }
 
-  const recentResults = getRecentResults();
-  const upcomingEventsList = getUpcomingEvents();
+  const recentResults = getRecentResults()
+  const upcomingEventsList = getUpcomingEvents()
 
   return (
     <>
       {/* Выдвижное левое меню */}
-      <div 
-        className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-80 bg-white transform transition-transform duration-300 ease-in-out overflow-y-auto ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-64 sm:w-80 bg-white transform transition-transform duration-300 ease-in-out overflow-y-auto ${isOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="p-2 sm:p-4">
           <div className="flex justify-between items-center mb-2 sm:mb-4">
             <h2 className="text-lg sm:text-xl font-bold">Меню</h2>
-            <button 
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+              <svg
+                className="w-5 h-5 sm:w-6 sm:h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"></path>
               </svg>
             </button>
           </div>
-          
+
           {/* Элементы навигации (Мобильные) */}
           {navItems && (
             <div className="mb-6">
@@ -135,19 +141,17 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
                     {item.onClick ? (
                       <button
                         onClick={() => {
-                          item.onClick?.();
-                          onClose();
+                          item.onClick?.()
+                          onClose()
                         }}
-                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-lg font-medium bg-transparent border-none cursor-pointer"
-                      >
+                        className="block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-lg font-medium bg-transparent border-none cursor-pointer">
                         {item.label}
                       </button>
                     ) : (
-                      <Link 
+                      <Link
                         href={item.href}
                         className="block px-4 py-2 text-gray-800 hover:bg-gray-100 rounded-lg font-medium"
-                        onClick={onClose}
-                      >
+                        onClick={onClose}>
                         {item.label}
                       </Link>
                     )}
@@ -168,39 +172,45 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
                     {teamMembers.length > 0 ? (
                       <ul className="space-y-2">
                         {teamMembers.map((member) => (
-                          <li key={member.id} className="border-b border-gray-200 pb-2 last:border-b-0">
+                          <li
+                            key={member.id}
+                            className="border-b border-gray-200 pb-2 last:border-b-0">
                             <div className="flex justify-between items-center">
                               <span className="font-medium text-gray-800">
                                 {member.user.name} {member.user.lastName}
                               </span>
-                              <span className={`text-xs px-2 py-1 rounded-full ${
-                                member.user.role === 'TRAINER' 
-                                  ? 'bg-purple-100 text-purple-800' 
-                                  : 'bg-blue-100 text-blue-800'
-                              }`}>
-                                {member.user.role === 'TRAINER' ? 'Тренер' : 'Спортсмен'}
+                              <span
+                                className={`text-xs px-2 py-1 rounded-full ${
+                                  member.user.role === "TRAINER"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : "bg-blue-100 text-blue-800"
+                                }`}>
+                                {member.user.role === "TRAINER" ? "Тренер" : "Спортсмен"}
                               </span>
                             </div>
                           </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-gray-500 text-sm">В команде пока нет участников</p>
+                      <p className="text-gray-500 text-sm">
+                        В команде пока нет участников
+                      </p>
                     )}
                   </div>
                 )}
-                
+
                 {/* Раздел предстоящих событий */}
                 <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-2">Будущие события</h3>
                   {upcomingEventsList.length > 0 ? (
                     <ul className="space-y-2">
                       {upcomingEventsList.map((event) => (
-                        <li key={event.id} className="border-b border-gray-200 pb-2 last:border-b-0">
-                          <div 
+                        <li
+                          key={event.id}
+                          className="border-b border-gray-200 pb-2 last:border-b-0">
+                          <div
                             className="cursor-pointer hover:bg-gray-100 p-2 rounded"
-                            onClick={() => onShowEventDetails(event)}
-                          >
+                            onClick={() => onShowEventDetails(event)}>
                             <p className="font-medium text-blue-600">{event.title}</p>
                             <div className="flex justify-between text-sm mt-1">
                               <span className="text-gray-600">Дата: {event.date}</span>
@@ -213,24 +223,29 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
                     <p className="text-gray-500 text-sm">Нет предстоящих событий</p>
                   )}
                 </div>
-                
+
                 {/* Раздел последних результатов */}
                 <div className="mt-4 bg-gray-50 p-4 rounded-lg">
                   <h3 className="font-bold text-lg mb-2">Последние результаты</h3>
                   {recentResults.length > 0 ? (
                     <ul className="space-y-2">
                       {recentResults.map((result) => (
-                        <li key={result.id} className="border-b border-gray-200 pb-2 last:border-b-0">
-                          <div 
+                        <li
+                          key={result.id}
+                          className="border-b border-gray-200 pb-2 last:border-b-0">
+                          <div
                             className="cursor-pointer hover:bg-gray-100 p-2 rounded"
                             onClick={() => {
-                              const event = events.find((e) => e.id === result.eventId);
-                              if (event) onShowEventDetails(event);
-                            }}
-                          >
-                            <p className="font-medium text-blue-600">{result.eventName}</p>
+                              const event = events.find((e) => e.id === result.eventId)
+                              if (event) onShowEventDetails(event)
+                            }}>
+                            <p className="font-medium text-blue-600">
+                              {result.eventName}
+                            </p>
                             <div className="flex justify-between text-sm mt-1">
-                              <span className="text-gray-600">Результат: {result.time}</span>
+                              <span className="text-gray-600">
+                                Результат: {result.time}
+                              </span>
                               <span className="text-gray-500">{result.dateAdded}</span>
                             </div>
                           </div>
@@ -246,26 +261,24 @@ const LeftMenu: React.FC<LeftMenuProps> = ({ isOpen, onClose, showAuth, toggleAu
               <p className="mb-4">Содержимое левого меню</p>
             )}
             {!isAuthenticated && (
-              <button 
+              <button
                 onClick={toggleAuth}
-                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                {showAuth ? 'Скрыть форму' : 'Показать форму входа/регистрации'}
+                className="w-full px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                {showAuth ? "Скрыть форму" : "Показать форму входа/регистрации"}
               </button>
             )}
           </div>
         </div>
       </div>
-      
+
       {/* Наложение для закрытия левого меню */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-40 bg-transparent backdrop-blur-sm"
-          onClick={onClose}
-        ></div>
+          onClick={onClose}></div>
       )}
     </>
-  );
-};
+  )
+}
 
-export default LeftMenu;
+export default LeftMenu

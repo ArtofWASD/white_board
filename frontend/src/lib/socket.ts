@@ -1,31 +1,70 @@
 import { io, Socket } from "socket.io-client"
 
 let socket: Socket | null = null
+let connectionPromise: Promise<Socket> | null = null
+let connectionResolver: ((s: Socket) => void) | null = null
+let activeConnections = 0
 
 export const initializeSocket = (userId: string) => {
-  if (socket?.connected) return socket
+  activeConnections++
 
-  socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001", {
-    withCredentials: true, // Важно! Отправляет cookies автоматически
-    transports: ["websocket", "polling"],
-  })
+  if (socket?.connected) {
+    if (socket.id) {
+      socket.emit("joinUserRoom", userId)
+    }
+    return socket
+  }
 
-  socket.on("connect", () => {
-    socket?.emit("joinUserRoom", userId)
-  })
+  if (!socket) {
+    socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001", {
+      withCredentials: true,
+      transports: ["websocket", "polling"],
+    })
 
-  socket.on("disconnect", () => {
-    // Socket disconnected
-  })
+    socket.on("connect", () => {
+      socket?.emit("joinUserRoom", userId)
+    })
+
+    socket.on("disconnect", (reason) => {
+      // Socket disconnected
+    })
+  }
+
+  // Resolve waiting consumers
+  if (connectionResolver && socket) {
+    connectionResolver(socket)
+    connectionResolver = null
+  }
 
   return socket
 }
 
 export const getSocket = () => socket
 
+export const waitForSocket = async (): Promise<Socket> => {
+  if (socket) return socket
+
+  if (!connectionPromise) {
+    connectionPromise = new Promise((resolve) => {
+      connectionResolver = resolve
+    })
+  }
+
+  return connectionPromise
+}
+
 export const disconnectSocket = () => {
-  if (socket) {
-    socket.disconnect()
-    socket = null
+  if (activeConnections > 0) {
+    activeConnections--
+  }
+
+  if (activeConnections === 0) {
+    if (socket) {
+      socket.disconnect()
+      socket = null
+    }
+    // Reset promise for next connection
+    connectionPromise = null
+    connectionResolver = null
   }
 }

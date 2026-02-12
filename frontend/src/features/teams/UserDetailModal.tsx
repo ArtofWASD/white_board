@@ -4,6 +4,9 @@ import { User, StrengthWorkoutResult, UserEventResult } from "../../types"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { logApiError } from "../../lib/logger"
 import { Loader } from "../../components/ui/Loader"
+import { chatApi } from "../../lib/api/chat"
+import { strengthResultsApi } from "../../lib/api/users"
+import { eventsApi } from "../../lib/api/events"
 import { motion, AnimatePresence } from "framer-motion"
 import { ChatWindow } from "../../components/chat/ChatWindow"
 
@@ -38,17 +41,8 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
   const initialiseChat = async () => {
     if (!user) return
     try {
-      const response = await fetch("/api/chats/direct", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ targetUserId: user.id }),
-      })
-
-      if (response.ok) {
-        const chat = await response.json()
+      const chat = await chatApi.createDirectChat(user.id)
+      if (chat) {
         setChatId(chat.id)
       }
     } catch (error) {
@@ -61,19 +55,12 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
     setIsLoading(true)
     try {
       const [strengthRes, eventsRes] = await Promise.all([
-        fetch(`/api/strength-results?userId=${user.id}`, { credentials: "include" }),
-        fetch(`/api/events/results/user/${user.id}`, { credentials: "include" }),
+        strengthResultsApi.getUserResults(user.id),
+        eventsApi.getUserResults(user.id),
       ])
 
-      if (strengthRes.ok) {
-        const data = await strengthRes.json()
-        setStrengthResults(data)
-      }
-
-      if (eventsRes.ok) {
-        const data = await eventsRes.json()
-        setEventResults(data)
-      }
+      setStrengthResults(strengthRes || [])
+      setEventResults(eventsRes || [])
     } catch (error) {
       logApiError(`/api/users/${user.id}/records`, error)
     } finally {

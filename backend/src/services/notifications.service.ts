@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Notification } from '@prisma/client';
@@ -9,7 +8,7 @@ import { NotificationsGateway } from '../modules/notifications/notifications.gat
 export class NotificationsService {
   constructor(
     private prisma: PrismaService,
-    private notificationsGateway: NotificationsGateway
+    private notificationsGateway: NotificationsGateway,
   ) {}
 
   async createNotification(
@@ -30,12 +29,17 @@ export class NotificationsService {
     });
 
     // Emit event to the user's room
-    this.notificationsGateway.server.to(userId).emit('newNotification', notification);
+    this.notificationsGateway.server
+      .to(userId)
+      .emit('newNotification', notification);
 
     return notification;
   }
 
-  async getNotifications(userId: string, unreadOnly: boolean = false): Promise<Notification[]> {
+  async getNotifications(
+    userId: string,
+    unreadOnly: boolean = false,
+  ): Promise<Notification[]> {
     return this.prisma.notification.findMany({
       where: {
         userId,

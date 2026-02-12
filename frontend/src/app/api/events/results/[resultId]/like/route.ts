@@ -1,44 +1,14 @@
-import { NextResponse } from "next/server"
 import { NextRequest } from "next/server"
-import { getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
+import { BackendClient } from "@/lib/api/backendClient"
 
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ resultId: string }> },
 ) {
-  try {
-    const { resultId } = await params
-    const body = await request.json()
-
-    // Forward the request to our NestJS backend
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
-    const csrfToken = await getCsrfTokenFromCookie()
-
-    const response = await fetch(`${backendUrl}/events/results/${resultId}/like`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
-        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
-      },
-      body: JSON.stringify(body),
-    })
-
-    const data = await response.json()
-
-    if (response.ok) {
-      return NextResponse.json(data)
-    } else {
-      return NextResponse.json(
-        { message: data.message || "Failed to toggle like" },
-        { status: response.status },
-      )
-    }
-  } catch (error) {
-    let errorMessage = "An error occurred while toggling like"
-    if (error instanceof Error) {
-      errorMessage = error.message
-    }
-    return NextResponse.json({ message: errorMessage }, { status: 500 })
-  }
+  const { resultId } = await params
+  const body = await request.json()
+  return BackendClient.forwardRequest(request, `/events/results/${resultId}/like`, {
+    method: "POST",
+    body,
+  })
 }

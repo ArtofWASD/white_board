@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { logApiError } from "../../lib/logger"
+import { teamsApi } from "../../lib/api/teams"
 
 import { QRCodeCanvas } from "qrcode.react"
 import { EditTeamModalProps, TeamMember } from "../../types/EditTeamModal.types"
@@ -28,72 +29,16 @@ export default function EditTeamModal({
 
   const fetchTeamMembers = useCallback(async () => {
     try {
-      // Validate teamId format
       if (!teamId || typeof teamId !== "string" || teamId === "undefined") {
         setTeamMembers([])
         return
       }
 
       setLoading(true)
-
-      // Log the URL being constructed
-      const url = `/api/teams/${teamId}/members`
-
-      // const token = localStorage.getItem('token'); // Removed direct access
-      const response = await fetch(url, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-
-      if (response.ok) {
-        const contentType = response.headers.get("content-type")
-
-        if (contentType && contentType.includes("application/json")) {
-          const data = await response.json()
-          // Ensure data is an array
-          if (Array.isArray(data)) {
-            setTeamMembers(data)
-          } else {
-            setTeamMembers([])
-          }
-        } else {
-          const text = await response.text()
-
-          setError("Получен неожиданный формат ответа от сервера")
-          setTeamMembers([])
-        }
-      } else {
-        // Handle error responses
-        const contentType = response.headers.get("content-type")
-
-        try {
-          if (contentType && contentType.includes("application/json")) {
-            const errorData = await response.json()
-            // Показываем конкретное сообщение об ошибке с бэкенда
-            const errorMessage =
-              errorData.message ||
-              errorData.error ||
-              `Ошибка сервера: ${response.status} ${response.statusText}`
-            setError(errorMessage)
-          } else {
-            const errorText = await response.text()
-            setError(
-              errorText || `Ошибка сервера: ${response.status} ${response.statusText}`,
-            )
-          }
-        } catch (error) {
-          setError(`Ошибка сервера: ${response.status} ${response.statusText}`)
-        }
-
-        setTeamMembers([])
-      }
-    } catch (err) {
-      setError(
-        "Не удалось загрузить участников команды: " +
-          (err instanceof Error ? err.message : "Неизвестная ошибка"),
-      )
+      const members = await teamsApi.getMembers(teamId)
+      setTeamMembers(members || [])
+    } catch (err: any) {
+      setError(err.message || "Не удалось загрузить участников команды")
       setTeamMembers([])
     } finally {
       setLoading(false)
@@ -102,19 +47,14 @@ export default function EditTeamModal({
 
   const fetchInviteCode = useCallback(async () => {
     try {
-      const response = await fetch(`/api/teams/${teamId}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.inviteCode) {
-          setInviteCode(data.inviteCode)
-          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
-        }
+      // Assuming getTeam returns the invite code if user has permission
+      // If not, we might need a dedicated endpoint or checking how backend behaves.
+      // We'll use getTeam for now as a substitute for fetching team details which likely contains invite info for owner.
+      // But wait, original code fetched `/api/teams/${teamId}`.
+      const team = await teamsApi.getTeam(teamId)
+      if (team && (team as any).inviteCode) {
+        setInviteCode((team as any).inviteCode)
+        setInviteLink(`${window.location.origin}/invite/${(team as any).inviteCode}`)
       }
     } catch (err) {
       logApiError(`/api/teams/${teamId}/invite`, err, { teamId })
@@ -124,18 +64,11 @@ export default function EditTeamModal({
   const generateInviteCode = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/${teamId}/invite`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
+      const response = await teamsApi.createInvite(teamId)
 
-      if (response.ok) {
-        const data = await response.json()
-        setInviteCode(data.inviteCode)
-        setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
+      if (response && response.inviteCode) {
+        setInviteCode(response.inviteCode)
+        setInviteLink(`${window.location.origin}/invite/${response.inviteCode}`)
       } else {
         setError("Не удалось создать код приглашения")
       }
@@ -160,35 +93,13 @@ export default function EditTeamModal({
 
     try {
       setLoading(true)
-      // const token = localStorage.getItem('token'); // Removed direct access
-      const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          userId: userId,
-        }),
-      })
+      await teamsApi.removeMember(teamId, userId)
 
-      if (response.ok) {
-        // Refresh team members
-        fetchTeamMembers()
-        onTeamUpdated()
-      } else {
-        // Попытка распарсить ошибку как JSON
-        let errorMessage = "Не удалось удалить участника"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.message || errorData.error || errorMessage
-        } catch {
-          errorMessage = response.statusText || "Не удалось удалить участника"
-        }
-        setError(errorMessage)
-      }
-    } catch (err) {
-      setError("Не удалось удалить участника")
+      // Refresh team members
+      fetchTeamMembers()
+      onTeamUpdated()
+    } catch (err: any) {
+      setError(err.message || "Не удалось удалить участника")
     } finally {
       setLoading(false)
     }

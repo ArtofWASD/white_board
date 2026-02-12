@@ -7,6 +7,8 @@ import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useTeamStore } from "../../lib/store/useTeamStore"
 import Button from "../ui/Button"
+import { getUnreadNotificationCount } from "../../lib/api/notifications"
+import { waitForSocket } from "../../lib/socket"
 
 interface HeaderProps {
   onRightMenuClick: () => void
@@ -55,43 +57,59 @@ const Header: React.FC<HeaderProps> = ({
   const [unreadCount, setUnreadCount] = React.useState(0)
 
   // Интеграция с WebSocket
-  // Интеграция с WebSocket
   React.useEffect(() => {
-    if (isAuthenticated && user) {
-      // Первоначальная загрузка
-      const fetchUnreadCount = async () => {
-        const { getUnreadNotificationCount } = await import("../../lib/api/notifications")
+    let isMounted = true
+    let socketInstance: any = null
+
+    const fetchUnreadCount = async () => {
+      if (!isAuthenticated || !user) return
+      try {
+        console.log("[Header] Fetching unread count...")
         const count = await getUnreadNotificationCount()
-        setUnreadCount(count)
+        console.log("[Header] Count fetched:", count)
+        if (isMounted) setUnreadCount(count)
+      } catch (e) {
+        console.error("Failed to fetch unread count", e)
       }
+    }
+
+    const handleNewNotification = (data: any) => {
+      console.log("[Header] EVENT RECEIVED: newNotification", data)
       fetchUnreadCount()
+    }
 
-      // Подключение к Socket.IO через shared utility
-      let socket: any = null
+    const setupSocket = async () => {
+      if (isAuthenticated && user) {
+        // Первоначальная загрузка
+        fetchUnreadCount()
 
-      import("../../lib/socket").then(({ getSocket }) => {
-        socket = getSocket()
-        if (socket) {
-          const handleNewNotification = () => {
-            fetchUnreadCount()
+        try {
+          // Инициализируем сокет (увеличиваем счетчик ссылок)
+          const { initializeSocket } = await import("../../lib/socket")
+          const socket = initializeSocket(user.id)
+          console.log("[Header] Socket initialized:", socket.id)
+
+          if (isMounted) {
+            socketInstance = socket
+            socket.on("newNotification", handleNewNotification)
           }
-
-          socket.on("newNotification", handleNewNotification)
-
-          // Cleanup listener specifically for this component
-          return () => {
-            socket.off("newNotification", handleNewNotification)
-          }
-        } else {
-          // If socket not ready (DashboardLayout handles init), try again or rely on DashboardLayout
-          // Since DashboardLayout is parent, socket *should* be initiating.
-          // We can rely on a retry or just checking.
-          // But simpler: just listen if available.
+        } catch (e) {
+          console.error("[Header] Socket init failed", e)
         }
-      })
+      }
+    }
 
-      // Cleanup handled in promise callback primarily, but ideally we track it.
-      // Given structure, we rely on DashboardLayout for lifecycle.
+    setupSocket()
+
+    return () => {
+      isMounted = false
+      if (socketInstance) {
+        socketInstance.off("newNotification", handleNewNotification)
+        // Отключаемся (уменьшаем счетчик ссылок)
+        import("../../lib/socket").then(({ disconnectSocket }) => {
+          disconnectSocket()
+        })
+      }
     }
   }, [isAuthenticated, user])
 

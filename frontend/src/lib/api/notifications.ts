@@ -1,12 +1,14 @@
-import { useAuthStore } from "../store/useAuthStore"
-import { logApiError, logApiSuccess } from "../logger"
+/**
+ * API модуль для работы с уведомлениями.
+ *
+ * @example
+ * ```ts
+ * import { notificationsApi } from '@/lib/api/notifications'
+ * const notifications = await notificationsApi.getAll()
+ * ```
+ */
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"
-
-// No longer need auth headers - using cookies
-const getAuthHeader = (): Record<string, string> => {
-  return { "Content-Type": "application/json" }
-}
+import { apiClient } from "./apiClient"
 
 export interface Notification {
   id: string
@@ -19,68 +21,47 @@ export interface Notification {
   data?: any
 }
 
-export const getNotifications = async (): Promise<Notification[]> => {
-  try {
-    const response = await fetch(`${API_URL}/api/notifications`, {
-      headers: getAuthHeader(),
-    })
-
-    if (response.ok) {
-      const data = await response.json()
-      if (Array.isArray(data)) {
-        return data
-      } else {
-        logApiError("/api/notifications", new Error("Unexpected response format"), {
-          data,
-        })
-        return []
-      }
-    } else {
-      logApiError("/api/notifications", new Error("Failed to fetch"), {
-        status: response.status,
-      })
+export const notificationsApi = {
+  /** Получить все уведомления */
+  getAll: async (): Promise<Notification[]> => {
+    try {
+      const data = await apiClient.get<Notification[]>("/api/notifications")
+      return Array.isArray(data) ? data : []
+    } catch {
       return []
     }
-  } catch (error) {
-    logApiError("/api/notifications", error)
-    return []
-  }
-}
+  },
 
-export const getUnreadNotificationCount = async (): Promise<number> => {
-  try {
-    const response = await fetch(`${API_URL}/api/notifications/unread-count`, {
-      headers: getAuthHeader(),
-    })
-    if (response.ok) {
-      const data = await response.json()
+  /** Получить количество непрочитанных */
+  getUnreadCount: async (): Promise<number> => {
+    try {
+      const data = await apiClient.request<{ count: number }>(
+        "/api/notifications/unread-count",
+        {
+          method: "GET",
+          cache: "no-store",
+          headers: {
+            Pragma: "no-cache",
+            "Cache-Control": "no-cache",
+          },
+        },
+      )
       return data.count
+    } catch {
+      return 0
     }
-    return 0
-  } catch (error) {
-    logApiError("/api/notifications/unread-count", error)
-    return 0
-  }
+  },
+
+  /** Отметить уведомление как прочитанное */
+  markAsRead: (notificationId: string) =>
+    apiClient.patch<void>(`/api/notifications/${notificationId}/read`),
+
+  /** Отметить все уведомления как прочитанные */
+  markAllAsRead: () => apiClient.patch<void>("/api/notifications/read-all"),
 }
 
-export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
-  try {
-    await fetch(`${API_URL}/api/notifications/${notificationId}/read`, {
-      method: "PATCH",
-      headers: getAuthHeader(),
-    })
-  } catch (error) {
-    logApiError(`/api/notifications/${notificationId}/read`, error)
-  }
-}
-
-export const markAllNotificationsAsRead = async (): Promise<void> => {
-  try {
-    await fetch(`${API_URL}/api/notifications/read-all`, {
-      method: "PATCH",
-      headers: getAuthHeader(),
-    })
-  } catch (error) {
-    logApiError("/api/notifications/read-all", error)
-  }
-}
+// Re-export для обратной совместимости
+export const getNotifications = notificationsApi.getAll
+export const getUnreadNotificationCount = notificationsApi.getUnreadCount
+export const markNotificationAsRead = notificationsApi.markAsRead
+export const markAllNotificationsAsRead = notificationsApi.markAllAsRead

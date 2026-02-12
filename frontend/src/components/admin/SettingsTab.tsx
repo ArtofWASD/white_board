@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react"
-import { useAuthStore } from "../../lib/store/useAuthStore"
 import { logApiError } from "../../lib/logger"
 
+import { adminApi } from "../../lib/api/admin"
+
 export const SettingsTab: React.FC = () => {
-  const { token } = useAuthStore()
+  // const { token } = useAuthStore() // Token no longer needed
   const [settings, setSettings] = useState<Record<string, string>>({})
   const [loadingSettings, setLoadingSettings] = useState(false)
 
@@ -11,11 +12,8 @@ export const SettingsTab: React.FC = () => {
     const fetchSettings = async () => {
       setLoadingSettings(true)
       try {
-        const res = await fetch("/api/settings", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (res.ok) {
-          const data = await res.json()
+        const data = await adminApi.getSettings()
+        if (data) {
           // Преобразование массива в объект
           const settingsMap: Record<string, string> = {}
           data.forEach((s: any) => (settingsMap[s.key] = s.value))
@@ -27,24 +25,16 @@ export const SettingsTab: React.FC = () => {
         setLoadingSettings(false)
       }
     }
-    if (token) {
-      fetchSettings()
-    }
-  }, [token])
+
+    fetchSettings()
+  }, []) // Removed token dependency
 
   const handleUpdateSetting = async (key: string, value: string) => {
     // Оптимистичное обновление
     setSettings((prev) => ({ ...prev, [key]: value }))
 
     try {
-      await fetch(`/api/settings/${key}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ value }),
-      })
+      await adminApi.updateSetting(key, value)
     } catch (e) {
       logApiError(`/api/settings/${key}`, e, { key, value })
       alert("Ошибка сохранения настройки")

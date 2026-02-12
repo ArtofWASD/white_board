@@ -23,8 +23,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   // Initialize Socket
   useEffect(() => {
-    if (typeof window !== "undefined" && user) {
-      import("../../lib/socket").then(({ initializeSocket, disconnectSocket }) => {
+    if (typeof window !== "undefined" && user?.id) {
+      import("../../lib/socket").then(({ initializeSocket }) => {
         initializeSocket(user.id)
       })
     }

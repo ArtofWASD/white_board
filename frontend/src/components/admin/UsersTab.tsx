@@ -3,9 +3,10 @@ import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Modal } from "../ui/Modal"
 import { User } from "../../types"
 import { logApiError } from "../../lib/logger"
+import { usersApi } from "../../lib/api/users"
 
 export const UsersTab: React.FC = () => {
-  const { user, token } = useAuthStore()
+  const { user } = useAuthStore() // Removed token
   const [users, setUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
@@ -19,21 +20,9 @@ export const UsersTab: React.FC = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      if (!token) return
       try {
-        const res = await fetch("/api/users", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        if (res.ok) {
-          const data = await res.json()
-          setUsers(data)
-        } else {
-          logApiError("/api/users", new Error("Failed to fetch users"), {
-            status: res.status,
-          })
-        }
+        const data = await usersApi.getAll()
+        setUsers(data || [])
       } catch (e) {
         logApiError("/api/users", e)
       } finally {
@@ -41,7 +30,7 @@ export const UsersTab: React.FC = () => {
       }
     }
     fetchUsers()
-  }, [token])
+  }, []) // Removed token dependency
 
   const openRoleModal = (u: any) => {
     setSelectedUser(u)
@@ -60,18 +49,7 @@ export const UsersTab: React.FC = () => {
     )
 
     try {
-      const res = await fetch(`/api/users/${selectedUser.id}/role`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ role: newRole }),
-      })
-      if (!res.ok) {
-        setUsers(oldUsers)
-        alert("Не удалось обновить роль")
-      }
+      await usersApi.updateRole(selectedUser.id, newRole)
       setIsRoleModalOpen(false)
       setSelectedUser(null)
     } catch (e) {
@@ -97,19 +75,7 @@ export const UsersTab: React.FC = () => {
     )
 
     try {
-      const res = await fetch(`/api/users/${u.id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isBlocked: newStatus }),
-      })
-
-      if (!res.ok) {
-        setUsers(oldUsers)
-        alert("Не удалось изменить статус блокировки")
-      }
+      await usersApi.toggleBlock(u.id, newStatus)
     } catch (e) {
       setUsers(oldUsers)
       alert("Ошибка запроса")
@@ -128,17 +94,7 @@ export const UsersTab: React.FC = () => {
     setUsers(users.filter((user) => user.id !== u.id))
 
     try {
-      const res = await fetch(`/api/users/${u.id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-
-      if (!res.ok) {
-        setUsers(oldUsers)
-        alert("Не удалось удалить пользователя")
-      }
+      await usersApi.deleteUser(u.id)
     } catch (e) {
       setUsers(oldUsers)
       alert("Ошибка при удалении")

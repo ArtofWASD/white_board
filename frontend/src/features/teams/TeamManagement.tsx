@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useToast } from "../../lib/context/ToastContext"
 import { logApiError } from "../../lib/logger"
+import { teamsApi } from "../../lib/api/teams"
 import {
   TeamManagementUser as User,
   TeamMember,
@@ -44,11 +45,10 @@ export default function TeamManagement() {
   const fetchUserTeams = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/user/${user?.id}`, {
-        credentials: "include",
-      })
-      const data = await response.json()
-      setTeams(data)
+      if (user?.id) {
+        const data = await teamsApi.getUserTeams(user.id)
+        setTeams(data || [])
+      }
     } catch (err) {
       toastError("Не удалось загрузить команды")
     } finally {
@@ -58,24 +58,8 @@ export default function TeamManagement() {
 
   const fetchTeamMembers = useCallback(async (teamId: string) => {
     try {
-      const response = await fetch(`/api/teams/${teamId}/members`, {
-        credentials: "include",
-      })
-      if (response.ok) {
-        const data = await response.json()
-        setTeamMembers((prev) => ({ ...prev, [teamId]: data }))
-      } else {
-        // Попытка распарсить ошибку как JSON, но обработка случая, если это не JSON
-        let errorMessage = "Не удалось загрузить участников команды"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.message || errorData.error || errorMessage
-        } catch {
-          // Если парсинг JSON не удался, используем текст статуса или общее сообщение
-          errorMessage = response.statusText || "Не удалось загрузить участников команды"
-        }
-        toastError(errorMessage)
-      }
+      const data = await teamsApi.getMembers(teamId)
+      setTeamMembers((prev) => ({ ...prev, [teamId]: data || [] }))
     } catch (err) {
       toastError("Не удалось загрузить участников команды")
     }
@@ -101,22 +85,14 @@ export default function TeamManagement() {
 
   const fetchInviteCode = async (teamId: string) => {
     try {
-      const response = await fetch(`/api/teams/${teamId}`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.inviteCode) {
-          setInviteCode(data.inviteCode)
-          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
-        } else {
-          setInviteCode(null)
-          setInviteLink(null)
-        }
+      // Use getTeam or createInvite/getInvite logic
+      const team = await teamsApi.getTeam(teamId)
+      if (team && (team as any).inviteCode) {
+        setInviteCode((team as any).inviteCode)
+        setInviteLink(`${window.location.origin}/invite/${(team as any).inviteCode}`)
+      } else {
+        setInviteCode(null)
+        setInviteLink(null)
       }
     } catch (err) {
       logApiError(`/api/teams/${teamId}/invite`, err, { teamId })
@@ -127,16 +103,9 @@ export default function TeamManagement() {
     if (!selectedTeam) return
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/${selectedTeam}/invite`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      })
+      const data = await teamsApi.createInvite(selectedTeam)
 
-      if (response.ok) {
-        const data = await response.json()
+      if (data && data.inviteCode) {
         setInviteCode(data.inviteCode)
         setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
         success("Ссылка для приглашения успешно создана")
@@ -156,20 +125,12 @@ export default function TeamManagement() {
 
     try {
       setLoading(true)
-      const response = await fetch("/api/teams", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          name: newTeamName,
-          description: newTeamDescription,
-        }),
+      const newTeam = await teamsApi.createTeam({
+        name: newTeamName,
+        description: newTeamDescription,
       })
 
-      if (response.ok) {
-        const newTeam = await response.json()
+      if (newTeam) {
         setTeams((prev) => [...prev, newTeam])
 
         // Сброс формы
@@ -177,16 +138,10 @@ export default function TeamManagement() {
         setNewTeamDescription("")
 
         success("Команда успешно создана!")
-      } else {
-        if (response.status === 401) {
-          toastError("Сессия истекла. Пожалуйста, войдите снова.")
-          // Опционально: можно перенаправить на вход или очистить стор
-        } else {
-          toastError("Не удалось создать команду")
-        }
       }
-    } catch (err) {
-      toastError("Произошла ошибка")
+    } catch (err: any) {
+      // Simplified error handling as apiClient throws errors
+      toastError(err.message || "Не удалось создать команду")
     } finally {
       setLoading(false)
     }
@@ -197,32 +152,11 @@ export default function TeamManagement() {
 
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/${teamId}/members`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          userId: userId,
-        }),
-      })
+      await teamsApi.removeMember(teamId, userId)
 
-      if (response.ok) {
-        // Обновление участников команды
-        fetchTeamMembers(teamId)
-        success("Участник успешно удален!")
-      } else {
-        // Попытка распарсить ошибку как JSON
-        let errorMessage = "Не удалось удалить участника"
-        try {
-          const errorData = await response.json()
-          errorMessage = errorData.message || errorData.error || errorMessage
-        } catch {
-          errorMessage = response.statusText || "Не удалось удалить участника"
-        }
-        toastError(errorMessage)
-      }
+      // Обновление участников команды
+      fetchTeamMembers(teamId)
+      success("Участник успешно удален!")
     } catch (err) {
       toastError("Не удалось удалить участника")
     } finally {

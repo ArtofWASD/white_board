@@ -1,30 +1,6 @@
-import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
+import { NextRequest } from "next/server"
+import { BackendClient } from "@/lib/api/backendClient"
 
-export async function GET(request: Request) {
-  try {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
-    const headersList = await headers();
-    const authorization = headersList.get('authorization');
-
-    if (!authorization) {
-      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-    }
-
-    const response = await fetch(`${backendUrl}/statistics/roles`, {
-      headers: {
-        'Authorization': authorization,
-      },
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-       return NextResponse.json({ message: 'Error from backend' }, { status: response.status });
-    }
-
-    const data = await response.json();
-    return NextResponse.json(data);
-  } catch (error) {
-    return NextResponse.json({ message: 'Error fetching role stats' }, { status: 500 });
-  }
+export async function GET(request: NextRequest) {
+  return BackendClient.forwardRequest(request, "/statistics/roles")
 }

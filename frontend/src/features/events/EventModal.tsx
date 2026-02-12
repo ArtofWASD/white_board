@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Team, EventResult, TeamMember, Exercise } from "../../types"
 import { logApiError } from "../../lib/logger"
+import { teamsApi } from "../../lib/api/teams" // Added import
 
 // Удален локальный интерфейс Exercise, чтобы избежать конфликтов или необходимости обновления для использования строкового id, соответствующего глобальному типу
 
@@ -34,7 +35,7 @@ const EventModal: React.FC<EventModalProps> = ({
   eventData,
   initialTeamId,
 }) => {
-  const { user, token } = useAuthStore()
+  const { user } = useAuthStore() // Removed token
 
   // Состояние формы
   const [eventTitle, setEventTitle] = useState(eventData?.title || "")
@@ -79,35 +80,28 @@ const EventModal: React.FC<EventModalProps> = ({
   // Получение команд
   useEffect(() => {
     const fetchTeams = async () => {
-      if (user && token) {
+      if (user) {
         try {
-          const response = await fetch(`/api/teams?userId=${user.id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
-          if (response.ok) {
-            const data = await response.json()
-            setTeams(data)
-          }
+          // Refactored to use teamsApi
+          const data = await teamsApi.getUserTeams(user.id)
+          setTeams(data || [])
         } catch (error) {
           logApiError(`/api/teams?userId=${user.id}`, error)
         }
       }
     }
     fetchTeams()
-  }, [user, token])
+  }, [user])
 
   // Получение участников команды при изменении команды
   useEffect(() => {
     const fetchMembers = async () => {
-      if (selectedTeamId && token) {
+      if (selectedTeamId) {
         try {
-          const response = await fetch(`/api/teams/${selectedTeamId}/members`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          if (response.ok) {
-            const data = await response.json()
+          // Refactored to use teamsApi
+          const data = await teamsApi.getMembers(selectedTeamId)
+
+          if (Array.isArray(data)) {
             setTeamMembers(data)
           } else {
             setTeamMembers([])
@@ -121,7 +115,7 @@ const EventModal: React.FC<EventModalProps> = ({
       }
     }
     fetchMembers()
-  }, [selectedTeamId, token])
+  }, [selectedTeamId])
 
   // Обработка инициализации и обновлений формы
   useEffect(() => {

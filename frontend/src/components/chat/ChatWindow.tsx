@@ -37,22 +37,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const isFirstLoadRef = useRef(true)
 
   // Listen for socket events
-  // Listen for socket events
   useEffect(() => {
-    // Defines the listener variable outside the promise scope so cleanup can access it?
-    // No, cleanup runs when component unmounts. But the listener is created inside the promise.
-    // We need a ref to hold the listener for cleanup.
-
+    let isMounted = true
     let socketInstance: any = null
     let listenerRef: any = null
 
-    import("../../lib/socket").then(({ getSocket }) => {
-      const socket = getSocket()
-      socketInstance = socket
+    const setupSocket = async () => {
+      const { waitForSocket } = await import("../../lib/socket")
+      const socket = await waitForSocket()
 
-      if (!socket) {
-        return
-      }
+      if (!isMounted) return
+
+      socketInstance = socket
 
       const handleNewNotification = async (notification: any) => {
         const isMatch =
@@ -97,14 +93,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
       listenerRef = handleNewNotification
       socket.on("newNotification", handleNewNotification)
-    })
+    }
+
+    setupSocket()
 
     return () => {
+      isMounted = false
       if (socketInstance && listenerRef) {
         socketInstance.off("newNotification", listenerRef)
       }
     }
-  }, [chatId])
+  }, [chatId, user])
 
   const fetchMessages = async (offset: number, isLoadMore: boolean = false) => {
     if (isLoading) return

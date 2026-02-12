@@ -1,15 +1,16 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { Team } from '../../types';
-import { useAuthStore } from './useAuthStore';
+import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
+import { Team } from "../../types"
+import { useAuthStore } from "./useAuthStore"
+import { teamsApi } from "../api/teams"
 
 interface TeamState {
-  teams: Team[];
-  selectedTeam: Team | null;
-  loading: boolean;
-  error: string | null;
-  fetchTeams: () => Promise<void>;
-  selectTeam: (teamId: string) => void;
+  teams: Team[]
+  selectedTeam: Team | null
+  loading: boolean
+  error: string | null
+  fetchTeams: () => Promise<void>
+  selectTeam: (teamId: string) => void
 }
 
 export const useTeamStore = create<TeamState>()(
@@ -21,67 +22,56 @@ export const useTeamStore = create<TeamState>()(
       error: null,
 
       fetchTeams: async () => {
-        const { user, isAuthenticated } = useAuthStore.getState();
+        const { user, isAuthenticated } = useAuthStore.getState()
 
         if (!isAuthenticated || !user) {
-          set({ teams: [], selectedTeam: null });
-          return;
+          set({ teams: [], selectedTeam: null })
+          return
         }
 
-        set({ loading: true, error: null });
+        set({ loading: true, error: null })
         try {
-          const { token } = useAuthStore.getState();
-          const response = await fetch(`/api/teams?userId=${user.id}`, {
-            headers: {
-              'Content-Type': 'application/json',
-              ...(token && { 'Authorization': `Bearer ${token}` }),
-            },
-          });
+          // Используем teamsApi, он берет userId из второго аргумента? Нет, getUserTeams(userId)
+          const data = await teamsApi.getUserTeams(user.id)
 
-          if (response.ok) {
-            const data = await response.json();
-            if (Array.isArray(data)) {
-              set({ teams: data });
-              
-              // Логика для обеспечения валидности selectedTeam или выбор первого по умолчанию
-              const currentSelected = get().selectedTeam;
-              if (currentSelected) {
-                 const stillExists = data.find(t => t.id === currentSelected.id);
-                 if (!stillExists) {
-                    set({ selectedTeam: data.length > 0 ? data[0] : null });
-                 } else {
-                    // Обновление данных выбранной команды, если они изменились
-                    set({ selectedTeam: stillExists });
-                 }
-              } else if (data.length > 0) {
-                 set({ selectedTeam: data[0] });
+          if (data && Array.isArray(data)) {
+            set({ teams: data })
+
+            // Логика для обеспечения валидности selectedTeam или выбор первого по умолчанию
+            const currentSelected = get().selectedTeam
+            if (currentSelected) {
+              const stillExists = data.find((t) => t.id === currentSelected.id)
+              if (!stillExists) {
+                set({ selectedTeam: data.length > 0 ? data[0] : null })
+              } else {
+                // Обновление данных выбранной команды, если они изменились
+                set({ selectedTeam: stillExists })
               }
-            } else {
-              set({ teams: [] });
+            } else if (data.length > 0) {
+              set({ selectedTeam: data[0] })
             }
           } else {
-
-            set({ error: 'Failed to fetch teams' });
+            set({ teams: [] })
           }
         } catch (err) {
-
-          set({ error: 'Error fetching teams' });
+          console.error("Error fetching teams:", err)
+          set({ error: "Error fetching teams" })
         } finally {
-          set({ loading: false });
+          set({ loading: false })
         }
       },
 
       selectTeam: (teamId: string) => {
-        const team = get().teams.find((t) => t.id === teamId);
+        const team = get().teams.find((t) => t.id === teamId)
         if (team) {
-          set({ selectedTeam: team });
+          set({ selectedTeam: team })
         }
       },
     }),
     {
-      name: 'team-storage',
+      name: "team-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ selectedTeam: state.selectedTeam }), // Сохранять только selectedTeam
-    }
-  )
-);
+    },
+  ),
+)

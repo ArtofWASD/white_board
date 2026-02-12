@@ -12,7 +12,12 @@ import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // Настройте это в продакшене, чтобы соответствовать URL вашего фронтенда
+    origin: [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://192.168.0.106:3000', // Add your local IP if needed
+    ],
+    credentials: true,
   },
 })
 export class NotificationsGateway
@@ -35,7 +40,7 @@ export class NotificationsGateway
 
   @SubscribeMessage('joinUserRoom')
   handleJoinRoom(client: Socket, userId: string): void {
-      client.join(userId);
-      this.logger.log(`Client ${client.id} joined room ${userId}`);
+    client.join(userId);
+    this.logger.log(`Client ${client.id} joined room ${userId}`);
   }
 }

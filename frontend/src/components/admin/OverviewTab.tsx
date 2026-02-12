@@ -14,9 +14,10 @@ import {
 } from "recharts"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { logApiError } from "../../lib/logger"
+import { statisticsApi } from "../../lib/api/users"
 
 export const OverviewTab: React.FC = () => {
-  const { token } = useAuthStore()
+  // Removed token usage as apiClient handles it
 
   const [dashboardStats, setDashboardStats] = useState<any>(null)
   const [registrationHistory, setRegistrationHistory] = useState<any[]>([])
@@ -30,21 +31,15 @@ export const OverviewTab: React.FC = () => {
     const fetchStats = async () => {
       setLoadingStats(true)
       try {
-        const [statsRes, historyRes, rolesRes] = await Promise.all([
-          fetch("/api/statistics/dashboard", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("/api/statistics/registrations", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          fetch("/api/statistics/roles", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+        const [stats, history, roles] = await Promise.all([
+          statisticsApi.getDashboard(),
+          statisticsApi.getRegistrations(),
+          statisticsApi.getRoles(),
         ])
 
-        if (statsRes.ok) setDashboardStats(await statsRes.json())
-        if (historyRes.ok) setRegistrationHistory(await historyRes.json())
-        if (rolesRes.ok) setRoleDistribution(await rolesRes.json())
+        if (stats) setDashboardStats(stats)
+        if (history) setRegistrationHistory(history as any[])
+        if (roles) setRoleDistribution(roles as any[])
       } catch (e) {
         logApiError("/api/statistics/dashboard", e)
       } finally {
@@ -52,10 +47,8 @@ export const OverviewTab: React.FC = () => {
       }
     }
 
-    if (token) {
-      fetchStats()
-    }
-  }, [token])
+    fetchStats()
+  }, [])
 
   // Расчет удержания (примерно на основе активных пользователей к общему числу)
   const retentionRate =

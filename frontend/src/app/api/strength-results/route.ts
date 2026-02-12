@@ -1,57 +1,28 @@
-import { NextResponse } from "next/server"
-import { getCsrfTokenFromCookie } from "@/lib/api/cookieHelpers"
+import { NextRequest } from "next/server"
+import { BackendClient } from "@/lib/api/backendClient"
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3001"
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const csrfToken = await getCsrfTokenFromCookie()
-    const response = await fetch(`${BACKEND_URL}/strength-results`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(csrfToken && { "X-CSRF-Token": csrfToken }),
-        ...(csrfToken && { Cookie: `csrf_token=${csrfToken}` }),
-      },
-      body: JSON.stringify(body),
-    })
-
-    const data = await response.json()
-    if (response.ok) {
-      return NextResponse.json(data)
-    } else {
-      return NextResponse.json(data, { status: response.status })
-    }
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to save result" }, { status: 500 })
-  }
+export async function POST(request: NextRequest) {
+  const body = await request.json()
+  return BackendClient.forwardRequest(request, "/strength-results", {
+    method: "POST",
+    body,
+  })
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
   const userId = searchParams.get("userId")
   const exerciseId = searchParams.get("exerciseId")
 
   if (!userId) {
+    const { NextResponse } = await import("next/server")
     return NextResponse.json({ error: "User ID is required" }, { status: 400 })
   }
 
-  let url = `${BACKEND_URL}/strength-results/${userId}`
+  let endpoint = `/strength-results/${userId}`
   if (exerciseId) {
-    url += `/${exerciseId}`
+    endpoint += `/${exerciseId}`
   }
 
-  try {
-    const response = await fetch(url)
-    const data = await response.json()
-
-    if (response.ok) {
-      return NextResponse.json(data)
-    } else {
-      return NextResponse.json(data, { status: response.status })
-    }
-  } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch results" }, { status: 500 })
-  }
+  return BackendClient.forwardRequest(request, endpoint)
 }

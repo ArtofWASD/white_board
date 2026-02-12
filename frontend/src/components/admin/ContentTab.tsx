@@ -3,8 +3,10 @@ import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Modal } from "../ui/Modal"
 import { logApiError } from "../../lib/logger"
 
+import { adminApi } from "../../lib/api/admin"
+
 export const ContentTab: React.FC = () => {
-  const { token } = useAuthStore()
+  // const { token } = useAuthStore() // Token no longer needed explicitely
 
   const [activeContentTab, setActiveContentTab] = useState<"wods" | "exercises" | "news">(
     "wods",
@@ -51,20 +53,20 @@ export const ContentTab: React.FC = () => {
 
   useEffect(() => {
     fetchContent()
-  }, [token])
+  }, []) // Removed token dependency as apiClient handles it
 
   const fetchContent = async () => {
     setLoadingContent(true)
     try {
-      const [wodsRes, exercisesRes, newsRes] = await Promise.all([
-        fetch("/api/admin/wods", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/admin/exercises", { headers: { Authorization: `Bearer ${token}` } }),
-        fetch("/api/news", { headers: { Authorization: `Bearer ${token}` } }),
+      const [wodsData, exercisesData, newsData] = await Promise.all([
+        adminApi.getWods(),
+        adminApi.getExercises(),
+        adminApi.getNews(),
       ])
 
-      if (wodsRes.ok) setWods(await wodsRes.json())
-      if (exercisesRes.ok) setGlobalExercises(await exercisesRes.json())
-      if (newsRes.ok) setNews(await newsRes.json())
+      setWods(wodsData || [])
+      setGlobalExercises(exercisesData || [])
+      setNews(newsData || [])
     } catch (e) {
       logApiError("/api/admin/content", e)
     } finally {
@@ -75,70 +77,37 @@ export const ContentTab: React.FC = () => {
   const handleCreateContent = async () => {
     if (contentModalType === "wod") {
       try {
-        const res = await fetch("/api/admin/wods", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newWod),
+        await adminApi.createWod(newWod)
+        fetchContent()
+        setIsContentModalOpen(false)
+        setNewWod({
+          name: "",
+          description: "",
+          type: "CLASSIC",
+          scheme: "FOR_TIME",
+          isGlobal: true,
+          muscleGroups: [],
         })
-        if (res.ok) {
-          fetchContent()
-          setIsContentModalOpen(false)
-          setNewWod({
-            name: "",
-            description: "",
-            type: "CLASSIC",
-            scheme: "FOR_TIME",
-            isGlobal: true,
-            muscleGroups: [],
-          })
-        } else {
-          alert("Ошибка создания WOD")
-        }
       } catch (e) {
-        alert("Ошибка запроса")
+        alert("Ошибка создания WOD")
       }
     } else if (contentModalType === "news") {
       try {
-        const res = await fetch("/api/news", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newNews),
-        })
-        if (res.ok) {
-          fetchContent()
-          setIsContentModalOpen(false)
-          setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
-        } else {
-          alert("Ошибка создания новости")
-        }
+        await adminApi.createNews(newNews)
+        fetchContent()
+        setIsContentModalOpen(false)
+        setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
       } catch (e) {
-        alert("Ошибка запроса")
+        alert("Ошибка создания новости")
       }
     } else {
       try {
-        const res = await fetch("/api/admin/exercises", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newExercise),
-        })
-        if (res.ok) {
-          fetchContent()
-          setIsContentModalOpen(false)
-          setNewExercise({ name: "", description: "", videoUrl: "", muscleGroups: [] })
-        } else {
-          alert("Ошибка создания упражнения")
-        }
+        await adminApi.createExercise(newExercise)
+        fetchContent()
+        setIsContentModalOpen(false)
+        setNewExercise({ name: "", description: "", videoUrl: "", muscleGroups: [] })
       } catch (e) {
-        alert("Ошибка запроса")
+        alert("Ошибка создания упражнения")
       }
     }
   }
@@ -147,73 +116,40 @@ export const ContentTab: React.FC = () => {
     if (!editingItem) return
     if (contentModalType === "wod") {
       try {
-        const res = await fetch(`/api/admin/wods/${editingItem.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newWod),
+        await adminApi.updateWod(editingItem.id, newWod)
+        fetchContent()
+        setIsContentModalOpen(false)
+        setEditingItem(null)
+        setNewWod({
+          name: "",
+          description: "",
+          type: "CLASSIC",
+          scheme: "FOR_TIME",
+          isGlobal: true,
+          muscleGroups: [],
         })
-        if (res.ok) {
-          fetchContent()
-          setIsContentModalOpen(false)
-          setEditingItem(null)
-          setNewWod({
-            name: "",
-            description: "",
-            type: "CLASSIC",
-            scheme: "FOR_TIME",
-            isGlobal: true,
-            muscleGroups: [],
-          })
-        } else {
-          alert("Ошибка обновления WOD")
-        }
       } catch (e) {
-        alert("Ошибка запроса")
+        alert("Ошибка обновления WOD")
       }
     } else if (contentModalType === "news") {
       try {
-        const res = await fetch(`/api/news/${editingItem.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newNews),
-        })
-        if (res.ok) {
-          fetchContent()
-          setIsContentModalOpen(false)
-          setEditingItem(null)
-          setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
-        } else {
-          alert("Ошибка обновления новости")
-        }
+        await adminApi.updateNews(editingItem.id, newNews)
+        fetchContent()
+        setIsContentModalOpen(false)
+        setEditingItem(null)
+        setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
       } catch (e) {
-        alert("Ошибка запроса")
+        alert("Ошибка обновления новости")
       }
     } else {
       try {
-        const res = await fetch(`/api/admin/exercises/${editingItem.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(newExercise),
-        })
-        if (res.ok) {
-          fetchContent()
-          setIsContentModalOpen(false)
-          setEditingItem(null)
-          setNewExercise({ name: "", description: "", videoUrl: "", muscleGroups: [] })
-        } else {
-          alert("Ошибка обновления упражнения")
-        }
+        await adminApi.updateExercise(editingItem.id, newExercise)
+        fetchContent()
+        setIsContentModalOpen(false)
+        setEditingItem(null)
+        setNewExercise({ name: "", description: "", videoUrl: "", muscleGroups: [] })
       } catch (e) {
-        alert("Ошибка запроса")
+        alert("Ошибка обновления упражнения")
       }
     }
   }
@@ -221,22 +157,13 @@ export const ContentTab: React.FC = () => {
   const handleDeleteContent = async (item: any, type: "wod" | "exercise" | "news") => {
     if (!confirm("Вы уверены, что хотите удалить этот элемент?")) return
     try {
-      let url = ""
-      if (type === "wod") url = `/api/admin/wods/${item.id}`
-      else if (type === "exercise") url = `/api/admin/exercises/${item.id}`
-      else url = `/api/news/${item.id}`
+      if (type === "wod") await adminApi.deleteWod(item.id)
+      else if (type === "exercise") await adminApi.deleteExercise(item.id)
+      else await adminApi.deleteNews(item.id)
 
-      const res = await fetch(url, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      if (res.ok) {
-        fetchContent()
-      } else {
-        alert("Ошибка удаления")
-      }
+      fetchContent()
     } catch (e) {
-      alert("Ошибка запроса")
+      alert("Ошибка удаления")
     }
   }
 

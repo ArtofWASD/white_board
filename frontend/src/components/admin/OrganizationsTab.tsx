@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { logApiError } from "../../lib/logger"
+import { organizationApi } from "../../lib/api/users"
 
 export const OrganizationsTab: React.FC = () => {
-  const { token } = useAuthStore()
   const [organizations, setOrganizations] = useState<any[]>([])
   const [loadingOrganizations, setLoadingOrganizations] = useState(false)
 
@@ -11,12 +11,8 @@ export const OrganizationsTab: React.FC = () => {
     const fetchOrganizations = async () => {
       setLoadingOrganizations(true)
       try {
-        const res = await fetch("/api/organization/admin/all", {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        if (res.ok) {
-          setOrganizations(await res.json())
-        }
+        const data = await organizationApi.getAll()
+        setOrganizations(data || [])
       } catch (e) {
         logApiError("/api/organization/admin/all", e)
       } finally {
@@ -24,10 +20,8 @@ export const OrganizationsTab: React.FC = () => {
       }
     }
 
-    if (token) {
-      fetchOrganizations()
-    }
-  }, [token])
+    fetchOrganizations()
+  }, [])
 
   const handleToggleOrganizationBlock = async (org: any) => {
     if (
@@ -44,19 +38,7 @@ export const OrganizationsTab: React.FC = () => {
     )
 
     try {
-      const res = await fetch(`/api/organization/${org.id}/block`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ isBlocked: newStatus }),
-      })
-
-      if (!res.ok) {
-        setOrganizations(oldOrgs)
-        alert("Не удалось изменить статус блокировки")
-      }
+      await organizationApi.toggleBlock(org.id, newStatus)
     } catch (e) {
       setOrganizations(oldOrgs)
       alert("Ошибка запроса")
