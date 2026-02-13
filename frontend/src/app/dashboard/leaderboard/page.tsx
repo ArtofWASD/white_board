@@ -28,10 +28,11 @@ export default function LeaderboardPage() {
           })
           if (response.ok) {
             const data = await response.json()
-            // Filter out events without results if needed, or show all
-            setEvents(data)
-            if (data.length > 0) {
-              setSelectedEventId(data[0].id)
+            // Filter out personal events (must have teamId)
+            const teamEvents = data.filter((event: Event) => event.teamId)
+            setEvents(teamEvents)
+            if (teamEvents.length > 0) {
+              setSelectedEventId(teamEvents[0].id)
             } else {
               setLoading(false)
             }

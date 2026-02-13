@@ -11,7 +11,7 @@ import { getUnreadNotificationCount } from "../../lib/api/notifications"
 import { waitForSocket } from "../../lib/socket"
 
 interface HeaderProps {
-  onRightMenuClick: () => void
+  onRightMenuClick?: () => void
   onLeftMenuClick?: () => void
   navItems?: {
     label: string
@@ -19,13 +19,16 @@ interface HeaderProps {
     icon?: React.ReactNode
     onClick?: () => void
     tooltip?: string
+    variant?: "primary" | "outline" | "ghost" | "link" | "destructive"
   }[]
+  rightContent?: React.ReactNode
 }
 
 const Header: React.FC<HeaderProps> = ({
   onRightMenuClick,
   onLeftMenuClick,
   navItems,
+  rightContent,
 }) => {
   const router = useRouter()
   const pathname = usePathname()
@@ -64,9 +67,7 @@ const Header: React.FC<HeaderProps> = ({
     const fetchUnreadCount = async () => {
       if (!isAuthenticated || !user) return
       try {
-        console.log("[Header] Fetching unread count...")
         const count = await getUnreadNotificationCount()
-        console.log("[Header] Count fetched:", count)
         if (isMounted) setUnreadCount(count)
       } catch (e) {
         console.error("Failed to fetch unread count", e)
@@ -74,7 +75,6 @@ const Header: React.FC<HeaderProps> = ({
     }
 
     const handleNewNotification = (data: any) => {
-      console.log("[Header] EVENT RECEIVED: newNotification", data)
       fetchUnreadCount()
     }
 
@@ -87,7 +87,6 @@ const Header: React.FC<HeaderProps> = ({
           // Инициализируем сокет (увеличиваем счетчик ссылок)
           const { initializeSocket } = await import("../../lib/socket")
           const socket = initializeSocket(user.id)
-          console.log("[Header] Socket initialized:", socket.id)
 
           if (isMounted) {
             socketInstance = socket
@@ -134,20 +133,31 @@ const Header: React.FC<HeaderProps> = ({
             </svg>
           </button>
         )}
-        {isDashboard ? (
-          <Link href="/" className="ml-2 hidden lg:flex items-center">
+        {/* Desktop/Tablet Logo (Left Aligned) */}
+        <Link href="/" className="ml-2 hidden lg:flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={180}
+            height={60}
+            priority
+            className="w-auto h-10 sm:h-14 object-contain"
+          />
+        </Link>
+
+        {/* Mobile Centered Logo */}
+        <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden flex items-center justify-center">
+          <Link href="/" className="flex items-center">
             <Image
               src="/logo.png"
               alt="Logo"
-              width={180}
-              height={60}
+              width={140}
+              height={50}
               priority
-              className="w-auto h-10 sm:h-14 object-contain"
+              className="w-auto h-8 object-contain"
             />
           </Link>
-        ) : (
-          <div className="h-10 sm:h-14 w-px"></div>
-        )}
+        </div>
       </div>
 
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full max-w-2xl pointer-events-none lg:pointer-events-auto">
@@ -168,34 +178,26 @@ const Header: React.FC<HeaderProps> = ({
                       {item.icon}
                     </Button>
                   ) : item.onClick ? (
-                    <button
+                    <Button
                       key={item.label}
                       onClick={item.onClick}
-                      className="text-white hover:text-blue-300 font-medium transition-colors bg-transparent border-none cursor-pointer text-base">
-                      {item.label}
-                    </button>
-                  ) : (
-                    <Link
-                      key={item.href}
-                      href={item.href}
+                      variant={item.variant || "ghost"}
                       className="text-white hover:text-blue-300 font-medium transition-colors">
                       {item.label}
-                    </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      key={item.href}
+                      href={item.href}
+                      variant={item.variant || "ghost"}
+                      className="text-white hover:text-blue-300 font-medium transition-colors">
+                      {item.label}
+                    </Button>
                   ),
                 )}
               </nav>
               {isDashboard && (
                 <div className="lg:hidden flex flex-col items-center">
-                  <Link href="/" className="flex items-center">
-                    <Image
-                      src="/logo.png"
-                      alt="Logo"
-                      width={180}
-                      height={60}
-                      priority
-                      className="w-auto h-10 sm:h-14 object-contain"
-                    />
-                  </Link>
                   {isAuthenticated && teams.length > 0 && selectedTeam && <div />}
                 </div>
               )}
@@ -213,7 +215,7 @@ const Header: React.FC<HeaderProps> = ({
           ) : (
             // Логотип по центру на мобильных для панели управления
             <div className="flex flex-col items-center">
-              <Link href="/" className="lg:hidden flex items-center">
+              <Link href="/" className="lg:hidden flex items-center hidden">
                 <Image
                   src="/logo.png"
                   alt="Logo"
@@ -261,7 +263,11 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {isAuthenticated && user ? (
+      {rightContent ? (
+        <div className="flex items-center space-x-4 cursor-pointer ml-auto pointer-events-auto z-50">
+          {rightContent}
+        </div>
+      ) : isAuthenticated && user ? (
         <div className="flex items-center space-x-1 sm:space-x-4 cursor-pointer ml-auto">
           <div className="relative group">
             <button
@@ -278,7 +284,7 @@ const Header: React.FC<HeaderProps> = ({
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+                  d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.454 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
                 />
               </svg>
               {unreadCount > 0 && (

@@ -1,38 +1,32 @@
 "use client"
 
-import React, { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import Image from "next/image"
-import Calendar from "../../features/events/Calendar"
 import Header from "../../components/layout/Header"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useTeamStore } from "../../lib/store/useTeamStore"
 import Footer from "../../components/layout/Footer"
 import { NavItem, CalendarEvent, EventResult } from "../../types"
-
-// Определение типа для ответа API
-interface ApiEvent {
-  id: string
-  title: string
-  eventDate: string
-  results?: EventResult[]
-  teamId?: string
-}
-
 import TeamSelector from "../../features/events/TeamSelector"
-
 import LeftMenu from "../../components/layout/LeftMenu"
+import { CalendarSystem } from "@/features/calendar/CalendarSystem"
+import { Workout } from "@/features/workouts/components/WorkoutCard"
+import { eventsApi } from "@/lib/api/events"
+import { format } from "date-fns"
 
 export default function CalendarPage() {
   const [showAuth, setShowAuth] = useState(false)
   const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false)
-  const [events, setEvents] = useState<CalendarEvent[]>([]) // Хранение событий для отображения результатов
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null) // Для отображения деталей события
-  const [showEventModal, setShowEventModal] = useState(false) // Управление видимостью модального окна события
+  const [events, setEvents] = useState<CalendarEvent[]>([]) // For LeftMenu
+  const [workouts, setWorkouts] = useState<Record<string, Workout[]>>({}) // For CalendarSystem
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
+  const [showEventModal, setShowEventModal] = useState(false)
 
   const { isAuthenticated, user, logout } = useAuthStore()
   const { selectedTeam, fetchTeams, teams } = useTeamStore()
 
-  const navItems = React.useMemo(() => {
+  // Navigation Items
+  const navItems = useMemo(() => {
     if (!user) return []
 
     const items: NavItem[] = [
@@ -89,7 +83,6 @@ export default function CalendarPage() {
       items.push({
         label: "Админ",
         href: "/admin",
-        // Пока без иконки или используйте общую
         icon: <Image src="/admin-panel.png" alt="Admin" width={32} height={32} />,
         tooltip: "Админ",
       })
@@ -137,23 +130,15 @@ export default function CalendarPage() {
     return items
   }, [user, logout])
 
-  // Убеждаемся, что команды загружены, если доступ прямой
   useEffect(() => {
     if (isAuthenticated && teams.length === 0) {
       fetchTeams()
     }
   }, [isAuthenticated, teams.length, fetchTeams])
 
-  // Локальное состояние для предпочтений просмотра календаря.
-  // Инициализируем глобальной выбранной командой, если доступна, или 'my' для "Мои события"
   const [calendarTeamId, setCalendarTeamId] = useState<string | null>(
     selectedTeam?.id || "my",
   )
-
-  // Синхронизировать с глобальным хранилищем изначально или при изменении хранилища?
-  // Пользователь может захотеть просматривать другие команды, не меняя глобальный контекст.
-  // давайте оставим его независимым после инициализации, но, может быть, обновим, если selectedTeam изменится извне?
-  // проще просто инициализировать с ним.
 
   useEffect(() => {
     if (selectedTeam) {
@@ -161,28 +146,140 @@ export default function CalendarPage() {
     }
   }, [selectedTeam])
 
-  // Функция для обновления событий на странице календаря
-  const updateEvents = useCallback((newEvents: CalendarEvent[]) => {
-    setEvents(newEvents)
-  }, [])
+  // Data Fetching
+  const loadEvents = useCallback(async () => {
+    if (!isAuthenticated || !user) return
 
-  // Эта функция больше не нужна, так как панель управления является отдельной страницей
+    try {
+      const isSpecialFilter = ["all", "my", "all_teams"].includes(calendarTeamId || "")
+      const filterTeamId = calendarTeamId && !isSpecialFilter ? calendarTeamId : undefined
+
+      const data = await eventsApi.getUserEvents(user.id, filterTeamId)
+
+      // Transform for Legacy Support (LeftMenu)
+      const calendarEvents: CalendarEvent[] = data.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        date: event.eventDate.split("T")[0],
+        exerciseType: event.exerciseType,
+        exercises: event.exercises || [],
+        results: event.results || [],
+        teamId: event.teamId,
+        timeCap: event.timeCap,
+        rounds: event.rounds,
+        description: event.description,
+        userId: event.userId,
+        participants: event.participants,
+        scheme: event.scheme,
+      }))
+
+      // Filtering Logic
+      const filteredEvents = calendarEvents.filter((event) => {
+        if (!calendarTeamId || calendarTeamId === "my") {
+          return event.id && !event.teamId && (event as any).userId === user?.id
+        }
+        if (calendarTeamId === "all_teams") {
+          return !(!event.teamId && (event as any).userId === user?.id)
+        }
+        if (calendarTeamId === "all") return true
+        return event.teamId === calendarTeamId || !event.teamId
+      })
+
+      setEvents(filteredEvents)
+
+      // Transform for New Calendar System
+      const workoutsMap: Record<string, Workout[]> = {}
+
+      data.forEach((event) => {
+        // Apply same filtering
+        let isVisible = false
+        if (!calendarTeamId || calendarTeamId === "my") {
+          isVisible = event.id && !event.teamId && event.userId === user?.id
+        } else if (calendarTeamId === "all_teams") {
+          isVisible = !(!event.teamId && event.userId === user?.id)
+        } else if (calendarTeamId === "all") {
+          isVisible = true
+        } else {
+          isVisible = event.teamId === calendarTeamId || !event.teamId
+        }
+
+        if (!isVisible) return
+
+        const dateObj = new Date(event.eventDate)
+        const dateKey = format(dateObj, "yyyy-MM-dd")
+        const scheduledTime = format(dateObj, "HH:mm")
+
+        if (!workoutsMap[dateKey]) {
+          workoutsMap[dateKey] = []
+        }
+
+        const typeMap: Record<string, "AMRAP" | "EMOM" | "FOR_TIME" | "WEIGHTLIFTING"> = {
+          "For Time": "FOR_TIME",
+          FOR_TIME: "FOR_TIME",
+          AMRAP: "AMRAP",
+          EMOM: "EMOM",
+          Weightlifting: "WEIGHTLIFTING",
+          WEIGHTLIFTING: "WEIGHTLIFTING",
+          "Not for Time": "FOR_TIME", // Fallback
+        }
+
+        // Try to find user result
+        const userResult = event.results?.find(
+          (r: any) => r.username === user.name || r.userId === user.id,
+        )
+
+        workoutsMap[dateKey].push({
+          id: event.id,
+          title: event.title,
+          type: typeMap[event.exerciseType || event.scheme || "FOR_TIME"] || "FOR_TIME",
+          result: userResult ? userResult.time : undefined,
+          scheduledTime,
+          description: event.description || "",
+          movements: event.exercises?.map((e: any) => e.name) || [],
+          timeCap: event.timeCap,
+          rounds: event.rounds,
+        })
+      })
+
+      setWorkouts(workoutsMap)
+    } catch (error) {
+      console.error("Failed to load events", error)
+    }
+  }, [isAuthenticated, user, calendarTeamId])
+
+  useEffect(() => {
+    loadEvents()
+  }, [loadEvents])
 
   const toggleAuth = () => {
     setShowAuth(!showAuth)
   }
 
-  // Функция для отображения деталей события при клике на название события
   const handleShowEventDetails = (event: CalendarEvent) => {
     setSelectedEvent(event)
     setShowEventModal(true)
   }
 
-  // Функция для закрытия модального окна события
   const handleCloseEventModal = () => {
     setShowEventModal(false)
     setSelectedEvent(null)
   }
+
+  // Footer Height Calculation for FAB
+  const footerRef = React.useRef<HTMLDivElement>(null)
+  const [footerHeight, setFooterHeight] = useState(0)
+
+  useEffect(() => {
+    const updateFooterHeight = () => {
+      if (footerRef.current) {
+        setFooterHeight(footerRef.current.offsetHeight)
+      }
+    }
+
+    updateFooterHeight() // Initial measure
+    window.addEventListener("resize", updateFooterHeight)
+    return () => window.removeEventListener("resize", updateFooterHeight)
+  }, [])
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -197,30 +294,35 @@ export default function CalendarPage() {
         onClose={() => setIsLeftMenuOpen(false)}
         showAuth={showAuth}
         toggleAuth={toggleAuth}
-        events={events}
+        events={events} // Legacy support
         onShowEventDetails={handleShowEventDetails}
         navItems={navItems}
       />
 
-      <main
-        className={`flex-grow transition-all duration-300 ease-in-out ml-0 p-2 sm:p-4`}>
-        <div className="mb-4 flex justify-end">
-          <TeamSelector
-            selectedTeamId={calendarTeamId}
-            onSelectTeam={setCalendarTeamId}
-            className="w-full sm:w-64"
+      <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 pt-0`}>
+        {/* Removed padding to let CalendarSystem take full space if needed, handled by internal padding */}
+        <div className="h-[calc(100vh-140px)]">
+          <CalendarSystem
+            workouts={workouts}
+            onWorkoutCreated={loadEvents}
+            teamId={calendarTeamId}
+            footerHeight={footerHeight}
+            headerActions={
+              <TeamSelector
+                selectedTeamId={calendarTeamId}
+                onSelectTeam={setCalendarTeamId}
+                className="w-full sm:w-64"
+              />
+            }
           />
         </div>
-        <Calendar
-          isMenuOpen={false}
-          onUpdateEvents={updateEvents}
-          teamId={calendarTeamId || undefined}
-        />
       </main>
 
-      <Footer />
+      <div ref={footerRef}>
+        <Footer />
+      </div>
 
-      {/* Модальное окно деталей события */}
+      {/* Legacy Event Modal for LeftMenu interactions */}
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div

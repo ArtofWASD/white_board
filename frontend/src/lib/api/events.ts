@@ -21,6 +21,7 @@ interface CreateEventData {
   teamId?: string
   timeCap?: string
   rounds?: string
+  assignees?: string[]
 }
 
 interface UpdateEventData {

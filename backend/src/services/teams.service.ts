@@ -137,14 +137,10 @@ export class TeamsService {
   }
 
   async getTeamMembers(teamId: string) {
-
-
     // Проверяем, существует ли команда
     const team = await (this.prisma as any).team.findUnique({
       where: { id: teamId },
     });
-
-
 
     if (!team) {
       throw new NotFoundException('Team not found');
@@ -239,15 +235,48 @@ export class TeamsService {
       },
     });
 
+    // Если пользователь SUPER_ADMIN, возвращаем все команды
+    if (user.role === 'SUPER_ADMIN') {
+      return (this.prisma as any).team.findMany({
+        include: {
+          owner: {
+            select: {
+              id: true,
+              name: true,
+              lastName: true,
+              email: true,
+            },
+          },
+          members: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  lastName: true,
+                  email: true,
+                  role: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+
     const memberTeams = teamMemberships.map((tm: any) => tm.team);
     let allTeams = [...ownedTeams, ...memberTeams];
 
     // Если пользователь является администратором организации, добавляем все команды из организации
-    if (user.role === 'organization_admin' && user.organizationName) {
-        const orgTeams = await (this.prisma as any).team.findMany({
-            where: { organizationName: user.organizationName }
-        });
-        allTeams = [...allTeams, ...orgTeams];
+    if (
+      (user.role === 'organization_admin' ||
+        user.role === 'ORGANIZATION_ADMIN') &&
+      user.organizationName
+    ) {
+      const orgTeams = await (this.prisma as any).team.findMany({
+        where: { organizationName: user.organizationName },
+      });
+      allTeams = [...allTeams, ...orgTeams];
     }
 
     // Удаляем дубликаты по id
