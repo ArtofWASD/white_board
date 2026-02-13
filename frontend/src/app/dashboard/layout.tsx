@@ -150,8 +150,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {
         label: "Выйти",
         href: "#",
-        onClick: () => {
-          logout()
+        onClick: async () => {
+          await logout()
+          window.location.href = "/calendar"
         },
         icon: (
           <svg

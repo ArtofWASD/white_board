@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  scrollbar-gutter: stable;
 }
 
 @theme inline {
@@ -29,37 +30,38 @@ body {
   .fc .fc-toolbar-title {
     font-size: 1rem !important;
   }
-  
+
   .fc .fc-button {
     padding: 0.25rem 0.5rem !important;
     font-size: 0.75rem !important;
     height: auto !important;
   }
-  
+
   .fc .fc-button-group {
     gap: 0.125rem !important;
   }
-  
+
   .fc .fc-toolbar-chunk {
     display: flex;
     align-items: center;
     gap: 0.25rem;
   }
-  
+
   .fc .fc-toolbar-chunk .fc-today-button {
     padding: 0.25rem 0.5rem !important;
     font-size: 0.75rem !important;
   }
-  
-  .fc .fc-prev-button, .fc .fc-next-button {
+
+  .fc .fc-prev-button,
+  .fc .fc-next-button {
     padding: 0.25rem !important;
   }
-  
+
   /* Ensure proper cell height on mobile */
   .fc .fc-daygrid-day-frame {
     min-height: 40px !important;
   }
-  
+
   .fc .fc-daygrid-day-events {
     min-height: 30px !important;
   }
@@ -70,7 +72,7 @@ body {
   .fc .fc-daygrid-day-frame {
     min-height: 120px !important;
   }
-  
+
   .fc .fc-daygrid-day-events {
     min-height: 100px !important;
   }
@@ -80,7 +82,7 @@ body {
   .fc .fc-daygrid-day-frame {
     min-height: 150px !important;
   }
-  
+
   .fc .fc-daygrid-day-events {
     min-height: 130px !important;
   }
@@ -90,7 +92,7 @@ body {
   .fc .fc-daygrid-day-frame {
     min-height: 180px !important;
   }
-  
+
   .fc .fc-daygrid-day-events {
     min-height: 160px !important;
   }
@@ -122,11 +124,11 @@ body {
     font-size: 0.875rem;
     line-height: 1.4;
   }
-  
+
   .fc .fc-daygrid-day-frame {
     padding: 4px 6px !important;
   }
-  
+
   .fc-event-main {
     min-height: 30px !important;
   }
@@ -136,7 +138,7 @@ body {
   .fc .fc-daygrid-day-frame {
     padding: 6px 8px !important;
   }
-  
+
   .fc-event-main {
     min-height: 35px !important;
   }

@@ -113,7 +113,7 @@ const Header: React.FC<HeaderProps> = ({
   }, [isAuthenticated, user])
 
   return (
-    <header className="bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4">
+    <header className="bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4 z-50">
       <div className="flex items-center">
         {isDashboard && (
           <button

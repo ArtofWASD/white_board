@@ -1,10 +1,13 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useToast } from "../../lib/context/ToastContext"
 import { logApiError } from "../../lib/logger"
 import { teamsApi } from "../../lib/api/teams"
+import { createTeamSchema, CreateTeamFormData } from "../../lib/validators/team"
 import {
   TeamManagementUser as User,
   TeamMember,
@@ -19,10 +22,22 @@ import { QRCodeSVG } from "qrcode.react"
 export default function TeamManagement() {
   const { user } = useAuthStore()
   const { success, error: toastError } = useToast()
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateTeamFormData>({
+    resolver: zodResolver(createTeamSchema),
+  })
+
   const [teams, setTeams] = useState<Team[]>([])
   const [teamMembers, setTeamMembers] = useState<{ [key: string]: TeamMember[] }>({})
-  const [newTeamName, setNewTeamName] = useState("")
-  const [newTeamDescription, setNewTeamDescription] = useState("")
+
+  // const [newTeamName, setNewTeamName] = useState("") // Removed
+  // const [newTeamDescription, setNewTeamDescription] = useState("") // Removed
+
   const [selectedTeam, setSelectedTeam] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [inviteCode, setInviteCode] = useState<string | null>(null)
@@ -119,23 +134,21 @@ export default function TeamManagement() {
     }
   }
 
-  const createTeam = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newTeamName.trim() || !user) return
+  const createTeam = async (data: CreateTeamFormData) => {
+    if (!user) return
 
     try {
       setLoading(true)
       const newTeam = await teamsApi.createTeam({
-        name: newTeamName,
-        description: newTeamDescription,
+        name: data.name,
+        description: data.description || "",
       })
 
       if (newTeam) {
         setTeams((prev) => [...prev, newTeam])
 
         // Сброс формы
-        setNewTeamName("")
-        setNewTeamDescription("")
+        reset()
 
         success("Команда успешно создана!")
       }
@@ -180,7 +193,7 @@ export default function TeamManagement() {
       {/* Форма создания команды */}
       <div className="mb-8">
         <h3 className="text-lg font-semibold mb-3">Создать новую команду</h3>
-        <form onSubmit={createTeam} className="space-y-4">
+        <form onSubmit={handleSubmit(createTeam)} className="space-y-4">
           <div>
             <label
               htmlFor="teamName"
@@ -190,11 +203,14 @@ export default function TeamManagement() {
             <input
               type="text"
               id="teamName"
-              value={newTeamName}
-              onChange={(e) => setNewTeamName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required
+              {...register("name")}
+              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                errors.name ? "border-red-500" : "border-gray-300"
+              }`}
             />
+            {errors.name && (
+              <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+            )}
           </div>
 
           <div>
@@ -205,18 +221,20 @@ export default function TeamManagement() {
             </label>
             <textarea
               id="teamDescription"
-              value={newTeamDescription}
-              onChange={(e) => setNewTeamDescription(e.target.value)}
+              {...register("description")}
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               rows={3}
             />
+            {errors.description && (
+              <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
-            {loading ? "Создание..." : "Создать команду"}
+            {isSubmitting ? "Создание..." : "Создать команду"}
           </button>
         </form>
       </div>

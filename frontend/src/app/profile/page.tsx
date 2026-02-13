@@ -1,109 +1,120 @@
-'use client';
+"use client"
 
-import React, { useState } from 'react';
-import Link from 'next/link';
-import { useAuthStore } from '../../lib/store/useAuthStore';
-import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
-import { useToast } from '../../lib/context/ToastContext';
-import Button from '../../components/ui/Button';
-import { Switch } from '../../components/ui/Switch';
+import React, { useState } from "react"
+import Link from "next/link"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useAuthStore } from "../../lib/store/useAuthStore"
+import { useFeatureFlagStore } from "../../lib/store/useFeatureFlagStore"
+import { useToast } from "../../lib/context/ToastContext"
+import Button from "../../components/ui/Button"
+import { Switch } from "../../components/ui/Switch"
+import {
+  updateEmailSchema,
+  updatePasswordSchema,
+  UpdateEmailFormData,
+  UpdatePasswordFormData,
+} from "../../lib/validators/profile"
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuthStore();
-  const { flags, toggleFlag } = useFeatureFlagStore();
-  const { success, error: toastError } = useToast();
-  
-  // Состояние Email
-  const [email, setEmail] = useState(user?.email || '');
-  const [isEmailEditing, setIsEmailEditing] = useState(false);
-  
-  // Состояние пароля
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [isPasswordEditing, setIsPasswordEditing] = useState(false);
+  const { user, updateUser } = useAuthStore()
+  const { flags, toggleFlag } = useFeatureFlagStore()
+  const { success, error: toastError } = useToast()
 
-  // Состояния загрузки
-  const [isLoading, setIsLoading] = useState(false);
+  // State for toggling edit mode
+  const [isEmailEditing, setIsEmailEditing] = useState(false)
+  const [isPasswordEditing, setIsPasswordEditing] = useState(false)
 
-  const handleUpdateEmail = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    
-    setIsLoading(true);
+  // Email Form
+  const {
+    register: registerEmail,
+    handleSubmit: handleSubmitEmail,
+    formState: { errors: emailErrors, isSubmitting: isEmailSubmitting },
+    reset: resetEmail,
+  } = useForm<UpdateEmailFormData>({
+    resolver: zodResolver(updateEmailSchema),
+    defaultValues: {
+      email: user?.email || "",
+    },
+  })
+
+  // Password Form
+  const {
+    register: registerPassword,
+    handleSubmit: handleSubmitPassword,
+    formState: { errors: passwordErrors, isSubmitting: isPasswordSubmitting },
+    reset: resetPassword,
+  } = useForm<UpdatePasswordFormData>({
+    resolver: zodResolver(updatePasswordSchema),
+  })
+
+  const onUpdateEmail = async (data: UpdateEmailFormData) => {
+    if (!user) return
+
     try {
       const response = await fetch(`/api/auth/profile/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: data.email }),
+      })
 
-      const data = await response.json();
+      const responseData = await response.json()
 
-      if (response.ok && data.user) {
-        updateUser(data.user);
-        setIsEmailEditing(false);
-        success('Email успешно обновлен');
+      if (response.ok && responseData.user) {
+        updateUser(responseData.user)
+        setIsEmailEditing(false)
+        success("Email успешно обновлен")
       } else {
-        toastError(`Не удалось обновить email: ${data.message || 'Неизвестная ошибка'}`);
+        toastError(
+          `Не удалось обновить email: ${responseData.message || "Неизвестная ошибка"}`,
+        )
       }
     } catch (error) {
-
-      toastError('Ошибка при обновлении email');
-    } finally {
-      setIsLoading(false);
+      toastError("Ошибка при обновлении email")
     }
-  };
+  }
 
-  const handleUpdatePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
+  const onUpdatePassword = async (data: UpdatePasswordFormData) => {
+    if (!user) return
 
-    if (newPassword !== confirmPassword) {
-      toastError('Новые пароли не совпадают');
-      return;
-    }
-    
-    setIsLoading(true);
     try {
       const response = await fetch(`/api/auth/profile/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          password: newPassword,
-          currentPassword: currentPassword
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          password: data.newPassword,
+          currentPassword: data.currentPassword,
         }),
-      });
+      })
 
-      const data = await response.json();
+      const responseData = await response.json()
 
       if (response.ok) {
-        setIsPasswordEditing(false);
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        success('Пароль успешно обновлен');
+        setIsPasswordEditing(false)
+        resetPassword()
+        success("Пароль успешно обновлен")
       } else {
-        toastError(`Не удалось обновить пароль: ${data.message || 'Неизвестная ошибка'}`);
+        toastError(
+          `Не удалось обновить пароль: ${responseData.message || "Неизвестная ошибка"}`,
+        )
       }
     } catch (error) {
-
-      toastError('Ошибка при обновлении пароля');
-    } finally {
-      setIsLoading(false);
+      toastError("Ошибка при обновлении пароля")
     }
-  };
+  }
 
   if (!user) {
     return (
       <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-xl">
         <h2 className="text-2xl font-bold mb-4">Доступ запрещен</h2>
-        <p className="mb-4">Вы должны войти в систему, чтобы просматривать эту страницу.</p>
+        <p className="mb-4">
+          Вы должны войти в систему, чтобы просматривать эту страницу.
+        </p>
         <Link href="/" className="text-blue-500 hover:text-blue-700 font-medium">
           Вернуться на главную
         </Link>
       </div>
-    );
+    )
   }
 
   return (
@@ -120,40 +131,48 @@ export default function ProfilePage() {
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-gray-900">Email</h3>
           {!isEmailEditing && (
-            <Button 
-              variant="ghost" 
-              onClick={() => setIsEmailEditing(true)}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
+            <Button
+              variant="ghost"
+              onClick={() => {
+                resetEmail({ email: user.email })
+                setIsEmailEditing(true)
+              }}
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
               Изменить
             </Button>
           )}
         </div>
 
         {isEmailEditing ? (
-          <form onSubmit={handleUpdateEmail} className="space-y-4">
+          <form onSubmit={handleSubmitEmail(onUpdateEmail)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Новый Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Новый Email
+              </label>
               <input
                 type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                required
+                {...registerEmail("email")}
+                className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
+                  emailErrors.email
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                }`}
               />
+              {emailErrors.email && (
+                <p className="text-red-500 text-xs mt-1">{emailErrors.email.message}</p>
+              )}
             </div>
             <div className="flex space-x-3">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Сохранение...' : 'Сохранить изменения'}
+              <Button type="submit" disabled={isEmailSubmitting}>
+                {isEmailSubmitting ? "Сохранение..." : "Сохранить изменения"}
               </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={() => {
-                  setIsEmailEditing(false);
-                  setEmail(user.email);
-                }}
-              >
+                  setIsEmailEditing(false)
+                  resetEmail({ email: user.email })
+                }}>
                 Отмена
               </Button>
             </div>
@@ -168,64 +187,85 @@ export default function ProfilePage() {
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-bold text-gray-900">Пароль</h3>
           {!isPasswordEditing && (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               onClick={() => setIsPasswordEditing(true)}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-            >
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
               Изменить
             </Button>
           )}
         </div>
 
         {isPasswordEditing ? (
-          <form onSubmit={handleUpdatePassword} className="space-y-4">
+          <form onSubmit={handleSubmitPassword(onUpdatePassword)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Текущий пароль</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Текущий пароль
+              </label>
               <input
                 type="password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                required
+                {...registerPassword("currentPassword")}
+                className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
+                  passwordErrors.currentPassword
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                }`}
               />
+              {passwordErrors.currentPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {passwordErrors.currentPassword.message}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Новый пароль</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Новый пароль
+              </label>
               <input
                 type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                required
-                minLength={6}
+                {...registerPassword("newPassword")}
+                className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
+                  passwordErrors.newPassword
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                }`}
               />
+              {passwordErrors.newPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {passwordErrors.newPassword.message}
+                </p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Подтвердите новый пароль</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Подтвердите новый пароль
+              </label>
               <input
                 type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none"
-                required
-                minLength={6}
+                {...registerPassword("confirmPassword")}
+                className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
+                  passwordErrors.confirmPassword
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                }`}
               />
+              {passwordErrors.confirmPassword && (
+                <p className="text-red-500 text-xs mt-1">
+                  {passwordErrors.confirmPassword.message}
+                </p>
+              )}
             </div>
             <div className="flex space-x-3">
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? 'Обновление...' : 'Обновить пароль'}
+              <Button type="submit" disabled={isPasswordSubmitting}>
+                {isPasswordSubmitting ? "Обновление..." : "Обновить пароль"}
               </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
+              <Button
+                type="button"
+                variant="ghost"
                 onClick={() => {
-                  setIsPasswordEditing(false);
-                  setCurrentPassword('');
-                  setNewPassword('');
-                  setConfirmPassword('');
-                }}
-              >
+                  setIsPasswordEditing(false)
+                  resetPassword()
+                }}>
                 Отмена
               </Button>
             </div>
@@ -236,63 +276,75 @@ export default function ProfilePage() {
       </div>
 
       {/* Флаги функций - Скрыть для администратора организации */}
-      {user.role !== 'ORGANIZATION_ADMIN' && (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-gray-900">Прогресс упражнений</h4>
-              <p className="text-sm text-gray-500">Показывать блок с максимальными весами в упражнениях</p>
+      {user.role !== "ORGANIZATION_ADMIN" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-gray-900">Прогресс упражнений</h4>
+                <p className="text-sm text-gray-500">
+                  Показывать блок с максимальными весами в упражнениях
+                </p>
+              </div>
+              <Switch
+                checked={flags.showExerciseTracker}
+                onChange={() => toggleFlag("showExerciseTracker")}
+              />
             </div>
-            <Switch
-              checked={flags.showExerciseTracker}
-              onChange={() => toggleFlag('showExerciseTracker')}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-gray-900">Трекер веса</h4>
-              <p className="text-sm text-gray-500">Показывать график изменения веса тела</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-gray-900">Трекер веса</h4>
+                <p className="text-sm text-gray-500">
+                  Показывать график изменения веса тела
+                </p>
+              </div>
+              <Switch
+                checked={flags.showWeightTracker}
+                onChange={() => toggleFlag("showWeightTracker")}
+              />
             </div>
-            <Switch
-              checked={flags.showWeightTracker}
-              onChange={() => toggleFlag('showWeightTracker')}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-gray-900">Калькулятор 5/3/1</h4>
-              <p className="text-sm text-gray-500">Показывать калькулятор силовых тренировок</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-gray-900">Калькулятор 5/3/1</h4>
+                <p className="text-sm text-gray-500">
+                  Показывать калькулятор силовых тренировок
+                </p>
+              </div>
+              <Switch
+                checked={flags.strengthTrainingCalculator}
+                onChange={() => toggleFlag("strengthTrainingCalculator")}
+              />
             </div>
-            <Switch
-              checked={flags.strengthTrainingCalculator}
-              onChange={() => toggleFlag('strengthTrainingCalculator')}
-            />
-          </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <h4 className="font-medium text-gray-900">Texas Method (Техасский метод)</h4>
-              <p className="text-sm text-gray-500">Калькулятор по методике Марка Риппто</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-medium text-gray-900">
+                  Texas Method (Техасский метод)
+                </h4>
+                <p className="text-sm text-gray-500">
+                  Калькулятор по методике Марка Риппто
+                </p>
+              </div>
+              <Switch
+                checked={flags.texasMethodCalculator}
+                onChange={() => toggleFlag("texasMethodCalculator")}
+              />
             </div>
-            <Switch
-              checked={flags.texasMethodCalculator}
-              onChange={() => toggleFlag('texasMethodCalculator')}
-            />
-          </div>
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div>
-              <h4 className="font-medium text-gray-900">Общий виджет калькуляторов</h4>
-              <p className="text-sm text-gray-500">Объединить все калькуляторы в один виджет</p>
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+              <div>
+                <h4 className="font-medium text-gray-900">Общий виджет калькуляторов</h4>
+                <p className="text-sm text-gray-500">
+                  Объединить все калькуляторы в один виджет
+                </p>
+              </div>
+              <Switch
+                checked={flags.showUniversalCalculator}
+                onChange={() => toggleFlag("showUniversalCalculator")}
+              />
             </div>
-            <Switch
-              checked={flags.showUniversalCalculator}
-              onChange={() => toggleFlag('showUniversalCalculator')}
-            />
           </div>
         </div>
-      </div>
       )}
     </div>
-  );
+  )
 }

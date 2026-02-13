@@ -1,53 +1,60 @@
-'use client';
+"use client"
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Image from 'next/image';
-import { motion, AnimatePresence } from 'framer-motion';
-import { useAuthStore } from '../../lib/store/useAuthStore';
-import Button from '../../components/ui/Button';
-import ErrorDisplay from '../../components/ui/ErrorDisplay';
+import React, { useEffect, Suspense } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
+import Image from "next/image"
+import { motion, AnimatePresence } from "framer-motion"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useAuthStore } from "../../lib/store/useAuthStore"
+import Button from "../../components/ui/Button"
+import ErrorDisplay from "../../components/ui/ErrorDisplay"
+import { loginSchema, LoginFormData } from "../../lib/validators/auth"
 
 function LoginForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login, isAuthenticated, isLoading } = useAuthStore();
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirect = searchParams.get('redirect');
-  const inviteCode = searchParams.get('inviteCode');
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+    setError: setFormError,
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  })
+
+  const { login, isAuthenticated, isLoading } = useAuthStore()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirect = searchParams.get("redirect")
+  const inviteCode = searchParams.get("inviteCode")
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      router.push(redirect || '/');
+      router.push(redirect || "/")
     }
-  }, [isAuthenticated, router, isLoading, redirect]);
+  }, [isAuthenticated, router, isLoading, redirect])
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-
+  const onSubmit = async (data: LoginFormData) => {
+    console.log("Submitting login form:", data.email) // Debug log
     try {
-      const success = await login(email, password);
+      const success = await login(data.email, data.password)
       if (success) {
-        // Перенаправление на целевую страницу или на главную
-        router.push(redirect || '/');
+        router.push(redirect || "/")
       } else {
-        setError('Не удалось войти. Пожалуйста, проверьте учетные данные.');
+        setFormError("root", {
+          type: "manual",
+          message: "Не удалось войти. Пожалуйста, проверьте учетные данные.",
+        })
       }
     } catch (error) {
-
-      setError('Произошла ошибка при входе');
-    } finally {
-      setLoading(false);
+      setFormError("root", {
+        type: "manual",
+        message: "Произошла ошибка при входе",
+      })
     }
-  };
+  }
 
   if (isLoading || isAuthenticated) {
-    return null; // or a loading spinner
+    return null // or a loading spinner
   }
 
   return (
@@ -61,8 +68,7 @@ function LoginForm() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-0"
-            >
+              className="absolute inset-0">
               <Image
                 src="/register_pic_1.jpg"
                 alt="Login"
@@ -77,20 +83,25 @@ function LoginForm() {
         {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
           <h2 className="text-3xl font-bold text-center mb-6">Вход</h2>
-          
+
           <div className="text-center mb-6">
-            <p className="text-gray-600 text-sm">Добро пожаловать обратно! Пожалуйста, войдите в свой аккаунт.</p>
+            <p className="text-gray-600 text-sm">
+              Добро пожаловать обратно! Пожалуйста, войдите в свой аккаунт.
+            </p>
           </div>
 
-          <ErrorDisplay error={error} onClose={() => setError('')} className="mb-6" />
-          
-          <form onSubmit={handleSubmit}>
+          <ErrorDisplay
+            error={errors.root?.message || ""}
+            onClose={() => setFormError("root", { message: "" })}
+            className="mb-6"
+          />
+
+          <form onSubmit={handleSubmit(onSubmit)}>
             <motion.div
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               transition={{ duration: 0.3 }}
-              className="space-y-4"
-            >
+              className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
                   Email
@@ -98,46 +109,52 @@ function LoginForm() {
                 <input
                   type="email"
                   id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  {...register("email")}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                )}
               </div>
-              
+
               <div>
-                <label htmlFor="password" className="block text-gray-700 font-medium mb-2">
+                <label
+                  htmlFor="password"
+                  className="block text-gray-700 font-medium mb-2">
                   Пароль
                 </label>
                 <input
                   type="password"
                   id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
+                  {...register("password")}
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    errors.password ? "border-red-500" : "border-gray-300"
+                  }`}
                 />
+                {errors.password && (
+                  <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+                )}
               </div>
-              
+
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 variant="primary"
-                className="w-full mt-6"
-              >
-                {loading ? 'Обработка...' : 'Войти'}
+                className="w-full mt-6">
+                {isSubmitting ? "Обработка..." : "Войти"}
               </Button>
             </motion.div>
           </form>
-          
+
           <div className="mt-6 text-center">
             <p className="text-gray-600">
-              Нет аккаунта?{' '}
+              Нет аккаунта?{" "}
               <Button
-                href={inviteCode ? `/register?inviteCode=${inviteCode}` : '/register'}
+                href={inviteCode ? `/register?inviteCode=${inviteCode}` : "/register"}
                 variant="link"
-                className="font-medium p-0 h-auto"
-              >
+                className="font-medium p-0 h-auto">
                 Зарегистрируйтесь
               </Button>
             </p>
@@ -145,13 +162,18 @@ function LoginForm() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-100">Загрузка...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+          Загрузка...
+        </div>
+      }>
       <LoginForm />
     </Suspense>
-  );
+  )
 }

@@ -105,8 +105,9 @@ export default function CalendarPage() {
       {
         label: "Выйти",
         href: "#",
-        onClick: () => {
-          logout()
+        onClick: async () => {
+          await logout()
+          window.location.href = "/calendar"
         },
         icon: (
           <svg
@@ -194,7 +195,7 @@ export default function CalendarPage() {
         // Apply same filtering
         let isVisible = false
         if (!calendarTeamId || calendarTeamId === "my") {
-          isVisible = event.id && !event.teamId && event.userId === user?.id
+          isVisible = !!event.id && !event.teamId && event.userId === user?.id
         } else if (calendarTeamId === "all_teams") {
           isVisible = !(!event.teamId && event.userId === user?.id)
         } else if (calendarTeamId === "all") {

@@ -4,42 +4,56 @@ import React, { useState, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import Button from "../../components/ui/Button"
 import SuccessModal from "../../components/ui/SuccessModal"
 import ErrorDisplay from "../../components/ui/ErrorDisplay"
 import { logApiError } from "../../lib/logger"
+import { registerSchema, RegisterFormData } from "../../lib/validators/auth"
 
 function RegisterForm() {
   const [step, setStep] = useState(1)
   const router = useRouter()
   const searchParams = useSearchParams()
   const inviteCode = searchParams.get("inviteCode")
-  const { register, isAuthenticated, isLoading } = useAuthStore()
+  const { register: registerUser, isAuthenticated, isLoading } = useAuthStore()
 
-  // Состояние формы
-  const [name, setName] = useState("")
-  const [lastName, setLastName] = useState("")
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [role, setRole] = useState<"TRAINER" | "ATHLETE" | "ORGANIZATION_ADMIN">(
-    "ATHLETE",
-  )
-  const [gender, setGender] = useState<"male" | "female">("male")
-  const [userType, setUserType] = useState<"individual" | "organization">("individual")
-  const [organizationName, setOrganizationName] = useState("")
-  const [isOrganizationTrainer, setIsOrganizationTrainer] = useState(false)
-  const [acceptTerms, setAcceptTerms] = useState(false)
-
-  const [error, setError] = useState("")
-  const [loading, setLoading] = useState(false)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
 
+  // Settings state
   const [settings, setSettings] = useState<Record<string, boolean>>({})
   const [loadingSettings, setLoadingSettings] = useState(true)
 
-  // Получение настроек
+  // Initialize form
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    watch,
+    setValue,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      userType: "individual",
+      role: "ATHLETE",
+      gender: "MALE",
+      isOrganizationTrainer: false,
+      acceptTerms: false,
+    },
+    mode: "onChange",
+  })
+
+  // Watch values for conditional rendering and validaton
+  const userType = watch("userType")
+  const role = watch("role")
+  const gender = watch("gender")
+  const isOrganizationTrainer = watch("isOrganizationTrainer")
+
+  // Fetch Settings
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -57,7 +71,7 @@ function RegisterForm() {
     fetchSettings()
   }, [])
 
-  // Перенаправление на панель управления, если уже выполнен вход, или перенаправление по приглашению
+  // Redirect if authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticated && !showSuccessModal) {
       if (inviteCode) {
@@ -94,93 +108,48 @@ function RegisterForm() {
     )
   }
 
-  const validateStep1 = () => {
-    if (!email || !password || !confirmPassword) {
-      setError("Пожалуйста, заполните все поля")
-      return false
-    }
-    if (password !== confirmPassword) {
-      setError("Пароли не совпадают")
-      return false
-    }
-    if (password.length < 6) {
-      setError("Пароль должен содержать минимум 6 символов")
-      return false
-    }
-    return true
-  }
-
-  const validateStep2 = () => {
-    if (!name) {
-      setError("Пожалуйста, введите имя")
-      return false
-    }
-    return true
-  }
-
-  const handleNext = () => {
-    setError("")
-    let isValid = false
+  const handleNext = async () => {
+    let fieldsToValidate: (keyof RegisterFormData)[] = []
 
     if (step === 1) {
-      isValid = validateStep1()
+      fieldsToValidate = ["email", "password", "confirmPassword"]
     } else if (step === 2) {
-      isValid = validateStep2()
+      fieldsToValidate = ["name", "lastName", "gender"]
     }
 
-    if (isValid) {
+    const isStepValid = await trigger(fieldsToValidate)
+
+    if (isStepValid) {
       setStep((prev) => prev + 1)
     }
   }
 
   const handleBack = () => {
-    setError("")
     setStep((prev) => prev - 1)
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (step < 3) {
-      handleNext()
-      return
-    }
-
-    if (userType === "organization" && !organizationName.trim()) {
-      setError("Пожалуйста, введите название организации")
-      return
-    }
-
-    if (!acceptTerms) {
-      setError(
-        "Необходимо принять условия Пользовательского соглашения и дать согласие на обработку персональных данных",
-      )
-      return
-    }
-
-    setError("")
-    setLoading(true)
-
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      const success = await register(
-        name,
-        email,
-        password,
-        role,
-        gender.toUpperCase(),
-        userType,
-        lastName,
-        organizationName || "", // Гарантируем строку
+      const success = await registerUser(
+        data.name,
+        data.email,
+        data.password,
+        data.role,
+        data.gender,
+        data.userType,
+        data.lastName || "",
+        data.organizationName || "",
       )
+
       if (!success) {
-        setError("Не удалось зарегистрироваться. Попробуйте еще раз.")
+        setError("root", {
+          message: "Не удалось зарегистрироваться. Попробуйте еще раз.",
+        })
       } else {
         setShowSuccessModal(true)
       }
     } catch (error) {
-      setError("Произошла ошибка при регистрации")
-    } finally {
-      setLoading(false)
+      setError("root", { message: "Произошла ошибка при регистрации" })
     }
   }
 
@@ -219,27 +188,6 @@ function RegisterForm() {
     }
   }
 
-  const variants = {
-    enter: (direction: number) => {
-      return {
-        x: direction > 0 ? 1000 : -1000,
-        opacity: 0,
-      }
-    },
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => {
-      return {
-        zIndex: 0,
-        x: direction < 0 ? 1000 : -1000,
-        opacity: 0,
-      }
-    },
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <SuccessModal
@@ -248,7 +196,7 @@ function RegisterForm() {
       />
 
       <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
-        {/* Левая сторона - Изображение (Видно на md+) */}
+        {/* Левая сторона - Изображение */}
         <div className="hidden md:block md:w-1/2 relative min-h-[500px] rounded-2xl overflow-hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -275,9 +223,13 @@ function RegisterForm() {
 
           {renderStepIndicator()}
 
-          <ErrorDisplay error={error} onClose={() => setError("")} className="mb-6" />
+          <ErrorDisplay
+            error={errors.root?.message || ""}
+            onClose={() => setError("root", { message: "" })}
+            className="mb-6"
+          />
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <AnimatePresence mode="wait">
               {step === 1 && (
                 <motion.div
@@ -302,11 +254,15 @@ function RegisterForm() {
                     <input
                       type="email"
                       id="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      {...register("email")}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.email ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                    )}
                   </div>
                   <div>
                     <label
@@ -317,11 +273,17 @@ function RegisterForm() {
                     <input
                       type="password"
                       id="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      {...register("password")}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.password ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
+                    {errors.password && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <label
@@ -332,11 +294,17 @@ function RegisterForm() {
                     <input
                       type="password"
                       id="confirmPassword"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      {...register("confirmPassword")}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
+                    {errors.confirmPassword && (
+                      <p className="text-red-500 text-xs mt-1">
+                        {errors.confirmPassword.message}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -364,11 +332,15 @@ function RegisterForm() {
                     <input
                       type="text"
                       id="name"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      {...register("name")}
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.name ? "border-red-500" : "border-gray-300"
+                      }`}
                       required
                     />
+                    {errors.name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                    )}
                   </div>
                   <div>
                     <label
@@ -379,8 +351,7 @@ function RegisterForm() {
                     <input
                       type="text"
                       id="lastName"
-                      value={lastName}
-                      onChange={(e) => setLastName(e.target.value)}
+                      {...register("lastName")}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
@@ -390,9 +361,8 @@ function RegisterForm() {
                       <label className="inline-flex items-center">
                         <input
                           type="radio"
-                          name="gender"
-                          checked={gender === "male"}
-                          onChange={() => setGender("male")}
+                          value="MALE"
+                          {...register("gender")}
                           className="form-radio h-4 w-4 text-blue-600"
                         />
                         <span className="ml-2">Мужской</span>
@@ -400,9 +370,8 @@ function RegisterForm() {
                       <label className="inline-flex items-center">
                         <input
                           type="radio"
-                          name="gender"
-                          checked={gender === "female"}
-                          onChange={() => setGender("female")}
+                          value="FEMALE"
+                          {...register("gender")}
                           className="form-radio h-4 w-4 text-blue-600"
                         />
                         <span className="ml-2">Женский</span>
@@ -437,8 +406,8 @@ function RegisterForm() {
                             : "border-gray-200 hover:border-blue-300"
                         }`}
                         onClick={() => {
-                          setRole("ATHLETE")
-                          setUserType("individual")
+                          setValue("role", "ATHLETE")
+                          setValue("userType", "individual")
                         }}>
                         <div className="flex items-start space-x-4">
                           <div
@@ -481,8 +450,8 @@ function RegisterForm() {
                             : "border-gray-200 hover:border-blue-300"
                         }`}
                         onClick={() => {
-                          setRole("TRAINER")
-                          setUserType("individual")
+                          setValue("role", "TRAINER")
+                          setValue("userType", "individual")
                         }}>
                         <div className="flex items-start space-x-4">
                           <div
@@ -525,9 +494,9 @@ function RegisterForm() {
                             : "border-gray-200 hover:border-blue-300"
                         }`}
                         onClick={() => {
-                          setRole("ORGANIZATION_ADMIN")
-                          setIsOrganizationTrainer(false)
-                          setUserType("organization")
+                          setValue("role", "ORGANIZATION_ADMIN")
+                          setValue("isOrganizationTrainer", false)
+                          setValue("userType", "organization")
                         }}>
                         <div className="flex items-start space-x-4">
                           <div
@@ -578,22 +547,30 @@ function RegisterForm() {
                         <input
                           type="text"
                           id="organizationName"
-                          value={organizationName}
-                          onChange={(e) => setOrganizationName(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          {...register("organizationName")}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                            errors.organizationName ? "border-red-500" : "border-gray-300"
+                          }`}
                           placeholder="Например: Спортивный клуб 'Олимп'"
-                          required
                         />
+                        {errors.organizationName && (
+                          <p className="text-red-500 text-xs mt-1">
+                            {errors.organizationName.message}
+                          </p>
+                        )}
                       </div>
 
                       <div className="flex items-center">
                         <input
                           id="is-trainer"
                           type="checkbox"
-                          checked={isOrganizationTrainer}
+                          {...register("isOrganizationTrainer")}
                           onChange={(e) => {
-                            setIsOrganizationTrainer(e.target.checked)
-                            setRole(e.target.checked ? "TRAINER" : "ORGANIZATION_ADMIN")
+                            setValue("isOrganizationTrainer", e.target.checked)
+                            setValue(
+                              "role",
+                              e.target.checked ? "TRAINER" : "ORGANIZATION_ADMIN",
+                            )
                           }}
                           className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                         />
@@ -612,8 +589,7 @@ function RegisterForm() {
                       <input
                         id="accept-terms"
                         type="checkbox"
-                        checked={acceptTerms}
-                        onChange={(e) => setAcceptTerms(e.target.checked)}
+                        {...register("acceptTerms")}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1 flex-shrink-0"
                       />
                       <label
@@ -637,6 +613,11 @@ function RegisterForm() {
                         </a>
                       </label>
                     </div>
+                    {errors.acceptTerms && (
+                      <p className="text-red-500 text-xs mt-1 ml-7">
+                        {errors.acceptTerms.message}
+                      </p>
+                    )}
                   </div>
                 </motion.div>
               )}
@@ -666,10 +647,10 @@ function RegisterForm() {
                 <Button
                   key="submit-btn"
                   type="submit"
-                  disabled={loading}
+                  disabled={isSubmitting}
                   variant="primary"
                   className="flex-1">
-                  {loading ? "Обработка..." : "Зарегистрироваться"}
+                  {isSubmitting ? "Обработка..." : "Зарегистрироваться"}
                 </Button>
               )}
             </div>

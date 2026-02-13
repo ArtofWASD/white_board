@@ -1,11 +1,13 @@
 "use client"
 
-import React, { useState } from "react"
+import React, { useEffect } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useToast } from "../../lib/context/ToastContext"
 import ErrorDisplay from "../../components/ui/ErrorDisplay"
 import { teamsApi } from "../../lib/api/teams"
-
+import { createTeamSchema, CreateTeamFormData } from "../../lib/validators/team"
 import { CreateTeamModalProps } from "../../types/CreateTeamModal.types"
 
 export default function CreateTeamModal({
@@ -14,29 +16,33 @@ export default function CreateTeamModal({
   onTeamCreated,
 }: CreateTeamModalProps) {
   const { user } = useAuthStore()
-  const { success, error: toastError } = useToast()
-  const [teamName, setTeamName] = useState("")
-  const [teamDescription, setTeamDescription] = useState("")
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { success } = useToast()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<CreateTeamFormData>({
+    resolver: zodResolver(createTeamSchema),
+  })
 
-    if (!teamName.trim() || !user) return
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      reset()
+    }
+  }, [isOpen, reset])
+
+  const onSubmit = async (data: CreateTeamFormData) => {
+    if (!user) return
 
     try {
-      setLoading(true)
-      setError(null)
-
       await teamsApi.createTeam({
-        name: teamName,
-        description: teamDescription,
+        name: data.name,
+        description: data.description || "",
       })
-
-      // Сброс формы
-      setTeamName("")
-      setTeamDescription("")
 
       // Уведомление родительского компонента и закрытие модального окна
       onTeamCreated()
@@ -44,9 +50,7 @@ export default function CreateTeamModal({
 
       success("Команда успешно создана!")
     } catch (err: any) {
-      setError(err.message || "Не удалось создать команду")
-    } finally {
-      setLoading(false)
+      setError("root", { message: err.message || "Не удалось создать команду" })
     }
   }
 
@@ -75,9 +79,13 @@ export default function CreateTeamModal({
             </button>
           </div>
 
-          <ErrorDisplay error={error} onClose={() => setError(null)} className="mb-4" />
+          <ErrorDisplay
+            error={errors.root?.message || null}
+            onClose={() => setError("root", { message: "" })}
+            className="mb-4"
+          />
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label
                 htmlFor="teamName"
@@ -87,11 +95,14 @@ export default function CreateTeamModal({
               <input
                 type="text"
                 id="teamName"
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
+                {...register("name")}
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 ${
+                  errors.name ? "border-red-500" : "border-gray-300"
+                }`}
               />
+              {errors.name && (
+                <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+              )}
             </div>
 
             <div>
@@ -102,11 +113,13 @@ export default function CreateTeamModal({
               </label>
               <textarea
                 id="teamDescription"
-                value={teamDescription}
-                onChange={(e) => setTeamDescription(e.target.value)}
+                {...register("description")}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
               />
+              {errors.description && (
+                <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+              )}
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">
@@ -114,14 +127,14 @@ export default function CreateTeamModal({
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                disabled={loading}>
+                disabled={isSubmitting}>
                 Отмена
               </button>
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isSubmitting}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50">
-                {loading ? "Создание..." : "Создать команду"}
+                {isSubmitting ? "Создание..." : "Создать команду"}
               </button>
             </div>
           </form>
