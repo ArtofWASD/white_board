@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Notification } from '@prisma/client';
+import { Notification, Prisma } from '@prisma/client';
 
 import { NotificationsGateway } from '../modules/notifications/notifications.gateway';
 
@@ -15,7 +15,7 @@ export class NotificationsService {
     userId: string,
     type: string,
     message: string,
-    data: any = {},
+    data: Prisma.InputJsonValue = {},
     title?: string,
   ): Promise<Notification> {
     const notification = await this.prisma.notification.create({

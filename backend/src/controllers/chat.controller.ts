@@ -11,6 +11,7 @@ import {
 import { ChatService } from '../services/chat.service';
 import { CreateDirectChatDto, SendMessageDto } from '../dtos/chat.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthenticatedRequest } from '../auth/interfaces/authenticated-request.interface';
 
 @Controller('chats')
 @UseGuards(JwtAuthGuard)
@@ -19,7 +20,7 @@ export class ChatController {
 
   @Post('direct')
   async createDirectChat(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Body() createDirectChatDto: CreateDirectChatDto,
   ) {
     const userId = req.user.id;
@@ -27,20 +28,23 @@ export class ChatController {
   }
 
   @Get('team/:teamId')
-  async getTeamChat(@Request() req: any, @Param('teamId') teamId: string) {
+  async getTeamChat(
+    @Request() req: AuthenticatedRequest,
+    @Param('teamId') teamId: string,
+  ) {
     const userId = req.user.id;
     return this.chatService.getTeamChat(teamId, userId);
   }
 
   @Get()
-  async getUserChats(@Request() req: any) {
+  async getUserChats(@Request() req: AuthenticatedRequest) {
     const userId = req.user.id;
     return this.chatService.getUserChats(userId);
   }
 
   @Get(':chatId/messages')
   async getMessages(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Param('chatId') chatId: string,
     @Query('limit') limit?: number,
     @Query('skip') skip?: number,
@@ -56,7 +60,7 @@ export class ChatController {
 
   @Post(':chatId/messages')
   async sendMessage(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Param('chatId') chatId: string,
     @Body() sendMessageDto: SendMessageDto,
   ) {

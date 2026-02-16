@@ -1,10 +1,9 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { CsrfGuard } from './auth/guards/csrf.guard';
-import { Reflector } from '@nestjs/core';
 
 // Загружаем переменные окружения
 dotenv.config();
@@ -29,13 +28,17 @@ async function bootstrap() {
   app.useGlobalGuards(new CsrfGuard(reflector));
 
   // CORS с поддержкой credentials для cookies
+  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
+    : [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001',
+      ];
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://127.0.0.1:3000',
-      'http://127.0.0.1:3001',
-    ],
+    origin: allowedOrigins,
     credentials: true, // Важно! Разрешает cookies
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
@@ -46,4 +49,4 @@ async function bootstrap() {
   // Прослушиваем все интерфейсы
   await app.listen(port, '0.0.0.0');
 }
-bootstrap();
+void bootstrap();

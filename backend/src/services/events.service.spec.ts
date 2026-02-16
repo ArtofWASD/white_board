@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsService } from './events.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { NotificationsService } from './notifications.service';
 import { NotFoundException, ForbiddenException } from '@nestjs/common';
 
 const mockPrismaService = {
@@ -30,6 +31,10 @@ const mockPrismaService = {
   },
 };
 
+const mockNotificationsService = {
+  createNotification: jest.fn(),
+};
+
 describe('EventsService', () => {
   let service: EventsService;
   let prisma: typeof mockPrismaService;
@@ -41,6 +46,10 @@ describe('EventsService', () => {
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();
@@ -84,26 +93,44 @@ describe('EventsService', () => {
 
   describe('deleteEvent', () => {
     it('should delete event if user is owner', async () => {
-      prisma.event.findUnique.mockResolvedValue({ id: 'event1', userId: 'user1' });
-      
+      prisma.event.findUnique.mockResolvedValue({
+        id: 'event1',
+        userId: 'user1',
+      });
+
       await service.deleteEvent('event1', 'user1');
-      expect(prisma.event.delete).toHaveBeenCalledWith({ where: { id: 'event1' } });
+      expect(prisma.event.delete).toHaveBeenCalledWith({
+        where: { id: 'event1' },
+      });
     });
 
     it('should throw ForbiddenException if user is not owner and has no other permissions', async () => {
-      prisma.event.findUnique.mockResolvedValue({ id: 'event1', userId: 'other' });
+      prisma.event.findUnique.mockResolvedValue({
+        id: 'event1',
+        userId: 'other',
+      });
       prisma.team.findMany.mockResolvedValue([]); // not owner of any team
       prisma.teamMember.findMany.mockResolvedValue([]); // not admin of any team
-      prisma.user.findUnique.mockResolvedValue({ id: 'user1', role: 'ATHLETE' });
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user1',
+        role: 'ATHLETE',
+      });
 
-      await expect(
-        service.deleteEvent('event1', 'user1'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(service.deleteEvent('event1', 'user1')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should delete event if user is owner of the team the event belongs to', async () => {
-      prisma.event.findUnique.mockResolvedValue({ id: 'event1', userId: 'other', teamId: 'team1' });
-      prisma.team.findUnique.mockResolvedValue({ id: 'team1', ownerId: 'user1' }); // User owns the team
+      prisma.event.findUnique.mockResolvedValue({
+        id: 'event1',
+        userId: 'other',
+        teamId: 'team1',
+      });
+      prisma.team.findUnique.mockResolvedValue({
+        id: 'team1',
+        ownerId: 'user1',
+      }); // User owns the team
 
       await service.deleteEvent('event1', 'user1');
       expect(prisma.event.delete).toHaveBeenCalled();

@@ -11,13 +11,15 @@ import {
   NotFoundException,
   Req,
   Res,
+  UseGuards,
+  ForbiddenException,
 } from '@nestjs/common';
-import { Response } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Response, Request } from 'express';
 import { AuthService } from '../services/auth.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 
 import { SettingsService } from '../services/settings.service';
-import { ForbiddenException, BadRequestException } from '@nestjs/common';
 
 @Controller('auth')
 export class AuthController {
@@ -57,7 +59,11 @@ export class AuthController {
 
   @HttpCode(HttpStatus.CREATED)
   @Post('register')
-  async register(@Body() body: any, @Req() request: any) {
+  async register(
+    @Body() body: RegisterDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     // Проверяем флаги функций
     const settings = await this.settingsService.getAll();
     const settingsMap = settings.reduce(
@@ -98,15 +104,13 @@ export class AuthController {
     }
 
     // Получаем IP-адрес из запроса
-    const ipAddress =
-      request.ip || request.connection?.remoteAddress || 'unknown';
+    const ipAddress = request.ip || request.socket?.remoteAddress || 'unknown';
 
     try {
       const result = await this.authService.register(body, ipAddress);
 
       // Устанавливаем httpOnly cookies
       const isProduction = process.env.NODE_ENV === 'production';
-      const response: Response = request.res;
 
       response.cookie('access_token', result.accessToken, {
         httpOnly: true,
@@ -123,16 +127,17 @@ export class AuthController {
       });
 
       return { user: result.user };
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Registration Error:', error);
       if (error instanceof ForbiddenException) {
         throw error;
       }
+      const err = error as Error;
       return {
         status: 'error',
-        message: error.message,
-        stack: error.stack,
-        details: error,
+        message: err.message || 'Unknown error',
+        stack: err.stack,
+        details: err,
       };
     }
   }
@@ -147,6 +152,7 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
   @Get('lookup')
   async lookupUser(@Query('email') email: string) {
     try {
@@ -174,10 +180,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('logout')
   async logout(
-    @Req() request: any,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = request.cookies?.refresh_token;
+    const refreshToken = (request.cookies as Record<string, string>)
+      ?.refresh_token;
 
     if (refreshToken) {
       await this.authService.revokeRefreshToken(refreshToken);
@@ -193,10 +200,11 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   async refresh(
-    @Req() request: any,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const refreshToken = request.cookies?.refresh_token;
+    const refreshToken = (request.cookies as Record<string, string>)
+      ?.refresh_token;
 
     if (!refreshToken) {
       throw new ForbiddenException('Refresh token not found');

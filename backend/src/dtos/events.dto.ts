@@ -91,7 +91,7 @@ export class CreateEventDto {
 export class UpdateEventStatusDto {
   @IsString()
   @IsNotEmpty()
-  status: 'past' | 'future';
+  status: 'COMPLETED' | 'FUTURE';
 }
 
 export class CreateEventResultDto {

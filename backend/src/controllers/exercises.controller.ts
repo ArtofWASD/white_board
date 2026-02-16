@@ -9,15 +9,9 @@ import {
   NotFoundException,
   BadRequestException,
   Put,
-  Delete,
-  UseGuards,
 } from '@nestjs/common';
 import { ExercisesService } from '../services/exercises.service';
-import { CreateExerciseDto, AddExerciseRecordDto, CreateGlobalExerciseDto, UpdateExerciseDto } from '../dtos/exercises.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '@prisma/client';
+import { CreateExerciseDto, AddExerciseRecordDto } from '../dtos/exercises.dto';
 
 @Controller('exercises')
 export class ExercisesController {
@@ -69,10 +63,7 @@ export class ExercisesController {
   }
 
   @Put(':id')
-  async updateExercise(
-    @Param('id') id: string,
-    @Body('name') name: string,
-  ) {
+  async updateExercise(@Param('id') id: string, @Body('name') name: string) {
     return this.exercisesService.updateExercise(id, name);
   }
 }

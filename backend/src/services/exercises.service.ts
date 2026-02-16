@@ -95,8 +95,8 @@ export class ExercisesService {
   }
 
   async deleteExercise(id: string) {
-      return this.prisma.userExercise.delete({
-          where: { id }
-      });
+    return this.prisma.userExercise.delete({
+      where: { id },
+    });
   }
 }

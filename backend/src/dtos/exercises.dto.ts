@@ -29,20 +29,20 @@ export class CreateGlobalExerciseDto {
 }
 
 export class UpdateExerciseDto {
-    @IsString()
-    @IsNotEmpty()
-    @IsOptional()
-    name?: string;
+  @IsString()
+  @IsNotEmpty()
+  @IsOptional()
+  name?: string;
 
-    @IsString()
-    @IsOptional()
-    description?: string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsString()
-    @IsOptional()
-    @IsString()
-    @IsOptional()
-    videoUrl?: string;
+  @IsString()
+  @IsOptional()
+  @IsString()
+  @IsOptional()
+  videoUrl?: string;
 }
 
 export class AddExerciseRecordDto {

@@ -1,4 +1,3 @@
-
 import { SignOptions } from 'jsonwebtoken';
 
 export const jwtConfig = {

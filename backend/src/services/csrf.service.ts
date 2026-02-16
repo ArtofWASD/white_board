@@ -40,7 +40,7 @@ export class CsrfService {
       }
 
       return crypto.timingSafeEqual(cookieBuffer, headerBuffer);
-    } catch (error) {
+    } catch {
       return false;
     }
   }

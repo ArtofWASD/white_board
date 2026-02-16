@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TeamsService } from './teams.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
+import { TeamRole } from '@prisma/client';
 
 const mockPrismaService = {
   user: {
@@ -47,7 +48,10 @@ describe('TeamsService', () => {
 
   describe('createTeam', () => {
     it('should create team if owner exists', async () => {
-      prisma.user.findUnique.mockResolvedValue({ id: 'owner1', organizationName: 'Org' });
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'owner1',
+        organizationName: 'Org',
+      });
       prisma.team.create.mockResolvedValue({ id: 'team1', name: 'Team A' });
 
       const dto = { name: 'Team A', description: 'Desc' };
@@ -58,8 +62,10 @@ describe('TeamsService', () => {
     });
 
     it('should throw NotFoundException if owner not found', async () => {
-       prisma.user.findUnique.mockResolvedValue(null);
-       await expect(service.createTeam({ name: 'A' }, 'owner1')).rejects.toThrow(NotFoundException);
+      prisma.user.findUnique.mockResolvedValue(null);
+      await expect(service.createTeam({ name: 'A' }, 'owner1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -68,9 +74,12 @@ describe('TeamsService', () => {
       prisma.team.findUnique.mockResolvedValue({ id: 'team1' });
       prisma.user.findUnique.mockResolvedValue({ id: 'user1' });
       prisma.teamMember.findUnique.mockResolvedValue(null); // Not a member yet
-      prisma.teamMember.create.mockResolvedValue({ userId: 'user1', teamId: 'team1' });
+      prisma.teamMember.create.mockResolvedValue({
+        userId: 'user1',
+        teamId: 'team1',
+      });
 
-      const dto = { userId: 'user1', role: 'MEMBER' as any };
+      const dto = { userId: 'user1', role: TeamRole.MEMBER };
       const result = await service.addTeamMember('team1', dto);
 
       expect(result).toBeDefined();
@@ -79,14 +88,18 @@ describe('TeamsService', () => {
 
     it('should throw NotFoundException if team not found', async () => {
       prisma.team.findUnique.mockResolvedValue(null);
-      await expect(service.addTeamMember('t1', { userId: 'u1', role: 'MEMBER' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.addTeamMember('t1', { userId: 'u1', role: 'MEMBER' }),
+      ).rejects.toThrow(NotFoundException);
     });
 
-     it('should throw if user already member', async () => {
-       prisma.team.findUnique.mockResolvedValue({ id: 't1' });
-       prisma.user.findUnique.mockResolvedValue({ id: 'u1' });
-       prisma.teamMember.findUnique.mockResolvedValue({ id: 'm1' });
-       await expect(service.addTeamMember('t1', { userId: 'u1', role: 'MEMBER' })).rejects.toThrow(NotFoundException);
-     });
+    it('should throw if user already member', async () => {
+      prisma.team.findUnique.mockResolvedValue({ id: 't1' });
+      prisma.user.findUnique.mockResolvedValue({ id: 'u1' });
+      prisma.teamMember.findUnique.mockResolvedValue({ id: 'm1' });
+      await expect(
+        service.addTeamMember('t1', { userId: 'u1', role: 'MEMBER' }),
+      ).rejects.toThrow(NotFoundException);
+    });
   });
 });

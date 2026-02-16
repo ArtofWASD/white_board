@@ -13,7 +13,6 @@ import {
   BadRequestException,
   NotFoundException,
   ForbiddenException,
-  Request,
   Query,
 } from '@nestjs/common';
 import { EventsService } from '../services/events.service';
@@ -31,8 +30,6 @@ export class EventsController {
   @HttpCode(HttpStatus.CREATED)
   @UsePipes(new ValidationPipe())
   async createEvent(@Body() createEventDto: CreateEventDto) {
-
-
     try {
       return await this.eventsService.createEvent(
         createEventDto.userId,
@@ -96,14 +93,10 @@ export class EventsController {
     @Param('eventId') eventId: string,
     @Body() body: { userId?: string },
   ) {
-
-
     const userId = body.userId;
     if (!userId) {
-
       throw new BadRequestException('User ID is required');
     }
-
 
     await this.eventsService.deleteEvent(eventId, userId);
   }
@@ -161,7 +154,7 @@ export class EventsController {
     @Body() body: { userId: string },
   ) {
     if (!body.userId) {
-       throw new BadRequestException('User ID is required');
+      throw new BadRequestException('User ID is required');
     }
     return this.eventsService.toggleResultLike(resultId, body.userId);
   }

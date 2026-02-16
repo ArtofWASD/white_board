@@ -12,7 +12,10 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { ContentExercisesService } from '../services/content-exercises.service';
-import { CreateContentExerciseDto, UpdateContentExerciseDto } from '../dtos/content-exercises.dto';
+import {
+  CreateContentExerciseDto,
+  UpdateContentExerciseDto,
+} from '../dtos/content-exercises.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -28,7 +31,12 @@ export class ContentExercisesController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
   @UsePipes(new ValidationPipe())
   async create(@Body() dto: CreateContentExerciseDto) {
-    return this.contentExercisesService.createContentExercise(dto.name, dto.description, dto.videoUrl, dto.muscleGroups);
+    return this.contentExercisesService.createContentExercise(
+      dto.name,
+      dto.description,
+      dto.videoUrl,
+      dto.muscleGroups,
+    );
   }
 
   @Get()

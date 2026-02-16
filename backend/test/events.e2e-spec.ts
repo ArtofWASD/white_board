@@ -8,7 +8,7 @@ import { PrismaService } from '../src/prisma/prisma.service';
 describe('EventsController (e2e)', () => {
   let app: INestApplication<App>;
   let prisma: PrismaService;
-  let testUser: any;
+  let testUser: { id: string };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -22,7 +22,7 @@ describe('EventsController (e2e)', () => {
     prisma = moduleFixture.get(PrismaService);
 
     // Create a test user
-    testUser = await prisma.user.create({
+    const user = await prisma.user.create({
       data: {
         name: 'Test User',
         email: 'test@example.com',
@@ -30,6 +30,7 @@ describe('EventsController (e2e)', () => {
         role: 'ATHLETE',
       },
     });
+    testUser = { id: user.id };
   });
 
   afterAll(async () => {
@@ -39,8 +40,8 @@ describe('EventsController (e2e)', () => {
     await app.close();
   });
 
-  it('/events (POST)', () => {
-    return request(app.getHttpServer())
+  it('/events (POST)', async () => {
+    await request(app.getHttpServer())
       .post('/events')
       .send({
         userId: testUser.id,
@@ -52,8 +53,8 @@ describe('EventsController (e2e)', () => {
       .expect(201);
   });
 
-  it('/events/:userId (GET)', () => {
-    return request(app.getHttpServer())
+  it('/events/:userId (GET)', async () => {
+    await request(app.getHttpServer())
       .get(`/events/${testUser.id}`)
       .expect(200);
   });

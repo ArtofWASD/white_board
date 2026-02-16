@@ -4,11 +4,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import {
-  CreateDirectChatDto,
-  CreateTeamChatDto,
-  SendMessageDto,
-} from '../dtos/chat.dto';
+import { CreateDirectChatDto, SendMessageDto } from '../dtos/chat.dto';
 import { NotificationsService } from './notifications.service';
 
 @Injectable()
@@ -25,7 +21,7 @@ export class ChatService {
     const { targetUserId } = createDirectChatDto;
 
     // Check if chat already exists
-    const existingChat = await this.prisma.chat.findFirst({
+    await this.prisma.chat.findFirst({
       where: {
         type: 'direct',
         participants: {
@@ -165,10 +161,10 @@ export class ChatService {
           },
         });
         // Re-fetch chat with new participant
-        chat = (await this.prisma.chat.findUnique({
+        chat = await this.prisma.chat.findUnique({
           where: { id: chat.id },
           include: { participants: true },
-        })) as any;
+        });
       }
     }
 

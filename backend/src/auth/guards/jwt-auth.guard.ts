@@ -9,6 +9,7 @@ import * as jwt from 'jsonwebtoken';
 import { jwtConfig } from '../../config/jwt.config';
 import { JwtPayload } from '../../utils/jwt.utils';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
+import { AuthenticatedRequest } from '../interfaces/authenticated-request.interface';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -24,10 +25,10 @@ export class JwtAuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
     // Пытаемся получить токен из cookie (приоритет)
-    let token = request.cookies?.access_token;
+    let token = request.cookies?.access_token as string | undefined;
 
     // Если нет в cookie, проверяем Authorization header (для обратной совместимости)
     if (!token) {
@@ -52,7 +53,7 @@ export class JwtAuthGuard implements CanActivate {
         role: decoded.role,
       };
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid or expired token');
     }
   }

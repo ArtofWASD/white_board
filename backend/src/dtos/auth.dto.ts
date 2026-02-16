@@ -42,8 +42,8 @@ export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   // Валидация строковых значений перечисления
-  @IsEnum(['ATHLETE', 'TRAINER', 'ORGANIZATION_ADMIN', 'SUPER_ADMIN'])
-  role: 'ATHLETE' | 'TRAINER' | 'ORGANIZATION_ADMIN' | 'SUPER_ADMIN';
+  @IsEnum(['ATHLETE', 'TRAINER', 'ORGANIZATION_ADMIN'])
+  role: 'ATHLETE' | 'TRAINER' | 'ORGANIZATION_ADMIN';
 
   @IsString()
   @IsOptional()

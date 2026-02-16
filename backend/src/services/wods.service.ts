@@ -30,12 +30,12 @@ export class WodsService {
 
   async update(id: string, updateWodDto: UpdateWodDto) {
     try {
-        return await this.prisma.wod.update({
-            where: { id },
-            data: updateWodDto,
-        });
-    } catch (error) {
-        throw new NotFoundException(`WOD with ID ${id} not found`);
+      return await this.prisma.wod.update({
+        where: { id },
+        data: updateWodDto,
+      });
+    } catch {
+      throw new NotFoundException(`WOD with ID ${id} not found`);
     }
   }
 
@@ -49,18 +49,18 @@ export class WodsService {
           },
         },
       });
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`WOD with ID ${id} not found`);
     }
   }
 
   async remove(id: string) {
     try {
-        return await this.prisma.wod.delete({
-            where: { id },
-        });
-    } catch (error) {
-        throw new NotFoundException(`WOD with ID ${id} not found`);
+      return await this.prisma.wod.delete({
+        where: { id },
+      });
+    } catch {
+      throw new NotFoundException(`WOD with ID ${id} not found`);
     }
   }
 }

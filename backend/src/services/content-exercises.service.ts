@@ -5,7 +5,12 @@ import { PrismaService } from '../prisma/prisma.service';
 export class ContentExercisesService {
   constructor(private prisma: PrismaService) {}
 
-  async createContentExercise(name: string, description?: string, videoUrl?: string, muscleGroups?: string[]) {
+  async createContentExercise(
+    name: string,
+    description?: string,
+    videoUrl?: string,
+    muscleGroups?: string[],
+  ) {
     return this.prisma.contentExercise.create({
       data: {
         name,
@@ -34,7 +39,15 @@ export class ContentExercisesService {
     return exercise;
   }
 
-  async updateContentExercise(id: string, data: { name?: string; description?: string; videoUrl?: string; muscleGroups?: string[] }) {
+  async updateContentExercise(
+    id: string,
+    data: {
+      name?: string;
+      description?: string;
+      videoUrl?: string;
+      muscleGroups?: string[];
+    },
+  ) {
     const exercise = await this.prisma.contentExercise.findUnique({
       where: { id },
     });
@@ -73,7 +86,7 @@ export class ContentExercisesService {
           },
         },
       });
-    } catch (error) {
+    } catch {
       throw new NotFoundException(`Content Exercise with ID ${id} not found`);
     }
   }

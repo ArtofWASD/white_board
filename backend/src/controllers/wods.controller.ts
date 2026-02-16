@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
 import { WodsService } from '../services/wods.service';
 import { CreateWodDto, UpdateWodDto } from '../dtos/wods.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';

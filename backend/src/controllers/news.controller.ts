@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { NewsService } from '../services/news.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -22,7 +32,15 @@ export class NewsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
-  create(@Body() body: { title: string; content: string; excerpt?: string; imageUrl?: string }) {
+  create(
+    @Body()
+    body: {
+      title: string;
+      content: string;
+      excerpt?: string;
+      imageUrl?: string;
+    },
+  ) {
     return this.newsService.create(body);
   }
 
@@ -31,7 +49,13 @@ export class NewsController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
   update(
     @Param('id') id: string,
-    @Body() body: { title?: string; content?: string; excerpt?: string; imageUrl?: string }
+    @Body()
+    body: {
+      title?: string;
+      content?: string;
+      excerpt?: string;
+      imageUrl?: string;
+    },
   ) {
     return this.newsService.update(id, body);
   }

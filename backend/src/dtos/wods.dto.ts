@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsEnum, IsBoolean, IsOptional, IsArray } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsBoolean,
+  IsOptional,
+  IsArray,
+} from 'class-validator';
 
 export class CreateWodDto {
   @IsString()

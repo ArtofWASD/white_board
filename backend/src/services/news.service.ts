@@ -18,13 +18,26 @@ export class NewsService {
     });
   }
 
-  async create(data: { title: string; content: string; excerpt?: string; imageUrl?: string }) {
+  async create(data: {
+    title: string;
+    content: string;
+    excerpt?: string;
+    imageUrl?: string;
+  }) {
     return this.prisma.news.create({
       data,
     });
   }
 
-  async update(id: string, data: { title?: string; content?: string; excerpt?: string; imageUrl?: string }) {
+  async update(
+    id: string,
+    data: {
+      title?: string;
+      content?: string;
+      excerpt?: string;
+      imageUrl?: string;
+    },
+  ) {
     return this.prisma.news.update({
       where: { id },
       data,

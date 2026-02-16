@@ -15,8 +15,14 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect();
     console.log('PrismaService: Подключено к БД.');
-    console.log('PrismaService: Модель User существует:', !!(this as any).user);
-    console.log('PrismaService: Модель UserExercise существует:', !!(this as any).userExercise);
-    console.log('PrismaService: Модель ContentExercise существует:', !!(this as any).contentExercise);
+    console.log('PrismaService: Модель User существует:', !!this.user);
+    console.log(
+      'PrismaService: Модель UserExercise существует:',
+      !!this.userExercise,
+    );
+    console.log(
+      'PrismaService: Модель ContentExercise существует:',
+      !!this.contentExercise,
+    );
   }
 }

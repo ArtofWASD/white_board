@@ -22,6 +22,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { AuthenticatedRequest } from '../auth/interfaces/authenticated-request.interface';
 
 @Controller('teams')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -33,7 +34,7 @@ export class TeamsController {
   @Roles(UserRole.TRAINER, UserRole.ORGANIZATION_ADMIN, UserRole.SUPER_ADMIN)
   async createTeam(
     @Body() createTeamDto: CreateTeamDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const ownerId = req.user.id;
     const result = await this.teamsService.createTeam(createTeamDto, ownerId);
@@ -91,7 +92,7 @@ export class TeamsController {
   @Delete(':teamId')
   async deleteTeam(
     @Param('teamId') teamId: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user.id;
     const result = await this.teamsService.deleteTeam(teamId, userId);
@@ -103,7 +104,7 @@ export class TeamsController {
   async updateTeam(
     @Param('teamId') teamId: string,
     @Body() updateTeamDto: UpdateTeamDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user.id;
     const result = await this.teamsService.updateTeam(
@@ -118,7 +119,7 @@ export class TeamsController {
   @Post(':teamId/invite')
   async refreshInviteCode(
     @Param('teamId') teamId: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user.id;
     const result = await this.teamsService.refreshInviteCode(teamId, userId);
@@ -129,7 +130,7 @@ export class TeamsController {
   @Post('invite/:code/join')
   async joinTeamByInvite(
     @Param('code') code: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     const userId = req.user.id;
     const result = await this.teamsService.joinTeamByInvite(code, userId);

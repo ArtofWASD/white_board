@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { App } from 'supertest/types';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 
 describe('Full User Flow (e2e)', () => {
-  let app: INestApplication;
+  let app: INestApplication<App>;
   let prisma: PrismaService;
   let authToken: string;
   let userId: string;
@@ -19,7 +20,7 @@ describe('Full User Flow (e2e)', () => {
     password: 'password123',
     name: 'E2E',
     lastName: 'Trainer',
-    role: 'TRAINER', 
+    role: 'TRAINER',
   };
 
   beforeAll(async () => {
@@ -35,15 +36,15 @@ describe('Full User Flow (e2e)', () => {
   afterAll(async () => {
     // Clean up
     if (eventId) {
-        await prisma.event.deleteMany({ where: { id: eventId } });
+      await prisma.event.deleteMany({ where: { id: eventId } });
     }
     if (teamId) {
-        // Remove members first
-        await prisma.teamMember.deleteMany({ where: { teamId } });
-        await prisma.team.delete({ where: { id: teamId } });
+      // Remove members first
+      await prisma.teamMember.deleteMany({ where: { teamId } });
+      await prisma.team.delete({ where: { id: teamId } });
     }
     if (userId) {
-        await prisma.user.delete({ where: { id: userId } });
+      await prisma.user.delete({ where: { id: userId } });
     }
     await app.close();
   });
@@ -54,12 +55,16 @@ describe('Full User Flow (e2e)', () => {
       .send(testUser)
       .expect(201);
 
-    expect(response.body).toHaveProperty('token');
-    expect(response.body.user).toHaveProperty('id');
-    expect(response.body.user.role).toBe('TRAINER');
-    
-    authToken = response.body.token;
-    userId = response.body.user.id;
+    const body = response.body as {
+      token: string;
+      user: { id: string; role: string };
+    };
+    expect(body).toHaveProperty('token');
+    expect(body.user).toHaveProperty('id');
+    expect(body.user.role).toBe('TRAINER');
+
+    authToken = body.token;
+    userId = body.user.id;
   });
 
   it('/teams/create (POST) - Create a team', async () => {
@@ -72,39 +77,40 @@ describe('Full User Flow (e2e)', () => {
       })
       .expect(201);
 
-    expect(response.body).toHaveProperty('id');
-    expect(response.body.name).toBe(`E2E Team ${uniqueSuffix}`);
-    teamId = response.body.id;
+    const body = response.body as { id: string; name: string };
+    expect(body).toHaveProperty('id');
+    expect(body.name).toBe(`E2E Team ${uniqueSuffix}`);
+    teamId = body.id;
   });
 
   it('/events (POST) - Create an event for the team', async () => {
-      const response = await request(app.getHttpServer())
-        .post('/events')
-        .set('Authorization', `Bearer ${authToken}`)
-        .send({
-          userId: userId,
-          teamId: teamId,
-          title: 'E2E Team Event',
-          eventDate: new Date().toISOString(),
-          description: 'Test Event Description',
-          exerciseType: 'AMRAP', 
-        })
-        .expect(201);
-      
-      expect(response.body).toHaveProperty('id');
-      eventId = response.body.id;
+    const response = await request(app.getHttpServer())
+      .post('/events')
+      .set('Authorization', `Bearer ${authToken}`)
+      .send({
+        userId: userId,
+        teamId: teamId,
+        title: 'E2E Team Event',
+        eventDate: new Date().toISOString(),
+        description: 'Test Event Description',
+        exerciseType: 'AMRAP',
+      })
+      .expect(201);
+
+    const body = response.body as { id: string };
+    expect(body).toHaveProperty('id');
+    eventId = body.id;
   });
 
   it('/events/:userId (GET) - Verify event visibility', async () => {
-      const response = await request(app.getHttpServer())
-        .get(`/events/${userId}`) // This endpoint returns events for user (personal + team)
-        .set('Authorization', `Bearer ${authToken}`)
-        .expect(200);
+    const response = await request(app.getHttpServer())
+      .get(`/events/${userId}`) // This endpoint returns events for user (personal + team)
+      .set('Authorization', `Bearer ${authToken}`)
+      .expect(200);
 
-      const events = response.body;
-      const found = events.find((e: any) => e.id === eventId);
-      expect(found).toBeDefined();
-      expect(found.title).toBe('E2E Team Event');
+    const events = response.body as { id: string; title: string }[];
+    const found = events.find((e) => e.id === eventId);
+    expect(found).toBeDefined();
+    expect(found?.title).toBe('E2E Team Event');
   });
 });
-

@@ -5,7 +5,14 @@ import { PrismaService } from '../prisma/prisma.service';
 export class StrengthResultsService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: { userId: string; exerciseId: string; date: Date; week: number; weight: number; reps: number }) {
+  async create(data: {
+    userId: string;
+    exerciseId: string;
+    date: Date;
+    week: number;
+    weight: number;
+    reps: number;
+  }) {
     return this.prisma.strengthWorkoutResult.create({
       data,
     });

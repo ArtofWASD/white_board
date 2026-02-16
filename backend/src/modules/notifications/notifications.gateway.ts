@@ -4,8 +4,6 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
-  MessageBody,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
@@ -23,10 +21,12 @@ import { Logger } from '@nestjs/common';
 export class NotificationsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
 {
-  @WebSocketServer() server: Server;
   private logger: Logger = new Logger('NotificationsGateway');
 
-  afterInit(server: Server) {
+  @WebSocketServer()
+  server: Server;
+
+  afterInit() {
     this.logger.log('Init');
   }
 
@@ -34,13 +34,12 @@ export class NotificationsGateway
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
-  handleConnection(client: Socket, ...args: any[]) {
+  handleConnection(client: Socket) {
     this.logger.log(`Client connected: ${client.id}`);
   }
 
-  @SubscribeMessage('joinUserRoom')
-  handleJoinRoom(client: Socket, userId: string): void {
-    client.join(userId);
+  async handleJoinRoom(client: Socket, userId: string): Promise<void> {
+    await client.join(userId);
     this.logger.log(`Client ${client.id} joined room ${userId}`);
   }
 }

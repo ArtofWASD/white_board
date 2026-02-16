@@ -5,6 +5,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { Request } from 'express';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
@@ -26,14 +27,16 @@ export class CsrfGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
 
     // Проверяем CSRF токен только для изменяющих методов
     const unsafeMethods = ['POST', 'PUT', 'DELETE', 'PATCH'];
 
     if (unsafeMethods.includes(request.method)) {
       const csrfTokenFromHeader = request.headers['x-csrf-token'];
-      const csrfTokenFromCookie = request.cookies?.csrf_token;
+      const csrfTokenFromCookie = request.cookies?.csrf_token as
+        | string
+        | undefined;
 
       // Проверяем наличие токенов
       if (!csrfTokenFromHeader || !csrfTokenFromCookie) {

@@ -28,8 +28,7 @@ export function extractUserIdFromToken(
   try {
     const decoded = jwt.verify(token, jwtConfig.secret) as JwtPayload;
     return decoded.sub; // 'sub' содержит ID пользователя
-  } catch (error) {
-
+  } catch {
     return null;
   }
 }

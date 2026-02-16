@@ -11,7 +11,7 @@ export class SettingsController {
 
   @Get('public')
   getPublic() {
-      return this.settingsService.getPublic();
+    return this.settingsService.getPublic();
   }
 
   @Get()
@@ -24,10 +24,7 @@ export class SettingsController {
   @Patch(':key')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.SUPER_ADMIN)
-  update(
-    @Param('key') key: string,
-    @Body('value') value: string,
-  ) {
+  update(@Param('key') key: string, @Body('value') value: string) {
     return this.settingsService.update(key, String(value));
   }
 }

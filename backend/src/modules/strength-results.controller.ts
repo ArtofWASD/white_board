@@ -3,10 +3,22 @@ import { StrengthResultsService } from './strength-results.service';
 
 @Controller('strength-results')
 export class StrengthResultsController {
-  constructor(private readonly strengthResultsService: StrengthResultsService) {}
+  constructor(
+    private readonly strengthResultsService: StrengthResultsService,
+  ) {}
 
   @Post()
-  create(@Body() createDto: { userId: string; exerciseId: string; date: Date; week: number; weight: number; reps: number }) {
+  create(
+    @Body()
+    createDto: {
+      userId: string;
+      exerciseId: string;
+      date: Date;
+      week: number;
+      weight: number;
+      reps: number;
+    },
+  ) {
     return this.strengthResultsService.create(createDto);
   }
 
@@ -16,7 +28,13 @@ export class StrengthResultsController {
   }
 
   @Get(':userId/:exerciseId')
-  findByUserAndExercise(@Param('userId') userId: string, @Param('exerciseId') exerciseId: string) {
-    return this.strengthResultsService.findByUserAndExercise(userId, exerciseId);
+  findByUserAndExercise(
+    @Param('userId') userId: string,
+    @Param('exerciseId') exerciseId: string,
+  ) {
+    return this.strengthResultsService.findByUserAndExercise(
+      userId,
+      exerciseId,
+    );
   }
 }

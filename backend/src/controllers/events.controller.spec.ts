@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsController } from './events.controller';
 import { EventsService } from '../services/events.service';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException } from '@nestjs/common';
+import { CreateEventDto } from '../dtos/events.dto';
 
 const mockEventsService = {
   createEvent: jest.fn(),
@@ -24,9 +25,7 @@ describe('EventsController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [EventsController],
-      providers: [
-        { provide: EventsService, useValue: mockEventsService },
-      ],
+      providers: [{ provide: EventsService, useValue: mockEventsService }],
     }).compile();
 
     controller = module.get<EventsController>(EventsController);
@@ -44,19 +43,25 @@ describe('EventsController', () => {
         title: 'T',
         eventDate: '2023-01-01',
       };
-      await controller.createEvent(dto as any);
+      await controller.createEvent(dto as unknown as CreateEventDto);
       expect(eventsService.createEvent).toHaveBeenCalled();
     });
 
     it('should wrap "Invalid date format" error in BadRequestException', async () => {
-       eventsService.createEvent.mockRejectedValue(new Error('Invalid date format'));
-       await expect(controller.createEvent({} as any)).rejects.toThrow(BadRequestException);
+      eventsService.createEvent.mockRejectedValue(
+        new Error('Invalid date format'),
+      );
+      await expect(
+        controller.createEvent({} as unknown as CreateEventDto),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
   describe('deleteEvent', () => {
     it('should throw BadRequestException if userId is missing in body', async () => {
-      await expect(controller.deleteEvent('id', {} as any)).rejects.toThrow(BadRequestException);
+      await expect(
+        controller.deleteEvent('id', {} as unknown as { userId?: string }),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should call service.deleteEvent if userId is provided', async () => {

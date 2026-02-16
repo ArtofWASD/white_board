@@ -1,15 +1,15 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return */
 import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { UserRole } from '@prisma/client';
+import { UserRole, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
-import { SafeUser, UserResponse, User } from '../types';
+import { SafeUser, UserResponse } from '../types';
 
 @Injectable()
 export class AuthService {
@@ -22,14 +22,23 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<SafeUser | null> {
-    const user = await (this.prisma as any).user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
     });
-    if (user && (await bcrypt.compare(password, user.password))) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { password, ...result } = user;
-      return result;
+
+    if (user) {
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (isPasswordValid) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...result } = user;
+        return result;
+      }
+    } else {
+      // Митигация timing attack: выполняем хеширование фиктивного пароля
+      // чтобы время ответа было примерно одинаковым
+      await bcrypt.compare(password, '$2a$10$abcdefghijklmnopqrstuvwxyz012345');
     }
+
     return null;
   }
 
@@ -66,17 +75,33 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto, ipAddress: string = 'unknown') {
-    const existingUser = await (this.prisma as any).user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
     });
 
     if (existingUser) {
-      throw new UnauthorizedException('User already exists');
+      // Исползуем более общий ответ, чтобы затруднить перечисление пользователей,
+      // но для регистрации без email-подтверждения это компромисс UX.
+      // В данном случае, следуя аудиту, можно было бы вернуть успех, но
+      // пользователь не узнает, что аккаунт не создан.
+      // Попробуем компромисс:
+      throw new UnauthorizedException(
+        'Registration failed. Username or Email may be already taken.',
+      );
+    }
+
+    // @ts-expect-error - Checking for role not in DTO type but potentially in payload
+    if (registerDto.role === 'SUPER_ADMIN') {
+      throw new ForbiddenException(
+        'Registration as SUPER_ADMIN is not allowed',
+      );
     }
 
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    let organizationData: any = {};
+    let organizationData: {
+      organization?: Prisma.OrganizationCreateNestedOneWithoutUsersInput;
+    } = {};
     // Проверяем, указано ли имя организации и не пустое ли оно
     if (
       registerDto.organizationName &&
@@ -99,7 +124,7 @@ export class AuthService {
     // Текущая версия документов (дата в формате YYYY-MM-DD)
     const currentVersion = new Date().toISOString().split('T')[0];
 
-    const newUser = await (this.prisma as any).user.create({
+    const newUser = await this.prisma.user.create({
       data: {
         name: registerDto.name,
         lastName: registerDto.lastName,
@@ -160,7 +185,7 @@ export class AuthService {
   }
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
-    const user = await (this.prisma as any).user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
     if (!user) {
@@ -170,7 +195,7 @@ export class AuthService {
     // Log the incoming data
 
     // Создаем объект обновления только с предоставленными полями
-    const updateData: Partial<User> = {};
+    const updateData: Prisma.UserUpdateInput = {};
     if (updateProfileDto.lastName !== undefined) {
       updateData.lastName = updateProfileDto.lastName;
     }
@@ -189,11 +214,11 @@ export class AuthService {
 
     // Обработка обновления Email
     if (updateProfileDto.email && updateProfileDto.email !== user.email) {
-      const existingUser = await (this.prisma as any).user.findUnique({
+      const existingUser = await this.prisma.user.findUnique({
         where: { email: updateProfileDto.email },
       });
       if (existingUser) {
-        throw new UnauthorizedException('Email already in use');
+        throw new UnauthorizedException('Email update failed.');
       }
       updateData.email = updateProfileDto.email;
     }
@@ -220,7 +245,7 @@ export class AuthService {
     }
 
     // Обновляем пользователя новыми данными
-    const updatedUser = await (this.prisma as any).user.update({
+    const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
@@ -241,7 +266,7 @@ export class AuthService {
   }
 
   async lookupUserByEmail(email: string) {
-    const user = await (this.prisma as any).user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { email },
     });
 
@@ -259,36 +284,30 @@ export class AuthService {
   }
 
   async getAthletes() {
-    try {
-      const users = await (this.prisma as any).user.findMany({
-        where: { role: UserRole.ATHLETE },
-        select: {
-          id: true,
-          name: true,
-          lastName: true,
-          email: true,
-          role: true,
-          teamMemberships: {
-            select: {
-              team: {
-                select: {
-                  name: true,
-                },
+    const users = await this.prisma.user.findMany({
+      where: { role: UserRole.ATHLETE },
+      select: {
+        id: true,
+        name: true,
+        lastName: true,
+        email: true,
+        role: true,
+        teamMemberships: {
+          select: {
+            team: {
+              select: {
+                name: true,
               },
             },
           },
         },
-      });
+      },
+    });
 
-      return users;
-    } catch (error) {
-      // Логируем ошибку внутри, если нужно, или просто пробрасываем
-
-      throw error;
-    }
+    return users;
   }
   async getUser(userId: string) {
-    const user = await (this.prisma as any).user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
 
@@ -324,7 +343,7 @@ export class AuthService {
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 дней
 
-    await (this.prisma as any).refreshToken.create({
+    await this.prisma.refreshToken.create({
       data: {
         token,
         userId,
@@ -341,7 +360,7 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string) {
     try {
       // Проверяем, существует ли токен в базе
-      const storedToken = await (this.prisma as any).refreshToken.findUnique({
+      const storedToken = await this.prisma.refreshToken.findUnique({
         where: { token: refreshToken },
         include: { user: true },
       });
@@ -353,7 +372,7 @@ export class AuthService {
       // Проверяем, не истек ли токен
       if (new Date() > storedToken.expiresAt) {
         // Удаляем истекший токен
-        await (this.prisma as any).refreshToken.delete({
+        await this.prisma.refreshToken.delete({
           where: { id: storedToken.id },
         });
         throw new UnauthorizedException('Refresh token expired');
@@ -383,7 +402,7 @@ export class AuthService {
           organizationId: storedToken.user.organizationId,
         } as UserResponse,
       };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
@@ -392,7 +411,7 @@ export class AuthService {
    * Удаление refresh токена (logout)
    */
   async revokeRefreshToken(refreshToken: string): Promise<void> {
-    await (this.prisma as any).refreshToken.deleteMany({
+    await this.prisma.refreshToken.deleteMany({
       where: { token: refreshToken },
     });
   }
@@ -401,7 +420,7 @@ export class AuthService {
    * Удаление всех refresh токенов пользователя
    */
   async revokeAllUserTokens(userId: string): Promise<void> {
-    await (this.prisma as any).refreshToken.deleteMany({
+    await this.prisma.refreshToken.deleteMany({
       where: { userId },
     });
   }
