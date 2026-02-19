@@ -26,7 +26,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
     watch,
     formState: { errors },
   } = useForm<TimerConfigFormData>({
-    resolver: zodResolver(timerConfigSchema),
+    resolver: zodResolver(timerConfigSchema) as any,
     defaultValues: {
       timeCapMinutes: 20,
       durationMinutes: 10,
@@ -35,7 +35,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
       workBytes: 20,
       restBytes: 10,
       rounds: 8,
-    },
+    } as any,
   })
 
   // Set mode in form when user selects it

@@ -90,8 +90,8 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       scWeight: scWeight || undefined,
       scReps: scReps || undefined,
       // Legacy compatibility if needed by schema (though schema marks them optional)
-      weight: rxWeight || undefined,
-      repetitions: rxReps || undefined,
+      weight: rxWeight || "",
+      repetitions: rxReps || "",
     })
 
     // Reset inputs
@@ -123,7 +123,12 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       await eventsApi.createEvent(payload)
 
       if (onSubmit) {
-        onSubmit(data.title, data.exerciseType, data.exercises)
+        const safeExercises = data.exercises?.map(e => ({
+          ...e,
+          weight: e.weight || "",
+          repetitions: e.repetitions || ""
+        })) || []
+        onSubmit(data.title, data.exerciseType, safeExercises)
       }
 
       reset()

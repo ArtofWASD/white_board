@@ -28,7 +28,9 @@
     "@nestjs/core": "^11.1.9",
     "@nestjs/jwt": "^11.0.2",
     "@nestjs/platform-express": "^11.1.9",
+    "@nestjs/platform-socket.io": "^11.1.14",
     "@nestjs/schedule": "^6.1.0",
+    "@nestjs/websockets": "^11.1.14",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@types/cron": "^2.0.1",
@@ -42,7 +44,8 @@
     "node-fetch": "^3.3.2",
     "pg": "^8.16.3",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.2"
+    "rxjs": "^7.8.2",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",

@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const timerConfigSchema = z.object({
-  mode: z.enum(["FOR_TIME", "AMRAP", "EMOM", "TABATA", "INTERVALS"]),
+  mode: z.enum(["FOR_TIME", "AMRAP", "EMOM", "TABATA", "INTERVALS"]).optional(),
   // For Time
   timeCapMinutes: z.coerce.number().min(1, "Минимум 1 минута").optional(),
   // AMRAP
