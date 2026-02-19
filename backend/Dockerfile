@@ -4,8 +4,9 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files and prisma schema
 COPY package*.json ./
+COPY prisma ./prisma/
 
 # Install all dependencies including dev dependencies for build
 RUN npm ci
@@ -30,5 +31,5 @@ RUN adduser -S nextjs -u 1001
 RUN chown -R nextjs:nodejs /app
 USER nextjs
 
-# Start the application
-CMD ["npm", "run", "start:prod"]
+# Start the application with migrations
+CMD ["npm", "run", "start:migrate:prod"]

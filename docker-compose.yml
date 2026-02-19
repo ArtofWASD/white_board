@@ -49,6 +49,7 @@ services:
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
       DB_NAME: whiteboard
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/whiteboard?schema=public
       PORT: 3001
     depends_on:
       - db
@@ -75,6 +76,7 @@ services:
 volumes:
   postgres_data:
   pgadmin_data:
+
 
 networks:
   whiteboard_network:
