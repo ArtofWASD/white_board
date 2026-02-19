@@ -106,7 +106,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
         {items.map((item) => {
           const ContentWrapper = ({ children }: { children: React.ReactNode }) => {
             if (type === 'workout' || type === 'exercise') {
-              const href = type === 'workout' ? `/blog/workouts/${item.id}` : `/blog/exercises/${item.id}`;
+              const href = type === 'workout' ? `/knowledge/workouts/${item.id}` : `/knowledge/exercises/${item.id}`;
               return (
                 <Link href={href} className="block h-full">
                   {children}
@@ -173,7 +173,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
 
                     <div className="flex justify-between items-center mt-auto">
                       {type === 'news' ? (
-                         <Link href={`/blog/news/${item.id}`} className="text-indigo-600 font-medium hover:text-indigo-800 text-sm">
+                         <Link href={`/knowledge/news/${item.id}`} className="text-indigo-600 font-medium hover:text-indigo-800 text-sm">
                            Читать далее →
                          </Link>
                       ) : (

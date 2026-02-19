@@ -73,7 +73,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-8">
               <Link 
-                href="/blog/news" 
+                href="/knowledge/news" 
                 className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
               >
                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -88,7 +88,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
             <div className="bg-white rounded-xl shadow-md p-8 text-center">
               <p className="text-gray-600 mb-6">Запрашиваемая новость не найдена.</p>
               <Link 
-                href="/blog/news" 
+                href="/knowledge/news" 
                 className="inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
               >
                 Вернуться к списку новостей
@@ -112,7 +112,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <Link 
-              href="/blog/news" 
+              href="/knowledge/news" 
               className="flex items-center text-indigo-600 hover:text-indigo-800 transition-colors"
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -143,7 +143,7 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
           
           <div className="mt-8 flex justify-between">
             <Link 
-              href="/blog/news" 
+              href="/knowledge/news" 
               className="px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
             >
               Назад к новостям

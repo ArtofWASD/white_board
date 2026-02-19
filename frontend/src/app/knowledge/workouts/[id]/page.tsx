@@ -149,7 +149,7 @@ export default function WodDetailsPage() {
         <div className="flex-grow flex items-center justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Воркаут не найден</h2>
-            <Link href="/blog/workouts" className="text-indigo-600 hover:text-indigo-800">
+            <Link href="/knowledge/workouts" className="text-indigo-600 hover:text-indigo-800">
               Вернуться к списку
             </Link>
           </div>
@@ -168,7 +168,7 @@ export default function WodDetailsPage() {
           {/* Breadcrumb / Back Link */}
           <div className="mb-6">
             <Link
-              href="/blog/workouts"
+              href="/knowledge/workouts"
               className="text-indigo-600 font-medium hover:text-indigo-800 flex items-center">
               <svg
                 className="w-4 h-4 mr-1"

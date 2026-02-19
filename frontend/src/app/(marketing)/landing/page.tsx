@@ -1,8 +1,7 @@
 import Link from "next/link"
-import Image from "next/image"
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
-import Button from "@/components/ui/Button"
+import AnimatedLink from "@/components/ui/AnimatedLink"
 
 export default function LandingPage() {
   return (
@@ -11,19 +10,14 @@ export default function LandingPage() {
       <Header
         navItems={[]}
         rightContent={
-          <>
-            <Button
-              href="/login"
-              variant="ghost"
-              className="text-gray-600 hover:text-black font-medium">
+          <div className="flex items-center gap-6">
+            <AnimatedLink href="/login">
               Войти
-            </Button>
-            <Button
-              href="/register"
-              className="bg-black text-white hover:bg-gray-800 font-medium rounded-lg px-4 py-2">
+            </AnimatedLink>
+            <AnimatedLink href="/register">
               Регистрация
-            </Button>
-          </>
+            </AnimatedLink>
+          </div>
         }
       />
 
@@ -42,20 +36,13 @@ export default function LandingPage() {
                 Цифровое пространство для кроссфит-атлетов и тренеров. Отслеживайте
                 прогресс, соревнуйтесь в лидербордах и планируйте тренировки.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Button
-                  href="/register"
-                  size="lg"
-                  className="w-full sm:w-auto font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                <AnimatedLink href="/register" className="text-black text-lg">
                   Начать бесплатно
-                </Button>
-                <Button
-                  href="/login"
-                  variant="outline"
-                  size="lg"
-                  className="w-full sm:w-auto font-semibold">
+                </AnimatedLink>
+                <AnimatedLink href="/login" className="text-black text-lg">
                   Уже есть аккаунт
-                </Button>
+                </AnimatedLink>
               </div>
             </div>
           </div>
@@ -68,17 +55,13 @@ export default function LandingPage() {
         </section>
 
         {/* Features Grid */}
-        {/* Feature Slides */}
-
+        
         {/* Slide 1: Workouts */}
         <section className="py-20 bg-white">
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
               {/* Text Content */}
               <div className="flex-1 space-y-6">
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600 text-2xl">
-                  💪
-                </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
                   Тренировки Дня (WOD)
                 </h2>
@@ -94,14 +77,12 @@ export default function LandingPage() {
                   </Link>
                 </div>
               </div>
-              {/* Image/Visual */}
-              <div className="flex-1 relative h-[400px] w-full rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src="/register_pic_1.jpg"
-                  alt="Workouts Feature"
-                  fill
-                  className="object-cover"
-                />
+              {/* Placeholder Text Block */}
+              <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl p-8 flex items-center justify-center text-center border border-gray-100">
+                <p className="text-gray-400 text-lg italic">
+                  Здесь будет описание функционала тренировок. Мы убрали изображения для
+                  чистоты интерфейса.
+                </p>
               </div>
             </div>
           </div>
@@ -112,9 +93,6 @@ export default function LandingPage() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row-reverse items-center gap-12 max-w-6xl mx-auto">
               <div className="flex-1 space-y-6">
-                <div className="h-12 w-12 bg-indigo-100 rounded-lg flex items-center justify-center text-indigo-600 text-2xl">
-                  📊
-                </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
                   Ваш Прогресс
                 </h2>
@@ -123,14 +101,11 @@ export default function LandingPage() {
                   история выполнения комплексов всегда под рукой.
                 </p>
               </div>
-              <div className="flex-1 relative h-[400px] w-full rounded-2xl overflow-hidden shadow-xl bg-white p-8 flex items-center justify-center">
-                <Image
-                  src="/stopwatch.png"
-                  alt="Progress Tracking"
-                  width={300}
-                  height={300}
-                  className="object-contain"
-                />
+              <div className="flex-1 h-[300px] w-full bg-white rounded-2xl p-8 flex items-center justify-center text-center shadow-sm">
+                 <p className="text-gray-400 text-lg italic">
+                  Блок визуализации прогресса. Графики и статистика теперь представлены
+                  в текстовом виде.
+                </p>
               </div>
             </div>
           </div>
@@ -141,9 +116,6 @@ export default function LandingPage() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
               <div className="flex-1 space-y-6">
-                <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center text-purple-600 text-2xl">
-                  🏆
-                </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
                   Сообщество и Лидерборды
                 </h2>
@@ -152,13 +124,10 @@ export default function LandingPage() {
                   в комментариях и следите за успехами команды.
                 </p>
               </div>
-              <div className="flex-1 relative h-[400px] w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-white">
-                <Image
-                  src="/leaderboard.png"
-                  alt="Community Features"
-                  fill
-                  className="object-contain p-4"
-                />
+               <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl p-8 flex items-center justify-center text-center border border-gray-100">
+                 <p className="text-gray-400 text-lg italic">
+                  Сообщество - это сердце нашего приложения. Общайтесь и соревнуйтесь.
+                </p>
               </div>
             </div>
           </div>
@@ -169,9 +138,6 @@ export default function LandingPage() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row-reverse items-center gap-12 max-w-6xl mx-auto">
               <div className="flex-1 space-y-6">
-                <div className="h-12 w-12 bg-rose-100 rounded-lg flex items-center justify-center text-rose-600 text-2xl">
-                  👥
-                </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
                   Команды и Тренеры
                 </h2>
@@ -180,13 +146,10 @@ export default function LandingPage() {
                   процесс. Идеально для владельцев залов и тренеров.
                 </p>
               </div>
-              <div className="flex-1 relative h-[400px] w-full rounded-2xl overflow-hidden shadow-2xl">
-                <Image
-                  src="/register_pic_3.jpg"
-                  alt="Team Management"
-                  fill
-                  className="object-cover"
-                />
+               <div className="flex-1 h-[300px] w-full bg-white rounded-2xl p-8 flex items-center justify-center text-center shadow-sm">
+                <p className="text-gray-400 text-lg italic">
+                  Управление командами и тренировочным процессом стало проще.
+                </p>
               </div>
             </div>
           </div>
@@ -197,9 +160,6 @@ export default function LandingPage() {
           <div className="container mx-auto px-4">
             <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
               <div className="flex-1 space-y-6">
-                <div className="h-12 w-12 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600 text-2xl">
-                  📅
-                </div>
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
                   Мероприятия
                 </h2>
@@ -208,13 +168,31 @@ export default function LandingPage() {
                   поможет ничего не пропустить.
                 </p>
               </div>
-              <div className="flex-1 relative h-[400px] w-full rounded-2xl overflow-hidden shadow-2xl border border-gray-100 bg-white">
-                <Image
-                  src="/calendar.png"
-                  alt="Events Calendar"
-                  fill
-                  className="object-contain p-2"
-                />
+               <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl p-8 flex items-center justify-center text-center border border-gray-100">
+                <p className="text-gray-400 text-lg italic">
+                  Календарь событий и мероприятий вашего клуба.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+        {/* Slide 6: Device Availability */}
+        <section className="py-20 bg-slate-50">
+          <div className="container mx-auto px-4">
+            <div className="flex flex-col md:flex-row-reverse items-center gap-12 max-w-6xl mx-auto">
+              <div className="flex-1 space-y-6">
+                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                  Всегда с вами
+                </h2>
+                <p className="text-lg text-gray-600 leading-relaxed">
+                  Используйте на компьютере, планшете или смартфоне. Ваши данные синхронизируются
+                  мгновенно, где бы вы ни находились.
+                </p>
+              </div>
+               <div className="flex-1 h-[300px] w-full bg-white rounded-2xl p-8 flex items-center justify-center text-center shadow-sm">
+                <p className="text-gray-400 text-lg italic">
+                  Доступно на всех платформах: Web, Mobile, Tablet.
+                </p>
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useTeamStore } from "../../lib/store/useTeamStore"
 import Button from "../ui/Button"
+import AnimatedLink from "../ui/AnimatedLink" // Import AnimatedLink
 import { getUnreadNotificationCount } from "../../lib/api/notifications"
 import { waitForSocket } from "../../lib/socket"
 
@@ -145,19 +146,7 @@ const Header: React.FC<HeaderProps> = ({
           />
         </Link>
 
-        {/* Mobile Centered Logo */}
-        <div className="absolute left-1/2 transform -translate-x-1/2 lg:hidden flex items-center justify-center">
-          <Link href="/" className="flex items-center">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={140}
-              height={50}
-              priority
-              className="w-auto h-8 object-contain"
-            />
-          </Link>
-        </div>
+        {/* Mobile Centered Logo - Removed as per request */}
       </div>
 
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full max-w-2xl pointer-events-none lg:pointer-events-auto">
@@ -202,29 +191,11 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </>
-          ) : !isDashboard ? (
-            <Link href="/" onClick={handleTitleClick} className="flex items-center">
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={180}
-                height={60}
-                className="h-10 sm:h-14 w-auto object-contain"
-              />
-            </Link>
+          ) : !isDashboard ? ( // Removed the center logo logic entirely
+              null
           ) : (
-            // Логотип по центру на мобильных для панели управления
+            // Логотип по центру на мобильных для панели управления - Removed centered logo logic
             <div className="flex flex-col items-center">
-              <Link href="/" className="lg:hidden flex items-center hidden">
-                <Image
-                  src="/logo.png"
-                  alt="Logo"
-                  width={180}
-                  height={60}
-                  priority
-                  className="w-auto h-10 sm:h-14 object-contain"
-                />
-              </Link>
               {isAuthenticated && teams.length > 0 && selectedTeam ? (
                 teams.length > 1 ? (
                   <div className="relative pointer-events-auto">
@@ -319,17 +290,14 @@ const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
       ) : (
-        <button
-          onClick={handleLoginClick}
-          className="bg-transparent hover:bg-transparent text-white font-bold p-2 sm:p-3 rounded-full cursor-pointer ml-auto">
-          <Image
-            src="/login.png"
-            alt="Login"
-            width={27}
-            height={27}
-            className="sm:w-[35px] sm:h-[35px]"
-          />
-        </button>
+        <div className="flex items-center gap-6">
+          <AnimatedLink href="/login">
+            Войти
+          </AnimatedLink>
+          <AnimatedLink href="/register">
+            Регистрация
+          </AnimatedLink>
+        </div>
       )}
     </header>
   )

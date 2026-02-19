@@ -110,7 +110,7 @@ export default function ExerciseDetailsPage() {
               Упражнение не найдено
             </h2>
             <Link
-              href="/blog/exercises"
+              href="/knowledge/exercises"
               className="text-indigo-600 hover:text-indigo-800">
               Вернуться к списку
             </Link>
@@ -130,7 +130,7 @@ export default function ExerciseDetailsPage() {
           {/* Breadcrumb / Back Link */}
           <div className="mb-6">
             <Link
-              href="/blog/exercises"
+              href="/knowledge/exercises"
               className="text-indigo-600 font-medium hover:text-indigo-800 flex items-center">
               <svg
                 className="w-4 h-4 mr-1"
