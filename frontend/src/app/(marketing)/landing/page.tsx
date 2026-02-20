@@ -2,8 +2,33 @@ import Link from "next/link"
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
 import AnimatedLink from "@/components/ui/AnimatedLink"
+import { ContentBlock } from "@/lib/api/admin"
 
-export default function LandingPage() {
+async function getLandingBlocks(): Promise<ContentBlock[]> {
+  try {
+    const url = `${process.env.BACKEND_URL || 'http://localhost:3001'}/content-blocks/public?location=LANDING`
+    console.log("Fetching landing blocks from:", url)
+    
+    const res = await fetch(url, {
+      next: { revalidate: 60 } // Can re-enable cache now that URL is correct
+    })
+    
+    if (!res.ok) {
+      console.error("Fetch failed with status:", res.status, res.statusText)
+      return []
+    }
+    
+    const json = await res.json()
+    console.log("Fetched blocks count:", json.length)
+    return json
+  } catch (error) {
+    console.error("Error fetching landing blocks:", error)
+    return []
+  }
+}
+
+export default async function LandingPage() {
+  const blocks = await getLandingBlocks()
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
@@ -54,149 +79,51 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Features Grid */}
-        
-        {/* Slide 1: Workouts */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
-              {/* Text Content */}
-              <div className="flex-1 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Тренировки Дня (WOD)
-                </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Получайте доступ к ежедневным тренировкам. Логируйте результаты,
-                  оставляйте заметки и отслеживайте историю своих побед в удобном формате.
-                </p>
-                <div className="pt-4">
-                  <Link
-                    href="/register"
-                    className="text-blue-600 font-semibold hover:text-blue-700 flex items-center gap-2">
-                    Начать тренировки <span aria-hidden="true">&rarr;</span>
-                  </Link>
+        {/* Dynamic Features Grid */}
+        {blocks.length > 0 ? (
+          blocks.map((block, index) => (
+            <section key={block.id} className={`py-20 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'}`}>
+              <div className="container mx-auto px-4">
+                <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12 max-w-6xl mx-auto`}>
+                  <div className="flex-1 space-y-6">
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+                      {block.title}
+                    </h2>
+                    {block.description && (
+                      <p className="text-lg text-gray-600 leading-relaxed whitespace-pre-wrap">
+                        {block.description}
+                      </p>
+                    )}
+                    {block.content && (
+                       <div className="text-gray-600 leading-relaxed">
+                         {block.content}
+                       </div>
+                    )}
+                  </div>
+                  <div className={`flex-1 min-h-[300px] w-full rounded-2xl p-8 flex items-center justify-center text-center overflow-hidden relative ${block.imageUrl ? '' : 'bg-gray-50 border border-gray-100 shadow-sm'}`}>
+                    {block.imageUrl ? (
+                      <img 
+                        src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${block.imageUrl}`} 
+                        alt={block.title} 
+                        className="absolute inset-0 w-full h-full object-cover" 
+                      />
+                    ) : (
+                      <p className="text-gray-400 text-lg italic">
+                        {block.description || "Нет изображения"}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
-              {/* Placeholder Text Block */}
-              <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl p-8 flex items-center justify-center text-center border border-gray-100">
-                <p className="text-gray-400 text-lg italic">
-                  Здесь будет описание функционала тренировок. Мы убрали изображения для
-                  чистоты интерфейса.
-                </p>
-              </div>
+            </section>
+          ))
+        ) : (
+          <section className="py-20 bg-white">
+            <div className="container mx-auto px-4 text-center">
+              <p className="text-gray-500 text-lg">Загрузка контента...</p>
             </div>
-          </div>
-        </section>
-
-        {/* Slide 2: Progress */}
-        <section className="py-20 bg-slate-50">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row-reverse items-center gap-12 max-w-6xl mx-auto">
-              <div className="flex-1 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Ваш Прогресс
-                </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Визуализируйте свой рост. Графики силовых показателей, личные рекорды и
-                  история выполнения комплексов всегда под рукой.
-                </p>
-              </div>
-              <div className="flex-1 h-[300px] w-full bg-white rounded-2xl p-8 flex items-center justify-center text-center shadow-sm">
-                 <p className="text-gray-400 text-lg italic">
-                  Блок визуализации прогресса. Графики и статистика теперь представлены
-                  в текстовом виде.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Slide 3: Community */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
-              <div className="flex-1 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Сообщество и Лидерборды
-                </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Соревнуйтесь с друзьями и атлетами вашего зала. Поддерживайте друг друга
-                  в комментариях и следите за успехами команды.
-                </p>
-              </div>
-               <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl p-8 flex items-center justify-center text-center border border-gray-100">
-                 <p className="text-gray-400 text-lg italic">
-                  Сообщество - это сердце нашего приложения. Общайтесь и соревнуйтесь.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Slide 4: Teams */}
-        <section className="py-20 bg-indigo-50/30">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row-reverse items-center gap-12 max-w-6xl mx-auto">
-              <div className="flex-1 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Команды и Тренеры
-                </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Создавайте свои команды, управляйте атлетами и планируйте тренировочный
-                  процесс. Идеально для владельцев залов и тренеров.
-                </p>
-              </div>
-               <div className="flex-1 h-[300px] w-full bg-white rounded-2xl p-8 flex items-center justify-center text-center shadow-sm">
-                <p className="text-gray-400 text-lg italic">
-                  Управление командами и тренировочным процессом стало проще.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Slide 5: Events */}
-        <section className="py-20 bg-white">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row items-center gap-12 max-w-6xl mx-auto">
-              <div className="flex-1 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Мероприятия
-                </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Организовывайте соревнования и челленджи. Удобный календарь событий
-                  поможет ничего не пропустить.
-                </p>
-              </div>
-               <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl p-8 flex items-center justify-center text-center border border-gray-100">
-                <p className="text-gray-400 text-lg italic">
-                  Календарь событий и мероприятий вашего клуба.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-        {/* Slide 6: Device Availability */}
-        <section className="py-20 bg-slate-50">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row-reverse items-center gap-12 max-w-6xl mx-auto">
-              <div className="flex-1 space-y-6">
-                <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                  Всегда с вами
-                </h2>
-                <p className="text-lg text-gray-600 leading-relaxed">
-                  Используйте на компьютере, планшете или смартфоне. Ваши данные синхронизируются
-                  мгновенно, где бы вы ни находились.
-                </p>
-              </div>
-               <div className="flex-1 h-[300px] w-full bg-white rounded-2xl p-8 flex items-center justify-center text-center shadow-sm">
-                <p className="text-gray-400 text-lg italic">
-                  Доступно на всех платформах: Web, Mobile, Tablet.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
 
       <Footer />

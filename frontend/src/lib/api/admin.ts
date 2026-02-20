@@ -36,6 +36,19 @@ export interface GlobalExercise {
   muscleGroups?: string[]
 }
 
+export interface ContentBlock {
+  id: string
+  title: string
+  description?: string
+  content?: string
+  imageUrl?: string
+  location: "LANDING" | "KNOWLEDGE"
+  isActive: boolean
+  order: number
+  seoTitle?: string
+  seoDescription?: string
+}
+
 export const adminApi = {
   // --- Content: WODs ---
   getWods: () => apiClient.get<Wod[]>("/api/admin/wods"),
@@ -44,6 +57,19 @@ export const adminApi = {
   updateWod: (id: string, data: Partial<Wod>) =>
     apiClient.patch<Wod>(`/api/admin/wods/${id}`, data),
   deleteWod: (id: string) => apiClient.delete<void>(`/api/admin/wods/${id}`),
+
+  // --- Content: Content Blocks (Slides) ---
+  getContentBlocks: () => apiClient.get<ContentBlock[]>("/api/content-blocks"),
+  createContentBlock: (data: Omit<ContentBlock, "id">) =>
+    apiClient.post<ContentBlock>("/api/content-blocks", data),
+  updateContentBlock: (id: string, data: Partial<ContentBlock>) =>
+    apiClient.patch<ContentBlock>(`/api/content-blocks/${id}`, data),
+  deleteContentBlock: (id: string) => apiClient.delete<void>(`/api/content-blocks/${id}`),
+  uploadImage: (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    return apiClient.post<{ imageUrl: string }>("/api/content-blocks/upload", formData)
+  },
 
   // --- Content: Exercises ---
   getExercises: () => apiClient.get<GlobalExercise[]>("/api/admin/exercises"),

@@ -82,16 +82,22 @@ export class BackendClient {
       ? await createBackendHeadersWithCsrf(nextRequest)
       : await createBackendHeaders(nextRequest)
 
+    const isFormData = options.body instanceof FormData
+
     const headers: Record<string, string> = {
       ...(baseHeaders as Record<string, string>),
       ...(options.headers || {}),
+    }
+
+    if (isFormData) {
+      delete headers["Content-Type"]
     }
 
     const fetchOptions: RequestInit = {
       method,
       headers,
       ...(options.body !== undefined && {
-        body: JSON.stringify(options.body),
+        body: isFormData ? (options.body as FormData) : JSON.stringify(options.body),
       }),
     }
 

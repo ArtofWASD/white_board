@@ -68,8 +68,10 @@ class ApiClient {
       csrfToken = await useCsrfStore.getState().getCsrfToken()
     }
 
+    const isFormData = body instanceof FormData
+
     const headers: Record<string, string> = {
-      ...(body !== undefined && { "Content-Type": "application/json" }),
+      ...(body !== undefined && !isFormData && { "Content-Type": "application/json" }),
       ...(csrfToken && { "X-CSRF-Token": csrfToken }),
       ...((fetchOptions.headers as Record<string, string>) || {}),
     }
@@ -78,7 +80,7 @@ class ApiClient {
       ...fetchOptions,
       headers,
       credentials: "include",
-      ...(body !== undefined && { body: JSON.stringify(body) }),
+      ...(body !== undefined && { body: isFormData ? (body as FormData) : JSON.stringify(body) }),
     }
 
     try {

@@ -18,6 +18,7 @@ import { NewsModule } from './modules/news.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ChatModule } from './modules/chat.module';
 import { CsrfModule } from './modules/csrf.module';
+import { ContentBlocksModule } from './modules/content-blocks.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { CsrfModule } from './modules/csrf.module';
     NotificationsModule,
     ChatModule,
     CsrfModule,
+    ContentBlocksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

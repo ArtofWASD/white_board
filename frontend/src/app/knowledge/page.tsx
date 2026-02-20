@@ -113,8 +113,9 @@ export default function BlogPage() {
     setSelectedEvent(null)
   }
 
-  // Состояние для новостей
+  // Состояние для новостей и блоков
   const [newsItems, setNewsItems] = useState<NewsItem[]>([])
+  const [knowledgeBlocks, setKnowledgeBlocks] = useState<any[]>([])
 
   useEffect(() => {
     const fetchNews = async () => {
@@ -138,8 +139,20 @@ export default function BlogPage() {
       }
     }
 
+    const fetchBlocks = async () => {
+      try {
+        const res = await fetch("/api/content-blocks/public?location=KNOWLEDGE")
+        if (res.ok) {
+          setKnowledgeBlocks(await res.json())
+        }
+      } catch (e) {
+        logApiError("/api/content-blocks/public", e)
+      }
+    }
+
     if (showContent) {
       fetchNews()
+      fetchBlocks()
     }
   }, [showContent])
 
@@ -170,78 +183,44 @@ export default function BlogPage() {
           <div className={!loadingConfig && showContent ? "" : "hidden"}>
 
             {/* Секции на всю ширину */}
+            {/* Секции на всю ширину */}
             <div className="w-full">
-              {/* Slide 1: News */}
-              <Link href="/knowledge/news" className="block group">
-                  <section className="bg-white py-20 border-b border-gray-100 transition-colors group-hover:bg-gray-50">
+              {knowledgeBlocks.length > 0 ? (
+                knowledgeBlocks.map((block, index) => (
+                  <section key={block.id} className={`py-20 border-b border-gray-100 transition-colors ${index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-slate-50 hover:bg-indigo-50/50'}`}>
                     <div className="max-w-6xl mx-auto px-4">
-                        <div className="flex flex-col md:flex-row items-center gap-12">
-                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-105">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 transition-colors">Новости</h2>
-                            <p className="text-lg text-gray-600 leading-relaxed">
-                              Будьте в курсе последних событий нашего клуба. Соревнования, семинары, новые тренеры и изменения в расписании — все важные новости в одном месте.
-                            </p>
-                            <div className="pt-4">
-                               <span className="text-blue-600 font-semibold flex items-center gap-2">
-                                 Читайте актуальное <span aria-hidden="true">&rarr;</span>
-                               </span>
-                            </div>
+                        <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
+                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out hover:scale-105">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 transition-colors">{block.title}</h2>
+                            {block.description && (
+                              <p className="text-lg text-gray-600 leading-relaxed whitespace-pre-wrap">
+                                {block.description}
+                              </p>
+                            )}
+                            {block.content && (
+                              <div className="text-gray-600 leading-relaxed">
+                                {block.content}
+                              </div>
+                            )}
                           </div>
-                          <div className="flex-1 h-[300px] w-full bg-blue-50 rounded-2xl flex items-center justify-center text-center shadow-inner transition-transform duration-300 ease-in-out group-hover:scale-105">
-                            <p className="text-blue-400 font-medium text-lg">События и объявления</p>
+                          <div className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out hover:scale-105 ${block.imageUrl ? '' : 'bg-blue-50 shadow-inner'}`}>
+                            {block.imageUrl ? (
+                              <img 
+                                src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${block.imageUrl}`} 
+                                alt={block.title} 
+                                className="absolute inset-0 w-full h-full object-cover" 
+                              />
+                            ) : (
+                              <p className="text-blue-400 font-medium text-lg">{block.title}</p>
+                            )}
                           </div>
                         </div>
                     </div>
                   </section>
-              </Link>
-
-              {/* Slide 2: Workouts */}
-              <Link href="/knowledge/workouts" className="block group">
-                  <section className="bg-slate-50 py-20 border-b border-gray-100 transition-colors group-hover:bg-indigo-50/50">
-                    <div className="max-w-6xl mx-auto px-4">
-                        <div className="flex flex-col md:flex-row-reverse items-center gap-12">
-                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-105">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 transition-colors">Воркауты (WOD)</h2>
-                            <p className="text-lg text-gray-600 leading-relaxed">
-                              Ежедневные задания для атлетов разного уровня подготовки. Подробные описания комплексов, масштабирование и целевые показатели.
-                            </p>
-                            <div className="pt-4">
-                               <span className="text-indigo-600 font-semibold flex items-center gap-2">
-                                 Смотреть тренировки <span aria-hidden="true">&rarr;</span>
-                               </span>
-                            </div>
-                          </div>
-                          <div className="flex-1 h-[300px] w-full bg-white rounded-2xl flex items-center justify-center text-center shadow-sm border border-gray-100 transition-transform duration-300 ease-in-out group-hover:scale-105">
-                            <p className="text-indigo-400 font-medium text-lg">Тренировки дня</p>
-                          </div>
-                        </div>
-                    </div>
-                  </section>
-              </Link>
-
-              {/* Slide 3: Exercises */}
-              <Link href="/knowledge/exercises" className="block group">
-                  <section className="bg-white py-20 transition-colors group-hover:bg-gray-50">
-                    <div className="max-w-6xl mx-auto px-4">
-                        <div className="flex flex-col md:flex-row items-center gap-12">
-                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-105">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 transition-colors">База Упражнений</h2>
-                            <p className="text-lg text-gray-600 leading-relaxed">
-                              Библиотека техники выполнения упражнений. Видео-инструкции, разбор ошибок и рекомендации по безопасности для прогресса без травм.
-                            </p>
-                             <div className="pt-4">
-                               <span className="text-teal-600 font-semibold flex items-center gap-2">
-                                 Изучить технику <span aria-hidden="true">&rarr;</span>
-                               </span>
-                            </div>
-                          </div>
-                          <div className="flex-1 h-[300px] w-full bg-gray-50 rounded-2xl flex items-center justify-center text-center shadow-inner transition-transform duration-300 ease-in-out group-hover:scale-105">
-                            <p className="text-gray-400 font-medium text-lg">Техника и видео</p>
-                          </div>
-                        </div>
-                    </div>
-                  </section>
-              </Link>
+                ))
+              ) : (
+                 <div className="py-20 text-center text-gray-500">Загрузка блоков...</div>
+              )}
             </div>
 
             {/* <div className="max-w-4xl mx-auto"> */}

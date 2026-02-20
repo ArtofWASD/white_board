@@ -1,5 +1,7 @@
 import { NestFactory, Reflector } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
+import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
@@ -9,7 +11,12 @@ import { CsrfGuard } from './auth/guards/csrf.guard';
 dotenv.config();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Раздача статических файлов из папки uploads
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/uploads/',
+  });
 
   // Cookie parser middleware
   app.use(cookieParser());

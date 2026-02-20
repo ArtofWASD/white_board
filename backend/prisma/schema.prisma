@@ -289,6 +289,31 @@ model News {
   @@map("news")
 }
 
+enum ContentLocation {
+  LANDING
+  KNOWLEDGE
+}
+
+model ContentBlock {
+  id          String   @id @default(uuid())
+  title       String
+  description String?  @db.Text
+  content     String?  @db.Text
+  imageUrl    String?  @map("image_url")
+  location    ContentLocation @default(LANDING)
+  isActive    Boolean  @default(true) @map("is_active")
+  order       Int      @default(0)
+  
+  // SEO fields
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("content_blocks")
+}
+
 model EventResultLike {
   id            String      @id @default(uuid())
   eventResultId String      @map("event_result_id")
