@@ -11,6 +11,9 @@ COPY prisma ./prisma/
 # Install all dependencies including dev dependencies for build
 RUN npm ci
 
+# Generate Prisma Client manually since postinstall script might not run successfully during docker builds
+RUN npx prisma generate
+
 # Copy application code
 COPY . .
 
