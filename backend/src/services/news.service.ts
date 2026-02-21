@@ -23,9 +23,13 @@ export class NewsService {
     content: string;
     excerpt?: string;
     imageUrl?: string;
+    createdAt?: string;
   }) {
     return this.prisma.news.create({
-      data,
+      data: {
+        ...data,
+        createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+      },
     });
   }
 
@@ -36,11 +40,15 @@ export class NewsService {
       content?: string;
       excerpt?: string;
       imageUrl?: string;
+      createdAt?: string;
     },
   ) {
     return this.prisma.news.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        createdAt: data.createdAt ? new Date(data.createdAt) : undefined,
+      },
     });
   }
 

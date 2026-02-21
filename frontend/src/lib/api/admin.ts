@@ -82,7 +82,7 @@ export const adminApi = {
   // --- Content: News ---
   // News endpoints are shared but admin actions are typically protected
   getNews: () => apiClient.get<News[]>("/api/news"),
-  createNews: (data: Omit<News, "id" | "createdAt">) =>
+  createNews: (data: Omit<News, "id" | "createdAt"> & { createdAt?: string }) =>
     apiClient.post<News>("/api/news", data),
   updateNews: (id: string, data: Partial<News>) =>
     apiClient.patch<News>(`/api/news/${id}`, data),

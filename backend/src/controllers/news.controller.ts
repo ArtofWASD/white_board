@@ -39,6 +39,7 @@ export class NewsController {
       content: string;
       excerpt?: string;
       imageUrl?: string;
+      createdAt?: string;
     },
   ) {
     return this.newsService.create(body);
@@ -55,6 +56,7 @@ export class NewsController {
       content?: string;
       excerpt?: string;
       imageUrl?: string;
+      createdAt?: string;
     },
   ) {
     return this.newsService.update(id, body);

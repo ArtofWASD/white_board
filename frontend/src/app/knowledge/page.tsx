@@ -251,9 +251,6 @@ export default function BlogPage() {
                   </section>
                 )
               })}
-              {knowledgeBlocks.length === 0 && (
-                <div className="py-20 text-center text-gray-500">Загрузка блоков...</div>
-              )}
             </div>
 
             {/* <div className="max-w-4xl mx-auto mt-16 px-4"> ... </div> */}

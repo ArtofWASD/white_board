@@ -43,6 +43,7 @@ export const ContentTab: React.FC = () => {
     content: "",
     excerpt: "",
     imageUrl: "",
+    createdAt: "",
   })
   const [newBlock, setNewBlock] = useState<Omit<ContentBlock, "id">>({
     title: "",
@@ -112,7 +113,7 @@ export const ContentTab: React.FC = () => {
         await adminApi.createNews(newNews)
         fetchContent()
         setIsContentModalOpen(false)
-        setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
+        setNewNews({ title: "", content: "", excerpt: "", imageUrl: "", createdAt: "" })
       } catch (e) {
         alert("Ошибка создания новости")
       }
@@ -178,7 +179,7 @@ export const ContentTab: React.FC = () => {
         fetchContent()
         setIsContentModalOpen(false)
         setEditingItem(null)
-        setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
+        setNewNews({ title: "", content: "", excerpt: "", imageUrl: "", createdAt: "" })
       } catch (e) {
         alert("Ошибка обновления новости")
       }
@@ -254,6 +255,7 @@ export const ContentTab: React.FC = () => {
         content: item.content,
         excerpt: item.excerpt || "",
         imageUrl: item.imageUrl || "",
+        createdAt: item.createdAt ? item.createdAt.substring(0, 16) : "",
       })
     } else if (type === "block") {
       setNewBlock({
@@ -352,7 +354,7 @@ export const ContentTab: React.FC = () => {
                 muscleGroups: [],
               })
             else if (activeContentTab === "news")
-              setNewNews({ title: "", content: "", excerpt: "", imageUrl: "" })
+              setNewNews({ title: "", content: "", excerpt: "", imageUrl: "", createdAt: "" })
             else if (activeContentTab === "blocks")
               setNewBlock({
                 title: "",
@@ -768,6 +770,17 @@ export const ContentTab: React.FC = () => {
                 className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 value={newNews.imageUrl}
                 onChange={(e) => setNewNews({ ...newNews, imageUrl: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Дата создания (опционально)
+              </label>
+              <input
+                type="datetime-local"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                value={newNews.createdAt}
+                onChange={(e) => setNewNews({ ...newNews, createdAt: e.target.value })}
               />
             </div>
           </div>
