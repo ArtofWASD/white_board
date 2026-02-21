@@ -16,7 +16,10 @@ export const initializeSocket = (userId: string) => {
   }
 
   if (!socket) {
-    socket = io(process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001", {
+    // In production, NEXT_PUBLIC_API_URL should point to the public backend URL 
+    // or we use the current host (empty string)
+    const socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
+    socket = io(socketUrl, {
       withCredentials: true,
       transports: ["websocket", "polling"],
     })

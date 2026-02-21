@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const { email } = body
 
     // Forward the request to our NestJS backend
-    const backendUrl = process.env.BACKEND_URL || "http://localhost:3001"
+    const backendUrl = process.env.BACKEND_URL || "http://slate-backend-lihtfr:3001"
     const response = await fetch(
       `${backendUrl}/auth/lookup?email=${encodeURIComponent(email)}`,
       {

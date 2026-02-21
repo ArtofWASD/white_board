@@ -206,7 +206,7 @@ export default function BlogPage() {
                           <div className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out hover:scale-105 ${block.imageUrl ? '' : 'bg-blue-50 shadow-inner'}`}>
                             {block.imageUrl ? (
                               <img 
-                                src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${block.imageUrl}`} 
+                        src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || ''}${block.imageUrl}`} 
                                 alt={block.title} 
                                 className="absolute inset-0 w-full h-full object-cover" 
                               />

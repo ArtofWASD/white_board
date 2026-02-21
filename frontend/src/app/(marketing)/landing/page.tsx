@@ -103,7 +103,7 @@ export default async function LandingPage() {
                   <div className={`flex-1 min-h-[300px] w-full rounded-2xl p-8 flex items-center justify-center text-center overflow-hidden relative ${block.imageUrl ? '' : 'bg-gray-50 border border-gray-100 shadow-sm'}`}>
                     {block.imageUrl ? (
                       <img 
-                        src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}${block.imageUrl}`} 
+                        src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || ''}${block.imageUrl}`} 
                         alt={block.title} 
                         className="absolute inset-0 w-full h-full object-cover" 
                       />
