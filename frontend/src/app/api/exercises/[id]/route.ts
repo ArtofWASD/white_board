@@ -12,3 +12,13 @@ export async function PUT(
     body,
   })
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  return BackendClient.forwardRequest(request, `/exercises/${id}`, {
+    method: "DELETE",
+  })
+}

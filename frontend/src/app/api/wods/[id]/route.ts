@@ -8,3 +8,25 @@ export async function GET(
   const { id } = await params
   return BackendClient.forwardRequest(request, `/wods/${id}`)
 }
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  const body = await request.json()
+  return BackendClient.forwardRequest(request, `/wods/${id}`, {
+    method: "PATCH",
+    body,
+  })
+}
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params
+  return BackendClient.forwardRequest(request, `/wods/${id}`, {
+    method: "DELETE",
+  })
+}
