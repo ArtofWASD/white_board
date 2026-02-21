@@ -1,25 +1,6 @@
-FROM node:20-alpine AS base
+# ... (стадии deps и builder остаются прежними)
 
-# 1. Установка зависимостей
-FROM base AS deps
-RUN apk add --no-cache libc6-compat
-WORKDIR /app
-
-COPY package.json package-lock.json* ./
-RUN if [ -f package-lock.json ]; then npm ci --legacy-peer-deps; \
-    else echo "Lockfile not found." && exit 1; \
-    fi
-
-# 2. Сборка приложения
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-RUN npm run build
-
-# 3. Финальный образ (Runner)
-FROM base AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -29,21 +10,19 @@ ENV HOSTNAME="0.0.0.0"
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Копируем статику и публичные файлы
-# Важно: В standalone режиме Next.js ищет их относительно корня проекта
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Копируем статику и публичные файлы (они нужны Next.js для работы)
+COPY --from=builder /app/frontend/public ./frontend/public
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/static ./frontend/.next/static
 
-# Копируем результат сборки standalone
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Копируем результат standalone сборки
+# Она уже содержит внутри папку 'frontend' со своим server.js
+COPY --from=builder --chown=nextjs:nodejs /app/frontend/.next/standalone ./
 
 USER nextjs
 
 EXPOSE 3000
 
-# Переходим в папку, где физически лежит server.js после сборки
-# Судя по вашим логам, Next.js воссоздал структуру папки 'frontend'
-WORKDIR /app/frontend
-
-# Теперь запускаем напрямую, так как мы находимся в нужной директории
-CMD ["node", "server.js"]
+# КРИТИЧЕСКИЙ МОМЕНТ:
+# Мы запускаем файл из корня /app, но указываем путь к нему.
+# Это позволяет Node.js найти node_modules, которые лежат в /app/node_modules
+CMD ["node", "frontend/server.js"]
