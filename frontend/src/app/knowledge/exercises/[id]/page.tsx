@@ -60,6 +60,12 @@ export default function ExerciseDetailsPage() {
     }
   }, [id, router])
 
+  useEffect(() => {
+    if (exercise) {
+      document.title = `${exercise.name} - Whiteboard`
+    }
+  }, [exercise])
+
   const renderStars = (rating: number = 0) => {
     return (
       <div className="flex items-center space-x-1">

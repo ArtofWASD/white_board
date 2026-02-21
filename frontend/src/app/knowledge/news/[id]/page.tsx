@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '../../../../components/layout/Header';
 import Footer from '../../../../components/layout/Footer';
@@ -61,6 +61,12 @@ export default function NewsDetailPage({ params }: { params: Promise<{ id: strin
 
   // Find the news item by ID
   const newsItem = newsItems.find(item => item.id === id);
+
+  useEffect(() => {
+    if (newsItem) {
+      document.title = `${newsItem.title} - Whiteboard`
+    }
+  }, [newsItem])
 
   if (!newsItem) {
     return (

@@ -43,6 +43,7 @@ export default function ExercisesPage() {
     }
 
     fetchExercises()
+    document.title = "Упражнения - Whiteboard"
   }, [])
 
   useEffect(() => {

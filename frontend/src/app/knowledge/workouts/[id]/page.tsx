@@ -73,6 +73,12 @@ export default function WodDetailsPage() {
     }
   }, [id])
 
+  useEffect(() => {
+    if (wod) {
+      document.title = `${wod.name} - Whiteboard`
+    }
+  }, [wod])
+
   const handleAddToCalendar = async (date: Date) => {
     if (!user || !wod) return
 

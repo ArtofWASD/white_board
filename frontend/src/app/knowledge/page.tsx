@@ -185,11 +185,38 @@ export default function BlogPage() {
             {/* Секции на всю ширину */}
             {/* Секции на всю ширину */}
             <div className="w-full">
-              {knowledgeBlocks.length > 0 ? (
-                knowledgeBlocks.map((block, index) => (
+              {[
+                  {
+                    id: "static-wods",
+                    title: "WODs / Тренировки",
+                    description: "Обширная база комплексов упражнений (Workout of the Day). Классические кроссфит-комплексы, героические WODs и многое другое.",
+                    href: "/knowledge/workouts",
+                    imageUrl: null,
+                    isStatic: true
+                  },
+                  {
+                    id: "static-exercises",
+                    title: "База упражнений",
+                    description: "Подробные видеоинструкции, описание техники выполнения и целевые группы мышц для каждого упражнения.",
+                    href: "/knowledge/exercises",
+                    imageUrl: null,
+                    isStatic: true
+                  },
+                  {
+                    id: "static-news",
+                    title: "Новости и статьи",
+                    description: "Последние события нашего зала, анонсы соревнований, полезные статьи о питании и восстановлении.",
+                    href: "/knowledge/news",
+                    imageUrl: null,
+                    isStatic: true
+                  },
+                  ...knowledgeBlocks
+                ].map((block: any, index: number) => {
+                  const href = block.isStatic ? block.href : `/knowledge/article/${block.slug || block.id}`;
+                  return (
                   <section key={block.id} className={`py-20 border-b border-gray-100 transition-colors ${index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-slate-50 hover:bg-indigo-50/50'}`}>
                     <div className="max-w-6xl mx-auto px-4">
-                      <Link href={`/knowledge/article/${block.slug || block.id}`} className="block group">
+                      <Link href={href} className="block group">
                         <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
                           <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-[1.02]">
                             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{block.title}</h2>
@@ -198,13 +225,13 @@ export default function BlogPage() {
                                 {block.description}
                               </p>
                             )}
-                            {block.content && (
+                            {block.content && !block.isStatic && (
                               <div className="text-gray-600 leading-relaxed line-clamp-4">
                                 {block.content}
                               </div>
                             )}
                             <div className="mt-4 text-indigo-600 font-medium group-hover:text-indigo-800 transition-colors inline-block">
-                              Читать далее →
+                              {block.isStatic ? "Перейти в раздел →" : "Читать далее →"}
                             </div>
                           </div>
                           <div className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out group-hover:scale-[1.02] group-hover:shadow-xl ${block.imageUrl ? '' : 'bg-blue-50 shadow-inner'}`}>
@@ -222,39 +249,14 @@ export default function BlogPage() {
                       </Link>
                     </div>
                   </section>
-                ))
-              ) : (
-                 <div className="py-20 text-center text-gray-500">Загрузка блоков...</div>
+                )
+              })}
+              {knowledgeBlocks.length === 0 && (
+                <div className="py-20 text-center text-gray-500">Загрузка блоков...</div>
               )}
             </div>
 
-            {/* <div className="max-w-4xl mx-auto"> */}
-            <div className="max-w-4xl mx-auto mt-16 px-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {newsItems.map((item) => (
-                    <article
-                      key={item.id}
-                      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                      <div className="p-6">
-                        <h2 className="text-xl font-bold mb-3 text-gray-800">{item.title}</h2>
-                        <p className="text-gray-600 mb-4">{item.excerpt}</p>
-                        <div className="flex justify-between items-center text-sm text-gray-500">
-                          <span>{item.date}</span>
-                          <span>{item.readTime}</span>
-                        </div>
-                        <Link
-                          href={`/knowledge/news/${item.id}`}
-                          className="mt-4 text-indigo-600 font-medium hover:text-indigo-800 transition-colors inline-block">
-                          Читать далее →
-                        </Link>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-
-
-            </div>
-             {/* </div> */}
+            {/* <div className="max-w-4xl mx-auto mt-16 px-4"> ... </div> */}
           </div>
       </main>
 

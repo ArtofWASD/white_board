@@ -31,6 +31,7 @@ export default function NewsPage() {
     }
 
     fetchNews()
+    document.title = "Новости - Whiteboard"
   }, [])
 
   if (flags.hideBlogContent) {

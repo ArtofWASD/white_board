@@ -568,7 +568,7 @@ export const ContentTab: React.FC = () => {
                   ? "Создать Новость"
                   : "Создать Блок/Слайд"
         }
-        size={contentModalType === "block" ? "xl" : "md"}
+        size="xl"
         footer={
           <div className="flex justify-end gap-2">
             <button
