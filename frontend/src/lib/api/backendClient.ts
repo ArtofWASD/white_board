@@ -62,7 +62,9 @@ const CSRF_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"])
 // ─── Клиент ────────────────────────────────────────────────────────────────────
 
 export class BackendClient {
-  private static readonly baseUrl = process.env.BACKEND_URL || "http://localhost:3001"
+  private static get baseUrl() {
+    return process.env.BACKEND_URL || "http://localhost:3001";
+  }
 
   /**
    * Выполняет запрос к NestJS backend с пробросом cookies.
