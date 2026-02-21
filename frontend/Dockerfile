@@ -38,5 +38,5 @@ USER nextjs
 
 EXPOSE 3000
 
-# Запускаем из корня /app
-CMD ["node", "server.js"]
+# Запускаем из корня /app/app
+CMD ["node", "app/server.js"]
