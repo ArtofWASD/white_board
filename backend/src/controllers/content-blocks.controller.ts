@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -50,6 +51,12 @@ export class ContentBlocksController {
       return [];
     }
     return this.contentBlocksService.findActiveByLocation(location);
+  }
+
+  @Public()
+  @Get('by-slug/:slug')
+  findBySlug(@Param('slug') slug: string) {
+    return this.contentBlocksService.findBySlug(slug);
   }
 
   @Public()
@@ -100,7 +107,9 @@ export class ContentBlocksController {
 
   @Delete(':id')
   @Roles(UserRole.SUPER_ADMIN)
-  remove(@Param('id') id: string) {
-    return this.contentBlocksService.remove(id);
+  @HttpCode(204)
+  async remove(@Param('id') id: string) {
+    await this.contentBlocksService.remove(id);
+    return;
   }
 }

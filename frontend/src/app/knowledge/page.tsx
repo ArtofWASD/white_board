@@ -189,32 +189,37 @@ export default function BlogPage() {
                 knowledgeBlocks.map((block, index) => (
                   <section key={block.id} className={`py-20 border-b border-gray-100 transition-colors ${index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-slate-50 hover:bg-indigo-50/50'}`}>
                     <div className="max-w-6xl mx-auto px-4">
+                      <Link href={`/knowledge/article/${block.slug || block.id}`} className="block group">
                         <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
-                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out hover:scale-105">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 transition-colors">{block.title}</h2>
+                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-[1.02]">
+                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{block.title}</h2>
                             {block.description && (
                               <p className="text-lg text-gray-600 leading-relaxed whitespace-pre-wrap">
                                 {block.description}
                               </p>
                             )}
                             {block.content && (
-                              <div className="text-gray-600 leading-relaxed">
+                              <div className="text-gray-600 leading-relaxed line-clamp-4">
                                 {block.content}
                               </div>
                             )}
+                            <div className="mt-4 text-indigo-600 font-medium group-hover:text-indigo-800 transition-colors inline-block">
+                              Читать далее →
+                            </div>
                           </div>
-                          <div className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out hover:scale-105 ${block.imageUrl ? '' : 'bg-blue-50 shadow-inner'}`}>
+                          <div className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out group-hover:scale-[1.02] group-hover:shadow-xl ${block.imageUrl ? '' : 'bg-blue-50 shadow-inner'}`}>
                             {block.imageUrl ? (
                               <img 
                         src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || ''}${block.imageUrl}`} 
                                 alt={block.title} 
-                                className="absolute inset-0 w-full h-full object-cover" 
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
                               />
                             ) : (
                               <p className="text-blue-400 font-medium text-lg">{block.title}</p>
                             )}
                           </div>
                         </div>
+                      </Link>
                     </div>
                   </section>
                 ))

@@ -7,6 +7,10 @@ export class CreateContentBlockDto {
 
   @IsString()
   @IsOptional()
+  slug?: string;
+
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @IsString()
@@ -42,6 +46,10 @@ export class UpdateContentBlockDto {
   @IsString()
   @IsOptional()
   title?: string;
+
+  @IsString()
+  @IsOptional()
+  slug?: string;
 
   @IsString()
   @IsOptional()

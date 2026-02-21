@@ -297,6 +297,7 @@ enum ContentLocation {
 model ContentBlock {
   id          String   @id @default(uuid())
   title       String
+  slug        String?  @unique
   description String?  @db.Text
   content     String?  @db.Text
   imageUrl    String?  @map("image_url")
