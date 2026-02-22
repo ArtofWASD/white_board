@@ -239,6 +239,7 @@ export default function CalendarPage() {
           movements: event.exercises?.map((e: any) => e.name) || [],
           timeCap: event.timeCap,
           rounds: event.rounds,
+          userId: event.userId,
         })
       })
 

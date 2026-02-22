@@ -67,9 +67,11 @@ export interface Exercise {
   rxReps?: string
   scWeight?: string
   scReps?: string
-  measurement?: "weight" | "calories"
+  measurement?: "weight" | "calories" | "time"
   rxCalories?: string
   scCalories?: string
+  rxTime?: string
+  scTime?: string
 }
 
 export interface EventResult {

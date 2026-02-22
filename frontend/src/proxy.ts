@@ -4,8 +4,8 @@ import type { NextRequest } from "next/server"
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Check if the user is authenticated (using the cookie name we identified)
-  const isAuth = request.cookies.has("access_token")
+  // Check if the user is authenticated (using the cookie names we identified)
+  const isAuth = request.cookies.has("access_token") || request.cookies.has("refresh_token")
 
   // Handle the root path '/'
   if (pathname === "/") {

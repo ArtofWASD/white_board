@@ -11,13 +11,14 @@ import { WorkoutQuickView } from "./WorkoutQuickView"
 export interface Workout {
   id: string
   title: string
-  type: "AMRAP" | "EMOM" | "FOR_TIME" | "WEIGHTLIFTING"
+  type: "AMRAP" | "EMOM" | "FOR_TIME" | "WEIGHTLIFTING" | "CARDIO"
   result?: string
   scheduledTime?: string // e.g. "18:00"
   description: string
   movements: string[]
   timeCap?: string
   rounds?: string
+  userId?: string // Added for ownership check
 }
 
 interface WorkoutCardProps {
@@ -61,12 +62,15 @@ export function WorkoutCard({ workout, onOpenDetail }: WorkoutCardProps) {
                   workout.type === "AMRAP" && "border-primary text-primary",
                   workout.type === "EMOM" && "border-orange-500 text-orange-700",
                   workout.type === "WEIGHTLIFTING" && "border-purple-500 text-purple-700",
+                  workout.type === "CARDIO" && "border-red-500 text-red-700",
                 )}>
                 {workout.type === "FOR_TIME"
                   ? "На время"
                   : workout.type === "WEIGHTLIFTING"
                     ? "Тяжелая атлетика"
-                    : workout.type}
+                    : workout.type === "CARDIO"
+                      ? "Кардио"
+                      : workout.type}
               </Badge>
 
               <div className="flex flex-col items-end gap-0.5">

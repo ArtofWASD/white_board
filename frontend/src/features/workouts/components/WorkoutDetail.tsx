@@ -68,6 +68,18 @@ export function WorkoutDetail({ workout, isOpen, onClose }: WorkoutDetailProps) 
       // EMOM logic customization needed if data available
       // Defaulting to standard 1 minute
       params.set("intervalWork", "60")
+    } else if (workout.type === "CARDIO") {
+      params.set("mode", "AMRAP") // Use AMRAP (countdown) mode for Cardio
+      if (workout.timeCap) {
+        const parts = workout.timeCap.split(":")
+        let durationSeconds = 0
+        if (parts.length === 2) {
+          durationSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1] || "0")
+        } else {
+          durationSeconds = parseInt(workout.timeCap) * 60
+        }
+        if (!isNaN(durationSeconds)) params.set("duration", durationSeconds.toString())
+      }
     } else {
       // Default to basic timer or intervals
       params.set("mode", "FOR_TIME")
@@ -98,13 +110,17 @@ export function WorkoutDetail({ workout, isOpen, onClose }: WorkoutDetailProps) 
                     ? "bg-orange-500/10 text-orange-600 ring-orange-500/20"
                     : workout.type === "EMOM"
                       ? "bg-blue-500/10 text-blue-600 ring-blue-500/20"
-                      : "bg-slate-500/10 text-slate-600 ring-slate-500/20",
+                      : workout.type === "CARDIO"
+                        ? "bg-red-500/10 text-red-600 ring-red-500/20"
+                        : "bg-slate-500/10 text-slate-600 ring-slate-500/20",
                 )}>
                 {workout.type === "FOR_TIME"
                   ? "На время"
                   : workout.type === "WEIGHTLIFTING"
                     ? "Тяжелая атлетика"
-                    : workout.type}
+                    : workout.type === "CARDIO"
+                      ? "Кардио"
+                      : workout.type}
               </span>
               {workout.timeCap && (
                 <span className="text-xs text-muted-foreground flex items-center gap-1">

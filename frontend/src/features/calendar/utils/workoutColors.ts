@@ -10,6 +10,8 @@ export const getWorkoutColorClass = (type: Workout["type"]) => {
       return "bg-green-500/10 text-green-700 border-green-200 hover:bg-green-500/20"
     case "WEIGHTLIFTING":
       return "bg-purple-500/10 text-purple-700 border-purple-200 hover:bg-purple-500/20"
+    case "CARDIO":
+      return "bg-red-500/10 text-red-700 border-red-200 hover:bg-red-500/20"
     default:
       return "bg-slate-500/10 text-slate-700 border-slate-200 hover:bg-slate-500/20"
   }

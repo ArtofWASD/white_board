@@ -60,7 +60,7 @@ export function AddResultModal({
         username: user.name,
         userId: user.id,
         time:
-          workout.type === "FOR_TIME" || workout.type === "EMOM"
+          workout.type === "FOR_TIME" || workout.type === "EMOM" || workout.type === "CARDIO"
             ? data.resultValue
             : undefined,
         value:
@@ -82,6 +82,19 @@ export function AddResultModal({
     } catch (error) {
       console.error("Failed to add result:", error)
       // Ideally show error toast
+    }
+  }
+
+  const handleDeleteWorkout = async () => {
+    if (!confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")) return
+    
+    try {
+      await eventsApi.deleteEvent(workout.id)
+      onSuccess?.()
+      onClose()
+    } catch (error) {
+      console.error("Failed to delete workout:", error)
+      alert("Не удалось удалить тренировку.")
     }
   }
 
@@ -159,14 +172,28 @@ export function AddResultModal({
             </p>
           </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Отмена
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Сохранить
-            </Button>
+          <div className="flex justify-between items-center pt-4">
+            <div>
+              {workout.userId === user?.id && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                  onClick={handleDeleteWorkout}
+                >
+                  Удалить занятие
+                </Button>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Отмена
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Сохранить
+              </Button>
+            </div>
           </div>
         </form>
       </DialogContent>

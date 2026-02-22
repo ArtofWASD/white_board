@@ -58,13 +58,15 @@ export function CreateWorkoutModal({
 
   // Exercise Input State
   const [exName, setExName] = useState("")
-  const [exMeasurement, setExMeasurement] = useState<"weight" | "calories">("weight")
+  const [exMeasurement, setExMeasurement] = useState<"weight" | "calories" | "time">("weight")
   const [rxWeight, setRxWeight] = useState("")
   const [rxReps, setRxReps] = useState("")
   const [scWeight, setScWeight] = useState("")
   const [scReps, setScReps] = useState("")
   const [rxCalories, setRxCalories] = useState("")
   const [scCalories, setScCalories] = useState("")
+  const [rxTime, setRxTime] = useState("")
+  const [scTime, setScTime] = useState("")
 
   useEffect(() => {
     if (isOpen) {
@@ -147,6 +149,8 @@ export function CreateWorkoutModal({
     setScReps("")
     setRxCalories("")
     setScCalories("")
+    setRxTime("")
+    setScTime("")
   }
 
   const handleAddExercise = () => {
@@ -162,6 +166,8 @@ export function CreateWorkoutModal({
       scReps,
       rxCalories: exMeasurement === "calories" ? rxCalories : undefined,
       scCalories: exMeasurement === "calories" ? scCalories : undefined,
+      rxTime: exMeasurement === "time" ? rxTime : undefined,
+      scTime: exMeasurement === "time" ? scTime : undefined,
     }
 
     setExercises([...exercises, newExercise])
@@ -257,22 +263,21 @@ export function CreateWorkoutModal({
                   <SelectItem value="AMRAP">AMRAP</SelectItem>
                   <SelectItem value="EMOM">EMOM</SelectItem>
                   <SelectItem value="WEIGHTLIFTING">Тяжелая атлетика</SelectItem>
+                  <SelectItem value="CARDIO">Кардио</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {(scheme === "FOR_TIME" || scheme === "AMRAP") && (
+            {(scheme === "FOR_TIME" || scheme === "AMRAP" || scheme === "CARDIO") && (
               <div className="space-y-2">
                 <Label htmlFor="timeCap">
-                  {scheme === "AMRAP" ? "Длительность" : "Лимит времени"}
+                  Количество времени
                 </Label>
                 <Input
                   id="timeCap"
                   value={timeCap}
                   onChange={(e) => setTimeCap(e.target.value)}
-                  placeholder={
-                    scheme === "AMRAP" ? "например, 20 мин" : "например, 15:00"
-                  }
+                  placeholder="например, 20:00 или 15 мин"
                 />
               </div>
             )}
@@ -313,7 +318,7 @@ export function CreateWorkoutModal({
                     <SelectValue placeholder="Выберите команду..." />
                   </SelectTrigger>
                   <SelectContent className="bg-white">
-                    <SelectItem value="none">Без команды (Личная заметка)</SelectItem>
+                    <SelectItem value="none">Личная тренировка</SelectItem>
                     {availableTeams.map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
@@ -436,6 +441,17 @@ export function CreateWorkoutModal({
                   )}>
                   Калории
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setExMeasurement("time")}
+                  className={cn(
+                    "px-2 py-1 text-xs rounded-sm transition-all",
+                    exMeasurement === "time"
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}>
+                  Время
+                </button>
               </div>
             </div>
 
@@ -465,11 +481,18 @@ export function CreateWorkoutModal({
                         className="bg-background"
                       />
                     </div>
-                  ) : (
+                  ) : exMeasurement === "calories" ? (
                     <Input
                       value={rxCalories}
                       onChange={(e) => setRxCalories(e.target.value)}
                       placeholder="Кал"
+                      className="bg-background"
+                    />
+                  ) : (
+                    <Input
+                      value={rxTime}
+                      onChange={(e) => setRxTime(e.target.value)}
+                      placeholder="Мин"
                       className="bg-background"
                     />
                   )}
@@ -491,11 +514,18 @@ export function CreateWorkoutModal({
                         className="bg-background"
                       />
                     </div>
-                  ) : (
+                  ) : exMeasurement === "calories" ? (
                     <Input
                       value={scCalories}
                       onChange={(e) => setScCalories(e.target.value)}
                       placeholder="Кал"
+                      className="bg-background"
+                    />
+                  ) : (
+                    <Input
+                      value={scTime}
+                      onChange={(e) => setScTime(e.target.value)}
+                      placeholder="Мин"
                       className="bg-background"
                     />
                   )}
@@ -525,7 +555,9 @@ export function CreateWorkoutModal({
                       <div className="text-xs text-muted-foreground">
                         {ex.measurement === "weight"
                           ? `Rx: ${ex.weight || "-"}кг/${ex.repetitions || "-"} • Sc: ${ex.scWeight || "-"}кг/${ex.scReps || "-"}`
-                          : `Rx: ${ex.rxCalories || "-"}кал • Sc: ${ex.scCalories || "-"}кал`}
+                          : ex.measurement === "calories" 
+                          ? `Rx: ${ex.rxCalories || "-"}кал • Sc: ${ex.scCalories || "-"}кал`
+                          : `Rx: ${ex.rxTime || "-"}мин • Sc: ${ex.scTime || "-"}мин`}
                       </div>
                     </div>
                     <Button
