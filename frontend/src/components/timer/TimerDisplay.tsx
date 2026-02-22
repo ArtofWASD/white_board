@@ -67,7 +67,7 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({ state, config, onPau
       </div>
 
       {/* Основной таймер */}
-      <div className={`text-[12rem] leading-none font-bold tabular-nums tracking-tighter transition-colors duration-300 ${getPhaseColor(phase, status)}`}>
+      <div className={`text-[7rem] sm:text-[9rem] md:text-[11rem] leading-none font-bold tabular-nums tracking-tighter transition-colors duration-300 ${getPhaseColor(phase, status)}`}>
         {formatTime(timeLeft)}
       </div>
 

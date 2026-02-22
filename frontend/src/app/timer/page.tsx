@@ -155,7 +155,7 @@ const ActiveTimer: React.FC<{
 
       <div className="mt-8 text-center text-gray-600 font-mono text-sm">
         Режим: {config.mode} • Раунды: {config.rounds || 1} • Время:{" "}
-        {config.intervalWork || config.duration || config.timeCap}с
+        {Math.floor((config.intervalWork || config.duration || config.timeCap || 0) / 60)} мин
       </div>
     </div>
   )
