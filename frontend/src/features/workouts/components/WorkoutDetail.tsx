@@ -56,14 +56,14 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         // Looking at Workout interface, timeCap is string.
         // Let's try to parse it. If it contains ':', split.
         const parts = workout.timeCap.split(":")
-        let totalMinutes = 0
+        let totalSeconds = 0
         if (parts.length === 2) {
-          totalMinutes = parseInt(parts[0]) + parseInt(parts[1]) / 60
+          totalSeconds = (parseInt(parts[0]) * 60) + parseInt(parts[1])
         } else {
-          totalMinutes = parseInt(workout.timeCap)
+          totalSeconds = parseInt(workout.timeCap) * 60
         }
-        if (!isNaN(totalMinutes)) {
-          params.set("timeCap", totalMinutes.toString())
+        if (!isNaN(totalSeconds)) {
+          params.set("timeCap", totalSeconds.toString())
         }
       }
     } else if (workout.type === "AMRAP") {
@@ -72,13 +72,13 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         // AMRAP usually has a fixed duration, often stored in timeCap field or description?
         // Workout interface has timeCap. Let's assume it's duration for AMRAP.
         const parts = workout.timeCap.split(":")
-        let duration = 0
+        let durationSeconds = 0
         if (parts.length === 2) {
-          duration = parseInt(parts[0]) // minutes
+          durationSeconds = (parseInt(parts[0]) * 60) + parseInt(parts[1] || "0")
         } else {
-          duration = parseInt(workout.timeCap)
+          durationSeconds = parseInt(workout.timeCap) * 60
         }
-        if (!isNaN(duration)) params.set("duration", duration.toString())
+        if (!isNaN(durationSeconds)) params.set("duration", durationSeconds.toString())
       }
     } else if (workout.type === "EMOM") {
       params.set("mode", "EMOM")
