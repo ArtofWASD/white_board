@@ -181,6 +181,10 @@ export function CalendarSystem({
         workout={selectedWorkout}
         isOpen={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+        onDelete={() => {
+          setIsDetailOpen(false)
+          if (onWorkoutCreated) onWorkoutCreated()
+        }}
       />
 
       <CreateWorkoutModal

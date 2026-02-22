@@ -8,19 +8,36 @@ import { useState } from "react"
 import { Workout } from "./WorkoutCard"
 import { useRouter } from "next/navigation" // Import useRouter
 import { AddResultModal } from "./AddResultModal" // Import AddResultModal
+import { useAuthStore } from "@/lib/store/useAuthStore"
+import { eventsApi } from "@/lib/api/events"
 
 interface WorkoutDetailProps {
   workout: Workout | null
   isOpen: boolean
   onClose: () => void
+  onDelete?: () => void
 }
 
-export function WorkoutDetail({ workout, isOpen, onClose }: WorkoutDetailProps) {
+export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDetailProps) {
   const [isRx, setIsRx] = useState(true)
   const [isAddResultOpen, setIsAddResultOpen] = useState(false) // State for result modal
   const router = useRouter()
+  const { user } = useAuthStore() // Added for delete ownership check
 
   if (!workout) return null
+
+  const handleDeleteWorkout = async () => {
+    if (!confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")) return
+    
+    try {
+      await eventsApi.deleteEvent(workout.id)
+      onClose()
+      onDelete?.()
+    } catch (error) {
+      console.error("Failed to delete workout:", error)
+      alert("Не удалось удалить тренировку.")
+    }
+  }
 
   // Handler for Start Timer
   const handleStartTimer = () => {
@@ -69,7 +86,6 @@ export function WorkoutDetail({ workout, isOpen, onClose }: WorkoutDetailProps) 
       // Defaulting to standard 1 minute
       params.set("intervalWork", "60")
     } else if (workout.type === "CARDIO") {
-      params.set("mode", "AMRAP") // Use AMRAP (countdown) mode for Cardio
       if (workout.timeCap) {
         const parts = workout.timeCap.split(":")
         let durationSeconds = 0
@@ -78,7 +94,14 @@ export function WorkoutDetail({ workout, isOpen, onClose }: WorkoutDetailProps) 
         } else {
           durationSeconds = parseInt(workout.timeCap) * 60
         }
-        if (!isNaN(durationSeconds)) params.set("duration", durationSeconds.toString())
+        if (!isNaN(durationSeconds) && durationSeconds > 0) {
+          params.set("mode", "AMRAP") // Use AMRAP (countdown) mode for Cardio if time specified
+          params.set("duration", durationSeconds.toString())
+        } else {
+          params.set("mode", "FOR_TIME") // Fallback to counting up
+        }
+      } else {
+        params.set("mode", "FOR_TIME") // Fallback to counting up
       }
     } else {
       // Default to basic timer or intervals
@@ -184,27 +207,38 @@ export function WorkoutDetail({ workout, isOpen, onClose }: WorkoutDetailProps) 
             </div>
           </div>
 
-          <div className="p-4 border-t bg-muted/20 flex flex-col sm:flex-row gap-3 mt-auto">
-            <Button
-              variant="outline"
-              className="flex-1 gap-2 whitespace-nowrap"
-              size="lg"
-              layout="horizontal"
-              onClick={handleStartTimer} // Attach handler
-            >
-              <PlayCircle className="h-5 w-5" />
-              Запустить таймер
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 gap-2 whitespace-nowrap"
-              size="lg"
-              layout="horizontal"
-              onClick={() => setIsAddResultOpen(true)} // Open result modal
-            >
-              <ClipboardEdit className="h-5 w-5" />
-              Записать результат
-            </Button>
+          <div className="p-4 border-t bg-muted/20 flex flex-col gap-3 mt-auto">
+            {workout.userId === user?.id && (
+              <Button
+                variant="ghost"
+                className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 border border-dashed"
+                onClick={handleDeleteWorkout}
+              >
+                Удалить занятие
+              </Button>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                className="flex-1 gap-2 whitespace-nowrap"
+                size="lg"
+                layout="horizontal"
+                onClick={handleStartTimer} // Attach handler
+              >
+                <PlayCircle className="h-5 w-5" />
+                Запустить таймер
+              </Button>
+              <Button
+                variant="outline"
+                className="flex-1 gap-2 whitespace-nowrap"
+                size="lg"
+                layout="horizontal"
+                onClick={() => setIsAddResultOpen(true)} // Open result modal
+              >
+                <ClipboardEdit className="h-5 w-5" />
+                Записать результат
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
