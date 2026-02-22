@@ -30,7 +30,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
     if (!confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")) return
     
     try {
-      await eventsApi.deleteEvent(workout.id)
+      await eventsApi.deleteEvent(workout.id, user!.id)
       onClose()
       onDelete?.()
     } catch (error) {
@@ -208,15 +208,6 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
           </div>
 
           <div className="p-4 border-t bg-muted/20 flex flex-col gap-3 mt-auto">
-            {workout.userId === user?.id && (
-              <Button
-                variant="ghost"
-                className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 border border-dashed"
-                onClick={handleDeleteWorkout}
-              >
-                Удалить занятие
-              </Button>
-            )}
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
@@ -239,6 +230,15 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                 Записать результат
               </Button>
             </div>
+            {workout.userId === user?.id && (
+              <Button
+                variant="ghost"
+                className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 border border-dashed"
+                onClick={handleDeleteWorkout}
+              >
+                Удалить занятие
+              </Button>
+            )}
           </div>
         </DialogContent>
       </Dialog>

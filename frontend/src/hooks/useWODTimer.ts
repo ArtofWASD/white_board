@@ -47,7 +47,7 @@ export const useWODTimer = (config: TimerConfig) => {
       let workTime = 0;
       if (config.mode === 'AMRAP') workTime = (config.duration || 0) * 1000;
       else if (['EMOM', 'TABATA', 'INTERVALS'].includes(config.mode)) workTime = (config.intervalWork || 0) * 1000;
-      else if (config.mode === 'FOR_TIME') workTime = (config.timeCap || 0) * 1000; // FOR_TIME обычно считает вверх, см. логику ниже
+      else if (config.mode === 'FOR_TIME') workTime = config.timeCap ? config.timeCap * 1000 : 999999999; // Если нет лимита, ставим большое время
       
       // FOR_TIME особенный, он считает ВВЕРХ, но мы можем моделировать его как обратный отсчет от лимита или просто бесконечный вверх.
       // Давайте стандартизируем: timeLeft - это то, что отображается.

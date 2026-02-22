@@ -59,7 +59,8 @@ export const eventsApi = {
     apiClient.put<CalendarEvent>(`/api/events/${eventId}`, data),
 
   /** Удалить событие */
-  deleteEvent: (eventId: string) => apiClient.delete<void>(`/api/events/${eventId}`),
+  deleteEvent: (eventId: string, userId: string) => 
+    apiClient.request<void>(`/api/events/${eventId}`, { method: 'DELETE', body: { userId } }),
 
   /** Обновить статус события */
   updateStatus: (eventId: string, status: string) =>
