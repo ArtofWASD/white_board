@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { User } from '../../types';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useToast } from '../../lib/context/ToastContext';
+import { apiClient } from '../../lib/api/apiClient';
 
 interface WeightTrackerProps {
   user: User;
@@ -32,23 +33,16 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
     setIsLoading(true);
     try {
       // Обновление бэкенда (пока только вес)
-      const response = await fetch(`/api/auth/profile/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weight: weightValue }),
+      const data = await apiClient.put<{ user: User }>(`/api/auth/profile/${user.id}`, {
+        weight: weightValue
       });
 
-      const data = await response.json();
-
-      if (response.ok && data.user) {
+      if (data && data.user) {
         // Создание новой записи истории
         const newEntry = {
           weight: weightValue,
           date: new Date().toISOString(),
         };
-
-
-
 
         // Обновление локального пользователя с новым весом И историей
         // Мы объединяем ответ бэкенда (в котором обновлен вес) с нашей локальной историей
@@ -57,17 +51,12 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
           weightHistory: [...(user.weightHistory || []), newEntry],
         };
 
-
-
         updateUser(updatedUser);
         setIsEditing(false);
         success('Вес успешно обновлен');
-      } else {
-        toastError(`Не удалось обновить вес: ${data.message || 'Неизвестная ошибка'}`);
       }
-    } catch (error) {
-
-      toastError('Ошибка при обновлении веса');
+    } catch (error: any) {
+      toastError(`Не удалось обновить вес: ${error.message || 'Ошибка при обновлении веса'}`);
     } finally {
       setIsLoading(false);
     }
