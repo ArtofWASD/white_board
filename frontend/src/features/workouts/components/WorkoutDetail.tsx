@@ -94,6 +94,14 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         } else {
           durationSeconds = parseInt(workout.timeCap) * 60
         }
+        
+        console.log("CARDIO TIMER DEBUG:", {
+          originalTimeCap: workout.timeCap,
+          parts,
+          durationSeconds,
+          finalQueryParam: durationSeconds.toString()
+        });
+
         if (!isNaN(durationSeconds) && durationSeconds > 0) {
           params.set("mode", "AMRAP") // Use AMRAP (countdown) mode for Cardio if time specified
           params.set("duration", durationSeconds.toString())

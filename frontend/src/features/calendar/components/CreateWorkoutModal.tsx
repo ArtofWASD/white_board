@@ -201,6 +201,7 @@ export function CreateWorkoutModal({
       rounds,
       description,
       teamId: selectedTeamId || undefined,
+      scheme, // actually send the scheme!
       assignees:
         assignmentType === "specific" && selectedAthletes.length > 0
           ? selectedAthletes

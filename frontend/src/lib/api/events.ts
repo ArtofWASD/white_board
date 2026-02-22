@@ -22,6 +22,7 @@ interface CreateEventData {
   timeCap?: string
   rounds?: string
   assignees?: string[]
+  scheme?: string
 }
 
 interface UpdateEventData {
@@ -32,6 +33,7 @@ interface UpdateEventData {
   exercises?: unknown[]
   timeCap?: string
   rounds?: string
+  scheme?: string
 }
 
 interface AddResultData {
