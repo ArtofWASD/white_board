@@ -89,7 +89,7 @@ export function AddResultModal({
     if (!confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")) return
     
     try {
-      await eventsApi.deleteEvent(workout.id)
+      await eventsApi.deleteEvent(workout.id, user!.id)
       onSuccess?.()
       onClose()
     } catch (error) {
