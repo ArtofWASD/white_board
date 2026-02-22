@@ -29,6 +29,7 @@ import { UniversalCalculator } from '../../components/dashboard/UniversalCalcula
 import { SortableItem } from '../../components/dashboard/SortableItem';
 import { useAuthStore } from '../../lib/store/useAuthStore';
 import { useFeatureFlagStore } from '../../lib/store/useFeatureFlagStore';
+import { apiClient } from '../../lib/api/apiClient';
 
 interface Exercise {
   id: string;
@@ -98,19 +99,17 @@ export default function DashboardPage() {
   const fetchData = async () => {
     if (!user) return;
     try {
-      const [exercisesRes, eventsRes] = await Promise.all([
-        fetch(`/api/exercises?userId=${user.id}`, { cache: 'no-store' }),
-        fetch(`/api/events?userId=${user.id}`, { cache: 'no-store' })
+      const [exercisesData, eventsData] = await Promise.all([
+        apiClient.get<Exercise[]>(`/api/exercises?userId=${user.id}`),
+        apiClient.get<Event[]>(`/api/events?userId=${user.id}`)
       ]);
 
-      if (exercisesRes.ok) {
-        const data = await exercisesRes.json();
-        setExercises(data);
+      if (exercisesData) {
+        setExercises(exercisesData);
       }
 
-      if (eventsRes.ok) {
-        const data = await eventsRes.json();
-        setEvents(data);
+      if (eventsData) {
+        setEvents(eventsData);
       }
     } catch (error) {
 
@@ -123,25 +122,18 @@ export default function DashboardPage() {
     if (!user) return;
 
     try {
-      const response = await fetch(`/api/auth/profile/${user.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          dashboardLayout: newItems,
-          dashboardLayoutMode: newMode,
-        }),
+      const data = await apiClient.put<{ user: any }>(`/api/auth/profile/${user.id}`, {
+        dashboardLayout: newItems,
+        dashboardLayoutMode: newMode,
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (data && data.user) {
         // Обновляем локальное хранилище пользователя для отображения изменений
-        if (data.user) {
-            updateUser({
-                ...user,
-                dashboardLayout: newItems,
-                dashboardLayoutMode: newMode
-            });
-        }
+        updateUser({
+            ...user,
+            dashboardLayout: newItems,
+            dashboardLayoutMode: newMode
+        });
       }
     } catch (error) {
 
@@ -156,15 +148,8 @@ export default function DashboardPage() {
         body.initialWeight = initialWeight;
       }
 
-      const response = await fetch('/api/exercises', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        fetchData();
-      }
+      await apiClient.post('/api/exercises', body);
+      fetchData();
     } catch (error) {
 
     }
@@ -172,15 +157,8 @@ export default function DashboardPage() {
 
   const handleAddRecord = async (exerciseId: string, weight: number) => {
     try {
-      const response = await fetch(`/api/exercises/${exerciseId}/records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ weight }),
-      });
-
-      if (response.ok) {
-        fetchData();
-      }
+      await apiClient.post(`/api/exercises/${exerciseId}/records`, { weight });
+      fetchData();
     } catch (error) {
 
     }
@@ -189,17 +167,9 @@ export default function DashboardPage() {
   const handleUpdateExercise = async (id: string, name: string) => {
     try {
 
-      const response = await fetch(`/api/exercises/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-      });
+      await apiClient.put(`/api/exercises/${id}`, { name });
 
-
-      if (response.ok) {
-
-        await fetchData();
-      }
+      await fetchData();
     } catch (error) {
 
     }
