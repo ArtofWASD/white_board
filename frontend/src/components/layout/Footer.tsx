@@ -17,6 +17,18 @@ const Footer: React.FC = () => {
             <Link href="/knowledge" className="text-gray-300 hover:text-white transition-colors">
               База знаний
             </Link>
+            <Link href="/knowledge/news" className="text-gray-300 hover:text-white transition-colors">
+              Новости
+            </Link>
+            <Link href="/knowledge/exercises" className="text-gray-300 hover:text-white transition-colors">
+              Упражнения
+            </Link>
+            <Link href="/knowledge/workouts" className="text-gray-300 hover:text-white transition-colors">
+              Комплексы
+            </Link>
+            <Link href="/features" className="text-gray-300 hover:text-white transition-colors">
+              Возможности
+            </Link>
           </div>
 
           {/* Column 2: Legal & Documents */}
