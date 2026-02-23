@@ -62,10 +62,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const items: NavItem[] = [
       {
-        label: "Главная",
+        label: "Личный кабинет",
         href: "/dashboard",
         icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
-        tooltip: "Главная",
+        tooltip: "Личный кабинет",
       },
       {
         label: "Команды",

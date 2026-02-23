@@ -200,16 +200,40 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                   Упражнения
                 </h3>
                 <ul className="grid gap-2">
-                  {workout.movements.map((movement, dx) => (
-                    <li
-                      key={dx}
-                      className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors">
-                      <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                        {dx + 1}
-                      </span>
-                      <span className="text-sm font-medium">{movement}</span>
-                    </li>
-                  ))}
+                  {workout.exercises && workout.exercises.length > 0
+                    ? workout.exercises.map((exercise, dx) => (
+                        <li
+                          key={dx}
+                          className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors">
+                          <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                            {dx + 1}
+                          </span>
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1 overflow-hidden">
+                            <span className="text-sm font-medium flex-1 truncate">{exercise.name}</span>
+                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground shrink-0">
+                              {exercise.weight && exercise.weight !== "0" && (
+                                <span className="bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">Вес: {exercise.weight} кг</span>
+                              )}
+                              {exercise.repetitions && exercise.repetitions !== "0" && (
+                                <span className="bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">Повторы: {exercise.repetitions}</span>
+                              )}
+                              {exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0" && (
+                                <span className="bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">Кал: {exercise.rxCalories}</span>
+                              )}
+                            </div>
+                          </div>
+                        </li>
+                      ))
+                    : workout.movements.map((movement, dx) => (
+                        <li
+                          key={dx}
+                          className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors">
+                          <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                            {dx + 1}
+                          </span>
+                          <span className="text-sm font-medium">{movement}</span>
+                        </li>
+                      ))}
                 </ul>
               </div>
             </div>

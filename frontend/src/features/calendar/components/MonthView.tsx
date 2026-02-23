@@ -56,7 +56,7 @@ export function MonthView({
                 "relative p-2 transition-colors hover:bg-muted/20 cursor-pointer min-h-[100px] border-b",
                 !isLastCol && "border-r",
                 !day.isCurrentMonth && "bg-muted/10 text-muted-foreground/50",
-                day.isToday && "bg-primary/5",
+                day.isToday && "bg-primary/10",
               )}>
               <div className="flex justify-between items-start">
                 <span

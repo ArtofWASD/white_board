@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 // import { WorkoutDetail } from "./WorkoutDetail" // Circular dependency note: Will be implemented next
 import { useState } from "react"
 import { WorkoutQuickView } from "./WorkoutQuickView"
+import { Exercise } from "@/types"
 
 // Placeholder type until we have the real one
 export interface Workout {
@@ -16,6 +17,7 @@ export interface Workout {
   scheduledTime?: string // e.g. "18:00"
   description: string
   movements: string[]
+  exercises?: Exercise[]
   timeCap?: string
   rounds?: string
   userId?: string // Added for ownership check

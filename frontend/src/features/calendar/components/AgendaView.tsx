@@ -44,12 +44,12 @@ export function AgendaView({
                 day.isToday ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/30",
               )}>
               {/* Date Column */}
-              <div className="flex sm:flex-col items-center sm:items-start gap-1 sm:w-20 shrink-0">
+              <div className="flex sm:flex-col items-center sm:items-start gap-1 sm:w-24 shrink-0">
                 <span className="text-2xl font-bold text-foreground">
                   {formatDayNumber(day.date)}
                 </span>
-                <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  {formatDayName(day.date)}
+                <span className="text-[10px] sm:text-xs font-medium text-muted-foreground capitalize tracking-wide">
+                  {format(day.date, "EEEE", { locale: require("date-fns/locale/ru") })}
                 </span>
                 {day.isToday && (
                   <span className="ml-auto sm:ml-0 text-[10px] font-bold px-1.5 py-0.5 bg-primary text-primary-foreground rounded-full">

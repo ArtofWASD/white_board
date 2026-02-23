@@ -119,6 +119,25 @@ export function AddResultModal({
         <DialogHeader>
           <DialogTitle>Записать результат</DialogTitle>
         </DialogHeader>
+
+        {workout.exercises && workout.exercises.length > 0 && (
+          <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/50 max-h-40 overflow-y-auto">
+            <h4 className="text-xs font-semibold mb-2 uppercase tracking-wider text-muted-foreground">Упражнения</h4>
+            <ul className="space-y-2">
+              {workout.exercises.map((exercise, dx) => (
+                <li key={dx} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm">
+                  <span className="font-medium shrink-0">{dx + 1}. {exercise.name}</span>
+                  <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
+                    {exercise.weight && exercise.weight !== "0" && <span className="bg-muted px-1 rounded">Вес: {exercise.weight} кг</span>}
+                    {exercise.repetitions && exercise.repetitions !== "0" && <span className="bg-muted px-1 rounded">Повторы: {exercise.repetitions}</span>}
+                    {exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0" && <span className="bg-muted px-1 rounded">Кал: {exercise.rxCalories}</span>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="resultValue">{getResultLabel()}</Label>

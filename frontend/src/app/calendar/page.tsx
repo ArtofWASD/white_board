@@ -31,10 +31,10 @@ export default function CalendarPage() {
 
     const items: NavItem[] = [
       {
-        label: "Главная",
+        label: "Личный кабинет",
         href: "/dashboard",
         icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
-        tooltip: "Главная",
+        tooltip: "Личный кабинет",
       },
       {
         label: "Лидерборд",
@@ -237,6 +237,7 @@ export default function CalendarPage() {
           scheduledTime,
           description: event.description || "",
           movements: event.exercises?.map((e: any) => e.name) || [],
+          exercises: event.exercises || [],
           timeCap: event.timeCap,
           rounds: event.rounds,
           userId: event.userId,
