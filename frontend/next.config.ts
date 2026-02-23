@@ -17,10 +17,11 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://slate-backend-lihtfr:3001";
     return [
       {
         source: "/api/:path*",
-        destination: `http://slate-backend-lihtfr:3001/:path*`, 
+        destination: `${backendUrl}/:path*`, 
       },
     ];
   },

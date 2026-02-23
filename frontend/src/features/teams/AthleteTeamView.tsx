@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react"
 import { Team, User } from "../../types"
 import { Card } from "../../components/ui/Card"
 import { UserDetailModal } from "./UserDetailModal"
+import { InviteModal } from "./InviteModal"
 import { ListFilters, ViewMode } from "../../components/ui/ListFilters"
 import { useMediaQuery } from "../../hooks/useMediaQuery"
 import { Modal } from "../../components/ui/Modal"
@@ -34,6 +35,10 @@ const AthleteTeamView: React.FC<
   const [activeTeamName, setActiveTeamName] = useState<string>("")
   const { user } = useAuthStore()
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
+  
+  // Invite state
+  const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
+  const [activeInviteTeamId, setActiveInviteTeamId] = useState<string | null>(null)
 
   useEffect(() => {
     if (isMobileOrTablet) {
@@ -134,6 +139,20 @@ const AthleteTeamView: React.FC<
               </div>
 
               <div className="flex gap-4">
+                {/* Invite Button for Trainers */}
+                {isTrainer && (
+                  <div
+                    className="flex items-center justify-center p-3 sm:p-4 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors bg-gray-50 h-16 sm:min-w-[120px]"
+                    onClick={() => {
+                      setActiveInviteTeamId(team.id)
+                      setIsInviteModalOpen(true)
+                    }}
+                    title="Пригласить участников">
+                    <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 sm:mr-2" />
+                    <span className="hidden sm:inline font-medium text-indigo-600">Пригласить</span>
+                  </div>
+                )}
+
                 {/* Чат с командой */}
                 <div
                   className="flex items-center justify-center p-4 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors bg-gray-50 h-16 w-16"
@@ -427,6 +446,15 @@ const AthleteTeamView: React.FC<
           </div>
         )}
       </Modal>
+
+      {/* Invite Modal */}
+      {activeInviteTeamId && (
+        <InviteModal
+          isOpen={isInviteModalOpen}
+          onClose={() => setIsInviteModalOpen(false)}
+          teamId={activeInviteTeamId}
+        />
+      )}
     </div>
   )
 }

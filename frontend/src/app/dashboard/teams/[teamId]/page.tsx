@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react"
 import { useAuthStore } from "../../../../lib/store/useAuthStore"
 import { useParams, useRouter } from "next/navigation"
-import { QRCodeCanvas } from "qrcode.react"
 import { UserDetailModal } from "../../../../features/teams/UserDetailModal"
 import { AddMemberModal } from "../../../../features/teams/AddMemberModal"
 import Button from "../../../../components/ui/Button"
@@ -48,9 +47,6 @@ export default function EditTeamPage() {
   const [isEditingName, setIsEditingName] = useState(false)
   const [editNameValue, setEditNameValue] = useState("")
 
-  const [inviteCode, setInviteCode] = useState<string | null>(null)
-  const [inviteLink, setInviteLink] = useState<string | null>(null)
-
   // User detail modal state
   const [selectedUserForDetail, setSelectedUserForDetail] = useState<FullUser | null>(
     null,
@@ -69,7 +65,6 @@ export default function EditTeamPage() {
     if (teamId && user) {
       fetchTeamDetails()
       fetchTeamMembers()
-      fetchInviteCode()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [teamId, user])
@@ -131,55 +126,6 @@ export default function EditTeamPage() {
         setError(errorData.message || "Не удалось загрузить участников команды")
       }
     } catch (err) {
-      setError("Ошибка при загрузке участников команды")
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchInviteCode = async () => {
-    try {
-      const response = await fetch(`/api/teams/${teamId}`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        if (data.inviteCode) {
-          setInviteCode(data.inviteCode)
-          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
-        }
-      }
-    } catch (err) {
-      logApiError(`/api/teams/${teamId}/invite`, err)
-    }
-  }
-
-  const generateInviteCode = async () => {
-    try {
-      setLoading(true)
-      const response = await fetch(`/api/teams/${teamId}/invite`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setInviteCode(data.inviteCode)
-        setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
-        setSuccess("Пригласительная ссылка создана")
-        setTimeout(() => setSuccess(null), 3000)
-      } else {
-        setError("Не удалось создать пригласительную ссылку")
-      }
-    } catch (err) {
-      setError("Не удалось создать пригласительную ссылку")
     } finally {
       setLoading(false)
     }
@@ -342,76 +288,7 @@ export default function EditTeamPage() {
           </div>
         )}
 
-        {/* Invite Section */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">
-            Приглашение в команду
-          </h2>
-          <div className="bg-blue-50 p-6 rounded-lg">
-            <div className="flex flex-col md:flex-row gap-8 items-start">
-              <div className="flex-1 w-full">
-                {!inviteCode ? (
-                  <div>
-                    <p className="text-gray-600 mb-4">
-                      Создайте уникальную ссылку, чтобы пригласить спортсменов в вашу
-                      команду.
-                    </p>
-                    <button
-                      onClick={generateInviteCode}
-                      disabled={loading}
-                      className="px-6 py-2.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium shadow-sm transition-colors">
-                      Создать пригласительную ссылку
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Ссылка для приглашения
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          readOnly
-                          value={inviteLink || ""}
-                          className="flex-1 px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-800"
-                        />
-                        <button
-                          onClick={() => {
-                            if (inviteLink) {
-                              navigator.clipboard.writeText(inviteLink)
-                              setSuccess("Ссылка скопирована!")
-                              setTimeout(() => setSuccess(null), 3000)
-                            }
-                          }}
-                          className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium transition-colors">
-                          Копировать
-                        </button>
-                      </div>
-                    </div>
-                    <button
-                      onClick={generateInviteCode}
-                      disabled={loading}
-                      className="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">
-                      Сгенерировать новую ссылку
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {inviteLink && (
-                <div className="flex flex-col items-center bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                  <QRCodeCanvas value={inviteLink} size={150} />
-                  <span className="text-sm text-gray-500 mt-2 font-medium">
-                    QR код для сканирования
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Team Members List (Moved here) */}
+        {/* Team Members List */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Состав команды</h2>
 
@@ -471,16 +348,19 @@ export default function EditTeamPage() {
             </div>
           )}
 
-          <div className="flex justify-end">
-            <div className="flex justify-end">
+          {/* Only show "Add Member" for users with an organization or admins */}
+          {(user.organizationId ||
+            user.role === "ORGANIZATION_ADMIN" ||
+            user.role === "SUPER_ADMIN") && (
+            <div className="flex justify-end mt-6">
               <Button
                 onClick={() => setIsAddMemberModalOpen(true)}
                 variant="outline"
                 className="!py-2 !px-4 bg-white hover:bg-gray-50 text-black border-gray-300">
-                <span>Добавить участника</span>
+                <span>Добавить участника вручную</span>
               </Button>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
@@ -497,7 +377,6 @@ export default function EditTeamPage() {
         existingMemberIds={teamMembers.map((m) => m.userId)}
         onMemberAdded={() => {
           fetchTeamMembers()
-          // setIsAddMemberModalOpen(false); // Optional: close on add? Keeping open for multiple adds
         }}
       />
     </div>
