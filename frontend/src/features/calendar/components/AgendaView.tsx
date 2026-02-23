@@ -2,6 +2,7 @@ import { CalendarDay } from "../hooks/useCalendar"
 import { Workout, WorkoutCard } from "@/features/workouts/components/WorkoutCard"
 import { cn } from "@/lib/utils"
 import { isSameDay, format } from "date-fns"
+import { ru } from "date-fns/locale"
 import { useEffect, useRef } from "react"
 
 interface AgendaViewProps {
@@ -49,7 +50,7 @@ export function AgendaView({
                   {formatDayNumber(day.date)}
                 </span>
                 <span className="text-[10px] sm:text-xs font-medium text-muted-foreground capitalize tracking-wide">
-                  {format(day.date, "EEEE", { locale: require("date-fns/locale/ru") })}
+                  {format(day.date, "EEEE", { locale: ru })}
                 </span>
                 {day.isToday && (
                   <span className="ml-auto sm:ml-0 text-[10px] font-bold px-1.5 py-0.5 bg-primary text-primary-foreground rounded-full">

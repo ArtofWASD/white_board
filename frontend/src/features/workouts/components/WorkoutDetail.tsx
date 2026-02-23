@@ -8,6 +8,7 @@ import { useState } from "react"
 import { Workout } from "./WorkoutCard"
 import { useRouter } from "next/navigation" // Import useRouter
 import { AddResultModal } from "./AddResultModal" // Import AddResultModal
+import { EditWorkoutModal } from "./EditWorkoutModal"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { eventsApi } from "@/lib/api/events"
 
@@ -21,6 +22,7 @@ interface WorkoutDetailProps {
 export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDetailProps) {
   const [isRx, setIsRx] = useState(true)
   const [isAddResultOpen, setIsAddResultOpen] = useState(false) // State for result modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false) // State for edit modal
   const router = useRouter()
   const { user } = useAuthStore() // Added for delete ownership check
 
@@ -267,9 +269,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                 <Button
                   variant="outline"
                   className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-blue-200 border border-dashed"
-                  onClick={() => {
-                    alert("Редактирование тренировки находится в разработке")
-                  }}
+                  onClick={() => setIsEditModalOpen(true)}
                 >
                   Изменить
                 </Button>
@@ -292,12 +292,23 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         isOpen={isAddResultOpen}
         onClose={() => setIsAddResultOpen(false)}
         onSuccess={() => {
-          // Optional: trigger refresh needed?
-          // Maybe close detail modal too?
           setIsAddResultOpen(false)
           onClose()
+        }}
+      />
+
+      {/* Render EditWorkoutModal */}
+      <EditWorkoutModal
+        workout={workout}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSuccess={() => {
+          setIsEditModalOpen(false)
+          onClose()
+          if (onDelete) onDelete() // We can reuse onDelete as onUpdate for now to trigger parent refresh
         }}
       />
     </>
   )
 }
+

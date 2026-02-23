@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState, useEffect } from "react"
-import { Plus, X, Trash2 } from "lucide-react"
+import { Plus, X, Trash2, Edit2 } from "lucide-react"
 import { Exercise, Team, TeamMember } from "@/types" // Ensure this type exists or definition matches
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/store/useAuthStore"
@@ -176,6 +176,26 @@ export function CreateWorkoutModal({
 
   const handleRemoveExercise = (id: string) => {
     setExercises(exercises.filter((e) => e.id !== id))
+  }
+
+  const handleEditExercise = (id: string) => {
+    const exerciseToEdit = exercises.find((e) => e.id === id)
+    if (!exerciseToEdit) return
+
+    // Populate inputs
+    setExName(exerciseToEdit.name)
+    setExMeasurement(exerciseToEdit.measurement || "weight")
+    setRxWeight(exerciseToEdit.weight || "")
+    setRxReps(exerciseToEdit.repetitions || "")
+    setScWeight(exerciseToEdit.scWeight || "")
+    setScReps(exerciseToEdit.scReps || "")
+    setRxCalories(exerciseToEdit.rxCalories || "")
+    setScCalories(exerciseToEdit.scCalories || "")
+    setRxTime(exerciseToEdit.rxTime || "")
+    setScTime(exerciseToEdit.scTime || "")
+
+    // Remove from list so it can be re-added on save
+    handleRemoveExercise(id)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -561,14 +581,24 @@ export function CreateWorkoutModal({
                           : `Rx: ${ex.rxTime || "-"}мин • Sc: ${ex.scTime || "-"}мин`}
                       </div>
                     </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 !flex-row"
-                      onClick={() => handleRemoveExercise(ex.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div className="flex gap-1">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 !flex-row"
+                        onClick={() => handleEditExercise(ex.id)}>
+                        <Edit2 className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 !flex-row"
+                        onClick={() => handleRemoveExercise(ex.id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>

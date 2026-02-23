@@ -26,6 +26,7 @@ interface CreateEventData {
 }
 
 interface UpdateEventData {
+  userId?: string
   title?: string
   eventDate?: string
   description?: string

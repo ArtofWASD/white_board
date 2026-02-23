@@ -10,7 +10,8 @@ import { useAuthStore } from "@/lib/store/useAuthStore"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { addResultSchema, AddResultFormData } from "@/lib/validators/workout"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import { EditWorkoutModal } from "./EditWorkoutModal"
 
 interface AddResultModalProps {
   workout: Workout
@@ -26,6 +27,7 @@ export function AddResultModal({
   onSuccess,
 }: AddResultModalProps) {
   const { user } = useAuthStore()
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
 
   const {
     register,
@@ -114,7 +116,8 @@ export function AddResultModal({
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Записать результат</DialogTitle>
@@ -199,9 +202,7 @@ export function AddResultModal({
                     type="button" 
                     variant="ghost" 
                     className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => {
-                      alert("Редактирование тренировки находится в разработке");
-                    }}
+                    onClick={() => setIsEditModalOpen(true)}
                   >
                     Изменить
                   </Button>
@@ -229,5 +230,22 @@ export function AddResultModal({
         </form>
       </DialogContent>
     </Dialog>
+      
+      {/* Render EditWorkoutModal inside or next to it? Next to it is better to avoid nesting dialogs. 
+          But AddResultModal is a Dialog itself, so we can render it as a sibling in the fragment. */}
+      {isEditModalOpen && (
+        <EditWorkoutModal
+          workout={workout}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          onSuccess={() => {
+            setIsEditModalOpen(false)
+            onClose() // Close AddResult too
+            if (onSuccess) onSuccess() // Trigger parent refresh
+          }}
+        />
+      )}
+    </>
   )
 }
+
