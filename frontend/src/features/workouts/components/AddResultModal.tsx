@@ -118,7 +118,7 @@ export function AddResultModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Записать результат</DialogTitle>
         </DialogHeader>
@@ -194,34 +194,22 @@ export function AddResultModal({
             </p>
           </div>
 
-          <div className="flex justify-between items-center pt-4">
-            <div className="flex gap-2 items-center">
-              {workout.userId === user?.id && (
-                <>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
-                    onClick={() => setIsEditModalOpen(true)}
-                  >
-                    Изменить
-                  </Button>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={handleDeleteWorkout}
-                  >
-                    Удалить занятие
-                  </Button>
-                </>
-              )}
-            </div>
+          <div className="flex justify-end items-center pt-4">
             <div className="flex gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={onClose}
+                className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors"
+              >
                 Отмена
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
+              <Button 
+                type="submit" 
+                variant="outline"
+                className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+                disabled={isSubmitting}
+              >
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Сохранить
               </Button>

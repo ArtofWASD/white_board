@@ -255,7 +255,7 @@ function RegisterForm() {
                       type="email"
                       id="email"
                       {...register("email")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                         errors.email ? "border-red-500" : "border-gray-300"
                       }`}
                       required
@@ -274,7 +274,7 @@ function RegisterForm() {
                       type="password"
                       id="password"
                       {...register("password")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                         errors.password ? "border-red-500" : "border-gray-300"
                       }`}
                       required
@@ -295,7 +295,7 @@ function RegisterForm() {
                       type="password"
                       id="confirmPassword"
                       {...register("confirmPassword")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                         errors.confirmPassword ? "border-red-500" : "border-gray-300"
                       }`}
                       required
@@ -333,7 +333,7 @@ function RegisterForm() {
                       type="text"
                       id="name"
                       {...register("name")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                         errors.name ? "border-red-500" : "border-gray-300"
                       }`}
                       required
@@ -352,7 +352,7 @@ function RegisterForm() {
                       type="text"
                       id="lastName"
                       {...register("lastName")}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
                     />
                   </div>
                   <div>
@@ -548,7 +548,7 @@ function RegisterForm() {
                           type="text"
                           id="organizationName"
                           {...register("organizationName")}
-                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                             errors.organizationName ? "border-red-500" : "border-gray-300"
                           }`}
                           placeholder="Например: Спортивный клуб 'Олимп'"

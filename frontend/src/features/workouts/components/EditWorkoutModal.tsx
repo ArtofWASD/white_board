@@ -457,7 +457,7 @@ export function EditWorkoutModal({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 !flex-row"
+                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-black dark:hover:bg-gray-800 transition-colors !flex-row"
                         onClick={() => handleEditExercise(ex.id)}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -465,7 +465,7 @@ export function EditWorkoutModal({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 !flex-row"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300 dark:bg-black dark:hover:bg-gray-800 transition-colors !flex-row"
                         onClick={() => handleRemoveExercise(ex.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -478,10 +478,22 @@ export function EditWorkoutModal({
         </div>
 
         <DialogFooter className="p-4 border-t bg-muted/20">
-          <Button variant="outline" onClick={onClose} type="button" disabled={isSubmitting}>
+          <Button 
+            variant="outline" 
+            onClick={onClose} 
+            type="button" 
+            disabled={isSubmitting}
+            className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors"
+          >
             Отмена
           </Button>
-          <Button onClick={handleSubmit} type="button" disabled={isSubmitting}>
+          <Button 
+            onClick={handleSubmit} 
+            type="button" 
+            variant="outline"
+            className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "Сохранение..." : "Сохранить изменения"}
           </Button>
         </DialogFooter>

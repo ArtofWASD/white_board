@@ -20,7 +20,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({ selectedTeamId, onSelectTea
         id="team-select"
         value={selectedTeamId || 'my'}
         onChange={(e) => onSelectTeam(e.target.value)}
-        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border"
+        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white text-gray-900"
       >
         <option value="my">Мои события</option>
         <option value="all_teams">Все команды</option>

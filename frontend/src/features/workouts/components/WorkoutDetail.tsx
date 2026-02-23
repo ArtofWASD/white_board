@@ -245,7 +245,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
-                className="flex-1 gap-2 whitespace-nowrap"
+                className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
                 size="lg"
                 layout="horizontal"
                 onClick={handleStartTimer} // Attach handler
@@ -255,7 +255,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 gap-2 whitespace-nowrap"
+                className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
                 size="lg"
                 layout="horizontal"
                 onClick={() => setIsAddResultOpen(true)} // Open result modal
@@ -268,14 +268,14 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
               <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
                 <Button
                   variant="outline"
-                  className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-blue-200 border border-dashed"
+                  className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-black dark:hover:bg-gray-800 dark:border-blue-900 border-blue-500 border bg-transparent transition-colors"
                   onClick={() => setIsEditModalOpen(true)}
                 >
                   Изменить
                 </Button>
                 <Button
-                  variant="ghost"
-                  className="flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 border border-dashed"
+                  variant="outline"
+                  className="flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:bg-black dark:hover:bg-gray-800 dark:border-red-900 border-red-500 border bg-transparent transition-colors"
                   onClick={handleDeleteWorkout}
                 >
                   Удалить занятие

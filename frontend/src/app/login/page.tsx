@@ -110,7 +110,7 @@ function LoginForm() {
                   type="email"
                   id="email"
                   {...register("email")}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                     errors.email ? "border-red-500" : "border-gray-300"
                   }`}
                 />
@@ -129,7 +129,7 @@ function LoginForm() {
                   type="password"
                   id="password"
                   {...register("password")}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
                     errors.password ? "border-red-500" : "border-gray-300"
                   }`}
                 />
