@@ -3,6 +3,7 @@ import { Modal } from "../../components/ui/Modal"
 import Button from "../../components/ui/Button"
 import { QRCodeCanvas } from "qrcode.react"
 import { logApiError } from "../../lib/logger"
+import { teamsApi } from "../../lib/api/teams"
 
 interface InviteModalProps {
   isOpen: boolean
@@ -32,21 +33,13 @@ export const InviteModal: React.FC<InviteModalProps> = ({
   const fetchInviteCode = async () => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/${teamId}`, {
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      const data = await teamsApi.getTeam(teamId)
 
-      if (response.ok) {
-        const data = await response.json()
-        if (data.inviteCode) {
-          setInviteCode(data.inviteCode)
-          setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
-        }
+      if (data && data.inviteCode) {
+        setInviteCode(data.inviteCode)
+        setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
       } else {
-        setError("Не удалось загрузить инвайт-код")
+        // Invite code hasn't been generated yet, which is fine
       }
     } catch (err) {
       logApiError(`/api/teams/${teamId}/invite`, err)
@@ -62,16 +55,9 @@ export const InviteModal: React.FC<InviteModalProps> = ({
       setError(null)
       setSuccess(null)
       
-      const response = await fetch(`/api/teams/${teamId}/invite`, {
-        method: "POST",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+      const data = await teamsApi.createInvite(teamId)
 
-      if (response.ok) {
-        const data = await response.json()
+      if (data && data.inviteCode) {
         setInviteCode(data.inviteCode)
         setInviteLink(`${window.location.origin}/invite/${data.inviteCode}`)
         setSuccess("Пригласительная ссылка создана")
@@ -79,8 +65,8 @@ export const InviteModal: React.FC<InviteModalProps> = ({
       } else {
         setError("Не удалось создать пригласительную ссылку")
       }
-    } catch (err) {
-      setError("Не удалось создать пригласительную ссылку")
+    } catch (err: any) {
+      setError(err.message || "Не удалось создать пригласительную ссылку")
     } finally {
       setLoading(false)
     }
