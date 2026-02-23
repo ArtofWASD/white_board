@@ -239,13 +239,24 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
               </Button>
             </div>
             {workout.userId === user?.id && (
-              <Button
-                variant="ghost"
-                className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 border border-dashed"
-                onClick={handleDeleteWorkout}
-              >
-                Удалить занятие
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+                <Button
+                  variant="outline"
+                  className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 border-blue-200 border border-dashed"
+                  onClick={() => {
+                    alert("Редактирование тренировки находится в разработке")
+                  }}
+                >
+                  Изменить
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200 border border-dashed"
+                  onClick={handleDeleteWorkout}
+                >
+                  Удалить занятие
+                </Button>
+              </div>
             )}
           </div>
         </DialogContent>

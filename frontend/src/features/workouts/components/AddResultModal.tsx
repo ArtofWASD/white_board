@@ -173,16 +173,28 @@ export function AddResultModal({
           </div>
 
           <div className="flex justify-between items-center pt-4">
-            <div>
+            <div className="flex gap-2 items-center">
               {workout.userId === user?.id && (
-                <Button 
-                  type="button" 
-                  variant="ghost" 
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                  onClick={handleDeleteWorkout}
-                >
-                  Удалить занятие
-                </Button>
+                <>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    className="text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                    onClick={() => {
+                      alert("Редактирование тренировки находится в разработке");
+                    }}
+                  >
+                    Изменить
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                    onClick={handleDeleteWorkout}
+                  >
+                    Удалить занятие
+                  </Button>
+                </>
               )}
             </div>
             <div className="flex gap-2">
