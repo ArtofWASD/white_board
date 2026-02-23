@@ -138,7 +138,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
             <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
               <span
                 className={cn(
-                  "px-2 py-0.5 rounded text-xs font-bold ring-1 ring-inset",
+                  "px-3 py-1 rounded text-sm sm:text-base font-bold ring-1 ring-inset",
                   workout.type === "AMRAP"
                     ? "bg-orange-500/10 text-orange-600 ring-orange-500/20"
                     : workout.type === "EMOM"
@@ -156,8 +156,8 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                       : workout.type}
               </span>
               {workout.timeCap && (
-                <span className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Timer className="h-3 w-3" /> {workout.timeCap}
+                <span className="text-sm sm:text-base text-muted-foreground flex items-center gap-1">
+                  <Timer className="h-4 w-4" /> {workout.timeCap}
                 </span>
               )}
             </div>
@@ -187,15 +187,17 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
             </div>
 
             <div className="space-y-6">
-              <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
-                <h3 className="font-semibold mb-2 flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-yellow-500" />
-                  Описание
-                </h3>
-                <div className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
-                  {workout.description}
+              {workout.description && workout.description.trim() !== "" && (
+                <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-yellow-500" />
+                    Описание
+                  </h3>
+                  <div className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                    {workout.description}
+                  </div>
                 </div>
-              </div>
+              )}
 
               <div>
                 <h3 className="font-semibold mb-3 text-sm uppercase tracking-wider text-muted-foreground">
@@ -203,37 +205,38 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                 </h3>
                 <ul className="grid gap-2">
                   {workout.exercises && workout.exercises.length > 0
-                    ? workout.exercises.map((exercise, dx) => (
-                        <li
-                          key={dx}
-                          className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors">
-                          <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                            {dx + 1}
-                          </span>
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 flex-1 overflow-hidden">
-                            <span className="text-sm font-medium flex-1 truncate">{exercise.name}</span>
-                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground shrink-0">
-                              {exercise.weight && exercise.weight !== "0" && (
-                                <span className="bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">Вес: {exercise.weight} кг</span>
-                              )}
-                              {exercise.repetitions && exercise.repetitions !== "0" && (
-                                <span className="bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">Повторы: {exercise.repetitions}</span>
-                              )}
-                              {exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0" && (
-                                <span className="bg-muted px-1.5 py-0.5 rounded whitespace-nowrap">Кал: {exercise.rxCalories}</span>
+                    ? workout.exercises.map((exercise, dx) => {
+                        const details = [];
+                        if (exercise.weight && exercise.weight !== "0") details.push(`${exercise.weight} кг.`);
+                        if (exercise.repetitions && exercise.repetitions !== "0") details.push(`${exercise.repetitions} пов.`);
+                        if (exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0") details.push(`${exercise.rxCalories} кал.`);
+                        
+                        return (
+                          <li
+                            key={dx}
+                            className="flex items-start gap-2 hover:bg-muted/50 p-1 -mx-1 rounded transition-colors">
+                            <span className="text-base font-bold text-primary shrink-0 min-w-[24px]">
+                              {dx + 1}.
+                            </span>
+                            <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 flex-1">
+                              <span className="text-base font-medium leading-tight">{exercise.name}</span>
+                              {details.length > 0 && (
+                                <span className="text-sm text-muted-foreground whitespace-nowrap">
+                                  {details.join(" \\ ")}
+                                </span>
                               )}
                             </div>
-                          </div>
-                        </li>
-                      ))
+                          </li>
+                        )
+                      })
                     : workout.movements.map((movement, dx) => (
                         <li
                           key={dx}
-                          className="flex items-center gap-3 p-2 rounded hover:bg-muted/50 transition-colors">
-                          <span className="h-6 w-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                            {dx + 1}
+                          className="flex items-start gap-2 hover:bg-muted/50 p-1 -mx-1 rounded transition-colors">
+                          <span className="text-base font-bold text-primary shrink-0 min-w-[24px]">
+                            {dx + 1}.
                           </span>
-                          <span className="text-sm font-medium">{movement}</span>
+                          <span className="text-base font-medium flex-1 leading-tight">{movement}</span>
                         </li>
                       ))}
                 </ul>

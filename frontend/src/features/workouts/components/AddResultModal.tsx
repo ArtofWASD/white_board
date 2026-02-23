@@ -126,17 +126,29 @@ export function AddResultModal({
         {workout.exercises && workout.exercises.length > 0 && (
           <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/50 max-h-40 overflow-y-auto">
             <h4 className="text-xs font-semibold mb-2 uppercase tracking-wider text-muted-foreground">Упражнения</h4>
-            <ul className="space-y-2">
-              {workout.exercises.map((exercise, dx) => (
-                <li key={dx} className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm">
-                  <span className="font-medium shrink-0">{dx + 1}. {exercise.name}</span>
-                  <div className="flex flex-wrap gap-1 text-xs text-muted-foreground">
-                    {exercise.weight && exercise.weight !== "0" && <span className="bg-muted px-1 rounded">Вес: {exercise.weight} кг</span>}
-                    {exercise.repetitions && exercise.repetitions !== "0" && <span className="bg-muted px-1 rounded">Повторы: {exercise.repetitions}</span>}
-                    {exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0" && <span className="bg-muted px-1 rounded">Кал: {exercise.rxCalories}</span>}
-                  </div>
-                </li>
-              ))}
+            <ul className="grid gap-2">
+              {workout.exercises.map((exercise, dx) => {
+                const details = [];
+                if (exercise.weight && exercise.weight !== "0") details.push(`${exercise.weight} кг.`);
+                if (exercise.repetitions && exercise.repetitions !== "0") details.push(`${exercise.repetitions} пов.`);
+                if (exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0") details.push(`${exercise.rxCalories} кал.`);
+                
+                return (
+                  <li key={dx} className="flex items-start gap-2 text-base pb-1">
+                    <span className="font-bold text-primary shrink-0 min-w-[24px]">
+                      {dx + 1}.
+                    </span>
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 flex-1">
+                      <span className="font-medium leading-tight">{exercise.name}</span>
+                      {details.length > 0 && (
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">
+                          {details.join(" \\ ")}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           </div>
         )}
