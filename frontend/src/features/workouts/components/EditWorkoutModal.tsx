@@ -49,7 +49,9 @@ export function EditWorkoutModal({
 
   // Exercise Input State
   const [exName, setExName] = useState("")
-  const [exMeasurement, setExMeasurement] = useState<"weight" | "calories" | "time">("weight")
+  const [exMeasurement, setExMeasurement] = useState<
+    "weight" | "calories" | "time" | "distance"
+  >("weight")
   const [rxWeight, setRxWeight] = useState("")
   const [rxReps, setRxReps] = useState("")
   const [scWeight, setScWeight] = useState("")
@@ -70,7 +72,7 @@ export function EditWorkoutModal({
       // Check if workout has exercises (e.g. from WorkoutCard or WorkoutDetail)
       // Some properties might be undefined if `Workout` type does not include them, so fallback gracefully
       if ((workout as any).exercises) {
-          setExercises((workout as any).exercises)
+        setExercises((workout as any).exercises)
       }
 
       // We still fetch the full event to ensure we have the most accurate data,
@@ -84,40 +86,42 @@ export function EditWorkoutModal({
       const fullEvent: any = await eventsApi.getEvent(workout.id)
       if (fullEvent) {
         setTitle(fullEvent.title || workout.title || "")
-        
+
         // Grab the date
         const rawDate = fullEvent.eventDate || fullEvent.date
-        const d = new Date(rawDate) 
-        
+        const d = new Date(rawDate)
+
         // fallback parsing
         if (!isNaN(d.getTime())) {
-            const year = d.getFullYear()
-            const month = String(d.getMonth() + 1).padStart(2, "0")
-            const day = String(d.getDate()).padStart(2, "0")
-            setDate(`${year}-${month}-${day}`)
-            
-            const hours = String(d.getHours()).padStart(2, "0")
-            const minutes = String(d.getMinutes()).padStart(2, "0")
-            setScheduledTime(`${hours}:${minutes}`)
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, "0")
+          const day = String(d.getDate()).padStart(2, "0")
+          setDate(`${year}-${month}-${day}`)
+
+          const hours = String(d.getHours()).padStart(2, "0")
+          const minutes = String(d.getMinutes()).padStart(2, "0")
+          setScheduledTime(`${hours}:${minutes}`)
         } else if (rawDate) {
-            // fallback if it's just a YYYY-MM-DD string
-            setDate(rawDate)
+          // fallback if it's just a YYYY-MM-DD string
+          setDate(rawDate)
         }
 
-        setScheme(fullEvent.scheme || fullEvent.exerciseType || workout.type || "FOR_TIME")
+        setScheme(
+          fullEvent.scheme || fullEvent.exerciseType || workout.type || "FOR_TIME",
+        )
         setDescription(fullEvent.description || workout.description || "")
         setTimeCap(fullEvent.timeCap || workout.timeCap || "")
         setRounds(fullEvent.rounds || workout.rounds || "")
         setExercises(fullEvent.exercises || (workout as any).exercises || [])
       }
     } catch (error) {
-       console.error("Failed to fetch full event details for editing:", error)
-       // Fallbacks if fetch fails
-       setTitle(workout.title || "")
-       setScheme(workout.type || "FOR_TIME")
-       setDescription(workout.description || "")
-       setTimeCap(workout.timeCap || "")
-       setRounds(workout.rounds || "")
+      console.error("Failed to fetch full event details for editing:", error)
+      // Fallbacks if fetch fails
+      setTitle(workout.title || "")
+      setScheme(workout.type || "FOR_TIME")
+      setDescription(workout.description || "")
+      setTimeCap(workout.timeCap || "")
+      setRounds(workout.rounds || "")
     }
   }
 
@@ -188,9 +192,9 @@ export function EditWorkoutModal({
       alert("Пожалуйста, выберите дату")
       return
     }
-    
+
     setIsSubmitting(true)
-    
+
     try {
       const dateTime = new Date(`${date}T${scheduledTime}:00`).toISOString()
 
@@ -360,67 +364,67 @@ export function EditWorkoutModal({
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-primary">RX</span>
                   {exMeasurement === "weight" ? (
-                     <div className="flex gap-2">
-                       <Input
-                         value={rxWeight || ""}
-                         onChange={(e) => setRxWeight(e.target.value)}
-                         placeholder="Кг"
-                         className="bg-background"
-                       />
-                       <Input
-                         value={rxReps || ""}
-                         onChange={(e) => setRxReps(e.target.value)}
-                         placeholder="Повт"
-                         className="bg-background"
-                       />
-                     </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={rxWeight || ""}
+                        onChange={(e) => setRxWeight(e.target.value)}
+                        placeholder="Кг"
+                        className="bg-background"
+                      />
+                      <Input
+                        value={rxReps || ""}
+                        onChange={(e) => setRxReps(e.target.value)}
+                        placeholder="Повт"
+                        className="bg-background"
+                      />
+                    </div>
                   ) : exMeasurement === "calories" ? (
-                     <Input
-                       value={rxCalories || ""}
-                       onChange={(e) => setRxCalories(e.target.value)}
-                       placeholder="Кал"
-                       className="bg-background"
-                     />
+                    <Input
+                      value={rxCalories || ""}
+                      onChange={(e) => setRxCalories(e.target.value)}
+                      placeholder="Кал"
+                      className="bg-background"
+                    />
                   ) : (
-                     <Input
-                       value={rxTime || ""}
-                       onChange={(e) => setRxTime(e.target.value)}
-                       placeholder="Мин"
-                       className="bg-background"
-                     />
+                    <Input
+                      value={rxTime || ""}
+                      onChange={(e) => setRxTime(e.target.value)}
+                      placeholder="Мин"
+                      className="bg-background"
+                    />
                   )}
                 </div>
                 <div className="space-y-2">
                   <span className="text-xs font-bold text-muted-foreground">Scaled</span>
                   {exMeasurement === "weight" ? (
-                     <div className="flex gap-2">
-                       <Input
-                         value={scWeight || ""}
-                         onChange={(e) => setScWeight(e.target.value)}
-                         placeholder="Кг"
-                         className="bg-background"
-                       />
-                       <Input
-                         value={scReps || ""}
-                         onChange={(e) => setScReps(e.target.value)}
-                         placeholder="Повт"
-                         className="bg-background"
-                       />
-                     </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={scWeight || ""}
+                        onChange={(e) => setScWeight(e.target.value)}
+                        placeholder="Кг"
+                        className="bg-background"
+                      />
+                      <Input
+                        value={scReps || ""}
+                        onChange={(e) => setScReps(e.target.value)}
+                        placeholder="Повт"
+                        className="bg-background"
+                      />
+                    </div>
                   ) : exMeasurement === "calories" ? (
-                     <Input
-                       value={scCalories || ""}
-                       onChange={(e) => setScCalories(e.target.value)}
-                       placeholder="Кал"
-                       className="bg-background"
-                     />
+                    <Input
+                      value={scCalories || ""}
+                      onChange={(e) => setScCalories(e.target.value)}
+                      placeholder="Кал"
+                      className="bg-background"
+                    />
                   ) : (
-                     <Input
-                       value={scTime || ""}
-                       onChange={(e) => setScTime(e.target.value)}
-                       placeholder="Мин"
-                       className="bg-background"
-                     />
+                    <Input
+                      value={scTime || ""}
+                      onChange={(e) => setScTime(e.target.value)}
+                      placeholder="Мин"
+                      className="bg-background"
+                    />
                   )}
                 </div>
               </div>
@@ -447,9 +451,9 @@ export function EditWorkoutModal({
                       <div className="text-xs text-muted-foreground">
                         {ex.measurement === "weight"
                           ? `Rx: ${ex.weight || "-"}кг/${ex.repetitions || "-"} • Sc: ${ex.scWeight || "-"}кг/${ex.scReps || "-"}`
-                          : ex.measurement === "calories" 
-                          ? `Rx: ${ex.rxCalories || "-"}кал • Sc: ${ex.scCalories || "-"}кал`
-                          : `Rx: ${ex.rxTime || "-"}мин • Sc: ${ex.scTime || "-"}мин`}
+                          : ex.measurement === "calories"
+                            ? `Rx: ${ex.rxCalories || "-"}кал • Sc: ${ex.scCalories || "-"}кал`
+                            : `Rx: ${ex.rxTime || "-"}мин • Sc: ${ex.scTime || "-"}мин`}
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -478,22 +482,20 @@ export function EditWorkoutModal({
         </div>
 
         <DialogFooter className="p-4 border-t bg-muted/20">
-          <Button 
-            variant="outline" 
-            onClick={onClose} 
-            type="button" 
+          <Button
+            variant="outline"
+            onClick={onClose}
+            type="button"
             disabled={isSubmitting}
-            className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors"
-          >
+            className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors">
             Отмена
           </Button>
-          <Button 
-            onClick={handleSubmit} 
-            type="button" 
+          <Button
+            onClick={handleSubmit}
+            type="button"
             variant="outline"
             className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
-            disabled={isSubmitting}
-          >
+            disabled={isSubmitting}>
             {isSubmitting ? "Сохранение..." : "Сохранить изменения"}
           </Button>
         </DialogFooter>
