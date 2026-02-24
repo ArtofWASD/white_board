@@ -114,7 +114,7 @@ const Header: React.FC<HeaderProps> = ({
   }, [isAuthenticated, user])
 
   return (
-    <header className="bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4 z-50">
+    <header className="sticky top-0 bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4 z-50">
       <div className="flex items-center">
         {isDashboard && (
           <button
@@ -191,9 +191,7 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </>
-          ) : !isDashboard ? ( // Removed the center logo logic entirely
-              null
-          ) : (
+          ) : !isDashboard ? null : ( // Removed the center logo logic entirely
             // Логотип по центру на мобильных для панели управления - Removed centered logo logic
             <div className="flex flex-col items-center">
               {isAuthenticated && teams.length > 0 && selectedTeam ? (
@@ -291,12 +289,8 @@ const Header: React.FC<HeaderProps> = ({
         </div>
       ) : (
         <div className="flex items-center gap-6">
-          <AnimatedLink href="/login">
-            Войти
-          </AnimatedLink>
-          <AnimatedLink href="/register">
-            Регистрация
-          </AnimatedLink>
+          <AnimatedLink href="/login">Войти</AnimatedLink>
+          <AnimatedLink href="/register">Регистрация</AnimatedLink>
         </div>
       )}
     </header>

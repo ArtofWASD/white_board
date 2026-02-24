@@ -137,14 +137,22 @@ export default function CalendarPage() {
     }
   }, [isAuthenticated, teams.length, fetchTeams])
 
+  // For trainers/admins default to "my" (Мои события) — they pick a team explicitly
+  const isTrainerRole =
+    user?.role === "TRAINER" ||
+    user?.role === "ORGANIZATION_ADMIN" ||
+    user?.role === "SUPER_ADMIN"
+
   const [calendarTeamId, setCalendarTeamId] = useState<string | null>(
-    selectedTeam?.id || "my",
+    isTrainerRole ? "my" : selectedTeam?.id || "my",
   )
 
   useEffect(() => {
-    if (selectedTeam) {
+    // Non-trainer users auto-follow the team store selection
+    if (selectedTeam && !isTrainerRole) {
       setCalendarTeamId(selectedTeam.id)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTeam])
 
   // Data Fetching
@@ -268,20 +276,27 @@ export default function CalendarPage() {
     setSelectedEvent(null)
   }
 
-  // Footer Height Calculation for FAB
+  // FAB offset: only the VISIBLE part of the footer in the viewport
   const footerRef = React.useRef<HTMLDivElement>(null)
-  const [footerHeight, setFooterHeight] = useState(0)
+  const [visibleFooterHeight, setVisibleFooterHeight] = useState(0)
 
   useEffect(() => {
-    const updateFooterHeight = () => {
+    const updateVisibleFooterHeight = () => {
       if (footerRef.current) {
-        setFooterHeight(footerRef.current.offsetHeight)
+        const rect = footerRef.current.getBoundingClientRect()
+        // How many pixels of the footer are currently visible from the bottom of the viewport
+        const visible = Math.max(0, window.innerHeight - rect.top)
+        setVisibleFooterHeight(visible)
       }
     }
 
-    updateFooterHeight() // Initial measure
-    window.addEventListener("resize", updateFooterHeight)
-    return () => window.removeEventListener("resize", updateFooterHeight)
+    updateVisibleFooterHeight()
+    window.addEventListener("resize", updateVisibleFooterHeight)
+    window.addEventListener("scroll", updateVisibleFooterHeight, { passive: true })
+    return () => {
+      window.removeEventListener("resize", updateVisibleFooterHeight)
+      window.removeEventListener("scroll", updateVisibleFooterHeight)
+    }
   }, [])
 
   return (
@@ -309,7 +324,7 @@ export default function CalendarPage() {
             workouts={workouts}
             onWorkoutCreated={loadEvents}
             teamId={calendarTeamId}
-            footerHeight={footerHeight}
+            footerHeight={visibleFooterHeight}
             headerActions={
               <TeamSelector
                 selectedTeamId={calendarTeamId}
