@@ -55,9 +55,12 @@ export function StrengthTrainingModule({
     }
   }, [selectedExerciseId, exercises])
 
+  // Округление до ближайших 2.5 кг (минимальный шаг блинов на штанге: 1.25×2)
+  const roundToPlates = (weight: number) => Math.round(weight / 2.5) * 2.5
+
   useEffect(() => {
-    // Тренировочный Максимум обычно составляет 90% от 1ПМ
-    setTrainingMax(Math.round(oneRepMax * 0.9))
+    // Тренировочный Максимум обычно составляет 90% от 1ПМ, округлённый до 2.5 кг
+    setTrainingMax(roundToPlates(oneRepMax * 0.9))
   }, [oneRepMax])
 
   const fetchHistory = async () => {
@@ -78,7 +81,7 @@ export function StrengthTrainingModule({
   }
 
   const calculateWeight = (percentage: number) => {
-    return Math.round(trainingMax * percentage)
+    return roundToPlates(trainingMax * percentage)
   }
 
   const startLogging = (week: number, weight: number) => {
