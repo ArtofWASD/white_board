@@ -34,9 +34,11 @@ export const Button: React.FC<ButtonProps> = ({
 
   // Variant styles
   const variantStyles = {
-    primary: "text-black bg-transparent border-none", // Underline style
-    outline: "text-black bg-white border border-black hover:bg-gray-100 rounded-lg", // Frame style
-    ghost: "text-gray-600 hover:text-black bg-transparent border-none",
+    primary: "text-black dark:text-white bg-transparent border-none", // Underline style
+    outline:
+      "text-black dark:text-white bg-white dark:bg-gray-700 border border-black dark:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg", // Frame style
+    ghost:
+      "text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white bg-transparent border-none",
     link: "text-blue-500 hover:text-blue-700 underline-offset-4 hover:underline bg-transparent border-none",
     destructive: "text-white bg-red-600 hover:bg-red-700 border-none rounded-lg",
   }

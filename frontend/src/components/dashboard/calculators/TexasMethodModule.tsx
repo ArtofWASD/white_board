@@ -62,7 +62,9 @@ export function TexasMethodModule({
   return (
     <div className="h-full flex flex-col">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold text-gray-800">Настройки</h3>
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+          Настройки
+        </h3>
         <select
           value={dayThreeMode}
           onChange={(e) => setDayThreeMode(e.target.value as any)}
@@ -76,7 +78,7 @@ export function TexasMethodModule({
 
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Упражнение
           </label>
           <select
@@ -95,7 +97,7 @@ export function TexasMethodModule({
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             Текущий 5ПМ (Старт)
           </label>
           <div className="flex items-center gap-2">
@@ -108,15 +110,19 @@ export function TexasMethodModule({
               className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900"
               placeholder="кг"
             />
-            <span className="text-sm text-gray-500 whitespace-nowrap">+2.5кг/нед</span>
+            <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+              +2.5кг/нед
+            </span>
           </div>
-          <p className="text-xs text-gray-500 mt-1">Начальный 5ПМ для расчета цикла.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            Начальный 5ПМ для расчета цикла.
+          </p>
         </div>
       </div>
 
       <div className="flex-1 overflow-auto mb-4">
         <table className="w-full text-sm text-left">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+          <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-800">
             <tr>
               <th className="px-2 py-3 w-12 text-center">Нед</th>
               <th className="px-2 py-3 w-[30%]">Объем (Пн)</th>
@@ -128,11 +134,11 @@ export function TexasMethodModule({
             {weeks.map((week) => (
               <tr
                 key={week.weekNum}
-                className="bg-white border-b hover:bg-gray-50 align-middle">
-                <td className="px-2 py-3 font-medium text-gray-900 text-center">
+                className="bg-white dark:bg-gray-900 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 align-middle">
+                <td className="px-2 py-3 font-medium text-gray-900 dark:text-gray-100 text-center">
                   {week.weekNum}
                 </td>
-                <td className="px-2 py-3 text-gray-600">
+                <td className="px-2 py-3 text-gray-600 dark:text-gray-300">
                   <div className="flex items-center justify-start gap-2">
                     <span>{week.day1}</span>
                     <button
@@ -160,7 +166,7 @@ export function TexasMethodModule({
                     </button>
                   </div>
                 </td>
-                <td className="px-2 py-3 text-gray-500">
+                <td className="px-2 py-3 text-gray-500 dark:text-gray-400">
                   <div className="flex items-center justify-start gap-2">
                     <span>{week.day2}</span>
                     <button
@@ -222,9 +228,11 @@ export function TexasMethodModule({
         </table>
       </div>
 
-      <div className="mt-auto bg-blue-50 p-4 rounded-lg">
-        <h4 className="text-sm font-semibold text-blue-800 mb-2">Прогрессия Месяца</h4>
-        <p className="text-xs text-blue-700">
+      <div className="mt-auto bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
+        <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+          Прогрессия Месяца
+        </h4>
+        <p className="text-xs text-blue-700 dark:text-blue-300">
           Цикл рассчитан на 4 недели с линейным повышением весов. Цель: увеличивать
           рабочий вес на 2.5 кг каждую неделю в день рекордов.
         </p>

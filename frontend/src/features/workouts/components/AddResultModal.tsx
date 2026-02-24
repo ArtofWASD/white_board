@@ -62,7 +62,9 @@ export function AddResultModal({
         username: user.name,
         userId: user.id,
         time:
-          workout.type === "FOR_TIME" || workout.type === "EMOM" || workout.type === "CARDIO"
+          workout.type === "FOR_TIME" ||
+          workout.type === "EMOM" ||
+          workout.type === "CARDIO"
             ? data.resultValue
             : undefined,
         value:
@@ -88,8 +90,11 @@ export function AddResultModal({
   }
 
   const handleDeleteWorkout = async () => {
-    if (!confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")) return
-    
+    if (
+      !confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")
+    )
+      return
+
     try {
       await eventsApi.deleteEvent(workout.id, user!.id)
       onSuccess?.()
@@ -107,7 +112,7 @@ export function AddResultModal({
       case "AMRAP":
         return "Количество раундов/повторений"
       case "WEIGHTLIFTING":
-        return "Вес (кг)"
+        return "Количество повторений"
       case "EMOM":
         return "Результат" // Generic
       default:
@@ -118,119 +123,126 @@ export function AddResultModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Записать результат</DialogTitle>
-        </DialogHeader>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Записать результат</DialogTitle>
+          </DialogHeader>
 
-        {workout.exercises && workout.exercises.length > 0 && (
-          <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/50 max-h-40 overflow-y-auto">
-            <h4 className="text-xs font-semibold mb-2 uppercase tracking-wider text-muted-foreground">Упражнения</h4>
-            <ul className="grid gap-2">
-              {workout.exercises.map((exercise, dx) => {
-                const details = [];
-                if (exercise.weight && exercise.weight !== "0") details.push(`${exercise.weight} кг.`);
-                if (exercise.repetitions && exercise.repetitions !== "0") details.push(`${exercise.repetitions} пов.`);
-                if (exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0") details.push(`${exercise.rxCalories} кал.`);
-                
-                return (
-                  <li key={dx} className="flex items-start gap-2 text-base pb-1">
-                    <span className="font-bold text-primary shrink-0 min-w-[24px]">
-                      {dx + 1}.
-                    </span>
-                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 flex-1">
-                      <span className="font-medium leading-tight">{exercise.name}</span>
-                      {details.length > 0 && (
-                        <span className="text-sm text-muted-foreground whitespace-nowrap">
-                          {details.join(" \\ ")}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                )
-              })}
-            </ul>
-          </div>
-        )}
+          {workout.exercises && workout.exercises.length > 0 && (
+            <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/50 max-h-40 overflow-y-auto">
+              <h4 className="text-xs font-semibold mb-2 uppercase tracking-wider text-muted-foreground">
+                Упражнения
+              </h4>
+              <ul className="grid gap-2">
+                {workout.exercises.map((exercise, dx) => {
+                  const details = []
+                  if (exercise.weight && exercise.weight !== "0")
+                    details.push(`${exercise.weight} кг.`)
+                  if (exercise.repetitions && exercise.repetitions !== "0")
+                    details.push(`${exercise.repetitions} пов.`)
+                  if (
+                    exercise.measurement === "calories" &&
+                    exercise.rxCalories &&
+                    exercise.rxCalories !== "0"
+                  )
+                    details.push(`${exercise.rxCalories} кал.`)
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="resultValue">{getResultLabel()}</Label>
-            <Input
-              id="resultValue"
-              {...register("resultValue")}
-              placeholder={workout.type === "FOR_TIME" ? "12:30" : "0"}
-              className={errors.resultValue ? "border-red-500" : ""}
-            />
-            {errors.resultValue && (
-              <p className="text-red-500 text-xs">{errors.resultValue.message}</p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label>Масштабирование</Label>
-            <div className="flex gap-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="RX"
-                  {...register("scaling")}
-                  className="w-4 h-4 text-primary"
-                />
-                <span className="font-bold">RX</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="radio"
-                  value="SCALED"
-                  {...register("scaling")}
-                  className="w-4 h-4 text-primary"
-                />
-                <span className="text-muted-foreground">SCALED</span>
-              </label>
+                  return (
+                    <li key={dx} className="flex items-start gap-2 text-base pb-1">
+                      <span className="font-bold text-primary shrink-0 min-w-[24px]">
+                        {dx + 1}.
+                      </span>
+                      <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 flex-1">
+                        <span className="font-medium leading-tight">{exercise.name}</span>
+                        {details.length > 0 && (
+                          <span className="text-sm text-muted-foreground whitespace-nowrap">
+                            {details.join(" \\ ")}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ul>
             </div>
-            {errors.scaling && (
-              <p className="text-red-500 text-xs">{errors.scaling.message}</p>
-            )}
-          </div>
+          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="comment">Комментарий (опционально)</Label>
-            <Textarea
-              id="comment"
-              {...register("comment")}
-              placeholder="Как прошла тренировка?"
-            />
-            <p className="text-[10px] text-muted-foreground">
-              * Комментарии пока не сохраняются в этом интерфейсе
-            </p>
-          </div>
-
-          <div className="flex justify-end items-center pt-4">
-            <div className="flex gap-2">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={onClose}
-                className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors"
-              >
-                Отмена
-              </Button>
-              <Button 
-                type="submit" 
-                variant="outline"
-                className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
-                disabled={isSubmitting}
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Сохранить
-              </Button>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="resultValue">{getResultLabel()}</Label>
+              <Input
+                id="resultValue"
+                {...register("resultValue")}
+                placeholder={workout.type === "FOR_TIME" ? "12:30" : "0"}
+                className={errors.resultValue ? "border-red-500" : ""}
+              />
+              {errors.resultValue && (
+                <p className="text-red-500 text-xs">{errors.resultValue.message}</p>
+              )}
             </div>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
-      
+
+            <div className="space-y-2">
+              <Label>Масштабирование</Label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="RX"
+                    {...register("scaling")}
+                    className="w-4 h-4 text-primary"
+                  />
+                  <span className="font-bold">RX</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="radio"
+                    value="SCALED"
+                    {...register("scaling")}
+                    className="w-4 h-4 text-primary"
+                  />
+                  <span className="text-muted-foreground">SCALED</span>
+                </label>
+              </div>
+              {errors.scaling && (
+                <p className="text-red-500 text-xs">{errors.scaling.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="comment">Комментарий (опционально)</Label>
+              <Textarea
+                id="comment"
+                {...register("comment")}
+                placeholder="Как прошла тренировка?"
+              />
+              <p className="text-[10px] text-muted-foreground">
+                * Комментарии пока не сохраняются в этом интерфейсе
+              </p>
+            </div>
+
+            <div className="flex justify-end items-center pt-4">
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={onClose}
+                  className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors">
+                  Отмена
+                </Button>
+                <Button
+                  type="submit"
+                  variant="outline"
+                  className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+                  disabled={isSubmitting}>
+                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Сохранить
+                </Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Render EditWorkoutModal inside or next to it? Next to it is better to avoid nesting dialogs. 
           But AddResultModal is a Dialog itself, so we can render it as a sibling in the fragment. */}
       {isEditModalOpen && (
@@ -248,4 +260,3 @@ export function AddResultModal({
     </>
   )
 }
-

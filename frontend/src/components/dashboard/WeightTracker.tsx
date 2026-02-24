@@ -84,15 +84,15 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-6"}`}>
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-6"}`}>
       <div className={`flex justify-between items-center ${!isExpanded ? "" : "mb-6"}`}>
         <h2
-          className={`font-bold text-gray-800 transition-all ${!isExpanded ? "text-lg" : "text-2xl"}`}>
+          className={`font-bold text-gray-800 dark:text-white transition-all ${!isExpanded ? "text-lg" : "text-2xl"}`}>
           Мой Вес
         </h2>
         <button
           onClick={onToggle}
-          className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+          className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
           title={!isExpanded ? "Развернуть" : "Свернуть"}
           onPointerDown={(e) => e.stopPropagation()}>
           <svg
@@ -115,9 +115,9 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
         <>
           <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
             <div className="flex items-end space-x-4 mb-6">
-              <div className="text-5xl font-bold text-gray-900">
+              <div className="text-5xl font-bold text-gray-900 dark:text-white">
                 {currentWeight > 0 ? currentWeight : "--"}
-                <span className="text-xl text-gray-500 ml-2">kg</span>
+                <span className="text-xl text-gray-500 dark:text-gray-400 ml-2">kg</span>
               </div>
 
               {currentWeight > 0 && (
@@ -135,7 +135,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
               )}
             </div>
 
-            <div className="relative h-32 w-full bg-gray-50 rounded-lg border border-dashed border-gray-200 flex items-center justify-center mb-6 overflow-hidden">
+            <div className="relative h-32 w-full bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-200 dark:border-gray-600 flex items-center justify-center mb-6 overflow-hidden">
               {weightHistory.length > 1 ? (
                 <svg
                   className="absolute inset-0 w-full h-full text-blue-500"
@@ -167,32 +167,36 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
 
             {/* Список истории веса */}
             <div className="flex-1 overflow-y-auto min-h-0 mb-4 pr-2">
-              <h3 className="text-sm font-semibold text-gray-500 mb-2 uppercase tracking-wider">
+              <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wider">
                 История
               </h3>
               {weightHistory.length === 0 ? (
-                <p className="text-sm text-gray-400 italic">История пуста</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 italic">
+                  История пуста
+                </p>
               ) : (
                 <div className="space-y-2">
                   {[...weightHistory].reverse().map((entry, index) => (
                     <div
                       key={index}
-                      className="flex justify-between items-center text-sm py-1 border-b border-gray-100 last:border-0">
-                      <span className="text-gray-600">
+                      className="flex justify-between items-center text-sm py-1 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                      <span className="text-gray-600 dark:text-gray-300">
                         {new Date(entry.date).toLocaleDateString("ru-RU", {
                           day: "numeric",
                           month: "long",
                           year: "numeric",
                         })}
                       </span>
-                      <span className="font-medium text-gray-900">{entry.weight} kg</span>
+                      <span className="font-medium text-gray-900 dark:text-white">
+                        {entry.weight} kg
+                      </span>
                     </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="mt-auto text-center pt-2 border-t border-gray-100">
+            <div className="mt-auto text-center pt-2 border-t border-gray-100 dark:border-gray-700">
               {isEditing ? (
                 <div
                   className="flex flex-col space-y-2"
@@ -204,7 +208,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
                     value={newWeight}
                     onChange={(e) => setNewWeight(e.target.value)}
                     placeholder="Введите вес"
-                    className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900"
+                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                     autoFocus
                   />
                   <div className="flex space-x-2 justify-center">
@@ -216,7 +220,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
                     </button>
                     <button
                       onClick={() => setIsEditing(false)}
-                      className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">
+                      className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 text-sm font-medium transition-colors">
                       Отмена
                     </button>
                   </div>

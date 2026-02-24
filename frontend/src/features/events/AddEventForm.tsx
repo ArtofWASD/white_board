@@ -51,8 +51,10 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
   const [exerciseName, setExerciseName] = useState("")
   const [rxWeight, setRxWeight] = useState("")
   const [rxReps, setRxReps] = useState("")
+  const [rxDistance, setRxDistance] = useState("")
   const [scWeight, setScWeight] = useState("")
   const [scReps, setScReps] = useState("")
+  const [scDistance, setScDistance] = useState("")
   const [exerciseError, setExerciseError] = useState<string | null>(null)
 
   // Watch selected team to handle optional team logic
@@ -87,8 +89,10 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       name: exerciseName,
       rxWeight: rxWeight || undefined,
       rxReps: rxReps || undefined,
+      rxDistance: rxDistance || undefined,
       scWeight: scWeight || undefined,
       scReps: scReps || undefined,
+      scDistance: scDistance || undefined,
       // Legacy compatibility if needed by schema (though schema marks them optional)
       weight: rxWeight || "",
       repetitions: rxReps || "",
@@ -98,8 +102,10 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
     setExerciseName("")
     setRxWeight("")
     setRxReps("")
+    setRxDistance("")
     setScWeight("")
     setScReps("")
+    setScDistance("")
   }
 
   const onFormSubmit = async (data: CreateEventFormData) => {
@@ -123,11 +129,12 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       await eventsApi.createEvent(payload)
 
       if (onSubmit) {
-        const safeExercises = data.exercises?.map(e => ({
-          ...e,
-          weight: e.weight || "",
-          repetitions: e.repetitions || ""
-        })) || []
+        const safeExercises =
+          data.exercises?.map((e) => ({
+            ...e,
+            weight: e.weight || "",
+            repetitions: e.repetitions || "",
+          })) || []
         onSubmit(data.title, data.exerciseType, safeExercises)
       }
 
@@ -255,6 +262,13 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
                     className="w-full px-2 py-1 border border-gray-300 rounded"
                     placeholder="Повторы"
                   />
+                  <input
+                    type="text"
+                    value={rxDistance}
+                    onChange={(e) => setRxDistance(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Дистанция (м)"
+                  />
                 </div>
               </div>
 
@@ -274,6 +288,13 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
                     onChange={(e) => setScReps(e.target.value)}
                     className="w-full px-2 py-1 border border-gray-300 rounded"
                     placeholder="Повторы"
+                  />
+                  <input
+                    type="text"
+                    value={scDistance}
+                    onChange={(e) => setScDistance(e.target.value)}
+                    className="w-full px-2 py-1 border border-gray-300 rounded"
+                    placeholder="Дистанция (м)"
                   />
                 </div>
               </div>
@@ -298,8 +319,9 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
                   <div>
                     <span className="font-medium">{field.name}</span>
                     <div className="text-xs text-gray-500">
-                      Rx: {field.rxWeight || "-"}кг / {field.rxReps || "-"} повт. | Sc:{" "}
-                      {field.scWeight || "-"}кг / {field.scReps || "-"} повт.
+                      Rx: {field.rxWeight || "-"}кг / {field.rxReps || "-"} повт. /{" "}
+                      {field.rxDistance || "-"}м | Sc: {field.scWeight || "-"}кг /{" "}
+                      {field.scReps || "-"} повт. / {field.scDistance || "-"}м
                     </div>
                   </div>
                   <button

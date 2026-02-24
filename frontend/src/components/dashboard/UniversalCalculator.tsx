@@ -1,46 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { useAuthStore } from '@/lib/store/useAuthStore';
-import { useFeatureFlagStore } from '@/lib/store/useFeatureFlagStore';
-import { useToast } from '@/lib/context/ToastContext';
-import { AddToCalendarModal } from './AddToCalendarModal';
-import { DashboardWidget, InteractiveArea } from './DashboardWidget';
-import { TexasMethodModule } from './calculators/TexasMethodModule';
-import { StrengthTrainingModule } from './calculators/StrengthTrainingModule';
+import React, { useState, useEffect } from "react"
+import { useAuthStore } from "@/lib/store/useAuthStore"
+import { useFeatureFlagStore } from "@/lib/store/useFeatureFlagStore"
+import { useToast } from "@/lib/context/ToastContext"
+import { AddToCalendarModal } from "./AddToCalendarModal"
+import { DashboardWidget, InteractiveArea } from "./DashboardWidget"
+import { TexasMethodModule } from "./calculators/TexasMethodModule"
+import { StrengthTrainingModule } from "./calculators/StrengthTrainingModule"
 
 interface Exercise {
-  id: string;
-  name: string;
-  maxWeight: number;
+  id: string
+  name: string
+  maxWeight: number
 }
 
 interface UniversalCalculatorProps {
-  exercises: Exercise[];
-  isExpanded?: boolean;
-  onToggle?: () => void;
+  exercises: Exercise[]
+  isExpanded?: boolean
+  onToggle?: () => void
 }
 
-export function UniversalCalculator({ exercises, isExpanded, onToggle }: UniversalCalculatorProps) {
-  const { user } = useAuthStore();
-  const { flags } = useFeatureFlagStore();
-  const { success, error: toastError } = useToast();
-  const [activeModule, setActiveModule] = useState<'texas' | '531'>('texas');
-  
+export function UniversalCalculator({
+  exercises,
+  isExpanded,
+  onToggle,
+}: UniversalCalculatorProps) {
+  const { user } = useAuthStore()
+  const { flags } = useFeatureFlagStore()
+  const { success, error: toastError } = useToast()
+  const [activeModule, setActiveModule] = useState<"texas" | "531">("texas")
+
   // Состояние модального окна календаря
-  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
-  const [calendarModalData, setCalendarModalData] = useState<{title: string, description: string} | null>(null);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false)
+  const [calendarModalData, setCalendarModalData] = useState<{
+    title: string
+    description: string
+    scheme?: string
+  } | null>(null)
 
   // Определение доступных модулей на основе флагов функций
-  const showTexas = flags.texasMethodCalculator;
-  const show531 = flags.strengthTrainingCalculator;
+  const showTexas = flags.texasMethodCalculator
+  const show531 = flags.strengthTrainingCalculator
 
   useEffect(() => {
     // Установка активного модуля по умолчанию на основе доступности
     if (showTexas && !show531) {
-        setActiveModule('texas');
+      setActiveModule("texas")
     } else if (!showTexas && show531) {
-        setActiveModule('531');
+      setActiveModule("531")
     }
-  }, [showTexas, show531]);
+  }, [showTexas, show531])
 
   // Если ни один не включен, мы все равно рендерим виджет, чтобы показать сообщение "Выберите доступный модуль"
   // чтобы пользователь не запутался, почему виджет исчез.
@@ -48,106 +56,106 @@ export function UniversalCalculator({ exercises, isExpanded, onToggle }: Univers
   //     return null;
   // }
 
-  const openCalendarModal = (title: string, description: string) => {
-    setCalendarModalData({ title, description });
-    setIsCalendarModalOpen(true);
-  };
+  const openCalendarModal = (title: string, description: string, scheme?: string) => {
+    setCalendarModalData({ title, description, scheme })
+    setIsCalendarModalOpen(true)
+  }
 
   const handleAddToCalendar = async (date: Date) => {
-    if (!user || !calendarModalData) return;
-    
+    if (!user || !calendarModalData) return
+
     try {
-      const response = await fetch('/api/events', {
-        method: 'POST',
+      const response = await fetch("/api/events", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userId: user.id,
           title: calendarModalData.title,
           description: calendarModalData.description,
           eventDate: date.toISOString(),
-          exerciseType: 'strength_training',
+          exerciseType: calendarModalData.scheme || "WEIGHTLIFTING",
+          scheme: calendarModalData.scheme || "WEIGHTLIFTING",
         }),
-      });
+      })
 
       if (response.ok) {
-        success('Тренировка добавлена в календарь');
+        success("Тренировка добавлена в календарь")
       } else {
-
-        toastError('Не удалось добавить тренировку в календарь');
+        toastError("Не удалось добавить тренировку в календарь")
       }
     } catch (error) {
-
-      toastError('Ошибка при добавлении события');
+      toastError("Ошибка при добавлении события")
     }
-  };
+  }
 
-  const moduleSwitcher = (showTexas && show531) ? (
-     <InteractiveArea className="flex bg-gray-100 p-1 rounded-lg">
+  const moduleSwitcher =
+    showTexas && show531 ? (
+      <InteractiveArea className="flex bg-gray-100 p-1 rounded-lg">
         <button
-            onClick={() => setActiveModule('texas')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                activeModule === 'texas' 
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-700'
-            }`}
-        >
-            Техасский
+          onClick={() => setActiveModule("texas")}
+          className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+            activeModule === "texas"
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}>
+          Техасский
         </button>
         <button
-            onClick={() => setActiveModule('531')}
-            className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
-                activeModule === '531' 
-                    ? 'bg-white text-blue-600 shadow-sm' 
-                    : 'text-gray-500 hover:text-gray-700'
-            }`}
-        >
-            5/3/1
+          onClick={() => setActiveModule("531")}
+          className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
+            activeModule === "531"
+              ? "bg-white text-blue-600 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+          }`}>
+          5/3/1
         </button>
-    </InteractiveArea>
-  ) : null;
+      </InteractiveArea>
+    ) : null
 
   return (
-    <DashboardWidget 
-        title="Калькулятор" 
-        headerActions={moduleSwitcher}
-        className="shadow-md border-0"
-        isExpanded={isExpanded}
-        onToggle={onToggle}
-    >
+    <DashboardWidget
+      title="Калькулятор"
+      headerActions={moduleSwitcher}
+      className="shadow-md border-0"
+      isExpanded={isExpanded}
+      onToggle={onToggle}>
       <InteractiveArea className="h-full flex flex-col">
-          {activeModule === 'texas' && showTexas && (
-              <TexasMethodModule 
-                exercises={exercises} 
-                onAddToCalendar={openCalendarModal}
-                handleInputPointerDown={() => {}} // Устарело, обрабатывается Wrapper
-                handleInputKeyDown={() => {}} // Устарело
-              />
-          )}
-          {activeModule === '531' && show531 && (
-              <StrengthTrainingModule 
-                exercises={exercises} 
-                onAddToCalendar={openCalendarModal}
-                handleInputPointerDown={() => {}}
-                handleInputKeyDown={() => {}}
-              />
-          )}
+        {activeModule === "texas" && showTexas && (
+          <TexasMethodModule
+            exercises={exercises}
+            onAddToCalendar={openCalendarModal}
+            handleInputPointerDown={() => {}} // Устарело, обрабатывается Wrapper
+            handleInputKeyDown={() => {}} // Устарело
+          />
+        )}
+        {activeModule === "531" && show531 && (
+          <StrengthTrainingModule
+            exercises={exercises}
+            onAddToCalendar={openCalendarModal}
+            handleInputPointerDown={() => {}}
+            handleInputKeyDown={() => {}}
+          />
+        )}
 
-          {!((activeModule === 'texas' && showTexas) || (activeModule === '531' && show531)) && (
-              <div className="text-gray-500 text-center mt-10">Выберите доступный модуль</div>
-          )}
+        {!(
+          (activeModule === "texas" && showTexas) ||
+          (activeModule === "531" && show531)
+        ) && (
+          <div className="text-gray-500 text-center mt-10">Выберите доступный модуль</div>
+        )}
       </InteractiveArea>
 
       {calendarModalData && (
         <AddToCalendarModal
-            isOpen={isCalendarModalOpen}
-            onClose={() => setIsCalendarModalOpen(false)}
-            onSave={handleAddToCalendar}
-            title={calendarModalData.title}
-            description={calendarModalData.description}
+          isOpen={isCalendarModalOpen}
+          onClose={() => setIsCalendarModalOpen(false)}
+          onSave={handleAddToCalendar}
+          title={calendarModalData.title}
+          description={calendarModalData.description}
         />
       )}
     </DashboardWidget>
-  );
+  )
 }

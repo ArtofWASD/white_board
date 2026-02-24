@@ -58,7 +58,9 @@ export function CreateWorkoutModal({
 
   // Exercise Input State
   const [exName, setExName] = useState("")
-  const [exMeasurement, setExMeasurement] = useState<"weight" | "calories" | "time">("weight")
+  const [exMeasurement, setExMeasurement] = useState<
+    "weight" | "calories" | "time" | "distance"
+  >("weight")
   const [rxWeight, setRxWeight] = useState("")
   const [rxReps, setRxReps] = useState("")
   const [scWeight, setScWeight] = useState("")
@@ -67,6 +69,8 @@ export function CreateWorkoutModal({
   const [scCalories, setScCalories] = useState("")
   const [rxTime, setRxTime] = useState("")
   const [scTime, setScTime] = useState("")
+  const [rxDistance, setRxDistance] = useState("")
+  const [scDistance, setScDistance] = useState("")
 
   useEffect(() => {
     if (isOpen) {
@@ -151,6 +155,8 @@ export function CreateWorkoutModal({
     setScCalories("")
     setRxTime("")
     setScTime("")
+    setRxDistance("")
+    setScDistance("")
   }
 
   const handleAddExercise = () => {
@@ -168,6 +174,8 @@ export function CreateWorkoutModal({
       scCalories: exMeasurement === "calories" ? scCalories : undefined,
       rxTime: exMeasurement === "time" ? rxTime : undefined,
       scTime: exMeasurement === "time" ? scTime : undefined,
+      rxDistance: exMeasurement === "distance" ? rxDistance : undefined,
+      scDistance: exMeasurement === "distance" ? scDistance : undefined,
     }
 
     setExercises([...exercises, newExercise])
@@ -193,6 +201,8 @@ export function CreateWorkoutModal({
     setScCalories(exerciseToEdit.scCalories || "")
     setRxTime(exerciseToEdit.rxTime || "")
     setScTime(exerciseToEdit.scTime || "")
+    setRxDistance(exerciseToEdit.rxDistance || "")
+    setScDistance(exerciseToEdit.scDistance || "")
 
     // Remove from list so it can be re-added on save
     handleRemoveExercise(id)
@@ -291,9 +301,7 @@ export function CreateWorkoutModal({
 
             {(scheme === "FOR_TIME" || scheme === "AMRAP" || scheme === "CARDIO") && (
               <div className="space-y-2">
-                <Label htmlFor="timeCap">
-                  Количество времени
-                </Label>
+                <Label htmlFor="timeCap">Количество времени</Label>
                 <Input
                   id="timeCap"
                   value={timeCap}
@@ -473,6 +481,17 @@ export function CreateWorkoutModal({
                   )}>
                   Время
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setExMeasurement("distance")}
+                  className={cn(
+                    "px-2 py-1 text-xs rounded-sm transition-all",
+                    exMeasurement === "distance"
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}>
+                  Дистанция
+                </button>
               </div>
             </div>
 
@@ -509,11 +528,18 @@ export function CreateWorkoutModal({
                       placeholder="Кал"
                       className="bg-background"
                     />
-                  ) : (
+                  ) : exMeasurement === "time" ? (
                     <Input
                       value={rxTime}
                       onChange={(e) => setRxTime(e.target.value)}
                       placeholder="Мин"
+                      className="bg-background"
+                    />
+                  ) : (
+                    <Input
+                      value={rxDistance}
+                      onChange={(e) => setRxDistance(e.target.value)}
+                      placeholder="Метры (м)"
                       className="bg-background"
                     />
                   )}
@@ -542,11 +568,18 @@ export function CreateWorkoutModal({
                       placeholder="Кал"
                       className="bg-background"
                     />
-                  ) : (
+                  ) : exMeasurement === "time" ? (
                     <Input
                       value={scTime}
                       onChange={(e) => setScTime(e.target.value)}
                       placeholder="Мин"
+                      className="bg-background"
+                    />
+                  ) : (
+                    <Input
+                      value={scDistance}
+                      onChange={(e) => setScDistance(e.target.value)}
+                      placeholder="Метры (м)"
                       className="bg-background"
                     />
                   )}
@@ -576,9 +609,11 @@ export function CreateWorkoutModal({
                       <div className="text-xs text-muted-foreground">
                         {ex.measurement === "weight"
                           ? `Rx: ${ex.weight || "-"}кг/${ex.repetitions || "-"} • Sc: ${ex.scWeight || "-"}кг/${ex.scReps || "-"}`
-                          : ex.measurement === "calories" 
-                          ? `Rx: ${ex.rxCalories || "-"}кал • Sc: ${ex.scCalories || "-"}кал`
-                          : `Rx: ${ex.rxTime || "-"}мин • Sc: ${ex.scTime || "-"}мин`}
+                          : ex.measurement === "calories"
+                            ? `Rx: ${ex.rxCalories || "-"}кал • Sc: ${ex.scCalories || "-"}кал`
+                            : ex.measurement === "time"
+                              ? `Rx: ${ex.rxTime || "-"}мин • Sc: ${ex.scTime || "-"}мин`
+                              : `Rx: ${ex.rxDistance || "-"}м • Sc: ${ex.scDistance || "-"}м`}
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -610,12 +645,11 @@ export function CreateWorkoutModal({
           <Button variant="outline" onClick={onClose} type="button">
             Отмена
           </Button>
-          <Button 
-            onClick={handleSubmit} 
+          <Button
+            onClick={handleSubmit}
             type="button"
             variant="outline"
-            className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
-          >
+            className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors">
             Создать тренировку
           </Button>
         </DialogFooter>

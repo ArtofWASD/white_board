@@ -5,8 +5,10 @@ const exerciseSchema = z.object({
   name: z.string().min(1, "Введите название упражнения"),
   rxWeight: z.string().optional(),
   rxReps: z.string().optional(),
+  rxDistance: z.string().optional(),
   scWeight: z.string().optional(),
   scReps: z.string().optional(),
+  scDistance: z.string().optional(),
   // Legacy fields
   weight: z.string().optional(),
   repetitions: z.string().optional(),
@@ -28,8 +30,10 @@ export const exerciseInputSchema = z.object({
   name: z.string().min(1, "Введите название упражнения"),
   rxWeight: z.string().optional(),
   rxReps: z.string().optional(),
+  rxDistance: z.string().optional(),
   scWeight: z.string().optional(),
   scReps: z.string().optional(),
+  scDistance: z.string().optional(),
 })
 
 export type ExerciseInputData = z.infer<typeof exerciseInputSchema>

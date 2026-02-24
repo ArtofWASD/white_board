@@ -120,7 +120,7 @@ export function StrengthTrainingModule({
     <div className="h-full flex flex-col relative w-full">
       <div className="space-y-4 mb-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-gray-700 dark:text-white mb-1">
             Упражнение
           </label>
           <select
@@ -140,7 +140,7 @@ export function StrengthTrainingModule({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-white mb-1 whitespace-nowrap">
               1RM (Максимум)
             </label>
             <input
@@ -154,7 +154,7 @@ export function StrengthTrainingModule({
             />
           </div>
           <div>
-            <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 whitespace-nowrap">
+            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-white mb-1 whitespace-nowrap">
               Тренировочный Вес (90%)
             </label>
             <input
@@ -172,28 +172,34 @@ export function StrengthTrainingModule({
 
       <div className="flex-1 overflow-auto mb-4">
         <table className="w-full text-sm text-left table-fixed">
-          <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+          <thead className="text-xs text-gray-700 dark:text-gray-300 uppercase bg-gray-50 dark:bg-gray-700">
             <tr>
-              <th className="px-1 py-3 w-8 text-center border-r border-gray-200">Нед</th>
-              <th className="px-1 py-3 w-[35%] border-r border-gray-200">Разминка</th>
-              <th className="px-1 py-3 w-[35%] border-r border-gray-200">Рабочие сеты</th>
-              <th className="px-1 py-3 text-right w-[20%]">Действие</th>
+              <th className="px-1 py-3 w-8 text-center border-r border-gray-200 dark:border-gray-600">
+                Нед
+              </th>
+              <th className="px-1 py-3 w-[35%] text-center border-r border-gray-200 dark:border-gray-600">
+                Разминка
+              </th>
+              <th className="px-1 py-3 w-[35%] text-center border-r border-gray-200 dark:border-gray-600">
+                Рабочие сеты
+              </th>
+              <th className="px-1 py-3 text-center w-[20%]">Действие</th>
             </tr>
           </thead>
           <tbody>
             {/* Неделя 1 */}
-            <tr className="bg-white border-b hover:bg-gray-50 align-top">
-              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">
+            <tr className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 align-top">
+              <td className="px-1 py-6 font-medium text-gray-900 dark:text-white text-center border-r border-gray-100 dark:border-gray-700">
                 1
               </td>
-              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 dark:text-gray-300 break-words text-xs sm:text-sm border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.4)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.5)}кг)</div>
                   <div>60% × 3 ({calculateWeight(0.6)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm text-gray-700 dark:text-gray-200 border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>65% × 5 ({calculateWeight(0.65)}кг)</div>
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
@@ -202,7 +208,7 @@ export function StrengthTrainingModule({
                   </div>
                 </div>
               </td>
-              <td className="px-1 py-6 text-right bg-gray-50/30">
+              <td className="px-1 py-6 text-right dark:bg-gray-800">
                 {loggingWeek === 1 ? (
                   <div
                     className="flex flex-col items-end gap-2"
@@ -233,25 +239,7 @@ export function StrengthTrainingModule({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-center items-center h-full gap-4">
-                    <button
-                      onClick={() => startLogging(1, calculateWeight(0.85))}
-                      onPointerDown={handleInputPointerDown}
-                      className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                      title="Заполнить">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
+                  <div className="flex justify-center items-center h-full">
                     <button
                       onClick={() =>
                         onAddToCalendar(
@@ -283,18 +271,18 @@ export function StrengthTrainingModule({
             </tr>
 
             {/* Неделя 2 */}
-            <tr className="bg-white border-b hover:bg-gray-50 align-top">
-              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">
+            <tr className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 align-top">
+              <td className="px-1 py-6 font-medium text-gray-900 dark:text-white text-center border-r border-gray-100 dark:border-gray-700">
                 2
               </td>
-              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 dark:text-gray-300 break-words text-xs sm:text-sm border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>45% × 5 ({calculateWeight(0.45)}кг)</div>
                   <div>55% × 5 ({calculateWeight(0.55)}кг)</div>
                   <div>65% × 3 ({calculateWeight(0.65)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm text-gray-700 dark:text-gray-200 border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>70% × 3 ({calculateWeight(0.7)}кг)</div>
                   <div>80% × 3 ({calculateWeight(0.8)}кг)</div>
@@ -303,7 +291,7 @@ export function StrengthTrainingModule({
                   </div>
                 </div>
               </td>
-              <td className="px-1 py-6 text-right bg-gray-50/30">
+              <td className="px-1 py-6 text-right dark:bg-gray-800">
                 {loggingWeek === 2 ? (
                   <div
                     className="flex flex-col items-end gap-2"
@@ -336,25 +324,7 @@ export function StrengthTrainingModule({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-center items-center h-full gap-4">
-                    <button
-                      onClick={() => startLogging(2, calculateWeight(0.9))}
-                      onPointerDown={handleInputPointerDown}
-                      className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                      title="Заполнить">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
+                  <div className="flex justify-center items-center h-full">
                     <button
                       onClick={() =>
                         onAddToCalendar(
@@ -386,18 +356,18 @@ export function StrengthTrainingModule({
             </tr>
 
             {/* Неделя 3 */}
-            <tr className="bg-white border-b hover:bg-gray-50 align-top">
-              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">
+            <tr className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 align-top">
+              <td className="px-1 py-6 font-medium text-gray-900 dark:text-white text-center border-r border-gray-100 dark:border-gray-700">
                 3
               </td>
-              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 dark:text-gray-300 break-words text-xs sm:text-sm border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>50% × 5 ({calculateWeight(0.5)}кг)</div>
                   <div>60% × 5 ({calculateWeight(0.6)}кг)</div>
                   <div>70% × 3 ({calculateWeight(0.7)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm text-gray-700 dark:text-gray-200 border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div>85% × 3 ({calculateWeight(0.85)}кг)</div>
@@ -406,7 +376,7 @@ export function StrengthTrainingModule({
                   </div>
                 </div>
               </td>
-              <td className="px-1 py-6 text-right bg-gray-50/30">
+              <td className="px-1 py-6 text-right dark:bg-gray-800">
                 {loggingWeek === 3 ? (
                   <div
                     className="flex flex-col items-end gap-2"
@@ -439,25 +409,7 @@ export function StrengthTrainingModule({
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-center items-center h-full gap-4">
-                    <button
-                      onClick={() => startLogging(3, calculateWeight(0.95))}
-                      onPointerDown={handleInputPointerDown}
-                      className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
-                      title="Заполнить">
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </button>
+                  <div className="flex justify-center items-center h-full">
                     <button
                       onClick={() =>
                         onAddToCalendar(
@@ -489,25 +441,25 @@ export function StrengthTrainingModule({
             </tr>
 
             {/* Неделя 4 (Разгрузка) */}
-            <tr className="bg-white hover:bg-gray-50 align-top">
-              <td className="px-1 py-6 font-medium text-gray-900 text-center border-r border-gray-100">
+            <tr className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 align-top">
+              <td className="px-1 py-6 font-medium text-gray-900 dark:text-white text-center border-r border-gray-100 dark:border-gray-700">
                 4
               </td>
-              <td className="px-1 py-6 text-gray-500 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 text-gray-500 dark:text-gray-300 break-words text-xs sm:text-sm border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1">
                   <div>40% × 5 ({calculateWeight(0.4)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.5)}кг)</div>
                   <div>60% × 5 ({calculateWeight(0.6)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 break-words text-xs sm:text-sm border-r border-gray-100">
+              <td className="px-1 py-6 break-words text-xs sm:text-sm text-gray-700 dark:text-gray-200 border-r border-gray-100 dark:border-gray-700">
                 <div className="space-y-1 text-gray-500">
                   <div>40% × 5 ({calculateWeight(0.4)}кг)</div>
                   <div>50% × 5 ({calculateWeight(0.5)}кг)</div>
                   <div>60% × 5 ({calculateWeight(0.6)}кг)</div>
                 </div>
               </td>
-              <td className="px-1 py-6 text-right bg-gray-50/30">
+              <td className="px-1 py-6 text-right dark:bg-gray-800">
                 <div className="flex justify-center items-center h-full">
                   <span className="text-xs text-gray-400">Deload</span>
                 </div>

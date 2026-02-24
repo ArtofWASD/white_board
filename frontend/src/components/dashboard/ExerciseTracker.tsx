@@ -57,10 +57,10 @@ export function ExerciseTracker({
 
   return (
     <div
-      className={`bg-white rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-6"}`}>
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-6"}`}>
       <div className={`flex justify-between items-center ${!isExpanded ? "" : "mb-6"}`}>
         <h2
-          className={`font-bold text-gray-800 transition-all ${!isExpanded ? "text-lg" : "text-2xl"}`}>
+          className={`font-bold text-gray-800 dark:text-white transition-all ${!isExpanded ? "text-lg" : "text-2xl"}`}>
           Прогресс упражнений
         </h2>
 
@@ -75,7 +75,7 @@ export function ExerciseTracker({
           {/* Кнопка сворачивания - видна только на мобильных/планшетах */}
           <button
             onClick={onToggle}
-            className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
             title={!isExpanded ? "Развернуть" : "Свернуть"}
             onPointerDown={(e) => e.stopPropagation()}>
             <svg
@@ -102,14 +102,14 @@ export function ExerciseTracker({
               onSubmit={handleCreateExercise}
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
+              className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-600 animate-in fade-in slide-in-from-top-4">
               <div className="flex gap-4">
                 <input
                   type="text"
                   placeholder="Название упражнения (например, Жим лежа)"
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white dark:placeholder-gray-400"
                   autoFocus
                 />
                 <input
@@ -118,7 +118,7 @@ export function ExerciseTracker({
                   placeholder="Вес (кг)"
                   value={initialWeight}
                   onChange={(e) => setInitialWeight(e.target.value)}
-                  className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                  className="w-24 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white dark:placeholder-gray-400"
                 />
                 <Button type="submit" disabled={!newExerciseName.trim()}>
                   Сохранить упражнение
@@ -140,8 +140,8 @@ export function ExerciseTracker({
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
               </div>
             ) : filteredExercises.length === 0 ? (
-              <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-                <p className="text-gray-500">
+              <div className="text-center py-10 bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
+                <p className="text-gray-500 dark:text-gray-300">
                   Упражнения не найдены. Начните с добавления нового!
                 </p>
               </div>

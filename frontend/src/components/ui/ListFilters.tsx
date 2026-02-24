@@ -33,7 +33,7 @@ export function ListFilters({
               type="text"
               placeholder={searchPlaceholder}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
             />
             <div className="absolute left-3 top-2.5 text-gray-400">
               <svg
@@ -57,13 +57,13 @@ export function ListFilters({
 
       {!hideViewToggle && (
         <div
-          className={`flex bg-gray-100 p-1 rounded-lg ${hideToggleOnMobile ? "hidden sm:flex" : ""}`}>
+          className={`flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg ${hideToggleOnMobile ? "hidden sm:flex" : ""}`}>
           <button
             onClick={() => onViewModeChange("list")}
             className={`p-2 rounded-md transition-all ${
               viewMode === "list"
-                ? "bg-white shadow-sm text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white dark:bg-gray-500 shadow-sm text-blue-600"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"
             }`}
             title="Список">
             <svg
@@ -88,8 +88,8 @@ export function ListFilters({
             onClick={() => onViewModeChange("card")}
             className={`p-2 rounded-md transition-all ${
               viewMode === "card"
-                ? "bg-white shadow-sm text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-white dark:bg-gray-500 shadow-sm text-blue-600"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"
             }`}
             title="Карточки">
             <svg
