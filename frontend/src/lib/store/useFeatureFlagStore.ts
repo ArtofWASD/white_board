@@ -1,18 +1,19 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { create } from "zustand"
+import { persist, createJSONStorage } from "zustand/middleware"
 
 interface FeatureFlags {
-  showExerciseTracker: boolean;
-  showWeightTracker: boolean;
-  strengthTrainingCalculator: boolean;
-  texasMethodCalculator: boolean;
-  showUniversalCalculator: boolean;
-  hideBlogContent: boolean;
+  showExerciseTracker: boolean
+  showWeightTracker: boolean
+  strengthTrainingCalculator: boolean
+  texasMethodCalculator: boolean
+  showUniversalCalculator: boolean
+  hideBlogContent: boolean
+  darkMode: boolean
 }
 
 interface FeatureFlagState {
-  flags: FeatureFlags;
-  toggleFlag: (key: keyof FeatureFlags) => void;
+  flags: FeatureFlags
+  toggleFlag: (key: keyof FeatureFlags) => void
 }
 
 const defaultFlags: FeatureFlags = {
@@ -22,7 +23,8 @@ const defaultFlags: FeatureFlags = {
   texasMethodCalculator: false,
   showUniversalCalculator: true,
   hideBlogContent: false,
-};
+  darkMode: false,
+}
 
 export const useFeatureFlagStore = create<FeatureFlagState>()(
   persist(
@@ -37,8 +39,8 @@ export const useFeatureFlagStore = create<FeatureFlagState>()(
         })),
     }),
     {
-      name: 'feature-flags',
+      name: "feature-flags",
       storage: createJSONStorage(() => localStorage),
-    }
-  )
-);
+    },
+  ),
+)

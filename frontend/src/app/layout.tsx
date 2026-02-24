@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { ToastProvider } from "@/lib/context/ToastContext"
 import { CookieBanner } from "@/components/ui/CookieBanner"
+import { ThemeProvider } from "@/components/ui/ThemeProvider"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <ThemeProvider />
         <ToastProvider>{children}</ToastProvider>
         <CookieBanner />
       </body>

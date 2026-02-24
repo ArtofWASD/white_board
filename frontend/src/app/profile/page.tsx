@@ -280,6 +280,15 @@ export default function ProfilePage() {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
           <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>
           <div className="space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+              <div>
+                <h4 className="font-medium text-gray-900">Тёмная тема</h4>
+                <p className="text-sm text-gray-500">
+                  Переключить между светлой и тёмной темой интерфейса
+                </p>
+              </div>
+              <Switch checked={flags.darkMode} onChange={() => toggleFlag("darkMode")} />
+            </div>
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-medium text-gray-900">Прогресс упражнений</h4>

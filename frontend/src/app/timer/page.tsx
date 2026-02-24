@@ -5,9 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { TimerLayout } from "../../components/timer/TimerLayout"
 import { TimerSetup } from "../../components/timer/TimerSetup"
 import { TimerDisplay } from "../../components/timer/TimerDisplay"
-import { useWODTimer, TimerConfig, TimerMode } from "../../hooks/useWODTimer"
+import { useWODTimer, TimerConfig, TimerMode, RoundRecord } from "../../hooks/useWODTimer"
 import { useAuthStore } from "../../lib/store/useAuthStore"
-import { logApiError } from "../../lib/logger"
+import { apiClient } from "../../lib/api/apiClient"
 
 // Wrapper for Suspense boundary required by useSearchParams
 export default function TimerPage() {
@@ -57,28 +57,23 @@ function TimerPageContent() {
 
   const { user } = useAuthStore()
 
-  const handleSaveResult = async (resultVal: string) => {
+  const handleSaveResult = async (
+    resultVal: string,
+    comment?: string,
+    value?: number,
+  ) => {
     if (!eventId || !user) return
 
     try {
-      const response = await fetch(`/api/events/${eventId}/results`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          time: resultVal,
-          dateAdded: new Date().toISOString(),
-          userId: user.id,
-          username: user.name,
-        }),
+      await apiClient.post(`/api/events/${eventId}/results`, {
+        time: resultVal,
+        notes: comment || undefined,
+        value: value,
+        userId: user.id,
+        username: user.name,
       })
-
-      if (response.ok) {
-        router.push("/calendar")
-      } else {
-        alert("Ошибка при сохранении результата")
-      }
-    } catch (e) {
-      logApiError(`/api/events/${eventId}/results`, e)
+      router.push("/calendar")
+    } catch {
       alert("Ошибка при сохранении результата")
     }
   }
@@ -106,7 +101,7 @@ function TimerPageContent() {
 const ActiveTimer: React.FC<{
   config: TimerConfig
   onBack: () => void
-  onSaveResult?: (val: string) => void
+  onSaveResult?: (val: string, comment?: string, value?: number) => void
 }> = ({ config, onBack, onSaveResult }) => {
   const { state, start, pause, reset, skipWarmup, addRound } = useWODTimer(config)
 
@@ -120,18 +115,50 @@ const ActiveTimer: React.FC<{
     onBack()
   }
 
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000)
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+  }
+
   const formatResult = () => {
     if (config.mode === "AMRAP") {
-      return `${state.currentRound} Раундов`
+      const completed = state.roundTimes.length
+      return `AMRAP: ${completed} раунд(а) за ${formatTime((config.duration || 0) * 1000)}`
     }
     if (config.mode === "FOR_TIME") {
-      const ms = state.elapsedTime
-      const totalSeconds = Math.ceil(ms / 1000)
-      const minutes = Math.floor(totalSeconds / 60)
-      const seconds = totalSeconds % 60
-      return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`
+      const completed = state.roundTimes.length
+      const timeStr = formatTime(state.elapsedTime)
+      return completed > 0
+        ? `FOR TIME: ${timeStr} — ${completed} раунд(а)`
+        : `FOR TIME: ${timeStr}`
     }
     return "Done"
+  }
+
+  // Числовое значение для сортировки в лидерборде
+  const getResultValue = (): number | undefined => {
+    if (config.mode === "AMRAP") {
+      return state.roundTimes.length // кол-во завершённых раундов
+    }
+    if (config.mode === "FOR_TIME") {
+      return Math.ceil(state.elapsedTime / 1000) // секунды (меньше = лучше)
+    }
+    return undefined
+  }
+
+  const formatComment = () => {
+    if (state.roundTimes.length === 0) return ""
+    return state.roundTimes
+      .map((rec: RoundRecord, idx: number) => {
+        const prevMs = idx === 0 ? 0 : state.roundTimes[idx - 1].elapsedMs
+        const roundDuration = rec.elapsedMs - prevMs
+        const totalStr = formatTime(rec.elapsedMs)
+        const lapStr = formatTime(roundDuration)
+        return `Раунд ${rec.round}: ${lapStr} (общее ${totalStr})`
+      })
+      .join("\n")
   }
 
   return (
@@ -150,12 +177,17 @@ const ActiveTimer: React.FC<{
         onReset={handleReset}
         onSkipWarmup={skipWarmup}
         onAddRound={addRound}
-        onAddResult={onSaveResult ? () => onSaveResult(formatResult()) : undefined}
+        onAddResult={
+          onSaveResult
+            ? () => onSaveResult(formatResult(), formatComment(), getResultValue())
+            : undefined
+        }
       />
 
       <div className="mt-8 text-center text-gray-600 font-mono text-sm">
         Режим: {config.mode} • Раунды: {config.rounds || 1} • Время:{" "}
-        {Math.floor((config.intervalWork || config.duration || config.timeCap || 0) / 60)} мин
+        {Math.floor((config.intervalWork || config.duration || config.timeCap || 0) / 60)}{" "}
+        мин
       </div>
     </div>
   )
