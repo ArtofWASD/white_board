@@ -19,7 +19,12 @@ interface WorkoutDetailProps {
   onDelete?: () => void
 }
 
-export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDetailProps) {
+export function WorkoutDetail({
+  workout,
+  isOpen,
+  onClose,
+  onDelete,
+}: WorkoutDetailProps) {
   const [isRx, setIsRx] = useState(true)
   const [isAddResultOpen, setIsAddResultOpen] = useState(false) // State for result modal
   const [isEditModalOpen, setIsEditModalOpen] = useState(false) // State for edit modal
@@ -29,8 +34,11 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
   if (!workout) return null
 
   const handleDeleteWorkout = async () => {
-    if (!confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")) return
-    
+    if (
+      !confirm("Вы уверены, что хотите удалить эту тренировку? Это действие необратимо.")
+    )
+      return
+
     try {
       await eventsApi.deleteEvent(workout.id, user!.id)
       onClose()
@@ -60,7 +68,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         const parts = workout.timeCap.split(":")
         let totalSeconds = 0
         if (parts.length === 2) {
-          totalSeconds = (parseInt(parts[0]) * 60) + parseInt(parts[1])
+          totalSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1])
         } else {
           totalSeconds = parseInt(workout.timeCap) * 60
         }
@@ -76,7 +84,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         const parts = workout.timeCap.split(":")
         let durationSeconds = 0
         if (parts.length === 2) {
-          durationSeconds = (parseInt(parts[0]) * 60) + parseInt(parts[1] || "0")
+          durationSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1] || "0")
         } else {
           durationSeconds = parseInt(workout.timeCap) * 60
         }
@@ -96,13 +104,13 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
         } else {
           durationSeconds = parseInt(workout.timeCap) * 60
         }
-        
+
         console.log("CARDIO TIMER DEBUG:", {
           originalTimeCap: workout.timeCap,
           parts,
           durationSeconds,
-          finalQueryParam: durationSeconds.toString()
-        });
+          finalQueryParam: durationSeconds.toString(),
+        })
 
         if (!isNaN(durationSeconds) && durationSeconds > 0) {
           params.set("mode", "AMRAP") // Use AMRAP (countdown) mode for Cardio if time specified
@@ -206,11 +214,24 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                 <ul className="grid gap-2">
                   {workout.exercises && workout.exercises.length > 0
                     ? workout.exercises.map((exercise, dx) => {
-                        const details = [];
-                        if (exercise.weight && exercise.weight !== "0") details.push(`${exercise.weight} кг.`);
-                        if (exercise.repetitions && exercise.repetitions !== "0") details.push(`${exercise.repetitions} пов.`);
-                        if (exercise.measurement === "calories" && exercise.rxCalories && exercise.rxCalories !== "0") details.push(`${exercise.rxCalories} кал.`);
-                        
+                        const details = []
+                        if (exercise.measurement === "time") {
+                          const val = isRx ? exercise.rxTime : exercise.scTime
+                          if (val && val !== "0") details.push(`${val} мин.`)
+                        } else if (exercise.measurement === "distance") {
+                          const val = isRx ? exercise.rxDistance : exercise.scDistance
+                          if (val && val !== "0") details.push(`${val} м.`)
+                        } else if (exercise.measurement === "calories") {
+                          const val = isRx ? exercise.rxCalories : exercise.scCalories
+                          if (val && val !== "0") details.push(`${val} кал.`)
+                        } else {
+                          // weight (default)
+                          const w = isRx ? exercise.weight : exercise.scWeight
+                          const r = isRx ? exercise.repetitions : exercise.scReps
+                          if (w && w !== "0") details.push(`${w} кг.`)
+                          if (r && r !== "0") details.push(`${r} пов.`)
+                        }
+
                         return (
                           <li
                             key={dx}
@@ -219,7 +240,9 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                               {dx + 1}.
                             </span>
                             <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 flex-1">
-                              <span className="text-base font-medium leading-tight">{exercise.name}</span>
+                              <span className="text-base font-medium leading-tight">
+                                {exercise.name}
+                              </span>
                               {details.length > 0 && (
                                 <span className="text-sm text-muted-foreground whitespace-nowrap">
                                   {details.join(" \\ ")}
@@ -236,7 +259,9 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                           <span className="text-base font-bold text-primary shrink-0 min-w-[24px]">
                             {dx + 1}.
                           </span>
-                          <span className="text-base font-medium flex-1 leading-tight">{movement}</span>
+                          <span className="text-base font-medium flex-1 leading-tight">
+                            {movement}
+                          </span>
                         </li>
                       ))}
                 </ul>
@@ -251,8 +276,7 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                 className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
                 size="lg"
                 layout="horizontal"
-                onClick={handleStartTimer} // Attach handler
-              >
+                onClick={handleStartTimer}>
                 <PlayCircle className="h-5 w-5" />
                 Запустить таймер
               </Button>
@@ -261,26 +285,27 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
                 className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
                 size="lg"
                 layout="horizontal"
-                onClick={() => setIsAddResultOpen(true)} // Open result modal
-              >
+                onClick={() => setIsAddResultOpen(true)}>
                 <ClipboardEdit className="h-5 w-5" />
                 Записать результат
               </Button>
             </div>
             {workout.userId === user?.id && (
-              <div className="flex flex-col sm:flex-row gap-3 w-full mt-2">
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <Button
                   variant="outline"
+                  size="lg"
+                  layout="horizontal"
                   className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-black dark:hover:bg-gray-800 dark:border-blue-900 border-blue-500 border bg-transparent transition-colors"
-                  onClick={() => setIsEditModalOpen(true)}
-                >
+                  onClick={() => setIsEditModalOpen(true)}>
                   Изменить
                 </Button>
                 <Button
                   variant="outline"
+                  size="lg"
+                  layout="horizontal"
                   className="flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:bg-black dark:hover:bg-gray-800 dark:border-red-900 border-red-500 border bg-transparent transition-colors"
-                  onClick={handleDeleteWorkout}
-                >
+                  onClick={handleDeleteWorkout}>
                   Удалить занятие
                 </Button>
               </div>
@@ -314,4 +339,3 @@ export function WorkoutDetail({ workout, isOpen, onClose, onDelete }: WorkoutDet
     </>
   )
 }
-

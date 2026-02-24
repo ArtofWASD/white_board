@@ -10,17 +10,22 @@ import ErrorDisplay from "../../components/ui/ErrorDisplay"
 import {
   createEventSchema,
   CreateEventFormData,
-  ExerciseInputData,
   exerciseInputSchema,
 } from "../../lib/validators/event"
 import { eventsApi } from "../../lib/api/events"
-import { teamsApi } from "../../lib/api/teams" // Assuming this exists or using fetch if not
+import { teamsApi } from "../../lib/api/teams"
+
+type ExerciseFieldErrors = Partial<
+  Record<
+    "name" | "rxWeight" | "rxReps" | "rxDistance" | "scWeight" | "scReps" | "scDistance",
+    string
+  >
+>
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
   const { success } = useToast()
   const [teams, setTeams] = useState<Team[]>([])
 
-  // Form for the main event
   const {
     register,
     handleSubmit,
@@ -40,14 +45,11 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
     },
   })
 
-  // Dynamic field array for exercises
   const { fields, append, remove } = useFieldArray({
     control,
     name: "exercises",
   })
 
-  // Local state for "New Exercise" inputs (managed separately to avoid polluting main form validation until added)
-  // We could use a separate useForm for this, but local state is fine for simple inputs
   const [exerciseName, setExerciseName] = useState("")
   const [rxWeight, setRxWeight] = useState("")
   const [rxReps, setRxReps] = useState("")
@@ -55,16 +57,12 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
   const [scWeight, setScWeight] = useState("")
   const [scReps, setScReps] = useState("")
   const [scDistance, setScDistance] = useState("")
-  const [exerciseError, setExerciseError] = useState<string | null>(null)
-
-  // Watch selected team to handle optional team logic
-  // const selectedTeamId = watch("teamId")
+  const [exerciseFieldErrors, setExerciseFieldErrors] = useState<ExerciseFieldErrors>({})
 
   useEffect(() => {
     const fetchTeams = async () => {
       if (user?.id) {
         try {
-          // Assuming teamsApi.getUserTeams exists and works similar to fetch
           const data = await teamsApi.getUserTeams(user.id)
           setTeams(data || [])
         } catch (error) {
@@ -76,14 +74,30 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
   }, [user])
 
   const handleAddExercise = () => {
-    if (!exerciseName.trim()) {
-      setExerciseError("Введите название упражнения")
+    const rawData = {
+      name: exerciseName,
+      rxWeight: rxWeight || undefined,
+      rxReps: rxReps || undefined,
+      rxDistance: rxDistance || undefined,
+      scWeight: scWeight || undefined,
+      scReps: scReps || undefined,
+      scDistance: scDistance || undefined,
+    }
+
+    const result = exerciseInputSchema.safeParse(rawData)
+
+    if (!result.success) {
+      const fieldErrors: ExerciseFieldErrors = {}
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof ExerciseFieldErrors
+        if (field) fieldErrors[field] = issue.message
+      }
+      setExerciseFieldErrors(fieldErrors)
       return
     }
 
-    setExerciseError(null)
+    setExerciseFieldErrors({})
 
-    // Add to field array
     append({
       id: Date.now().toString(),
       name: exerciseName,
@@ -93,12 +107,10 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       scWeight: scWeight || undefined,
       scReps: scReps || undefined,
       scDistance: scDistance || undefined,
-      // Legacy compatibility if needed by schema (though schema marks them optional)
       weight: rxWeight || "",
       repetitions: rxReps || "",
     })
 
-    // Reset inputs
     setExerciseName("")
     setRxWeight("")
     setRxReps("")
@@ -119,7 +131,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
         userId: user.id,
         teamId: data.teamId || undefined,
         title: data.title,
-        description: "", // Schema doesn't have description yet, or backend handles it
+        description: "",
         eventDate: data.eventDate,
         exerciseType: data.exerciseType,
         exercises:
@@ -148,6 +160,15 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
     }
   }
 
+  // Helper: input class with optional error highlight
+  const inputClass = (
+    hasError: boolean,
+    base = "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500",
+  ) => `${base} ${hasError ? "border-red-500" : "border-gray-300"}`
+
+  const smallInputClass = (hasError: boolean) =>
+    `w-full px-2 py-1 border rounded ${hasError ? "border-red-500" : "border-gray-300"}`
+
   return (
     <div className="border rounded-lg p-6 mb-6">
       <h3 className="text-xl font-semibold mb-4">Добавить новое событие</h3>
@@ -159,6 +180,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       />
 
       <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-4">
+        {/* Title */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
             Название события *
@@ -167,16 +189,16 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
             type="text"
             id="title"
             {...register("title")}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.title ? "border-red-500" : "border-gray-300"
-            }`}
+            className={inputClass(!!errors.title)}
             placeholder="Введите название события"
+            maxLength={150}
           />
           {errors.title && (
             <p className="text-red-500 text-xs mt-1">{errors.title.message}</p>
           )}
         </div>
 
+        {/* Team */}
         <div>
           <label
             htmlFor="teamId"
@@ -196,18 +218,17 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
           </select>
         </div>
 
+        {/* Exercise Type */}
         <div>
           <label
             htmlFor="exerciseType"
             className="block text-sm font-medium text-gray-700 mb-1">
-            Тип упражнения
+            Тип упражнения *
           </label>
           <select
             id="exerciseType"
             {...register("exerciseType")}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.exerciseType ? "border-red-500" : "border-gray-300"
-            }`}>
+            className={inputClass(!!errors.exerciseType)}>
             <option value="">Выберите тип упражнения</option>
             <option value="running">Бег</option>
             <option value="swimming">Плавание</option>
@@ -221,11 +242,12 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
           )}
         </div>
 
+        {/* Exercises Block */}
         <div className="border p-4 rounded-md bg-gray-50">
           <h4 className="font-medium mb-3">Упражнения</h4>
 
-          {/* New Exercise Inputs */}
           <div className="grid grid-cols-1 gap-4 mb-4">
+            {/* Exercise Name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Название упражнения
@@ -234,68 +256,127 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
                 type="text"
                 value={exerciseName}
                 onChange={(e) => setExerciseName(e.target.value)}
-                className={`w-full px-3 py-2 border rounded-md ${
-                  exerciseError ? "border-red-500" : "border-gray-300"
-                }`}
+                className={smallInputClass(!!exerciseFieldErrors.name).replace(
+                  "px-2 py-1",
+                  "px-3 py-2",
+                )}
                 placeholder="Например: Трастеры"
+                maxLength={100}
               />
-              {exerciseError && (
-                <p className="text-red-500 text-xs mt-1">{exerciseError}</p>
+              {exerciseFieldErrors.name && (
+                <p className="text-red-500 text-xs mt-1">{exerciseFieldErrors.name}</p>
               )}
             </div>
 
+            {/* Rx / Sc columns */}
             <div className="grid grid-cols-2 gap-4">
+              {/* Rx */}
               <div className="bg-blue-50 p-3 rounded">
                 <div className="text-center font-semibold text-blue-800 mb-2">Rx</div>
                 <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={rxWeight}
-                    onChange={(e) => setRxWeight(e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                    placeholder="Вес (кг)"
-                  />
-                  <input
-                    type="text"
-                    value={rxReps}
-                    onChange={(e) => setRxReps(e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                    placeholder="Повторы"
-                  />
-                  <input
-                    type="text"
-                    value={rxDistance}
-                    onChange={(e) => setRxDistance(e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                    placeholder="Дистанция (м)"
-                  />
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={rxWeight}
+                      onChange={(e) => setRxWeight(e.target.value)}
+                      className={smallInputClass(!!exerciseFieldErrors.rxWeight)}
+                      placeholder="Вес (кг)"
+                    />
+                    {exerciseFieldErrors.rxWeight && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {exerciseFieldErrors.rxWeight}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={rxReps}
+                      onChange={(e) => setRxReps(e.target.value)}
+                      className={smallInputClass(!!exerciseFieldErrors.rxReps)}
+                      placeholder="Повторы"
+                    />
+                    {exerciseFieldErrors.rxReps && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {exerciseFieldErrors.rxReps}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={rxDistance}
+                      onChange={(e) => setRxDistance(e.target.value)}
+                      className={smallInputClass(!!exerciseFieldErrors.rxDistance)}
+                      placeholder="Дистанция (м)"
+                    />
+                    {exerciseFieldErrors.rxDistance && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {exerciseFieldErrors.rxDistance}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
 
+              {/* Sc */}
               <div className="bg-green-50 p-3 rounded">
                 <div className="text-center font-semibold text-green-800 mb-2">Sc</div>
                 <div className="space-y-2">
-                  <input
-                    type="text"
-                    value={scWeight}
-                    onChange={(e) => setScWeight(e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                    placeholder="Вес (кг)"
-                  />
-                  <input
-                    type="text"
-                    value={scReps}
-                    onChange={(e) => setScReps(e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                    placeholder="Повторы"
-                  />
-                  <input
-                    type="text"
-                    value={scDistance}
-                    onChange={(e) => setScDistance(e.target.value)}
-                    className="w-full px-2 py-1 border border-gray-300 rounded"
-                    placeholder="Дистанция (м)"
-                  />
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={scWeight}
+                      onChange={(e) => setScWeight(e.target.value)}
+                      className={smallInputClass(!!exerciseFieldErrors.scWeight)}
+                      placeholder="Вес (кг)"
+                    />
+                    {exerciseFieldErrors.scWeight && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {exerciseFieldErrors.scWeight}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      value={scReps}
+                      onChange={(e) => setScReps(e.target.value)}
+                      className={smallInputClass(!!exerciseFieldErrors.scReps)}
+                      placeholder="Повторы"
+                    />
+                    {exerciseFieldErrors.scReps && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {exerciseFieldErrors.scReps}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={scDistance}
+                      onChange={(e) => setScDistance(e.target.value)}
+                      className={smallInputClass(!!exerciseFieldErrors.scDistance)}
+                      placeholder="Дистанция (м)"
+                    />
+                    {exerciseFieldErrors.scDistance && (
+                      <p className="text-red-500 text-xs mt-0.5">
+                        {exerciseFieldErrors.scDistance}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,7 +389,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
             </button>
           </div>
 
-          {/* List of added exercises */}
+          {/* Added exercises list */}
           {fields.length > 0 && (
             <div className="space-y-2">
               <h5 className="text-sm font-medium text-gray-700">Список упражнений:</h5>
@@ -319,9 +400,9 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
                   <div>
                     <span className="font-medium">{field.name}</span>
                     <div className="text-xs text-gray-500">
-                      Rx: {field.rxWeight || "-"}кг / {field.rxReps || "-"} повт. /{" "}
-                      {field.rxDistance || "-"}м | Sc: {field.scWeight || "-"}кг /{" "}
-                      {field.scReps || "-"} повт. / {field.scDistance || "-"}м
+                      Rx: {field.rxWeight || "—"}кг / {field.rxReps || "—"} повт. /{" "}
+                      {field.rxDistance || "—"}м | Sc: {field.scWeight || "—"}кг /{" "}
+                      {field.scReps || "—"} повт. / {field.scDistance || "—"}м
                     </div>
                   </div>
                   <button
@@ -336,6 +417,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
           )}
         </div>
 
+        {/* Date */}
         <div>
           <label
             htmlFor="eventDate"
@@ -346,9 +428,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
             type="date"
             id="eventDate"
             {...register("eventDate")}
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.eventDate ? "border-red-500" : "border-gray-300"
-            }`}
+            className={inputClass(!!errors.eventDate)}
           />
           {errors.eventDate && (
             <p className="text-red-500 text-xs mt-1">{errors.eventDate.message}</p>
