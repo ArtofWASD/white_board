@@ -82,7 +82,7 @@ function LoginForm() {
 
         {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
-          <h2 className="text-3xl font-bold text-center mb-6">Вход</h2>
+          <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">Вход</h2>
 
           <div className="text-center mb-6">
             <p className="text-gray-600 text-sm">

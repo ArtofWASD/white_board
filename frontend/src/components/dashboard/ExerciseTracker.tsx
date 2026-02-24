@@ -1,93 +1,94 @@
-import React, { useState } from 'react';
-import { ExerciseCard } from './ExerciseCard';
-import { ListFilters, ViewMode } from '../ui/ListFilters';
-import Button from '../ui/Button';
+import React, { useState } from "react"
+import { ExerciseCard } from "./ExerciseCard"
+import { ListFilters, ViewMode } from "../ui/ListFilters"
+import Button from "../ui/Button"
 
 interface Exercise {
-  id: string;
-  name: string;
-  maxWeight: number;
-  records: any[];
+  id: string
+  name: string
+  maxWeight: number
+  records: any[]
 }
 
 interface ExerciseTrackerProps {
-  exercises: Exercise[];
-  isLoading: boolean;
-  onCreateExercise: (name: string, initialWeight?: number) => Promise<void>;
-  onAddRecord: (exerciseId: string, weight: number) => Promise<void>;
-  onUpdateExercise: (id: string, name: string) => Promise<void>;
-  isExpanded?: boolean;
-  onToggle?: () => void;
+  exercises: Exercise[]
+  isLoading: boolean
+  onCreateExercise: (name: string, initialWeight?: number) => Promise<void>
+  onAddRecord: (exerciseId: string, weight: number) => Promise<void>
+  onUpdateExercise: (id: string, name: string) => Promise<void>
+  isExpanded?: boolean
+  onToggle?: () => void
 }
 
-export function ExerciseTracker({ 
-  exercises, 
-  isLoading, 
-  onCreateExercise, 
+export function ExerciseTracker({
+  exercises,
+  isLoading,
+  onCreateExercise,
   onAddRecord,
   onUpdateExercise,
   isExpanded = true,
-  onToggle
+  onToggle,
 }: ExerciseTrackerProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
-  const [newExerciseName, setNewExerciseName] = useState('');
-  const [initialWeight, setInitialWeight] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>("list")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [isCreating, setIsCreating] = useState(false)
+  const [newExerciseName, setNewExerciseName] = useState("")
+  const [initialWeight, setInitialWeight] = useState("")
 
   // const [isCollapsed, setIsCollapsed] = useState(false); // УДАЛЕНО локальное состояние
 
   const handleCreateExercise = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newExerciseName.trim()) return;
+    e.preventDefault()
+    if (!newExerciseName.trim()) return
 
     await onCreateExercise(
-      newExerciseName, 
-      initialWeight ? parseFloat(initialWeight) : undefined
-    );
-    
-    setNewExerciseName('');
-    setInitialWeight('');
-    setIsCreating(false);
-  };
+      newExerciseName,
+      initialWeight ? parseFloat(initialWeight) : undefined,
+    )
+
+    setNewExerciseName("")
+    setInitialWeight("")
+    setIsCreating(false)
+  }
 
   const filteredExercises = exercises.filter((ex) =>
-    ex.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+    ex.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  )
 
   return (
-    <div className={`bg-white rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? 'overflow-hidden justify-center px-4' : 'p-6'}`}>
-      <div className={`flex justify-between items-center ${!isExpanded ? '' : 'mb-6'}`}>
-        <h2 className={`font-bold text-gray-800 transition-all ${!isExpanded ? 'text-lg' : 'text-2xl'}`}>Прогресс упражнений</h2>
-        
+    <div
+      className={`bg-white rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-6"}`}>
+      <div className={`flex justify-between items-center ${!isExpanded ? "" : "mb-6"}`}>
+        <h2
+          className={`font-bold text-gray-800 transition-all ${!isExpanded ? "text-lg" : "text-2xl"}`}>
+          Прогресс упражнений
+        </h2>
+
         <div className="flex items-center gap-2">
           {isExpanded && (
-            <Button 
+            <Button
               onClick={() => setIsCreating(!isCreating)}
-              onPointerDown={(e) => e.stopPropagation()}
-            >
-              {isCreating ? 'Отмена' : 'Добавить'}
+              onPointerDown={(e) => e.stopPropagation()}>
+              {isCreating ? "Отмена" : "Добавить"}
             </Button>
           )}
           {/* Кнопка сворачивания - видна только на мобильных/планшетах */}
-          <button 
+          <button
             onClick={onToggle}
             className="lg:hidden p-2 hover:bg-gray-100 rounded-full transition-colors"
             title={!isExpanded ? "Развернуть" : "Свернуть"}
-            onPointerDown={(e) => e.stopPropagation()} 
-          >
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              width="24" 
-              height="24" 
-              viewBox="0 0 24 24" 
-              fill="none" 
-              stroke="currentColor" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
+            onPointerDown={(e) => e.stopPropagation()}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
               strokeLinejoin="round"
-              className={`transform transition-transform duration-200 ${!isExpanded ? 'rotate-180' : ''}`}
-            >
+              className={`transform transition-transform duration-200 ${!isExpanded ? "rotate-180" : ""}`}>
               <polyline points="18 15 12 9 6 15"></polyline>
             </svg>
           </button>
@@ -97,62 +98,73 @@ export function ExerciseTracker({
       {isExpanded && (
         <>
           {isCreating && (
-        <form onSubmit={handleCreateExercise} onPointerDown={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
-          <div className="flex gap-4">
-            <input
-              type="text"
-              placeholder="Название упражнения (например, Жим лежа)"
-              value={newExerciseName}
-              onChange={(e) => setNewExerciseName(e.target.value)}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              autoFocus
-            />
-            <input
-              type="number"
-              step="0.5"
-              placeholder="Вес (кг)"
-              value={initialWeight}
-              onChange={(e) => setInitialWeight(e.target.value)}
-              className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <Button type="submit" disabled={!newExerciseName.trim()}>
-              Сохранить упражнение
-            </Button>
+            <form
+              onSubmit={handleCreateExercise}
+              onPointerDown={(e) => e.stopPropagation()}
+              onKeyDown={(e) => e.stopPropagation()}
+              className="bg-white p-6 rounded-lg shadow-md border border-gray-200 animate-in fade-in slide-in-from-top-4">
+              <div className="flex gap-4">
+                <input
+                  type="text"
+                  placeholder="Название упражнения (например, Жим лежа)"
+                  value={newExerciseName}
+                  onChange={(e) => setNewExerciseName(e.target.value)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                  autoFocus
+                />
+                <input
+                  type="number"
+                  step="0.5"
+                  placeholder="Вес (кг)"
+                  value={initialWeight}
+                  onChange={(e) => setInitialWeight(e.target.value)}
+                  className="w-24 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                />
+                <Button type="submit" disabled={!newExerciseName.trim()}>
+                  Сохранить упражнение
+                </Button>
+              </div>
+            </form>
+          )}
+
+          <ListFilters
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+            onSearchChange={setSearchQuery}
+            searchPlaceholder="Фильтр упражнений..."
+          />
+
+          <div className="flex-1 overflow-y-auto min-h-0 pr-2">
+            {isLoading ? (
+              <div className="text-center py-10">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
+              </div>
+            ) : filteredExercises.length === 0 ? (
+              <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                <p className="text-gray-500">
+                  Упражнения не найдены. Начните с добавления нового!
+                </p>
+              </div>
+            ) : (
+              <div
+                className={
+                  viewMode === "list"
+                    ? "space-y-4"
+                    : "grid grid-cols-1 md:grid-cols-2 gap-6"
+                }>
+                {filteredExercises.map((exercise) => (
+                  <ExerciseCard
+                    key={exercise.id}
+                    exercise={exercise}
+                    onAddRecord={onAddRecord}
+                    onUpdateExercise={onUpdateExercise}
+                  />
+                ))}
+              </div>
+            )}
           </div>
-        </form>
+        </>
       )}
-
-      <ListFilters
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        onSearchChange={setSearchQuery}
-        searchPlaceholder="Фильтр упражнений..."
-      />
-
-      <div className="flex-1 overflow-y-auto min-h-0 pr-2">
-        {isLoading ? (
-          <div className="text-center py-10">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
-          </div>
-        ) : filteredExercises.length === 0 ? (
-          <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-            <p className="text-gray-500">Упражнения не найдены. Начните с добавления нового!</p>
-          </div>
-        ) : (
-          <div className={viewMode === 'list' ? 'space-y-4' : 'grid grid-cols-1 md:grid-cols-2 gap-6'}>
-            {filteredExercises.map((exercise) => (
-              <ExerciseCard
-                key={exercise.id}
-                exercise={exercise}
-                onAddRecord={onAddRecord}
-                onUpdateExercise={onUpdateExercise}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-      </>
-    )}
     </div>
-  );
+  )
 }

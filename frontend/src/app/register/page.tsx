@@ -219,7 +219,9 @@ function RegisterForm() {
 
         {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
-          <h2 className="text-3xl font-bold text-center mb-6">Регистрация</h2>
+          <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">
+            Регистрация
+          </h2>
 
           {renderStepIndicator()}
 
@@ -240,7 +242,9 @@ function RegisterForm() {
                   transition={{ duration: 0.3 }}
                   className="space-y-4">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2">Данные аккаунта</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                      Данные аккаунта
+                    </h3>
                     <p className="text-gray-600 text-sm">
                       Начните свой путь к успеху сегодня.
                     </p>
@@ -318,7 +322,9 @@ function RegisterForm() {
                   transition={{ duration: 0.3 }}
                   className="space-y-4">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2">Личные данные</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                      Личные данные
+                    </h3>
                     <p className="text-gray-600 text-sm">
                       Расскажите нам немного о себе.
                     </p>
@@ -390,7 +396,9 @@ function RegisterForm() {
                   transition={{ duration: 0.3 }}
                   className="space-y-6">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2">Выберите цель</h3>
+                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                      Выберите цель
+                    </h3>
                     <p className="text-gray-600 text-sm">
                       Как вы планируете использовать сервис?
                     </p>
