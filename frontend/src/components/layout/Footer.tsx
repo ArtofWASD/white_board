@@ -11,29 +11,31 @@ const Footer: React.FC = () => {
             <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
               Компания
             </h3>
-            <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+            <Link
+              href="/about"
+              className="text-gray-300 hover:text-white transition-colors">
               О нас
             </Link>
-            <Link href="/knowledge" className="text-gray-300 hover:text-white transition-colors">
-              База знаний
-            </Link>
-            <Link href="/knowledge/news" className="text-gray-300 hover:text-white transition-colors">
+            <Link
+              href="/news"
+              className="text-gray-300 hover:text-white transition-colors">
               Новости
             </Link>
-            <Link href="/knowledge/exercises" className="text-gray-300 hover:text-white transition-colors">
-              Упражнения
+            <Link
+              href="/features"
+              className="text-gray-300 hover:text-white transition-colors">
+              Наши возможности
             </Link>
-            <Link href="/knowledge/workouts" className="text-gray-300 hover:text-white transition-colors">
-              Комплексы
-            </Link>
-            <Link href="/features" className="text-gray-300 hover:text-white transition-colors">
-              Возможности
+            <Link
+              href="/knowledge"
+              className="text-gray-300 hover:text-white transition-colors">
+              База знаний
             </Link>
           </div>
 
           {/* Column 2: Legal & Documents */}
           <div className="flex flex-col space-y-3 items-start text-left w-full md:w-auto">
-             <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
+            <h3 className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-2">
               Документы
             </h3>
             <Link
@@ -53,7 +55,7 @@ const Footer: React.FC = () => {
             </Link>
           </div>
         </div>
-        
+
         <div className="border-t border-gray-700 pt-8 text-center text-gray-400 text-sm">
           <p>&copy; {new Date().getFullYear()} The Slate. Все права защищены.</p>
         </div>

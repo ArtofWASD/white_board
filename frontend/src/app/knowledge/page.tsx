@@ -113,32 +113,10 @@ export default function BlogPage() {
     setSelectedEvent(null)
   }
 
-  // Состояние для новостей и блоков
-  const [newsItems, setNewsItems] = useState<NewsItem[]>([])
+  // Состояние для блоков
   const [knowledgeBlocks, setKnowledgeBlocks] = useState<any[]>([])
 
   useEffect(() => {
-    const fetchNews = async () => {
-      try {
-        const res = await fetch("/api/news?limit=3")
-        if (res.ok) {
-          const data = await res.json()
-          setNewsItems(
-            data.map((item: any) => ({
-              id: item.id,
-              title: item.title,
-              excerpt: item.excerpt,
-              date: new Date(item.createdAt).toLocaleDateString("ru-RU"),
-              readTime: "5 мин чтения", // Заглушка
-              content: item.content,
-            })),
-          )
-        }
-      } catch (e) {
-        logApiError("/api/news?limit=3", e)
-      }
-    }
-
     const fetchBlocks = async () => {
       try {
         const res = await fetch("/api/content-blocks/public?location=KNOWLEDGE")
@@ -151,7 +129,6 @@ export default function BlogPage() {
     }
 
     if (showContent) {
-      fetchNews()
       fetchBlocks()
     }
   }, [showContent])
@@ -161,100 +138,107 @@ export default function BlogPage() {
       <Header onRightMenuClick={() => {}} />
 
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0`}>
-          {/* Сообщение о разработке */}
-          {!loadingConfig && !showContent && (
-             <div className="max-w-4xl mx-auto">
-                <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                  <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
-                    Раздел находится в стадии разработки
-                  </h1>
-                  <div className="mt-8">
-                    <Link
-                      href="/"
-                      className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300">
-                      На главную
-                    </Link>
-                  </div>
-                </div>
+        {/* Сообщение о разработке */}
+        {!loadingConfig && !showContent && (
+          <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col items-center justify-center min-h-[50vh]">
+              <h1 className="text-3xl font-bold text-gray-800 mb-4 text-center">
+                Раздел находится в стадии разработки
+              </h1>
+              <div className="mt-8">
+                <Link
+                  href="/"
+                  className="px-6 py-3 bg-white text-black border border-black font-medium rounded-lg hover:bg-gray-100 transition-colors duration-300">
+                  На главную
+                </Link>
+              </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Временный контент - Скрытый */}
-          <div className={!loadingConfig && showContent ? "" : "hidden"}>
-
-            {/* Секции на всю ширину */}
-            {/* Секции на всю ширину */}
-            <div className="w-full">
-              {[
-                  {
-                    id: "static-wods",
-                    title: "WODs / Тренировки",
-                    description: "Обширная база комплексов упражнений (Workout of the Day). Классические кроссфит-комплексы, героические WODs и многое другое.",
-                    href: "/knowledge/workouts",
-                    imageUrl: null,
-                    isStatic: true
-                  },
-                  {
-                    id: "static-exercises",
-                    title: "База упражнений",
-                    description: "Подробные видеоинструкции, описание техники выполнения и целевые группы мышц для каждого упражнения.",
-                    href: "/knowledge/exercises",
-                    imageUrl: null,
-                    isStatic: true
-                  },
-                  {
-                    id: "static-news",
-                    title: "Новости и статьи",
-                    description: "Последние события нашего зала, анонсы соревнований, полезные статьи о питании и восстановлении.",
-                    href: "/knowledge/news",
-                    imageUrl: null,
-                    isStatic: true
-                  },
-                  ...knowledgeBlocks
-                ].map((block: any, index: number) => {
-                  const href = block.isStatic ? block.href : `/knowledge/article/${block.slug || block.id}`;
-                  return (
-                  <section key={block.id} className={`py-20 border-b border-gray-100 transition-colors ${index % 2 === 0 ? 'bg-white hover:bg-gray-50' : 'bg-slate-50 hover:bg-indigo-50/50'}`}>
-                    <div className="max-w-6xl mx-auto px-4">
-                      <Link href={href} className="block group">
-                        <div className={`flex flex-col ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} items-center gap-12`}>
-                          <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-[1.02]">
-                            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">{block.title}</h2>
-                            {block.description && (
-                              <p className="text-lg text-gray-600 leading-relaxed whitespace-pre-wrap">
-                                {block.description}
-                              </p>
-                            )}
-                            {block.content && !block.isStatic && (
-                              <div className="text-gray-600 leading-relaxed line-clamp-4">
-                                {block.content}
-                              </div>
-                            )}
-                            <div className="mt-4 text-indigo-600 font-medium group-hover:text-indigo-800 transition-colors inline-block">
-                              {block.isStatic ? "Перейти в раздел →" : "Читать далее →"}
+        {/* Временный контент - Скрытый */}
+        <div className={!loadingConfig && showContent ? "" : "hidden"}>
+          {/* Секции на всю ширину */}
+          {/* Секции на всю ширину */}
+          <div className="w-full">
+            {[
+              {
+                id: "static-wods",
+                title: "WODs / Тренировки",
+                description:
+                  "Обширная база комплексов упражнений (Workout of the Day). Классические кроссфит-комплексы, героические WODs и многое другое.",
+                href: "/knowledge/workouts",
+                imageUrl: null,
+                isStatic: true,
+              },
+              {
+                id: "static-exercises",
+                title: "База упражнений",
+                description:
+                  "Подробные видеоинструкции, описание техники выполнения и целевые группы мышц для каждого упражнения.",
+                href: "/knowledge/exercises",
+                imageUrl: null,
+                isStatic: true,
+              },
+              ...knowledgeBlocks,
+            ].map((block: any, index: number) => {
+              const href = block.isStatic
+                ? block.href
+                : `/knowledge/article/${block.slug || block.id}`
+              return (
+                <section
+                  key={block.id}
+                  className={`py-20 border-b border-gray-100 transition-colors ${index % 2 === 0 ? "bg-white hover:bg-gray-50" : "bg-slate-50 hover:bg-indigo-50/50"}`}>
+                  <div className="max-w-6xl mx-auto px-4">
+                    <Link href={href} className="block group">
+                      <div
+                        className={`flex flex-col ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-12`}>
+                        <div className="flex-1 space-y-6 transition-transform duration-300 ease-in-out group-hover:scale-[1.02]">
+                          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 group-hover:text-indigo-600 transition-colors">
+                            {block.title}
+                          </h2>
+                          {block.description && (
+                            <p className="text-lg text-gray-600 leading-relaxed whitespace-pre-wrap">
+                              {block.description}
+                            </p>
+                          )}
+                          {block.content && !block.isStatic && (
+                            <div className="text-gray-600 leading-relaxed line-clamp-4">
+                              {block.content}
                             </div>
-                          </div>
-                          <div className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out group-hover:scale-[1.02] group-hover:shadow-xl ${block.imageUrl ? '' : 'bg-blue-50 shadow-inner'}`}>
-                            {block.imageUrl ? (
-                              <img 
-                        src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || ''}${block.imageUrl}`} 
-                                alt={block.title} 
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                              />
-                            ) : (
-                              <p className="text-blue-400 font-medium text-lg">{block.title}</p>
-                            )}
+                          )}
+                          <div className="mt-4 text-indigo-600 font-medium group-hover:text-indigo-800 transition-colors inline-block">
+                            {block.isStatic ? "Перейти в раздел →" : "Читать далее →"}
                           </div>
                         </div>
-                      </Link>
-                    </div>
-                  </section>
-                )
-              })}
-            </div>
-
-            {/* <div className="max-w-4xl mx-auto mt-16 px-4"> ... </div> */}
+                        <div
+                          className={`flex-1 h-[300px] w-full rounded-2xl flex items-center justify-center text-center overflow-hidden relative transition-transform duration-300 ease-in-out group-hover:scale-[1.02] group-hover:shadow-xl ${block.imageUrl ? "" : "bg-blue-50 shadow-inner"}`}>
+                          {block.imageUrl ? (
+                            <img
+                              src={
+                                block.imageUrl.startsWith("http")
+                                  ? block.imageUrl
+                                  : `${process.env.NEXT_PUBLIC_API_URL || ""}${block.imageUrl}`
+                              }
+                              alt={block.title}
+                              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                            />
+                          ) : (
+                            <p className="text-blue-400 font-medium text-lg">
+                              {block.title}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </div>
+                </section>
+              )
+            })}
           </div>
+
+          {/* <div className="max-w-4xl mx-auto mt-16 px-4"> ... </div> */}
+        </div>
       </main>
 
       <Footer />

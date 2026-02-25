@@ -81,10 +81,8 @@ export default function NewsPage() {
           )}
 
           <div className="mt-12 text-center">
-            <Link
-              href="/knowledge"
-              className="text-indigo-600 font-medium hover:text-indigo-800">
-              ← Назад
+            <Link href="/" className="text-indigo-600 font-medium hover:text-indigo-800">
+              ← На главную
             </Link>
           </div>
         </div>
