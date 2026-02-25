@@ -23,8 +23,12 @@ export default function TimerPage() {
   )
 }
 
+import { NavItem } from "../../types"
+import Image from "next/image"
+
 function TimerPageContent() {
   const [config, setConfig] = useState<TimerConfig | null>(null)
+  const [selectedMode, setSelectedMode] = useState<TimerMode | null>(null)
   const [eventId, setEventId] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -55,7 +59,113 @@ function TimerPageContent() {
 
   // Wait, I need to import useAuthStore first.
 
-  const { user } = useAuthStore()
+  const { user, logout } = useAuthStore()
+
+  // Navigation Items (Same as dashboard/calendar)
+  const navItems = React.useMemo<NavItem[]>(() => {
+    if (!user) return []
+
+    const items: NavItem[] = [
+      {
+        label: "Личный кабинет",
+        href: "/dashboard",
+        icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
+        tooltip: "Личный кабинет",
+      },
+      {
+        label: "Команды",
+        href: "/dashboard/teams",
+        icon: <Image src="/teams_icon.png" alt="Teams" width={32} height={32} />,
+        tooltip: "Команды",
+      },
+      {
+        label: "Лидерборд",
+        href: "/dashboard/leaderboard",
+        icon: <Image src="/leaderboard.png" alt="Leaderboard" width={32} height={32} />,
+        tooltip: "Лидерборд",
+      },
+    ]
+
+    if (
+      user.role === "TRAINER" ||
+      user.role === "ORGANIZATION_ADMIN" ||
+      user.role === "SUPER_ADMIN"
+    ) {
+      items.push({
+        label: "Управление",
+        href: "/dashboard/organization",
+        icon: <Image src="/menegment.png" alt="Management" width={32} height={32} />,
+        tooltip: "Управление",
+      })
+
+      items.push({
+        label: "Атлеты",
+        href: "/dashboard/athletes",
+        icon: <Image src="/athlet_icon.png" alt="Athletes" width={32} height={32} />,
+        tooltip: "Атлеты",
+      })
+
+      if (user.role === "TRAINER" || user.role === "SUPER_ADMIN") {
+        items.push({
+          label: "Занятия",
+          href: "/dashboard/activities",
+          icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
+          tooltip: "Занятия",
+        })
+      }
+    }
+
+    if (user.role === "SUPER_ADMIN") {
+      items.push({
+        label: "Админ",
+        href: "/admin",
+        icon: <Image src="/admin-panel.png" alt="Admin" width={32} height={32} />,
+        tooltip: "Админ",
+      })
+    }
+
+    items.push({
+      label: "Таймер",
+      href: "/timer",
+      icon: <Image src="/stopwatch.png" alt="Timer" width={32} height={32} />,
+      tooltip: "Таймер",
+    })
+
+    items.push(
+      {
+        label: "Календарь",
+        href: "/calendar",
+        icon: <Image src="/calendar_icon.png" alt="Calendar" width={32} height={32} />,
+        tooltip: "Календарь",
+      },
+      {
+        label: "Выйти",
+        href: "#",
+        onClick: async () => {
+          await logout()
+          window.location.href = "/"
+        },
+        icon: (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="w-8 h-8">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
+            />
+          </svg>
+        ),
+        tooltip: "Выйти",
+      },
+    )
+
+    return items
+  }, [user, logout])
 
   const handleSaveResult = async (
     resultVal: string,
@@ -79,9 +189,23 @@ function TimerPageContent() {
   }
 
   return (
-    <TimerLayout>
+    <TimerLayout navItems={navItems}>
       {!config ? (
-        <TimerSetup onStart={setConfig} />
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center mb-8 gap-4">
+            <div className="text-center">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">
+                WOD Таймер
+              </h1>
+              {selectedMode && (
+                <p className="mt-4 text-2xl font-bold text-gray-700 dark:text-gray-300 uppercase tracking-[0.2em] animate-in fade-in slide-in-from-top-2 duration-300">
+                  {selectedMode.replace("_", " ")}
+                </p>
+              )}
+            </div>
+          </div>
+          <TimerSetup onStart={setConfig} onModeSelect={setSelectedMode} />
+        </div>
       ) : (
         <ActiveTimer
           config={config}

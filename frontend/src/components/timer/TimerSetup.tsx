@@ -6,17 +6,18 @@ import { timerConfigSchema, TimerConfigFormData } from "../../lib/validators/tim
 
 interface TimerSetupProps {
   onStart: (config: TimerConfig) => void
+  onModeSelect?: (mode: TimerMode | null) => void
 }
 
 const MODES: { id: TimerMode; label: string; desc: string }[] = [
   { id: "FOR_TIME", label: "For Time", desc: "Закончить задание как можно быстрее" },
   { id: "AMRAP", label: "AMRAP", desc: "Как можно больше раундов/повторений" },
   { id: "EMOM", label: "EMOM", desc: "Каждую минуту в начале минуты" },
-  { id: "TABATA", label: "Tabata", desc: "20с Работа / 10с Отдых" },
+  { id: "TABATA", label: "Tabata", desc: "Высокоинтенсивные интервалы" },
   { id: "INTERVALS", label: "Intervals", desc: "Настраиваемые интервалы" },
 ]
 
-export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
+export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart, onModeSelect }) => {
   const [selectedMode, setSelectedMode] = React.useState<TimerMode | null>(null)
 
   const {
@@ -40,10 +41,13 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
 
   // Set mode in form when user selects it
   useEffect(() => {
+    if (onModeSelect) {
+      onModeSelect(selectedMode)
+    }
     if (selectedMode) {
       reset(undefined, { keepDefaultValues: true })
     }
-  }, [selectedMode, reset])
+  }, [selectedMode, reset, onModeSelect])
 
   const onSubmit = (data: TimerConfigFormData) => {
     if (!selectedMode) return
@@ -64,9 +68,9 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
         config.rounds = data.emomRounds
         break
       case "TABATA":
-        config.intervalWork = 20
-        config.intervalRest = 10
-        config.rounds = 8
+        config.intervalWork = data.workBytes
+        config.intervalRest = data.restBytes
+        config.rounds = data.rounds
         break
       case "INTERVALS":
         config.intervalWork = data.workBytes
@@ -98,16 +102,8 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
 
   return (
     <div className="w-full max-w-lg mx-auto bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 mt-12">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
-          {MODES.find((m) => m.id === selectedMode)?.label} Настройка
-        </h2>
-        <button
-          onClick={() => setSelectedMode(null)}
-          type="button"
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
-          Сменить режим
-        </button>
+      <div className="mb-8 flex flex-col items-center">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Настройка</h2>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -174,17 +170,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
           </div>
         )}
 
-        {selectedMode === "TABATA" && (
-          <div className="text-gray-600 dark:text-gray-300 text-center py-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-100 dark:border-gray-600">
-            <p className="text-xl">Стандартная Tabata</p>
-            <p className="text-3xl font-bold text-gray-900 dark:text-white my-2">
-              20с Работа / 10с Отдых
-            </p>
-            <p>8 Раундов</p>
-          </div>
-        )}
-
-        {selectedMode === "INTERVALS" && (
+        {(selectedMode === "TABATA" || selectedMode === "INTERVALS") && (
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
@@ -194,7 +180,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
                 <input
                   type="number"
                   {...register("workBytes")}
-                  className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-4 rounded-xl border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-2xl text-center font-bold transition-all"
+                  className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-4 rounded-xl border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-blue-900 outline-none text-2xl text-center font-bold transition-all"
                 />
                 {errors.workBytes && (
                   <p className="text-red-500 text-sm mt-1">{errors.workBytes.message}</p>
@@ -207,7 +193,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
                 <input
                   type="number"
                   {...register("restBytes")}
-                  className="w-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-xl border border-red-200 dark:border-red-800 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900 outline-none text-2xl text-center font-bold transition-all"
+                  className="w-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-xl border border-red-200 dark:border-red-800 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-blue-900 outline-none text-2xl text-center font-bold transition-all"
                 />
                 {errors.restBytes && (
                   <p className="text-red-500 text-sm mt-1">{errors.restBytes.message}</p>
@@ -215,11 +201,13 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
               </div>
             </div>
             <div>
-              <label className="block text-gray-600 font-medium mb-2">Раунды</label>
+              <label className="block text-gray-600 dark:text-gray-400 font-medium mb-2">
+                Раунды
+              </label>
               <input
                 type="number"
                 {...register("rounds")}
-                className="w-full bg-gray-50 text-gray-900 p-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-2xl text-center transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-2xl text-center transition-all"
               />
               {errors.rounds && (
                 <p className="text-red-500 text-sm mt-1">{errors.rounds.message}</p>
@@ -228,11 +216,20 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
           </div>
         )}
 
-        <button
-          type="submit"
-          className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xl mt-8 transition-colors shadow-lg shadow-blue-200 dark:shadow-none">
-          НАЧАТЬ ТАЙМЕР
-        </button>
+        <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <button
+            type="submit"
+            className="flex-1 py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xl transition-colors shadow-lg shadow-blue-200 dark:shadow-none order-1 sm:order-2">
+            НАЧАТЬ ТАЙМЕР
+          </button>
+
+          <button
+            onClick={() => setSelectedMode(null)}
+            type="button"
+            className="flex-1 py-5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl text-xl transition-colors shadow-lg shadow-red-200 dark:shadow-none order-2 sm:order-1">
+            СМЕНИТЬ РЕЖИМ
+          </button>
+        </div>
       </form>
     </div>
   )

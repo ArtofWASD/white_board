@@ -105,7 +105,7 @@ const AthleteTeamView: React.FC<
           noPadding
           className="overflow-hidden border-0 shadow-md dark:bg-gray-800 dark:border dark:border-white">
           {/* Team Header */}
-          <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
+          <div className="p-5 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-3 mb-2">
@@ -216,7 +216,7 @@ const AthleteTeamView: React.FC<
                     <p className="text-xs text-gray-400 dark:text-gray-300 uppercase font-bold tracking-wider mb-0.5">
                       Тренер
                     </p>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
                       {team.owner?.name} {team.owner?.lastName}
                     </p>
                   </div>
@@ -225,7 +225,7 @@ const AthleteTeamView: React.FC<
             </div>
           </div>
 
-          <div className="p-3 sm:p-6 md:p-8 dark:bg-gray-800">
+          <div className="p-5 sm:p-6 md:p-8 dark:bg-gray-800">
             <ListFilters
               viewMode={viewMode}
               onViewModeChange={setViewMode}
@@ -321,21 +321,16 @@ const AthleteTeamView: React.FC<
                     <tr>
                       <th
                         scope="col"
-                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Имя
                       </th>
                       <th
                         scope="col"
-                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Email
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                        className="px-4 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Роль
                       </th>
                       {isTrainer && onRemoveMember && (
-                        <th scope="col" className="relative px-2 py-2 sm:px-6 sm:py-3">
+                        <th scope="col" className="relative px-4 py-2 sm:px-6 sm:py-3">
                           <span className="sr-only">Действия</span>
                         </th>
                       )}
@@ -349,7 +344,7 @@ const AthleteTeamView: React.FC<
                           key={member.id}
                           className="hover:bg-blue-50 dark:hover:bg-gray-900 cursor-pointer transition-colors"
                           onClick={() => handleUserClick(member.user)}>
-                          <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                          <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10 hidden sm:block">
                                 <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-white font-bold border border-gray-200 dark:border-gray-600">
@@ -364,12 +359,7 @@ const AthleteTeamView: React.FC<
                               </div>
                             </div>
                           </td>
-                          <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">
-                              {member.user.email}
-                            </div>
-                          </td>
-                          <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
+                          <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 member.role === "OWNER"
@@ -386,7 +376,7 @@ const AthleteTeamView: React.FC<
                             </span>
                           </td>
                           {isTrainer && onRemoveMember && (
-                            <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap text-right text-sm font-medium">
                               {member.role !== "OWNER" && (
                                 <button
                                   onClick={(e) => {

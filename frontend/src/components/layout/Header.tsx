@@ -36,7 +36,10 @@ const Header: React.FC<HeaderProps> = ({
   const { user, isAuthenticated } = useAuthStore()
   const { teams, selectedTeam, selectTeam } = useTeamStore()
 
-  const isDashboard = pathname?.startsWith("/dashboard") || pathname === "/calendar"
+  const isDashboard =
+    pathname?.startsWith("/dashboard") ||
+    pathname === "/calendar" ||
+    pathname === "/timer"
 
   const handleLoginClick = () => {
     router.push("/login")
@@ -116,7 +119,7 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4 z-50">
       <div className="flex items-center">
-        {isDashboard && (
+        {onLeftMenuClick && (
           <button
             onClick={onLeftMenuClick}
             className="lg:hidden mr-2 p-1 text-gray-300 hover:text-white focus:outline-none">
@@ -146,7 +149,19 @@ const Header: React.FC<HeaderProps> = ({
           />
         </Link>
 
-        {/* Mobile Centered Logo - Removed as per request */}
+        {/* Mobile Centered Logo */}
+        <Link
+          href="/"
+          className="lg:hidden absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={120}
+            height={40}
+            priority
+            className="w-auto h-8 object-contain"
+          />
+        </Link>
       </div>
 
       <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center w-full max-w-2xl pointer-events-none lg:pointer-events-auto">
@@ -191,8 +206,8 @@ const Header: React.FC<HeaderProps> = ({
                 </div>
               )}
             </>
-          ) : !isDashboard ? null : ( // Removed the center logo logic entirely
-            // Логотип по центру на мобильных для панели управления - Removed centered logo logic
+          ) : !isDashboard ? null : (
+            // Логотип по центру на мобильных для панели управления
             <div className="flex flex-col items-center">
               {isAuthenticated && teams.length > 0 && selectedTeam ? (
                 teams.length > 1 ? (

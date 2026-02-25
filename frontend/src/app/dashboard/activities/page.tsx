@@ -76,7 +76,7 @@ export default function ActivitiesPage() {
   }
 
   return (
-    <div className="w-full p-2 sm:p-4 lg:p-8">
+    <div className="w-full p-1 sm:p-2 lg:p-4">
       <ListFilters
         viewMode={viewMode}
         onViewModeChange={setViewMode}
@@ -94,7 +94,9 @@ export default function ActivitiesPage() {
           if (teamEvents.length === 0) return null
 
           return (
-            <div key={teamId} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
+            <div
+              key={teamId}
+              className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 sm:p-4">
               <div className="flex items-center mb-6">
                 <div className="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
                 <h2 className="text-lg font-bold text-gray-800 dark:text-white">
@@ -166,22 +168,12 @@ export default function ActivitiesPage() {
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                          className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Название
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
-                          Дата
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
-                          Тип
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
+                          className="px-4 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-24">
                           Статус
                         </th>
                       </tr>
@@ -191,25 +183,18 @@ export default function ActivitiesPage() {
                         <tr
                           key={event.id}
                           className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4">
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {event.title}
                             </div>
-                            {event.description && (
-                              <div className="text-sm text-gray-500 truncate max-w-xs">
-                                {event.description}
-                              </div>
-                            )}
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                              {new Date(event.eventDate).toLocaleDateString("ru-RU")}
+                              {event.exerciseType && ` • ${event.exerciseType}`}
+                            </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {new Date(event.eventDate).toLocaleDateString("ru-RU")}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {event.exerciseType || "-"}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-4 py-4 text-right whitespace-nowrap">
                             <span
-                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              className={`px-2 inline-flex text-[10px] leading-5 font-semibold rounded-full ${
                                 event.status === "FUTURE"
                                   ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                                   : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
