@@ -51,12 +51,12 @@ export interface ContentBlock {
 
 export const adminApi = {
   // --- Content: WODs ---
-  getWods: () => apiClient.get<Wod[]>("/api/admin/wods"),
+  getWods: () => apiClient.get<Wod[]>("/api/wods"),
   createWod: (data: Omit<Wod, "id" | "createdAt">) =>
-    apiClient.post<Wod>("/api/admin/wods", data),
+    apiClient.post<Wod>("/api/wods", data),
   updateWod: (id: string, data: Partial<Wod>) =>
-    apiClient.patch<Wod>(`/api/admin/wods/${id}`, data),
-  deleteWod: (id: string) => apiClient.delete<void>(`/api/admin/wods/${id}`),
+    apiClient.patch<Wod>(`/api/wods/${id}`, data),
+  deleteWod: (id: string) => apiClient.delete<void>(`/api/wods/${id}`),
 
   // --- Content: Content Blocks (Slides) ---
   getContentBlocks: () => apiClient.get<ContentBlock[]>("/api/content-blocks"),
@@ -72,12 +72,12 @@ export const adminApi = {
   },
 
   // --- Content: Exercises ---
-  getExercises: () => apiClient.get<GlobalExercise[]>("/api/admin/exercises"),
+  getExercises: () => apiClient.get<GlobalExercise[]>("/api/content-exercises"),
   createExercise: (data: Omit<GlobalExercise, "id">) =>
-    apiClient.post<GlobalExercise>("/api/admin/exercises", data),
+    apiClient.post<GlobalExercise>("/api/content-exercises", data),
   updateExercise: (id: string, data: Partial<GlobalExercise>) =>
-    apiClient.put<GlobalExercise>(`/api/admin/exercises/${id}`, data),
-  deleteExercise: (id: string) => apiClient.delete<void>(`/api/admin/exercises/${id}`),
+    apiClient.put<GlobalExercise>(`/api/content-exercises/${id}`, data),
+  deleteExercise: (id: string) => apiClient.delete<void>(`/api/content-exercises/${id}`),
 
   // --- Content: News ---
   // News endpoints are shared but admin actions are typically protected
