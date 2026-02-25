@@ -218,59 +218,62 @@ export default function LeaderboardPage() {
   }
 
   const getRowStyle = (index: number) => {
-    // Pastel colors with transparency
-    if (index === 0) return "bg-yellow-100/40 hover:bg-yellow-100/60" // Gold
-    if (index === 1) return "bg-gray-100/60 hover:bg-gray-200/60" // Silver
-    if (index === 2) return "bg-orange-100/40 hover:bg-orange-100/60" // Bronze
-    return "hover:bg-gray-50"
+    if (index === 0) return "hover:bg-gray-50 dark:hover:bg-gray-900"
+    if (index === 1) return "hover:bg-gray-50 dark:hover:bg-gray-900"
+    if (index === 2) return "hover:bg-gray-50 dark:hover:bg-gray-900"
+    return "hover:bg-gray-50 dark:hover:bg-gray-900"
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Лидерборд</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Лидерборд</h1>
         <div className="w-full sm:w-64">
           {events.length > 0 ? (
             <select
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               {events.map((event) => (
-                <option key={event.id} value={event.id}>
+                <option key={event.id} value={event.id} className="text-black">
                   {event.title} ({new Date(event.eventDate).toLocaleDateString()})
                 </option>
               ))}
             </select>
           ) : (
-            <div className="text-sm text-gray-500">Нет доступных событий</div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              Нет доступных событий
+            </div>
           )}
         </div>
       </div>
 
-      <Card className="overflow-hidden" noPadding>
+      <Card
+        className="overflow-hidden dark:bg-black dark:border dark:border-white"
+        noPadding>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
               <tr>
-                <th className="py-4 px-6 text-sm font-semibold text-gray-600 uppercase tracking-wider w-20 text-center">
+                <th className="py-4 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-20 text-center">
                   #
                 </th>
-                <th className="py-4 px-6 text-sm font-semibold text-gray-600 uppercase tracking-wider">
+                <th className="py-4 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
                   Атлет
                 </th>
-                <th className="py-4 px-6 text-sm font-semibold text-gray-600 uppercase tracking-wider text-right">
+                <th className="py-4 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-right">
                   Результат
                 </th>
-                <th className="py-4 px-6 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center">
+                <th className="py-4 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-center">
                   Категория
                 </th>
 
-                <th className="py-4 px-6 text-sm font-semibold text-gray-600 uppercase tracking-wider text-center w-24">
+                <th className="py-4 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider text-center w-24">
                   {/* Actions */}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
               {loading ? (
                 // Skeleton state
                 [1, 2, 3].map((i) => (
@@ -294,13 +297,13 @@ export default function LeaderboardPage() {
                   <tr
                     key={result.id}
                     className={`${getRowStyle(index)} transition-colors`}>
-                    <td className="py-4 px-6 text-center text-gray-500 font-medium">
+                    <td className="py-4 px-6 text-center text-gray-500 dark:text-gray-400 font-medium">
                       {index + 1}
                     </td>
-                    <td className="py-4 px-6 font-medium text-gray-900">
+                    <td className="py-4 px-6 font-medium text-gray-900 dark:text-white">
                       {result.username}
                     </td>
-                    <td className="py-4 px-6 text-right font-bold text-gray-800">
+                    <td className="py-4 px-6 text-right font-bold text-gray-800 dark:text-white">
                       {formatResultValue(result)}
                     </td>
 
@@ -351,7 +354,9 @@ export default function LeaderboardPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="py-8 text-center text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="py-8 text-center text-gray-500 dark:text-gray-400">
                     Нет результатов для этого события
                   </td>
                 </tr>
@@ -369,16 +374,16 @@ export default function LeaderboardPage() {
         size="sm">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Комментарий
             </label>
             <textarea
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
+              className="w-full px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
               placeholder="Введите текст..."
             />
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               Ваше имя будет добавлено автоматически: {user?.name}{" "}
               {user?.lastName ? user.lastName.charAt(0) : ""}
             </p>
@@ -386,7 +391,7 @@ export default function LeaderboardPage() {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setCommentModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-white bg-gray-100 dark:bg-black border dark:border-white rounded-md hover:bg-gray-200 dark:hover:bg-gray-800">
               Отмена
             </button>
             <button

@@ -87,64 +87,60 @@ export default function AthletesPage() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         hideToggleOnMobile={true}>
-        <h1 className="text-3xl font-bold text-gray-800">Атлеты</h1>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Атлеты</h1>
       </ListFilters>
 
       {athletes.length === 0 ? (
-        <div className="bg-white p-8 rounded-lg shadow-md text-center">
-          <p className="text-gray-600 text-lg">В ваших командах пока нет атлетов.</p>
-          <p className="text-gray-500 mt-2">
+        <div className="bg-white dark:bg-black p-8 rounded-lg shadow-md text-center">
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
+            В ваших командах пока нет атлетов.
+          </p>
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
             Добавьте атлетов в свои команды на странице "Команды".
           </p>
         </div>
       ) : (
         <>
           {viewMode === "list" ? (
-            <div className="bg-white rounded-lg shadow-md overflow-hidden">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
+            <div className="bg-white dark:bg-black rounded-lg shadow-md dark:border dark:border-white overflow-hidden">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-900">
                   <tr>
                     <th
                       scope="col"
-                      className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Имя
                     </th>
                     <th
                       scope="col"
-                      className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      className="px-2 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                       Команды
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-gray-50 dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                   {athletes.map((athlete) => (
-                    <tr key={athlete.id} className="hover:bg-gray-50">
+                    <tr
+                      key={athlete.id}
+                      className="hover:bg-gray-100 dark:hover:bg-gray-800">
                       <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <div className="hidden sm:flex h-10 w-10 rounded-full bg-blue-100 items-center justify-center text-blue-600 font-bold text-lg">
+                          <div className="hidden sm:flex h-10 w-10 rounded-full bg-blue-100 dark:bg-gray-800 items-center justify-center text-blue-600 dark:text-white font-bold text-lg">
                             {athlete.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="ml-0 sm:ml-4">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {athlete.name}
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{athlete.email}</div>
-                      </td>
-                      <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-wrap gap-2">
                           {athlete.teams.map((team) => (
                             <span
                               key={team.id}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-gray-800 text-blue-800 dark:text-white">
                               {team.name}
                             </span>
                           ))}
@@ -160,26 +156,27 @@ export default function AthletesPage() {
               {athletes.map((athlete) => (
                 <div
                   key={athlete.id}
-                  className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+                  className="bg-white dark:bg-black rounded-lg shadow-md dark:border dark:border-white p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center mb-4">
-                    <div className="h-16 w-16 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-2xl">
+                    <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-gray-800 flex items-center justify-center text-blue-600 dark:text-white font-bold text-2xl">
                       {athlete.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-bold text-gray-900">{athlete.name}</h3>
-                      <p className="text-sm text-gray-500">{athlete.email}</p>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                        {athlete.name}
+                      </h3>
                     </div>
                   </div>
 
                   <div>
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                    <h4 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
                       Команды
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {athlete.teams.map((team) => (
                         <span
                           key={team.id}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-gray-800 text-blue-800 dark:text-white">
                           {team.name}
                         </span>
                       ))}

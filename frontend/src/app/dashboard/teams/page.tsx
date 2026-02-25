@@ -102,9 +102,11 @@ export default function TeamsPage() {
 
   if (!user) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-2 text-red-600">Доступ запрещен</h2>
-        <p className="text-gray-700">Пожалуйста, войдите в систему.</p>
+      <div className="bg-white dark:bg-black p-6 rounded-lg shadow-md dark:border dark:border-white">
+        <h2 className="text-xl font-semibold mb-2 text-red-600 dark:text-red-400">
+          Доступ запрещен
+        </h2>
+        <p className="text-gray-700 dark:text-gray-300">Пожалуйста, войдите в систему.</p>
       </div>
     )
   }
@@ -116,7 +118,7 @@ export default function TeamsPage() {
 
   return (
     <div className="w-full">
-      <h1 className="text-3xl font-bold text-gray-800 mb-8 text-center">
+      <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-8 text-center">
         {isManagement ? "Управление командами" : "Моя команда"}
       </h1>
 
@@ -125,13 +127,18 @@ export default function TeamsPage() {
           {loadingTeams ? <Loader /> : <AthleteTeamView teams={teams} />}
         </div>
       ) : (
-        <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-          <h3 className="text-xl font-semibold mb-2 text-indigo-600">Создать команду</h3>
-          <p className="text-gray-700 mb-4">
+        <div className="bg-white dark:bg-black p-6 rounded-lg shadow-md mb-8">
+          <h3 className="text-xl font-semibold mb-2 text-indigo-600 dark:text-white">
+            Создать команду
+          </h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
             Создайте новую команду для управления спортсменами
           </p>
           {!showCreateTeamForm ? (
-            <Button onClick={() => setShowCreateTeamForm(true)} variant="outline">
+            <Button
+              onClick={() => setShowCreateTeamForm(true)}
+              variant="outline"
+              className="dark:text-white dark:bg-black dark:border-white">
               Создать команду
             </Button>
           ) : (
@@ -150,7 +157,7 @@ export default function TeamsPage() {
                 <div>
                   <label
                     htmlFor="teamName"
-                    className="block text-sm font-medium text-gray-700 mb-1">
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Название команды *
                   </label>
                   <input
@@ -158,7 +165,7 @@ export default function TeamsPage() {
                     id="teamName"
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     required
                   />
                 </div>
@@ -166,20 +173,24 @@ export default function TeamsPage() {
                 <div>
                   <label
                     htmlFor="teamDescription"
-                    className="block text-sm font-medium text-gray-700 mb-1">
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     Описание
                   </label>
                   <textarea
                     id="teamDescription"
                     value={teamDescription}
                     onChange={(e) => setTeamDescription(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     rows={3}
                   />
                 </div>
 
                 <div className="flex space-x-3">
-                  <Button type="submit" disabled={loading} variant="outline">
+                  <Button
+                    type="submit"
+                    disabled={loading}
+                    variant="outline"
+                    className="dark:text-white dark:bg-black dark:border-white">
                     {loading ? "Создание..." : "Создать команду"}
                   </Button>
                   <Button
@@ -192,7 +203,8 @@ export default function TeamsPage() {
                       setError(null)
                       setSuccess(null)
                     }}
-                    variant="outline">
+                    variant="outline"
+                    className="dark:text-white dark:bg-black dark:border-white">
                     Отмена
                   </Button>
                 </div>
@@ -202,7 +214,9 @@ export default function TeamsPage() {
 
           {/* Display Teams */}
           <div className="mt-8">
-            <h4 className="text-lg font-semibold mb-4 text-gray-800">Ваши команды</h4>
+            <h4 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">
+              Ваши команды
+            </h4>
             {error && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                 {error}
@@ -211,7 +225,7 @@ export default function TeamsPage() {
             {loadingTeams ? (
               <Loader />
             ) : teams.length === 0 ? (
-              <p className="text-gray-600">У вас пока нет команд</p>
+              <p className="text-gray-600 dark:text-gray-400">У вас пока нет команд</p>
             ) : (
               <AthleteTeamView
                 teams={teams}

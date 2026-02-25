@@ -35,7 +35,7 @@ const AthleteTeamView: React.FC<
   const [activeTeamName, setActiveTeamName] = useState<string>("")
   const { user } = useAuthStore()
   const [activeChatId, setActiveChatId] = useState<string | null>(null)
-  
+
   // Invite state
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false)
   const [activeInviteTeamId, setActiveInviteTeamId] = useState<string | null>(null)
@@ -70,8 +70,8 @@ const AthleteTeamView: React.FC<
 
   if (teams.length === 0) {
     return (
-      <Card className="p-12 text-center max-w-2xl mx-auto mt-8">
-        <div className="bg-blue-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600">
+      <Card className="p-12 text-center max-w-2xl mx-auto mt-8 dark:bg-black dark:border dark:border-white">
+        <div className="bg-blue-50 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 dark:text-white">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             className="h-10 w-10"
@@ -86,10 +86,10 @@ const AthleteTeamView: React.FC<
             />
           </svg>
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
           Вы пока не состоите в команде
         </h3>
-        <p className="text-gray-500 text-lg leading-relaxed">
+        <p className="text-gray-500 dark:text-gray-300 text-lg leading-relaxed">
           Попросите своего тренера прислать вам ссылку-приглашение или QR-код для
           вступления в команду.
         </p>
@@ -100,20 +100,23 @@ const AthleteTeamView: React.FC<
   return (
     <div className="space-y-8">
       {teams.map((team) => (
-        <Card key={team.id} noPadding className="overflow-hidden border-0 shadow-md">
+        <Card
+          key={team.id}
+          noPadding
+          className="overflow-hidden border-0 shadow-md dark:bg-black dark:border dark:border-white">
           {/* Team Header */}
-          <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 bg-white">
+          <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-black">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-3 mb-2">
-                  <span className="bg-blue-600 w-2 h-8 rounded-full"></span>
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">
+                  <span className="bg-blue-600 dark:bg-white w-2 h-8 rounded-full"></span>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                     {team.name}
                   </h2>
                   {isTrainer && onEditTeam && (
                     <button
                       onClick={() => onEditTeam(team.id)}
-                      className="ml-2 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all flex-shrink-0"
+                      className="ml-2 p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:text-white dark:hover:bg-gray-800 rounded-full transition-all flex-shrink-0"
                       title="Редактировать команду">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -132,7 +135,7 @@ const AthleteTeamView: React.FC<
                   )}
                 </div>
                 {team.description && (
-                  <p className="text-gray-500 text-lg max-w-3xl ml-5">
+                  <p className="text-gray-500 dark:text-gray-300 text-lg max-w-3xl ml-5">
                     {team.description}
                   </p>
                 )}
@@ -142,29 +145,31 @@ const AthleteTeamView: React.FC<
                 {/* Invite Button for Trainers */}
                 {isTrainer && (
                   <div
-                    className="flex items-center justify-center p-3 sm:p-4 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors bg-gray-50 h-16 sm:min-w-[120px]"
+                    className="flex items-center justify-center p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-black h-16 sm:min-w-[120px]"
                     onClick={() => {
                       setActiveInviteTeamId(team.id)
                       setIsInviteModalOpen(true)
                     }}
                     title="Пригласить участников">
-                    <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 sm:mr-2" />
-                    <span className="hidden sm:inline font-medium text-indigo-600">Пригласить</span>
+                    <UserPlus className="h-5 w-5 sm:h-6 sm:w-6 text-indigo-600 dark:text-white sm:mr-2" />
+                    <span className="hidden sm:inline font-medium text-indigo-600 dark:text-white">
+                      Пригласить
+                    </span>
                   </div>
                 )}
 
                 {/* Чат с командой */}
                 <div
-                  className="flex items-center justify-center p-4 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors bg-gray-50 h-16 w-16"
+                  className="flex items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-black h-16 w-16"
                   onClick={() => handleOpenChat(team)}
                   title="Чат команды">
-                  <MessageSquare className="h-6 w-6 text-blue-600" />
+                  <MessageSquare className="h-6 w-6 text-blue-600 dark:text-white" />
                 </div>
 
                 {/* Чат с тренером (для атлетов) */}
                 {!isTrainer && team.owner && (
                   <div
-                    className="flex items-center justify-center p-4 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors bg-gray-50 h-16 w-16"
+                    className="flex items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-black h-16 w-16"
                     onClick={async () => {
                       if (team.ownerId) {
                         try {
@@ -181,18 +186,18 @@ const AthleteTeamView: React.FC<
                     }}
                     title="Написать тренеру">
                     <div className="relative">
-                      <MessageSquare className="h-6 w-6 text-green-600" />
-                      <div className="absolute -top-2 -right-2 bg-green-100 rounded-full p-0.5">
-                        <UserPlus size={10} className="text-green-600" />
+                      <MessageSquare className="h-6 w-6 text-green-600 dark:text-white" />
+                      <div className="absolute -top-2 -right-2 bg-green-100 dark:bg-gray-700 rounded-full p-0.5">
+                        <UserPlus size={10} className="text-green-600 dark:text-white" />
                       </div>
                     </div>
                   </div>
                 )}
 
                 <div
-                  className="flex items-center bg-gray-50 p-2 pr-6 rounded-xl border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors"
+                  className="flex items-center bg-gray-50 dark:bg-black p-2 pr-6 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => team.owner && handleUserClick(team.owner)}>
-                  <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 mr-4">
+                  <div className="h-12 w-12 bg-blue-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-blue-600 dark:text-white mr-4">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-6 w-6"
@@ -208,10 +213,10 @@ const AthleteTeamView: React.FC<
                     </svg>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400 uppercase font-bold tracking-wider mb-0.5">
+                    <p className="text-xs text-gray-400 dark:text-gray-300 uppercase font-bold tracking-wider mb-0.5">
                       Тренер
                     </p>
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-gray-900 dark:text-white">
                       {team.owner?.name} {team.owner?.lastName}
                     </p>
                   </div>
@@ -220,14 +225,14 @@ const AthleteTeamView: React.FC<
             </div>
           </div>
 
-          <div className="p-3 sm:p-6 md:p-8">
+          <div className="p-3 sm:p-6 md:p-8 dark:bg-black">
             <ListFilters
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               hideViewToggle={isMobileOrTablet}>
               <div className="flex items-center">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 flex items-center mr-4">
-                  <span className="bg-gray-100 text-gray-600 p-2 rounded-lg mr-3">
+                <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white flex items-center mr-4">
+                  <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-white p-2 rounded-lg mr-3">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -244,7 +249,7 @@ const AthleteTeamView: React.FC<
                   </span>
                   Состав команды
                 </h3>
-                <span className="text-xs sm:text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+                <span className="text-xs sm:text-sm font-bold text-blue-600 dark:text-white bg-blue-50 dark:bg-gray-800 px-3 py-1 rounded-full border border-blue-100 dark:border-gray-600">
                   {team.members?.length || 0} участников
                 </span>
               </div>
@@ -257,19 +262,19 @@ const AthleteTeamView: React.FC<
                   .map((member) => (
                     <div
                       key={member.id}
-                      className="relative flex items-center p-4 rounded-xl bg-gray-50 border border-gray-100 hover:border-blue-300 hover:bg-white transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer"
+                      className="relative flex items-center p-4 rounded-xl bg-gray-50 dark:bg-black border border-gray-100 dark:border-white hover:border-blue-300 dark:hover:border-gray-400 hover:bg-white dark:hover:bg-gray-900 transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer"
                       onClick={() => handleUserClick(member.user)}>
-                      <div className="h-10 w-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-400 group-hover:text-blue-600 group-hover:border-blue-200 transition-colors shadow-sm">
+                      <div className="h-10 w-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 dark:text-white group-hover:text-blue-600 group-hover:border-blue-200 dark:group-hover:text-white transition-colors shadow-sm">
                         <span className="text-xs font-bold uppercase">
                           {member.user.name.charAt(0)}
                           {member.user.lastName?.charAt(0) || ""}
                         </span>
                       </div>
                       <div className="ml-4 overflow-hidden flex-1">
-                        <p className="font-bold text-gray-900 truncate">
+                        <p className="font-bold text-gray-900 dark:text-white truncate">
                           {member.user.name} {member.user.lastName}
                         </p>
-                        <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-300 uppercase font-black tracking-widest">
                           {member.role === "OWNER"
                             ? "Главный тренер"
                             : member.role === "ADMIN"
@@ -310,23 +315,23 @@ const AthleteTeamView: React.FC<
                   ))}
               </div>
             ) : (
-              <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
+              <div className="bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-white overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
                       <th
                         scope="col"
-                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Имя
                       </th>
                       <th
                         scope="col"
-                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Email
                       </th>
                       <th
                         scope="col"
-                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        className="px-2 py-2 sm:px-6 sm:py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         Роль
                       </th>
                       {isTrainer && onRemoveMember && (
@@ -336,31 +341,31 @@ const AthleteTeamView: React.FC<
                       )}
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-black divide-y divide-gray-200 dark:divide-gray-700">
                     {team.members
                       ?.filter((member) => member.user.id !== user?.id)
                       .map((member) => (
                         <tr
                           key={member.id}
-                          className="hover:bg-blue-50 cursor-pointer transition-colors"
+                          className="hover:bg-blue-50 dark:hover:bg-gray-900 cursor-pointer transition-colors"
                           onClick={() => handleUserClick(member.user)}>
                           <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10 hidden sm:block">
-                                <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold border border-gray-200">
+                                <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-white font-bold border border-gray-200 dark:border-gray-600">
                                   {member.user.name.charAt(0)}
                                   {member.user.lastName?.charAt(0) || ""}
                                 </div>
                               </div>
                               <div className="sm:ml-4">
-                                <div className="text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-900">
+                                <div className="text-xs sm:text-sm font-medium text-blue-600 dark:text-white hover:text-blue-900 dark:hover:text-gray-200">
                                   {member.user.name} {member.user.lastName}
                                 </div>
                               </div>
                             </div>
                           </td>
                           <td className="px-2 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
-                            <div className="text-xs sm:text-sm text-gray-500">
+                            <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-300">
                               {member.user.email}
                             </div>
                           </td>
