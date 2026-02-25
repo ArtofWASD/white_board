@@ -80,7 +80,9 @@ export default function OrganizationPage() {
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Управление организацией</h1>
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
+          Управление организацией
+        </h1>
         <Button onClick={handleExportCSV} variant="primary">
           Скачать отчет (CSV)
         </Button>
@@ -88,31 +90,35 @@ export default function OrganizationPage() {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500">
-          <div className="text-gray-500 text-sm font-medium uppercase">Всего Атлетов</div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border dark:border-gray-700 border-l-4 border-l-blue-500">
+          <div className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
+            Всего Атлетов
+          </div>
+          <div className="text-3xl font-bold text-gray-800 dark:text-white mt-2">
             {stats?.totalAthletes || 0}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500">
-          <div className="text-gray-500 text-sm font-medium uppercase">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border dark:border-gray-700 border-l-4 border-l-green-500">
+          <div className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
             Активных (30 дн)
           </div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">
+          <div className="text-3xl font-bold text-gray-800 dark:text-white mt-2">
             {stats?.activeAthletes || 0}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500">
-          <div className="text-gray-500 text-sm font-medium uppercase">Команды</div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border dark:border-gray-700 border-l-4 border-l-purple-500">
+          <div className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
+            Команды
+          </div>
+          <div className="text-3xl font-bold text-gray-800 dark:text-white mt-2">
             {stats?.totalTeams || 0}
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md border-l-4 border-orange-500">
-          <div className="text-gray-500 text-sm font-medium uppercase">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border dark:border-gray-700 border-l-4 border-l-orange-500">
+          <div className="text-gray-500 dark:text-gray-400 text-sm font-medium uppercase">
             Тренировки (30 дн)
           </div>
-          <div className="text-3xl font-bold text-gray-800 mt-2">
+          <div className="text-3xl font-bold text-gray-800 dark:text-white mt-2">
             {stats?.totalWorkouts || 0}
           </div>
         </div>
@@ -121,8 +127,8 @@ export default function OrganizationPage() {
       {/* Charts / Activity Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Simple Activity Chart Placeholder */}
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-bold mb-4">Активность по дням</h2>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Активность по дням</h2>
           <div className="h-64 flex items-end justify-between space-x-2">
             {/* Dynamically generate bars roughly based on 'totalWorkouts' for visual demo, 
                     since we don't have daily breakdown from API yet. 
@@ -130,7 +136,7 @@ export default function OrganizationPage() {
             {[...Array(7)].map((_, i) => (
               <div
                 key={i}
-                className="w-full bg-blue-100 rounded-t-md hover:bg-blue-200 transition-colors relative group">
+                className="w-full bg-blue-100 dark:bg-blue-900/20 rounded-t-md hover:bg-blue-200 dark:hover:bg-blue-900/40 transition-colors relative group">
                 <div
                   className="absolute bottom-0 w-full bg-blue-500 rounded-t-md transition-all duration-500"
                   style={{ height: `${Math.random() * 80 + 20}%` }} // Random height for demo
@@ -141,7 +147,7 @@ export default function OrganizationPage() {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-sm text-gray-500">
+          <div className="flex justify-between mt-2 text-sm text-gray-500 dark:text-gray-400">
             <span>Пн</span>
             <span>Вт</span>
             <span>Ср</span>
@@ -153,34 +159,36 @@ export default function OrganizationPage() {
         </div>
 
         {/* Recent Activity Table */}
-        <div className="bg-white p-6 rounded-lg shadow-md overflow-hidden">
-          <h2 className="text-xl font-bold mb-4">Последние изменения</h2>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md overflow-hidden border dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Последние изменения</h2>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Атлет
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Действие
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Дата
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {stats?.recentActivity?.map((activity) => (
                   <tr key={activity.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
                       {activity.athleteName}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       <div>{activity.action}</div>
-                      <div className="text-xs text-gray-400">{activity.details}</div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500">
+                        {activity.details}
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {new Date(activity.date).toLocaleDateString()}
                     </td>
                   </tr>

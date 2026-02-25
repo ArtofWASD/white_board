@@ -42,7 +42,9 @@ export function AgendaView({
               ref={day.isToday ? todayRef : null}
               className={cn(
                 "flex flex-col sm:flex-row gap-1 p-2 rounded-xl transition-colors",
-                day.isToday ? "bg-primary/5 ring-1 ring-primary/20" : "hover:bg-muted/30",
+                day.isToday
+                  ? "bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20"
+                  : "hover:bg-muted/30 dark:hover:bg-gray-800",
               )}>
               {/* Date Column */}
               <div className="flex sm:flex-col items-center sm:items-start gap-1 sm:w-24 shrink-0">

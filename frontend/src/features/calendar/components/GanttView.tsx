@@ -149,7 +149,7 @@ export function GanttView({
   return (
     <div className="flex flex-col md:flex-row h-full gap-4 overflow-hidden">
       {/* Mini Calendar Sidebar */}
-      <div className="w-full md:w-[260px] shrink-0 bg-background border rounded-xl p-4 flex flex-col gap-2 h-fit">
+      <div className="w-full md:w-[260px] shrink-0 bg-background dark:bg-gray-800 border dark:border-gray-700 rounded-xl p-4 flex flex-col gap-2 h-fit">
         <div className="flex items-center justify-between mb-2">
           <span className="font-semibold capitalize">
             {format(currentDate, "LLLL yyyy", { locale: ru })}
@@ -180,10 +180,10 @@ export function GanttView({
                       !day.isCurrentMonth && "text-muted-foreground/30",
                       isSelected
                         ? "bg-primary text-primary-foreground font-bold shadow-md"
-                        : "hover:bg-muted font-medium text-foreground",
+                        : "hover:bg-muted dark:hover:bg-gray-700 font-medium text-foreground",
                       !isSelected &&
                         hasWorkouts &&
-                        "bg-orange-100 text-orange-700 font-bold",
+                        "bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 font-bold",
                     )}>
                     {formatDayNumber(day.date)}
                   </button>
@@ -195,8 +195,8 @@ export function GanttView({
       </div>
 
       {/* Gantt / Timeline Area */}
-      <div className="flex-1 flex flex-col bg-background border rounded-xl overflow-hidden shadow-sm h-full max-h-[600px] md:max-h-full">
-        <div className="p-4 border-b flex justify-between items-center bg-muted/10">
+      <div className="flex-1 flex flex-col bg-background dark:bg-gray-900 border dark:border-gray-700 rounded-xl overflow-hidden shadow-sm h-full max-h-[600px] md:max-h-full">
+        <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center bg-muted/10 dark:bg-gray-800/50">
           <div>
             <h3 className="font-bold text-lg">
               {format(currentDate, "d MMMM, EEEE", { locale: ru })}
@@ -212,11 +212,11 @@ export function GanttView({
           ref={scrollContainerRef}>
           <div className="min-w-[3600px] h-full relative">
             {/* Time Header */}
-            <div className="flex border-b sticky top-0 bg-background z-10 pointer-events-none">
+            <div className="flex border-b dark:border-gray-700 sticky top-0 bg-background dark:bg-gray-900 z-10 pointer-events-none">
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="w-[150px] shrink-0 p-2 text-xs text-muted-foreground border-r font-medium">
+                  className="w-[150px] shrink-0 p-2 text-xs text-muted-foreground border-r dark:border-gray-700 font-medium">
                   {hour}:00
                 </div>
               ))}
@@ -229,7 +229,7 @@ export function GanttView({
               {hours.map((hour) => (
                 <div
                   key={hour}
-                  className="w-[150px] shrink-0 border-r border-dashed border-border/40 h-full hover:bg-muted/10 transition-colors"
+                  className="w-[150px] shrink-0 border-r border-dashed border-border/40 dark:border-gray-700/40 h-full hover:bg-muted/10 dark:hover:bg-gray-800/20 transition-colors"
                 />
               ))}
             </div>
@@ -253,7 +253,7 @@ export function GanttView({
                         onWorkoutClick(workout)
                       }}
                       className={cn(
-                        "absolute h-[80px] rounded-lg p-3 cursor-pointer transition-shadow group overflow-visible pointer-events-auto shadow-sm border select-none",
+                        "absolute h-[80px] rounded-lg p-3 cursor-pointer transition-shadow group overflow-visible pointer-events-auto shadow-sm border dark:border-gray-700 select-none",
                         "hover:shadow-md hover:z-20",
                         getWorkoutColorClass(workout.type),
                       )}
@@ -280,7 +280,7 @@ export function GanttView({
 
                       {/* Tooltip */}
                       <div className="absolute -top-12 left-0 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
-                        <div className="bg-white text-zinc-950 px-3 py-2 rounded-md shadow-md border text-xs flex flex-col gap-0.5">
+                        <div className="bg-white dark:bg-gray-800 text-zinc-950 dark:text-white px-3 py-2 rounded-md shadow-md border dark:border-gray-700 text-xs flex flex-col gap-0.5">
                           <span className="font-semibold">{workout.title}</span>
                           <span className="text-muted-foreground">
                             {workout.scheduledTime} • {workout.type}

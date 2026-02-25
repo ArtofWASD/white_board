@@ -131,7 +131,7 @@ export function StrengthTrainingModule({
             onChange={(e) => setSelectedExerciseId(e.target.value)}
             onPointerDown={handleInputPointerDown}
             onKeyDown={handleInputKeyDown}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900">
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             <option value="">Выберите упражнение</option>
             {exercises.map((ex) => (
               <option key={ex.id} value={ex.id}>
@@ -152,7 +152,7 @@ export function StrengthTrainingModule({
               onChange={(e) => setOneRepMax(Number(e.target.value))}
               onPointerDown={handleInputPointerDown}
               onKeyDown={handleInputKeyDown}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="кг"
             />
           </div>
@@ -166,7 +166,7 @@ export function StrengthTrainingModule({
               onChange={(e) => setTrainingMax(Number(e.target.value))}
               onPointerDown={handleInputPointerDown}
               onKeyDown={handleInputKeyDown}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               placeholder="кг"
             />
           </div>
@@ -206,7 +206,7 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>65% × 5 ({calculateWeight(0.65)}кг)</div>
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
-                  <div className="font-bold text-blue-600">
+                  <div className="font-bold text-gray-900 dark:text-white">
                     85% × 5+ ({calculateWeight(0.85)}кг)
                   </div>
                 </div>
@@ -219,7 +219,7 @@ export function StrengthTrainingModule({
                     onKeyDown={handleInputKeyDown}>
                     <input
                       type="number"
-                      className="w-full min-w-[3rem] px-1 py-1 border rounded text-right text-sm bg-white text-gray-900"
+                      className="w-full min-w-[3rem] px-1 py-1 border dark:border-gray-600 rounded text-right text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-400"
                       placeholder="Reps"
                       value={logReps || ""}
                       onChange={(e) => setLogReps(Number(e.target.value))}
@@ -252,7 +252,7 @@ export function StrengthTrainingModule({
 Рабочие: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`,
                         )
                       }
-                      className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                      className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
                       <svg
@@ -289,7 +289,7 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>70% × 3 ({calculateWeight(0.7)}кг)</div>
                   <div>80% × 3 ({calculateWeight(0.8)}кг)</div>
-                  <div className="font-bold text-blue-600">
+                  <div className="font-bold text-gray-900 dark:text-white">
                     90% × 3+ ({calculateWeight(0.9)}кг)
                   </div>
                 </div>
@@ -337,7 +337,7 @@ export function StrengthTrainingModule({
 Рабочие: 3x${calculateWeight(0.7)}кг, 3x${calculateWeight(0.8)}кг, 3+x${calculateWeight(0.9)}кг`,
                         )
                       }
-                      className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                      className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в calendar"
                       onPointerDown={handleInputPointerDown}>
                       <svg
@@ -374,7 +374,7 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div>85% × 3 ({calculateWeight(0.85)}кг)</div>
-                  <div className="font-bold text-blue-600">
+                  <div className="font-bold text-gray-900 dark:text-white">
                     95% × 1+ ({calculateWeight(0.95)}кг)
                   </div>
                 </div>
@@ -422,7 +422,7 @@ export function StrengthTrainingModule({
 Рабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`,
                         )
                       }
-                      className="text-gray-400 hover:text-blue-600 p-2 rounded-full hover:bg-blue-50 transition-colors"
+                      className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
                       <svg
@@ -475,7 +475,7 @@ export function StrengthTrainingModule({
       <div className="mt-auto">
         <Button
           variant="ghost"
-          className="w-full justify-center text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+          className="w-full justify-center text-gray-700 hover:text-gray-900 hover:bg-gray-100"
           onClick={() => setShowHistory(true)}
           onPointerDown={handleInputPointerDown}>
           История
@@ -519,7 +519,7 @@ export function StrengthTrainingModule({
                       <span className="text-sm font-medium text-gray-900">
                         {new Date(record.date).toLocaleDateString()}
                       </span>
-                      <span className="text-xs px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">
+                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700 font-medium">
                         Неделя {record.week}
                       </span>
                     </div>

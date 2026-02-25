@@ -50,7 +50,7 @@ export function CalendarHeader({
 
       {/* Line 2: View Selector + Team Selector */}
       <div className="flex flex-row items-center justify-between w-full lg:w-auto lg:justify-end gap-4">
-        <div className="flex items-center bg-muted/50 p-1 rounded-lg border">
+        <div className="flex items-center bg-muted/50 dark:bg-gray-800 p-1 rounded-lg border dark:border-gray-700">
           <button
             onClick={() => onViewChange("month")}
             className={cn(

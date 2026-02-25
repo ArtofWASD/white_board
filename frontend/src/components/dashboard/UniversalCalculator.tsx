@@ -92,13 +92,13 @@ export function UniversalCalculator({
 
   const moduleSwitcher =
     showTexas && show531 ? (
-      <InteractiveArea className="flex bg-gray-100 p-1 rounded-lg">
+      <InteractiveArea className="flex bg-gray-100 dark:bg-gray-700 p-1 rounded-lg">
         <button
           onClick={() => setActiveModule("texas")}
           className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
             activeModule === "texas"
-              ? "bg-white text-blue-600 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"
           }`}>
           Техасский
         </button>
@@ -106,8 +106,8 @@ export function UniversalCalculator({
           onClick={() => setActiveModule("531")}
           className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${
             activeModule === "531"
-              ? "bg-white text-blue-600 shadow-sm"
-              : "text-gray-500 hover:text-gray-700"
+              ? "bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"
           }`}>
           5/3/1
         </button>

@@ -1,27 +1,32 @@
-import React from 'react';
-import { useTeamStore } from '../../lib/store/useTeamStore';
-import { Team } from '../../types';
+import React from "react"
+import { useTeamStore } from "../../lib/store/useTeamStore"
+import { Team } from "../../types"
 
 interface TeamSelectorProps {
-  selectedTeamId: string | null;
-  onSelectTeam: (teamId: string | null) => void;
-  className?: string;
+  selectedTeamId: string | null
+  onSelectTeam: (teamId: string | null) => void
+  className?: string
 }
 
-const TeamSelector: React.FC<TeamSelectorProps> = ({ selectedTeamId, onSelectTeam, className = '' }) => {
-  const { teams } = useTeamStore();
+const TeamSelector: React.FC<TeamSelectorProps> = ({
+  selectedTeamId,
+  onSelectTeam,
+  className = "",
+}) => {
+  const { teams } = useTeamStore()
 
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      <label htmlFor="team-select" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+      <label
+        htmlFor="team-select"
+        className="text-sm font-medium text-gray-700 dark:text-white whitespace-nowrap">
         Команда:
       </label>
       <select
         id="team-select"
-        value={selectedTeamId || 'my'}
+        value={selectedTeamId || "my"}
         onChange={(e) => onSelectTeam(e.target.value)}
-        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white text-gray-900"
-      >
+        className="block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2 border bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors">
         <option value="my">Мои события</option>
         <option value="all_teams">Все команды</option>
         {teams.map((team) => (
@@ -31,7 +36,7 @@ const TeamSelector: React.FC<TeamSelectorProps> = ({ selectedTeamId, onSelectTea
         ))}
       </select>
     </div>
-  );
-};
+  )
+}
 
-export default TeamSelector;
+export default TeamSelector

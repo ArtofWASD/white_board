@@ -81,7 +81,7 @@ export default function ActivitiesPage() {
         viewMode={viewMode}
         onViewModeChange={setViewMode}
         hideToggleOnMobile={true}>
-        <h1 className="text-3xl font-bold text-gray-900 w-full text-center sm:text-left">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white w-full text-center sm:text-left">
           Занятия команд
         </h1>
       </ListFilters>
@@ -94,10 +94,12 @@ export default function ActivitiesPage() {
           if (teamEvents.length === 0) return null
 
           return (
-            <div key={teamId} className="bg-gray-50 rounded-xl p-6">
+            <div key={teamId} className="bg-gray-50 dark:bg-gray-900 rounded-xl p-6">
               <div className="flex items-center mb-6">
                 <div className="w-2 h-8 bg-blue-500 rounded-full mr-3"></div>
-                <h2 className="text-lg font-bold text-gray-800">{teamName}</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">
+                  {teamName}
+                </h2>
                 <span className="ml-4 px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
                   {teamEvents.length}{" "}
                   {teamEvents.length === 1
@@ -113,13 +115,13 @@ export default function ActivitiesPage() {
                   {teamEvents.map((event) => (
                     <div
                       key={event.id}
-                      className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100">
+                      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow p-6 border border-gray-100 dark:border-gray-700">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
                             {event.title}
                           </h3>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
                             {new Date(event.eventDate).toLocaleDateString("ru-RU", {
                               weekday: "long",
                               year: "numeric",
@@ -139,7 +141,7 @@ export default function ActivitiesPage() {
                       </div>
 
                       {event.description && (
-                        <p className="text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
                           {event.description}
                         </p>
                       )}
@@ -158,37 +160,39 @@ export default function ActivitiesPage() {
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                           Название
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
                           Дата
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-40">
                           Тип
                         </th>
                         <th
                           scope="col"
-                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                          className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-32">
                           Статус
                         </th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                       {teamEvents.map((event) => (
-                        <tr key={event.id} className="hover:bg-gray-50 transition-colors">
+                        <tr
+                          key={event.id}
+                          className="hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors">
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm font-medium text-gray-900">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {event.title}
                             </div>
                             {event.description && (
@@ -197,18 +201,18 @@ export default function ActivitiesPage() {
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {new Date(event.eventDate).toLocaleDateString("ru-RU")}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                             {event.exerciseType || "-"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
                               className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                                 event.status === "FUTURE"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-gray-100 text-gray-800"
+                                  ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                  : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                               }`}>
                               {event.status === "FUTURE" ? "Предстоящее" : "Прошедшее"}
                             </span>
@@ -224,8 +228,8 @@ export default function ActivitiesPage() {
         })}
 
         {sortedTeamIds.length === 0 && (
-          <div className="text-center py-12 bg-gray-50 rounded-xl">
-            <p className="text-gray-500 text-lg">Занятий пока нет</p>
+          <div className="text-center py-12 bg-gray-50 dark:bg-gray-900 rounded-xl">
+            <p className="text-gray-500 dark:text-gray-400 text-lg">Занятий пока нет</p>
           </div>
         )}
       </div>

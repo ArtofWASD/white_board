@@ -165,7 +165,7 @@ const ActiveTimer: React.FC<{
     <div className="w-full max-w-4xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       <button
         onClick={handleReset}
-        className="mb-6 text-gray-500 hover:text-gray-900 flex items-center gap-2 transition-colors">
+        className="mb-6 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white flex items-center gap-2 transition-colors">
         ← Назад к настройкам
       </button>
 
@@ -184,7 +184,7 @@ const ActiveTimer: React.FC<{
         }
       />
 
-      <div className="mt-8 text-center text-gray-600 font-mono text-sm">
+      <div className="mt-8 text-center text-gray-600 dark:text-gray-400 font-mono text-sm">
         Режим: {config.mode} • Раунды: {config.rounds || 1} • Время:{" "}
         {Math.floor((config.intervalWork || config.duration || config.timeCap || 0) / 60)}{" "}
         мин

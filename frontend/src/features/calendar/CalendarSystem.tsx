@@ -130,7 +130,7 @@ export function CalendarSystem({
   )
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
+    <div className="flex flex-col h-full bg-background dark:bg-gray-900 relative">
       <CalendarHeader
         currentDate={currentDate}
         view={view}
@@ -191,7 +191,7 @@ export function CalendarSystem({
       {/* Floating Action Button for Mobile/Agenda View */}
       {view === "agenda" && (
         <button
-          className="fixed right-6 rounded-full h-14 w-14 shadow-xl border-2 border-gray-900 z-50 bg-white text-black flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors"
+          className="fixed right-6 rounded-full h-14 w-14 shadow-xl border-2 border-gray-900 dark:border-gray-700 z-50 bg-white dark:bg-gray-800 text-black dark:text-white flex items-center justify-center cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           style={{ bottom: `${footerHeight + 10}px` }}
           onClick={() => {
             setCreateDate(new Date()) // Default to today

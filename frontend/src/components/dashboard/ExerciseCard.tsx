@@ -125,7 +125,7 @@ export function ExerciseCard({
               <button
                 onClick={() => setIsEditing(true)}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="text-gray-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                className="text-gray-400 hover:text-gray-700 dark:hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg
                   className="w-4 h-4"
                   fill="none"
@@ -176,7 +176,7 @@ export function ExerciseCard({
         <button
           onClick={() => setShowHistory(!showHistory)}
           onPointerDown={(e) => e.stopPropagation()}
-          className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1 w-full justify-center">
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-blue-400 flex items-center gap-1 w-full justify-center">
           {showHistory ? "Скрыть историю" : "Показать историю"}
           <svg
             className={`w-4 h-4 transform transition-transform ${showHistory ? "rotate-180" : ""}`}

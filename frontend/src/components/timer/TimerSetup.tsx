@@ -85,11 +85,11 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
           <button
             key={m.id}
             onClick={() => setSelectedMode(m.id)}
-            className="flex flex-col items-center justify-center p-8 bg-white hover:bg-gray-50 rounded-2xl shadow-md transition-all hover:scale-105 border border-gray-200 hover:border-blue-500 group">
-            <h3 className="text-3xl font-bold text-gray-800 mb-2 group-hover:text-blue-600">
+            className="flex flex-col items-center justify-center p-8 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 group">
+            <h3 className="text-3xl font-bold text-gray-800 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400">
               {m.label}
             </h3>
-            <p className="text-gray-500 text-center">{m.desc}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-center">{m.desc}</p>
           </button>
         ))}
       </div>
@@ -97,15 +97,15 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
   }
 
   return (
-    <div className="w-full max-w-lg mx-auto bg-white p-8 rounded-3xl shadow-xl border border-gray-100 mt-12">
+    <div className="w-full max-w-lg mx-auto bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 mt-12">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-800">
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
           {MODES.find((m) => m.id === selectedMode)?.label} Настройка
         </h2>
         <button
           onClick={() => setSelectedMode(null)}
           type="button"
-          className="text-sm text-gray-500 hover:text-blue-600 flex items-center gap-1">
+          className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 flex items-center gap-1">
           Сменить режим
         </button>
       </div>
@@ -113,13 +113,13 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {selectedMode === "FOR_TIME" && (
           <div>
-            <label className="block text-gray-600 font-medium mb-2">
+            <label className="block text-gray-600 dark:text-gray-400 font-medium mb-2">
               Лимит времени (минуты)
             </label>
             <input
               type="number"
               {...register("timeCapMinutes")}
-              className="w-full bg-gray-50 text-gray-900 p-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-2xl text-center transition-all"
+              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-2xl text-center transition-all"
             />
             {errors.timeCapMinutes && (
               <p className="text-red-500 text-sm mt-1">{errors.timeCapMinutes.message}</p>
@@ -129,13 +129,13 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
 
         {selectedMode === "AMRAP" && (
           <div>
-            <label className="block text-gray-600 font-medium mb-2">
+            <label className="block text-gray-600 dark:text-gray-400 font-medium mb-2">
               Длительность (минуты)
             </label>
             <input
               type="number"
               {...register("durationMinutes")}
-              className="w-full bg-gray-50 text-gray-900 p-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-2xl text-center transition-all"
+              className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-2xl text-center transition-all"
             />
             {errors.durationMinutes && (
               <p className="text-red-500 text-sm mt-1">
@@ -148,13 +148,13 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
         {selectedMode === "EMOM" && (
           <div className="space-y-4">
             <div>
-              <label className="block text-gray-600 font-medium mb-2">
+              <label className="block text-gray-600 dark:text-gray-400 font-medium mb-2">
                 Интервал (секунды)
               </label>
               <input
                 type="number"
                 {...register("emomInterval")}
-                className="w-full bg-gray-50 text-gray-900 p-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-2xl text-center transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-2xl text-center transition-all"
               />
               {errors.emomInterval && (
                 <p className="text-red-500 text-sm mt-1">{errors.emomInterval.message}</p>
@@ -165,7 +165,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
               <input
                 type="number"
                 {...register("emomRounds")}
-                className="w-full bg-gray-50 text-gray-900 p-4 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none text-2xl text-center transition-all"
+                className="w-full bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white p-4 rounded-xl border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none text-2xl text-center transition-all"
               />
               {errors.emomRounds && (
                 <p className="text-red-500 text-sm mt-1">{errors.emomRounds.message}</p>
@@ -175,9 +175,9 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
         )}
 
         {selectedMode === "TABATA" && (
-          <div className="text-gray-600 text-center py-4 bg-gray-50 rounded-xl border border-gray-100">
+          <div className="text-gray-600 dark:text-gray-300 text-center py-4 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-100 dark:border-gray-600">
             <p className="text-xl">Стандартная Tabata</p>
-            <p className="text-3xl font-bold text-gray-900 my-2">
+            <p className="text-3xl font-bold text-gray-900 dark:text-white my-2">
               20с Работа / 10с Отдых
             </p>
             <p>8 Раундов</p>
@@ -188,26 +188,26 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-gray-600 font-medium mb-2">
+                <label className="block text-gray-600 dark:text-gray-400 font-medium mb-2">
                   Работа (сек)
                 </label>
                 <input
                   type="number"
                   {...register("workBytes")}
-                  className="w-full bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 focus:border-green-500 focus:ring-2 focus:ring-green-100 outline-none text-2xl text-center font-bold"
+                  className="w-full bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-4 rounded-xl border border-green-200 dark:border-green-800 focus:border-green-500 focus:ring-2 focus:ring-green-100 dark:focus:ring-green-900 outline-none text-2xl text-center font-bold transition-all"
                 />
                 {errors.workBytes && (
                   <p className="text-red-500 text-sm mt-1">{errors.workBytes.message}</p>
                 )}
               </div>
               <div>
-                <label className="block text-gray-600 font-medium mb-2">
+                <label className="block text-gray-600 dark:text-gray-400 font-medium mb-2">
                   Отдых (сек)
                 </label>
                 <input
                   type="number"
                   {...register("restBytes")}
-                  className="w-full bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 focus:border-red-500 focus:ring-2 focus:ring-red-100 outline-none text-2xl text-center font-bold"
+                  className="w-full bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400 p-4 rounded-xl border border-red-200 dark:border-red-800 focus:border-red-500 focus:ring-2 focus:ring-red-100 dark:focus:ring-red-900 outline-none text-2xl text-center font-bold transition-all"
                 />
                 {errors.restBytes && (
                   <p className="text-red-500 text-sm mt-1">{errors.restBytes.message}</p>
@@ -230,7 +230,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart }) => {
 
         <button
           type="submit"
-          className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xl mt-8 transition-colors shadow-lg shadow-blue-200">
+          className="w-full py-5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xl mt-8 transition-colors shadow-lg shadow-blue-200 dark:shadow-none">
           НАЧАТЬ ТАЙМЕР
         </button>
       </form>

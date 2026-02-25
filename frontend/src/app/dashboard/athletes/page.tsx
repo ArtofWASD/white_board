@@ -91,7 +91,7 @@ export default function AthletesPage() {
       </ListFilters>
 
       {athletes.length === 0 ? (
-        <div className="bg-white dark:bg-black p-8 rounded-lg shadow-md text-center">
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md text-center">
           <p className="text-gray-600 dark:text-gray-300 text-lg">
             В ваших командах пока нет атлетов.
           </p>
@@ -102,9 +102,9 @@ export default function AthletesPage() {
       ) : (
         <>
           {viewMode === "list" ? (
-            <div className="bg-white dark:bg-black rounded-lg shadow-md dark:border dark:border-white overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:border dark:border-gray-700 overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-900">
+                <thead className="bg-gray-50 dark:bg-gray-700">
                   <tr>
                     <th
                       scope="col"
@@ -118,29 +118,20 @@ export default function AthletesPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-gray-50 dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody className="bg-gray-50 dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {athletes.map((athlete) => (
                     <tr
                       key={athlete.id}
                       className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                      <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="hidden sm:flex h-10 w-10 rounded-full bg-blue-100 dark:bg-gray-800 items-center justify-center text-blue-600 dark:text-white font-bold text-lg">
-                            {athlete.name.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="ml-0 sm:ml-4">
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
-                              {athlete.name}
-                            </div>
-                          </div>
-                        </div>
+                      <td className="px-2 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                        {athlete.name}
                       </td>
                       <td className="px-2 sm:px-6 py-4 whitespace-nowrap">
                         <div className="flex flex-wrap gap-2">
                           {athlete.teams.map((team) => (
                             <span
                               key={team.id}
-                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-gray-800 text-blue-800 dark:text-white">
+                              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-gray-800 text-blue-800 dark:text-white border dark:border-white">
                               {team.name}
                             </span>
                           ))}
@@ -156,12 +147,9 @@ export default function AthletesPage() {
               {athletes.map((athlete) => (
                 <div
                   key={athlete.id}
-                  className="bg-white dark:bg-black rounded-lg shadow-md dark:border dark:border-white p-6 hover:shadow-lg transition-shadow">
+                  className="bg-white dark:bg-gray-800 rounded-lg shadow-md dark:border dark:border-gray-700 p-6 hover:shadow-lg transition-shadow">
                   <div className="flex items-center mb-4">
-                    <div className="h-16 w-16 rounded-full bg-blue-100 dark:bg-gray-800 flex items-center justify-center text-blue-600 dark:text-white font-bold text-2xl">
-                      {athlete.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="ml-4">
+                    <div className="ml-0">
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                         {athlete.name}
                       </h3>
@@ -176,7 +164,7 @@ export default function AthletesPage() {
                       {athlete.teams.map((team) => (
                         <span
                           key={team.id}
-                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-gray-800 text-blue-800 dark:text-white">
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-gray-800 text-blue-800 dark:text-white border dark:border-white">
                           {team.name}
                         </span>
                       ))}

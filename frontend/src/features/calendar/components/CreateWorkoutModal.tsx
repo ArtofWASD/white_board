@@ -360,7 +360,7 @@ export function CreateWorkoutModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col bg-white dark:bg-gray-800 dark:border-gray-700">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>Создать тренировку</DialogTitle>
           <div className="sr-only">Заполните форму для создания новой тренировки</div>
@@ -484,7 +484,7 @@ export function CreateWorkoutModal({
                   <SelectTrigger id="team-select" className="bg-background">
                     <SelectValue placeholder="Выберите команду..." />
                   </SelectTrigger>
-                  <SelectContent className="bg-white text-gray-900">
+                  <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border dark:border-gray-700">
                     <SelectItem value="none">Личная тренировка</SelectItem>
                     {availableTeams.map((team) => (
                       <SelectItem key={team.id} value={team.id}>
@@ -856,7 +856,7 @@ export function CreateWorkoutModal({
                 {exercises.map((ex) => (
                   <div
                     key={ex.id}
-                    className="flex items-center justify-between bg-background p-2 rounded border text-sm">
+                    className="flex items-center justify-between bg-background dark:bg-gray-900/50 p-2 rounded border dark:border-gray-700 text-sm">
                     <div>
                       <span className="font-medium">{ex.name}</span>
                       <div className="text-xs text-muted-foreground">
@@ -882,7 +882,7 @@ export function CreateWorkoutModal({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-white dark:hover:text-white dark:hover:bg-transparent !flex-row"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-950/30 !flex-row"
                         onClick={() => handleRemoveExercise(ex.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -894,7 +894,7 @@ export function CreateWorkoutModal({
           </div>
         </div>
 
-        <DialogFooter className="p-4 border-t bg-muted/20">
+        <DialogFooter className="p-4 border-t dark:border-gray-700 bg-muted/20 dark:bg-gray-900/20">
           <Button variant="outline" onClick={onClose} type="button">
             Отмена
           </Button>
@@ -902,7 +902,7 @@ export function CreateWorkoutModal({
             onClick={handleSubmit}
             type="button"
             variant="outline"
-            className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors">
+            className="border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600 bg-transparent transition-colors">
             Создать тренировку
           </Button>
         </DialogFooter>

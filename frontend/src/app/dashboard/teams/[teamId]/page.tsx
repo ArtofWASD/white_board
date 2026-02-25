@@ -202,12 +202,12 @@ export default function EditTeamPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="flex items-center mb-8">
           <button
             onClick={() => router.push("/dashboard/teams")}
-            className="mr-4 text-gray-500 hover:text-gray-700 transition-colors">
+            className="mr-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -229,7 +229,7 @@ export default function EditTeamPage() {
                 type="text"
                 value={editNameValue}
                 onChange={(e) => setEditNameValue(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
                 autoFocus
               />
               <button
@@ -249,7 +249,7 @@ export default function EditTeamPage() {
             </div>
           ) : (
             <div className="flex items-center">
-              <h1 className="text-3xl font-bold text-gray-800">
+              <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
                 {team ? `Редактирование команды: ${team.name}` : "Загрузка..."}
               </h1>
               {team && (
@@ -289,24 +289,26 @@ export default function EditTeamPage() {
         )}
 
         {/* Team Members List */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Состав команды</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border dark:border-gray-700">
+          <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            Состав команды
+          </h2>
 
           {teamMembers.length === 0 ? (
             <p className="text-gray-600 italic mb-4">В команде пока нет участников.</p>
           ) : (
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg mb-6">
-              <table className="min-w-full divide-y divide-gray-300">
-                <thead className="bg-gray-50">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 dark:ring-gray-700 rounded-lg mb-6">
+              <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-700/50">
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                      className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-white sm:pl-6">
                       Имя
                     </th>
                     <th
                       scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-white">
                       Роль
                     </th>
                     <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
@@ -314,11 +316,11 @@ export default function EditTeamPage() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
+                <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800">
                   {teamMembers.map((member) => (
                     <tr key={member.id}>
                       <td
-                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 sm:pl-6 cursor-pointer hover:underline"
+                        className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-blue-600 dark:text-white sm:pl-6 cursor-pointer hover:underline"
                         onClick={() => handleUserClick(member.user)}>
                         {member.user.name} {member.user.lastName}
                       </td>
@@ -327,8 +329,8 @@ export default function EditTeamPage() {
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             member.user.role === "TRAINER"
-                              ? "bg-purple-100 text-purple-800"
-                              : "bg-blue-100 text-blue-800"
+                              ? "bg-purple-100 text-purple-800 dark:bg-transparent dark:text-white"
+                              : "bg-blue-100 text-blue-800 dark:bg-transparent dark:text-white"
                           }`}>
                           {member.user.role === "TRAINER" ? "Тренер" : "Спортсмен"}
                         </span>
@@ -337,7 +339,7 @@ export default function EditTeamPage() {
                         <button
                           onClick={() => removeTeamMember(member.userId)}
                           disabled={loading}
-                          className="text-red-600 hover:text-red-900 disabled:opacity-50 font-medium">
+                          className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 disabled:opacity-50 font-medium">
                           Удалить
                         </button>
                       </td>
@@ -356,7 +358,7 @@ export default function EditTeamPage() {
               <Button
                 onClick={() => setIsAddMemberModalOpen(true)}
                 variant="outline"
-                className="!py-2 !px-4 bg-white hover:bg-gray-50 text-black border-gray-300">
+                className="!py-2 !px-4 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 text-black dark:text-white border-gray-300 dark:border-gray-600">
                 <span>Добавить участника вручную</span>
               </Button>
             </div>

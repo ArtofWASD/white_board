@@ -102,7 +102,7 @@ export default function TeamsPage() {
 
   if (!user) {
     return (
-      <div className="bg-white dark:bg-black p-6 rounded-lg shadow-md dark:border dark:border-white">
+      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:border dark:border-gray-700">
         <h2 className="text-xl font-semibold mb-2 text-red-600 dark:text-red-400">
           Доступ запрещен
         </h2>
@@ -127,7 +127,7 @@ export default function TeamsPage() {
           {loadingTeams ? <Loader /> : <AthleteTeamView teams={teams} />}
         </div>
       ) : (
-        <div className="bg-white dark:bg-black p-6 rounded-lg shadow-md mb-8">
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
           <h3 className="text-xl font-semibold mb-2 text-indigo-600 dark:text-white">
             Создать команду
           </h3>
@@ -138,7 +138,7 @@ export default function TeamsPage() {
             <Button
               onClick={() => setShowCreateTeamForm(true)}
               variant="outline"
-              className="dark:text-white dark:bg-black dark:border-white">
+              className="dark:text-white dark:bg-gray-700 dark:border-gray-600">
               Создать команду
             </Button>
           ) : (
@@ -190,7 +190,7 @@ export default function TeamsPage() {
                     type="submit"
                     disabled={loading}
                     variant="outline"
-                    className="dark:text-white dark:bg-black dark:border-white">
+                    className="dark:text-white dark:bg-gray-700 dark:border-gray-600">
                     {loading ? "Создание..." : "Создать команду"}
                   </Button>
                   <Button
@@ -204,7 +204,7 @@ export default function TeamsPage() {
                       setSuccess(null)
                     }}
                     variant="outline"
-                    className="dark:text-white dark:bg-black dark:border-white">
+                    className="dark:text-white dark:bg-gray-700 dark:border-gray-600">
                     Отмена
                   </Button>
                 </div>

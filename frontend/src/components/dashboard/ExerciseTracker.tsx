@@ -109,7 +109,7 @@ export function ExerciseTracker({
                   placeholder="Название упражнения (например, Жим лежа)"
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white dark:placeholder-gray-400"
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                   autoFocus
                 />
                 <input
@@ -118,7 +118,7 @@ export function ExerciseTracker({
                   placeholder="Вес (кг)"
                   value={initialWeight}
                   onChange={(e) => setInitialWeight(e.target.value)}
-                  className="w-24 px-4 py-2 border border-gray-300 dark:border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-600 text-gray-900 dark:text-white dark:placeholder-gray-400"
+                  className="w-24 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                 />
                 <Button type="submit" disabled={!newExerciseName.trim()}>
                   Сохранить упражнение

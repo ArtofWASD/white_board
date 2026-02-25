@@ -131,7 +131,7 @@ export function RecentActivities({
                     key={`${activity.type}-${activity.id}`}
                     className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                     <div>
-                      <h3 className="font-semibold text-gray-800 dark:text-white">
+                      <h3 className="text-lg font-bold text-gray-800 dark:text-white">
                         {activity.name}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -139,7 +139,7 @@ export function RecentActivities({
                         {formatDate(activity.date)}
                       </p>
                     </div>
-                    <div className="text-lg font-bold text-blue-600">
+                    <div className="text-sm font-bold text-gray-900 dark:text-white">
                       {activity.value}
                     </div>
                   </div>

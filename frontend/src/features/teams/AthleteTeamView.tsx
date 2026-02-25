@@ -70,7 +70,7 @@ const AthleteTeamView: React.FC<
 
   if (teams.length === 0) {
     return (
-      <Card className="p-12 text-center max-w-2xl mx-auto mt-8 dark:bg-black dark:border dark:border-white">
+      <Card className="p-12 text-center max-w-2xl mx-auto mt-8 dark:bg-gray-800 dark:border dark:border-gray-700">
         <div className="bg-blue-50 dark:bg-gray-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 text-blue-600 dark:text-white">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -103,9 +103,9 @@ const AthleteTeamView: React.FC<
         <Card
           key={team.id}
           noPadding
-          className="overflow-hidden border-0 shadow-md dark:bg-black dark:border dark:border-white">
+          className="overflow-hidden border-0 shadow-md dark:bg-gray-800 dark:border dark:border-white">
           {/* Team Header */}
-          <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-black">
+          <div className="p-3 sm:p-6 md:p-8 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
                 <div className="flex items-center gap-3 mb-2">
@@ -145,7 +145,7 @@ const AthleteTeamView: React.FC<
                 {/* Invite Button for Trainers */}
                 {isTrainer && (
                   <div
-                    className="flex items-center justify-center p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-black h-16 sm:min-w-[120px]"
+                    className="flex items-center justify-center p-3 sm:p-4 rounded-xl border border-gray-100 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 h-16 sm:min-w-[120px]"
                     onClick={() => {
                       setActiveInviteTeamId(team.id)
                       setIsInviteModalOpen(true)
@@ -160,7 +160,7 @@ const AthleteTeamView: React.FC<
 
                 {/* Чат с командой */}
                 <div
-                  className="flex items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-black h-16 w-16"
+                  className="flex items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 h-16 w-16"
                   onClick={() => handleOpenChat(team)}
                   title="Чат команды">
                   <MessageSquare className="h-6 w-6 text-blue-600 dark:text-white" />
@@ -169,7 +169,7 @@ const AthleteTeamView: React.FC<
                 {/* Чат с тренером (для атлетов) */}
                 {!isTrainer && team.owner && (
                   <div
-                    className="flex items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-gray-50 dark:bg-black h-16 w-16"
+                    className="flex items-center justify-center p-4 rounded-xl border border-gray-100 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors bg-gray-50 dark:bg-gray-900 h-16 w-16"
                     onClick={async () => {
                       if (team.ownerId) {
                         try {
@@ -195,7 +195,7 @@ const AthleteTeamView: React.FC<
                 )}
 
                 <div
-                  className="flex items-center bg-gray-50 dark:bg-black p-2 pr-6 rounded-xl border border-gray-100 dark:border-white cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  className="flex items-center bg-gray-50 dark:bg-gray-900 p-2 pr-6 rounded-xl border border-gray-100 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => team.owner && handleUserClick(team.owner)}>
                   <div className="h-12 w-12 bg-blue-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-blue-600 dark:text-white mr-4">
                     <svg
@@ -225,7 +225,7 @@ const AthleteTeamView: React.FC<
             </div>
           </div>
 
-          <div className="p-3 sm:p-6 md:p-8 dark:bg-black">
+          <div className="p-3 sm:p-6 md:p-8 dark:bg-gray-800">
             <ListFilters
               viewMode={viewMode}
               onViewModeChange={setViewMode}
@@ -262,7 +262,7 @@ const AthleteTeamView: React.FC<
                   .map((member) => (
                     <div
                       key={member.id}
-                      className="relative flex items-center p-4 rounded-xl bg-gray-50 dark:bg-black border border-gray-100 dark:border-white hover:border-blue-300 dark:hover:border-gray-400 hover:bg-white dark:hover:bg-gray-900 transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer"
+                      className="relative flex items-center p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-gray-500 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer"
                       onClick={() => handleUserClick(member.user)}>
                       <div className="h-10 w-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 dark:text-white group-hover:text-blue-600 group-hover:border-blue-200 dark:group-hover:text-white transition-colors shadow-sm">
                         <span className="text-xs font-bold uppercase">
@@ -315,7 +315,7 @@ const AthleteTeamView: React.FC<
                   ))}
               </div>
             ) : (
-              <div className="bg-white dark:bg-black rounded-xl border border-gray-200 dark:border-white overflow-hidden">
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-900">
                     <tr>
@@ -341,7 +341,7 @@ const AthleteTeamView: React.FC<
                       )}
                     </tr>
                   </thead>
-                  <tbody className="bg-white dark:bg-black divide-y divide-gray-200 dark:divide-gray-700">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {team.members
                       ?.filter((member) => member.user.id !== user?.id)
                       .map((member) => (

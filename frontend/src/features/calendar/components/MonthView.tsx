@@ -25,9 +25,9 @@ export function MonthView({
   const weekDays = days.slice(0, 7)
 
   return (
-    <div className="flex flex-col h-full border rounded-md overflow-hidden bg-background">
+    <div className="flex flex-col h-full border dark:border-gray-700 rounded-md overflow-hidden bg-background dark:bg-gray-800">
       {/* Weekday Headers */}
-      <div className="grid grid-cols-7 border-b bg-muted/30">
+      <div className="grid grid-cols-7 border-b dark:border-gray-700 bg-muted/30 dark:bg-gray-700/50">
         {weekDays.map((day) => (
           <div
             key={day.date.toISOString()}
@@ -53,10 +53,11 @@ export function MonthView({
               key={day.date.toISOString()}
               onClick={() => onDayClick(day.date)}
               className={cn(
-                "relative flex flex-col p-2 transition-colors hover:bg-muted/20 cursor-pointer border-b overflow-hidden",
-                !isLastCol && "border-r",
-                !day.isCurrentMonth && "bg-muted/10 text-muted-foreground/50",
-                day.isToday && "bg-primary/10",
+                "relative flex flex-col p-2 transition-colors hover:bg-muted/20 dark:hover:bg-gray-700/50 cursor-pointer border-b dark:border-gray-700 overflow-hidden",
+                !isLastCol && "border-r dark:border-r-gray-700",
+                !day.isCurrentMonth &&
+                  "bg-muted/10 dark:bg-gray-900/40 text-muted-foreground/50",
+                day.isToday && "bg-primary/10 dark:bg-primary/5",
               )}>
               <div className="flex justify-between items-start flex-shrink-0">
                 <span

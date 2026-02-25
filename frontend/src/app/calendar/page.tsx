@@ -345,9 +345,9 @@ export default function CalendarPage() {
       {showEventModal && selectedEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black bg-opacity-50"
+            className="absolute inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm"
             onClick={handleCloseEventModal}></div>
-          <div className="relative bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto border dark:border-gray-700">
             <div className="p-6">
               <div className="flex justify-between items-start mb-4">
                 <h2 className="text-2xl font-bold">{selectedEvent.title}</h2>
@@ -380,7 +380,7 @@ export default function CalendarPage() {
                     {selectedEvent.results.map((result) => (
                       <li
                         key={result.id}
-                        className="border border-gray-200 rounded-lg p-3">
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-3 bg-gray-50 dark:bg-gray-900/50">
                         <div className="flex justify-between items-center">
                           <span className="font-medium">{result.time}</span>
                           <span className="text-gray-500 text-sm">

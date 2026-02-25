@@ -233,9 +233,12 @@ export default function LeaderboardPage() {
             <select
               value={selectedEventId}
               onChange={(e) => setSelectedEventId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
               {events.map((event) => (
-                <option key={event.id} value={event.id} className="text-black">
+                <option
+                  key={event.id}
+                  value={event.id}
+                  className="text-black dark:text-white dark:bg-gray-700">
                   {event.title} ({new Date(event.eventDate).toLocaleDateString()})
                 </option>
               ))}
@@ -249,11 +252,11 @@ export default function LeaderboardPage() {
       </div>
 
       <Card
-        className="overflow-hidden dark:bg-black dark:border dark:border-white"
+        className="overflow-hidden dark:bg-gray-800 dark:border dark:border-gray-700"
         noPadding>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600">
               <tr>
                 <th className="py-4 px-6 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider w-20 text-center">
                   #
@@ -391,7 +394,7 @@ export default function LeaderboardPage() {
           <div className="flex justify-end gap-2">
             <button
               onClick={() => setCommentModalOpen(false)}
-              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-white bg-gray-100 dark:bg-black border dark:border-white rounded-md hover:bg-gray-200 dark:hover:bg-gray-800">
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-white bg-gray-100 dark:bg-gray-800 border dark:border-gray-600 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
               Отмена
             </button>
             <button

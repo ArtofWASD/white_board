@@ -69,7 +69,7 @@ export function TexasMethodModule({
           value={dayThreeMode}
           onChange={(e) => setDayThreeMode(e.target.value as any)}
           onPointerDown={handleInputPointerDown}
-          className="text-sm border border-gray-200 rounded-md px-2 py-1 bg-white text-gray-900 focus:ring-2 focus:ring-blue-100 outline-none">
+          className="text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none">
           <option value="1x5">Режим: Рекорд (1x5)</option>
           <option value="1x3">Режим: Тяжело (1x3)</option>
           <option value="1x1">Режим: Пик (1x1)</option>
@@ -86,7 +86,7 @@ export function TexasMethodModule({
             onChange={(e) => setSelectedExerciseId(e.target.value)}
             onPointerDown={handleInputPointerDown}
             onKeyDown={handleInputKeyDown}
-            className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900">
+            className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white">
             <option value="">Выберите упражнение</option>
             {exercises.map((ex) => (
               <option key={ex.id} value={ex.id}>
@@ -107,7 +107,7 @@ export function TexasMethodModule({
               onChange={(e) => setFiveRepMax(Number(e.target.value))}
               onPointerDown={handleInputPointerDown}
               onKeyDown={handleInputKeyDown}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none bg-white text-gray-900"
+              className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
               placeholder="кг"
             />
             <span className="text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
@@ -148,7 +148,7 @@ export function TexasMethodModule({
                           `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}: ${week.day1}`,
                         )
                       }
-                      className="text-gray-300 hover:text-blue-500 p-1"
+                      className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
                       <svg
@@ -176,7 +176,7 @@ export function TexasMethodModule({
                           `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}: ${week.day2}`,
                         )
                       }
-                      className="text-gray-300 hover:text-blue-500 p-1"
+                      className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
                       <svg
@@ -194,7 +194,7 @@ export function TexasMethodModule({
                     </button>
                   </div>
                 </td>
-                <td className="px-2 py-3 font-bold text-blue-600">
+                <td className="px-2 py-3 font-bold text-gray-900 dark:text-white">
                   <div className="flex items-center justify-start gap-2">
                     <span>{week.day3}</span>
                     <button
@@ -204,7 +204,7 @@ export function TexasMethodModule({
                           `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}: ${week.day3}`,
                         )
                       }
-                      className="text-gray-300 hover:text-blue-500 p-1"
+                      className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
                       <svg
@@ -228,11 +228,11 @@ export function TexasMethodModule({
         </table>
       </div>
 
-      <div className="mt-auto bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg">
-        <h4 className="text-sm font-semibold text-blue-800 dark:text-blue-300 mb-2">
+      <div className="mt-auto bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg border dark:border-gray-700">
+        <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-300 mb-2">
           Прогрессия Месяца
         </h4>
-        <p className="text-xs text-blue-700 dark:text-blue-300">
+        <p className="text-xs text-gray-600 dark:text-gray-400">
           Цикл рассчитан на 4 недели с линейным повышением весов. Цель: увеличивать
           рабочий вес на 2.5 кг каждую неделю в день рекордов.
         </p>

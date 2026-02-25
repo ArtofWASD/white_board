@@ -232,7 +232,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
                     setIsEditing(true)
                   }}
                   onPointerDown={(e) => e.stopPropagation()}
-                  className="text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors">
+                  className="text-gray-700 dark:text-white hover:text-gray-900 dark:hover:text-gray-300 text-sm font-medium transition-colors">
                   + Добавить замер
                 </button>
               )}
