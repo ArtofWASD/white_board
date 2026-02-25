@@ -17,9 +17,9 @@ export class EventsService {
   ) {}
 
   @Cron(CronExpression.EVERY_HOUR)
-  updatePastEventsStatus() {
+  async updatePastEventsStatus() {
     // Обновляем статусы прошедших событий
-    // Используем prisma.$transaction, если критична согласованность чтения/записи, но для массового обновления updateMany вполне достаточно.
+    await this.updateEventStatuses();
   }
 
   async createEvent(
@@ -93,6 +93,9 @@ export class EventsService {
   }
 
   async getEventsByUserId(userId: string, teamId?: string) {
+    // Сначала обновляем статусы событий на основании текущей даты
+    await this.updateEventStatuses();
+
     if (teamId) {
       // Просмотр для конкретной команды
       const teamMembers = await this.prisma.teamMember.findMany({

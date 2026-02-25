@@ -136,4 +136,49 @@ describe('EventsService', () => {
       expect(prisma.event.delete).toHaveBeenCalled();
     });
   });
+
+  describe('updateEventStatuses', () => {
+    it('should update FUTURE events to COMPLETED if date is in the past', async () => {
+      await service.updateEventStatuses();
+      expect(prisma.event.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            eventDate: expect.any(Object),
+            status: 'FUTURE',
+          }),
+          data: { status: 'COMPLETED' },
+        }),
+      );
+    });
+
+    it('should update COMPLETED events to FUTURE if date is in the future', async () => {
+      await service.updateEventStatuses();
+      expect(prisma.event.updateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            eventDate: expect.any(Object),
+            status: 'COMPLETED',
+          }),
+          data: { status: 'FUTURE' },
+        }),
+      );
+    });
+  });
+
+  describe('getEventsByUserId', () => {
+    it('should call updateEventStatuses before fetching events', async () => {
+      const updateStatusesSpy = jest.spyOn(service, 'updateEventStatuses');
+      prisma.user.findUnique.mockResolvedValue({
+        id: 'user1',
+        role: 'ATHLETE',
+      });
+      prisma.teamMember.findMany.mockResolvedValue([]);
+      prisma.team.findMany.mockResolvedValue([]);
+      prisma.event.findMany.mockResolvedValue([]);
+
+      await service.getEventsByUserId('user1');
+
+      expect(updateStatusesSpy).toHaveBeenCalled();
+    });
+  });
 });
