@@ -29,7 +29,7 @@ export function AgendaView({
   }, [])
 
   return (
-    <div className="flex flex-col gap-1 pb-10">
+    <div className="flex flex-col gap-1 pb-10 h-full overflow-y-auto pr-2">
       {days
         .filter((d) => d.isCurrentMonth)
         .map((day) => {
