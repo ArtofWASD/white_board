@@ -196,12 +196,12 @@ export function WorkoutDetail({
 
             <div className="space-y-6">
               {workout.description && workout.description.trim() !== "" && (
-                <div className="bg-muted/30 p-4 rounded-lg border border-border/50">
-                  <h3 className="font-semibold mb-2 flex items-center gap-2">
+                <div className="bg-muted/30 dark:bg-gray-800/50 p-4 rounded-lg border border-border/50 dark:border-gray-700">
+                  <h3 className="font-semibold mb-2 flex items-center gap-2 dark:text-white">
                     <Trophy className="h-4 w-4 text-yellow-500" />
                     Описание
                   </h3>
-                  <div className="font-mono text-sm whitespace-pre-wrap leading-relaxed">
+                  <div className="font-mono text-sm whitespace-pre-wrap leading-relaxed dark:text-gray-300">
                     {workout.description}
                   </div>
                 </div>
@@ -273,7 +273,7 @@ export function WorkoutDetail({
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 variant="outline"
-                className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+                className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
                 size="lg"
                 layout="horizontal"
                 onClick={handleStartTimer}>
@@ -282,7 +282,7 @@ export function WorkoutDetail({
               </Button>
               <Button
                 variant="outline"
-                className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+                className="flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
                 size="lg"
                 layout="horizontal"
                 onClick={() => setIsAddResultOpen(true)}>
@@ -296,7 +296,7 @@ export function WorkoutDetail({
                   variant="outline"
                   size="lg"
                   layout="horizontal"
-                  className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-black dark:hover:bg-gray-800 dark:border-blue-900 border-blue-500 border bg-transparent transition-colors"
+                  className="flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-blue-900 border-blue-500 border bg-transparent transition-colors"
                   onClick={() => setIsEditModalOpen(true)}>
                   Изменить
                 </Button>
@@ -304,7 +304,7 @@ export function WorkoutDetail({
                   variant="outline"
                   size="lg"
                   layout="horizontal"
-                  className="flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:bg-black dark:hover:bg-gray-800 dark:border-red-900 border-red-500 border bg-transparent transition-colors"
+                  className="flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-red-900 border-red-500 border bg-transparent transition-colors"
                   onClick={handleDeleteWorkout}>
                   Удалить занятие
                 </Button>

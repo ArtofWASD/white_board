@@ -120,16 +120,18 @@ export default function ProfilePage() {
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-900">Настройки профиля</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          Настройки профиля
+        </h1>
         <Link href="/dashboard">
           <Button variant="outline">Назад в панель управления</Button>
         </Link>
       </div>
 
       {/* Настройки Email */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Email</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Email</h3>
           {!isEmailEditing && (
             <Button
               variant="ghost"
@@ -137,7 +139,7 @@ export default function ProfilePage() {
                 resetEmail({ email: user.email })
                 setIsEmailEditing(true)
               }}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20">
               Изменить
             </Button>
           )}
@@ -146,7 +148,7 @@ export default function ProfilePage() {
         {isEmailEditing ? (
           <form onSubmit={handleSubmitEmail(onUpdateEmail)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Новый Email
               </label>
               <input
@@ -154,8 +156,8 @@ export default function ProfilePage() {
                 {...registerEmail("email")}
                 className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
                   emailErrors.email
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 dark:bg-gray-700 dark:text-white"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-900/40"
                 }`}
               />
               {emailErrors.email && (
@@ -178,19 +180,19 @@ export default function ProfilePage() {
             </div>
           </form>
         ) : (
-          <p className="text-gray-600">{user.email}</p>
+          <p className="text-gray-600 dark:text-gray-400">{user.email}</p>
         )}
       </div>
 
       {/* Настройки пароля */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-bold text-gray-900">Пароль</h3>
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">Пароль</h3>
           {!isPasswordEditing && (
             <Button
               variant="ghost"
               onClick={() => setIsPasswordEditing(true)}
-              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/20">
               Изменить
             </Button>
           )}
@@ -199,7 +201,7 @@ export default function ProfilePage() {
         {isPasswordEditing ? (
           <form onSubmit={handleSubmitPassword(onUpdatePassword)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Текущий пароль
               </label>
               <input
@@ -207,8 +209,8 @@ export default function ProfilePage() {
                 {...registerPassword("currentPassword")}
                 className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
                   passwordErrors.currentPassword
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 dark:bg-gray-700 dark:text-white"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-900/40"
                 }`}
               />
               {passwordErrors.currentPassword && (
@@ -218,7 +220,7 @@ export default function ProfilePage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Новый пароль
               </label>
               <input
@@ -226,8 +228,8 @@ export default function ProfilePage() {
                 {...registerPassword("newPassword")}
                 className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
                   passwordErrors.newPassword
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 dark:bg-gray-700 dark:text-white"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-900/40"
                 }`}
               />
               {passwordErrors.newPassword && (
@@ -237,7 +239,7 @@ export default function ProfilePage() {
               )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Подтвердите новый пароль
               </label>
               <input
@@ -245,8 +247,8 @@ export default function ProfilePage() {
                 {...registerPassword("confirmPassword")}
                 className={`w-full px-4 py-2 rounded-lg border focus:ring-2 transition-all outline-none ${
                   passwordErrors.confirmPassword
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-200"
-                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200"
+                    ? "border-red-500 focus:border-red-500 focus:ring-red-200 dark:bg-gray-700 dark:text-white"
+                    : "border-gray-200 focus:border-blue-500 focus:ring-blue-200 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:focus:ring-blue-900/40"
                 }`}
               />
               {passwordErrors.confirmPassword && (
@@ -271,19 +273,21 @@ export default function ProfilePage() {
             </div>
           </form>
         ) : (
-          <p className="text-gray-600">••••••••••••</p>
+          <p className="text-gray-600 dark:text-gray-400">••••••••••••</p>
         )}
       </div>
 
       {/* Флаги функций - Скрыть для администратора организации */}
       {user.role !== "ORGANIZATION_ADMIN" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">Настройки интерфейса</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+            Настройки интерфейса
+          </h3>
           <div className="space-y-6">
-            <div className="flex items-center justify-between pb-4 border-b border-gray-100">
+            <div className="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-700">
               <div>
-                <h4 className="font-medium text-gray-900">Тёмная тема</h4>
-                <p className="text-sm text-gray-500">
+                <h4 className="font-medium text-gray-900 dark:text-white">Тёмная тема</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Переключить между светлой и тёмной темой интерфейса
                 </p>
               </div>
@@ -291,8 +295,10 @@ export default function ProfilePage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">Прогресс упражнений</h4>
-                <p className="text-sm text-gray-500">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  Прогресс упражнений
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Показывать блок с максимальными весами в упражнениях
                 </p>
               </div>
@@ -303,8 +309,8 @@ export default function ProfilePage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">Трекер веса</h4>
-                <p className="text-sm text-gray-500">
+                <h4 className="font-medium text-gray-900 dark:text-white">Трекер веса</h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Показывать график изменения веса тела
                 </p>
               </div>
@@ -315,8 +321,10 @@ export default function ProfilePage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">Калькулятор 5/3/1</h4>
-                <p className="text-sm text-gray-500">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  Калькулятор 5/3/1
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Показывать калькулятор силовых тренировок
                 </p>
               </div>
@@ -327,10 +335,10 @@ export default function ProfilePage() {
             </div>
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-medium text-gray-900">
+                <h4 className="font-medium text-gray-900 dark:text-white">
                   Texas Method (Техасский метод)
                 </h4>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Калькулятор по методике Марка Риппто
                 </p>
               </div>
@@ -339,10 +347,12 @@ export default function ProfilePage() {
                 onChange={() => toggleFlag("texasMethodCalculator")}
               />
             </div>
-            <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-700">
               <div>
-                <h4 className="font-medium text-gray-900">Общий виджет калькуляторов</h4>
-                <p className="text-sm text-gray-500">
+                <h4 className="font-medium text-gray-900 dark:text-white">
+                  Общий виджет калькуляторов
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Объединить все калькуляторы в один виджет
                 </p>
               </div>

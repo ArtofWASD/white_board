@@ -29,7 +29,7 @@ export function AgendaView({
   }, [])
 
   return (
-    <div className="flex flex-col gap-1 pb-10 h-full overflow-y-auto pr-2">
+    <div className="flex flex-col gap-1 pb-10 h-full overflow-y-auto px-2">
       {days
         .filter((d) => d.isCurrentMonth)
         .map((day) => {
@@ -43,7 +43,7 @@ export function AgendaView({
               className={cn(
                 "flex flex-col sm:flex-row gap-1 p-2 rounded-xl transition-colors",
                 day.isToday
-                  ? "bg-primary/5 dark:bg-primary/10 ring-1 ring-primary/20"
+                  ? "bg-primary/5 dark:bg-primary/10 ring-1 ring-inset ring-primary/20"
                   : "hover:bg-muted/30 dark:hover:bg-gray-800",
               )}>
               {/* Date Column */}

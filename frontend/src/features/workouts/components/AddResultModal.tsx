@@ -129,8 +129,8 @@ export function AddResultModal({
           </DialogHeader>
 
           {workout.exercises && workout.exercises.length > 0 && (
-            <div className="mt-4 bg-muted/30 p-3 rounded-lg border border-border/50 max-h-40 overflow-y-auto">
-              <h4 className="text-xs font-semibold mb-2 uppercase tracking-wider text-muted-foreground">
+            <div className="mt-4 bg-muted/30 dark:bg-gray-800/50 p-3 rounded-lg border border-border/50 dark:border-gray-700 max-h-40 overflow-y-auto">
+              <h4 className="text-xs font-semibold mb-2 uppercase tracking-wider text-muted-foreground dark:text-gray-400">
                 Упражнения
               </h4>
               <ul className="grid gap-2">
@@ -226,13 +226,13 @@ export function AddResultModal({
                   type="button"
                   variant="outline"
                   onClick={onClose}
-                  className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors">
+                  className="dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition-colors">
                   Отмена
                 </Button>
                 <Button
                   type="submit"
                   variant="outline"
-                  className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+                  className="border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
                   disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Сохранить

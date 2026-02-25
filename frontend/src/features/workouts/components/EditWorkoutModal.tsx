@@ -69,6 +69,21 @@ export function EditWorkoutModal({
       setTimeCap(workout.timeCap || "")
       setRounds(workout.rounds || "")
       setScheduledTime(workout.scheduledTime || "09:00")
+
+      // Initialize date if available in workout object
+      const rawDate = (workout as any).eventDate || (workout as any).date
+      if (rawDate) {
+        const d = new Date(rawDate)
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear()
+          const month = String(d.getMonth() + 1).padStart(2, "0")
+          const day = String(d.getDate()).padStart(2, "0")
+          setDate(`${year}-${month}-${day}`)
+        } else {
+          setDate(rawDate)
+        }
+      }
+
       // Check if workout has exercises (e.g. from WorkoutCard or WorkoutDetail)
       // Some properties might be undefined if `Workout` type does not include them, so fallback gracefully
       if ((workout as any).exercises) {
@@ -312,18 +327,18 @@ export function EditWorkoutModal({
             />
           </div>
 
-          <div className="border rounded-lg p-4 bg-muted/20 space-y-4">
+          <div className="border rounded-lg p-4 bg-muted/20 dark:bg-gray-800/50 dark:border-gray-700 space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold">Упражнения</h4>
-              <div className="flex gap-1 bg-muted rounded-md p-1">
+              <h4 className="text-sm font-semibold dark:text-white">Упражнения</h4>
+              <div className="flex gap-1 bg-muted dark:bg-gray-700 rounded-md p-1">
                 <button
                   type="button"
                   onClick={() => setExMeasurement("weight")}
                   className={cn(
                     "px-2 py-1 text-xs rounded-sm transition-all",
                     exMeasurement === "weight"
-                      ? "bg-background shadow-sm text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? "bg-background dark:bg-gray-600 shadow-sm text-foreground dark:text-white"
+                      : "text-muted-foreground hover:text-foreground dark:hover:text-white",
                   )}>
                   Вес/Повторы
                 </button>
@@ -461,7 +476,7 @@ export function EditWorkoutModal({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-black dark:hover:bg-gray-800 transition-colors !flex-row"
+                        className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors !flex-row"
                         onClick={() => handleEditExercise(ex.id)}>
                         <Edit2 className="h-4 w-4" />
                       </Button>
@@ -469,7 +484,7 @@ export function EditWorkoutModal({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300 dark:bg-black dark:hover:bg-gray-800 transition-colors !flex-row"
+                        className="h-8 w-8 p-0 text-destructive hover:text-destructive hover:bg-destructive/10 dark:text-red-400 dark:hover:text-red-300 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors !flex-row"
                         onClick={() => handleRemoveExercise(ex.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -487,14 +502,14 @@ export function EditWorkoutModal({
             onClick={onClose}
             type="button"
             disabled={isSubmitting}
-            className="dark:bg-black dark:text-white dark:hover:bg-gray-800 transition-colors">
+            className="dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition-colors">
             Отмена
           </Button>
           <Button
             onClick={handleSubmit}
             type="button"
             variant="outline"
-            className="border-black text-black hover:bg-gray-100 dark:border-white dark:text-white dark:bg-black dark:hover:bg-gray-800 bg-transparent transition-colors"
+            className="border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
             disabled={isSubmitting}>
             {isSubmitting ? "Сохранение..." : "Сохранить изменения"}
           </Button>
