@@ -11,6 +11,7 @@ import { eventsApi } from "@/lib/api/events"
 import { useAuthStore } from "@/lib/store/useAuthStore" // Assuming this exists
 import { Button } from "@/components/ui/Button" // For global create button if needed
 import { Plus } from "lucide-react"
+import { useCallback } from "react"
 
 interface CalendarSystemProps {
   initialView?: "month" | "agenda" | "gantt"
@@ -106,6 +107,28 @@ export function CalendarSystem({
     }
   }
 
+  const handleDurationChange = useCallback(
+    async (workout: Workout, minutes: number, date: Date) => {
+      if (!workout.userId) return
+      try {
+        // Build the eventDate: date part from `date`, time part from scheduledTime
+        const datePart = date.toISOString().split("T")[0]
+        const timePart = workout.scheduledTime ?? "00:00"
+        const eventDate = `${datePart}T${timePart}:00.000Z`
+
+        await eventsApi.updateEvent(workout.id, {
+          userId: workout.userId,
+          title: workout.title,
+          eventDate,
+          timeCap: String(minutes),
+        })
+      } catch (error) {
+        console.error("Failed to save duration", error)
+      }
+    },
+    [],
+  )
+
   return (
     <div className="flex flex-col h-full bg-background relative">
       <CalendarHeader
@@ -120,7 +143,7 @@ export function CalendarSystem({
       />
       <div className="w-full border-b" />
 
-      <div className="flex-1 overflow-y-auto p-1 sm:p-2 relative">
+      <div className="flex-1 overflow-hidden p-1 sm:p-2 relative">
         {view === "month" ? (
           <MonthView
             days={calendarDays}
@@ -146,6 +169,7 @@ export function CalendarSystem({
             onDateSelect={setDate}
             onWorkoutClick={handleOpenDetail}
             formatDayNumber={formatDayNumber}
+            onDurationChange={handleDurationChange}
             onTimeSelect={(time) => {
               setCreateDate(currentDate) // Ensure date is set
               setIsCreateModalOpen(true)

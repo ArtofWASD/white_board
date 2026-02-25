@@ -1,11 +1,12 @@
 import { Workout } from "@/features/workouts/components/WorkoutCard"
 import { getWorkoutColorClass } from "../utils/workoutColors"
 import { cn } from "@/lib/utils"
-import { addHours, format, isSameDay, parse, set, startOfDay } from "date-fns"
+import { format, isSameDay } from "date-fns"
 import { ru } from "date-fns/locale"
 import { CalendarDay } from "../hooks/useCalendar"
-import { useEffect, useRef } from "react"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useEffect, useRef, useState, useCallback } from "react"
+
+const PIXELS_PER_HOUR = 150
 
 interface GanttViewProps {
   currentDate: Date
@@ -15,6 +16,7 @@ interface GanttViewProps {
   onWorkoutClick: (workout: Workout) => void
   formatDayNumber: (date: Date) => string
   onTimeSelect?: (time: string) => void
+  onDurationChange?: (workout: Workout, minutes: number, date: Date) => void
 }
 
 export function GanttView({
@@ -25,57 +27,120 @@ export function GanttView({
   onWorkoutClick,
   formatDayNumber,
   onTimeSelect,
+  onDurationChange,
 }: GanttViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
   const hours = Array.from({ length: 24 }, (_, i) => i)
-
   const currentDayWorkouts = workouts[format(currentDate, "yyyy-MM-dd")] || []
 
-  // Helper to calculate position and width
+  // Per-workout duration overrides (for instant resize feedback)
+  const [durationOverrides, setDurationOverrides] = useState<Record<string, number>>({})
+
+  // Tracks the latest duration for the currently-resized workout
+  const latestResizeDuration = useRef<number>(0)
+
+  // Drag-resize state
+  const resizingRef = useRef<{
+    workoutId: string
+    startX: number
+    startWidth: number
+  } | null>(null)
+
+  // ── Auto-scroll to first event ──
+  useEffect(() => {
+    if (!scrollContainerRef.current || currentDayWorkouts.length === 0) return
+
+    const sorted = [...currentDayWorkouts].sort((a, b) =>
+      (a.scheduledTime ?? "").localeCompare(b.scheduledTime ?? ""),
+    )
+    const first = sorted[0]
+    if (!first.scheduledTime) return
+
+    const [h, m] = first.scheduledTime.split(":").map(Number)
+    const eventLeft = (h + m / 60) * PIXELS_PER_HOUR
+    const containerWidth = scrollContainerRef.current.clientWidth
+    const scrollTo = Math.max(0, eventLeft - containerWidth / 2)
+
+    scrollContainerRef.current.scrollTo({ left: scrollTo, behavior: "smooth" })
+  }, [currentDate]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Workout position/width ──
   const getWorkoutStyle = (workout: Workout) => {
-    if (!workout.scheduledTime) return { left: 0, width: 0, display: "none" }
+    if (!workout.scheduledTime) return { display: "none" }
 
     const [h, m] = workout.scheduledTime.split(":").map(Number)
-    const startHour = 0
-    const pixelsPerHour = 150 // Increased width
+    const startOffsetHours = h + m / 60
+    const left = startOffsetHours * PIXELS_PER_HOUR
 
-    // Calculate start position relative to 00:00
-    const startOffsetHours = h - startHour + m / 60
-    const left = startOffsetHours * pixelsPerHour
-
-    // Default duration 1 hour if not parsed
-    let durationHours = 1
-    // Simplistic duration parsing, assumes "60 mins" or similar format in timeCap or just defaults
-    // In a real app we'd parse this more robustly or have a dedicated duration field
-
-    const width = durationHours * pixelsPerHour
+    const durationMinutes = durationOverrides[workout.id] ?? workout.durationMinutes ?? 60
+    const width = (durationMinutes / 60) * PIXELS_PER_HOUR
 
     return {
       left: `${Math.max(0, left)}px`,
-      width: `${width}px`,
-      top: "10px", // spacing from top
+      width: `${Math.max(PIXELS_PER_HOUR / 4, width)}px`, // min 15 min width
+      top: "10px",
     }
   }
 
-  // Handle click on grid to create event
+  // ── Drag-resize handlers ──
+  const handleResizeMouseDown = useCallback(
+    (e: React.MouseEvent, workout: Workout) => {
+      e.stopPropagation()
+      e.preventDefault()
+
+      const currentDuration =
+        durationOverrides[workout.id] ?? workout.durationMinutes ?? 60
+      const currentWidth = (currentDuration / 60) * PIXELS_PER_HOUR
+
+      resizingRef.current = {
+        workoutId: workout.id,
+        startX: e.clientX,
+        startWidth: currentWidth,
+      }
+
+      const onMouseMove = (ev: MouseEvent) => {
+        if (!resizingRef.current) return
+        const dx = ev.clientX - resizingRef.current.startX
+        const newWidth = Math.max(
+          PIXELS_PER_HOUR / 4,
+          resizingRef.current.startWidth + dx,
+        )
+        const newMinutes = Math.round(((newWidth / PIXELS_PER_HOUR) * 60) / 15) * 15
+        latestResizeDuration.current = newMinutes
+        setDurationOverrides((prev) => ({
+          ...prev,
+          [resizingRef.current!.workoutId]: newMinutes,
+        }))
+      }
+
+      const onMouseUp = () => {
+        if (!resizingRef.current) return
+        const id = resizingRef.current.workoutId
+        onDurationChange?.(workout, latestResizeDuration.current, currentDate)
+        resizingRef.current = null
+        window.removeEventListener("mousemove", onMouseMove)
+        window.removeEventListener("mouseup", onMouseUp)
+      }
+
+      window.addEventListener("mousemove", onMouseMove)
+      window.addEventListener("mouseup", onMouseUp)
+    },
+    [durationOverrides, onDurationChange],
+  )
+
+  // ── Grid click ──
   const handleGridClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!onTimeSelect) return
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left + (scrollContainerRef.current?.scrollLeft || 0)
-
-    const pixelsPerHour = 150 // Match above
-    const hour = Math.floor(x / pixelsPerHour)
-    const minutes = Math.floor(((x % pixelsPerHour) / pixelsPerHour) * 60)
-
-    // Round to nearest 15 mins for cleaner UX
-    const roundedMinutes = Math.round(minutes / 15) * 15
-    const timeString = `${hour.toString().padStart(2, "0")}:${roundedMinutes < 60 ? roundedMinutes.toString().padStart(2, "0") : "00"}`
-
+    const hour = Math.floor(x / PIXELS_PER_HOUR)
+    const minutes = Math.floor(((x % PIXELS_PER_HOUR) / PIXELS_PER_HOUR) * 60)
+    const rounded = Math.round(minutes / 15) * 15
+    const timeString = `${hour.toString().padStart(2, "0")}:${(rounded < 60 ? rounded : 0).toString().padStart(2, "0")}`
     onTimeSelect(timeString)
   }
 
-  // Group days by weeks for the mini calendar
+  // ── Mini calendar weeks ──
   const weeks: CalendarDay[][] = []
   for (let i = 0; i < calendarDays.length; i += 7) {
     weeks.push(calendarDays.slice(i, i + 7))
@@ -89,13 +154,12 @@ export function GanttView({
           <span className="font-semibold capitalize">
             {format(currentDate, "LLLL yyyy", { locale: ru })}
           </span>
-          {/* Navigation controls could be added here if we expose next/prev month logic locally or via props */}
         </div>
 
         <div className="grid grid-cols-7 text-center mb-1">
-          {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((day) => (
-            <div key={day} className="text-[10px] text-muted-foreground font-medium">
-              {day}
+          {["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"].map((d) => (
+            <div key={d} className="text-[10px] text-muted-foreground font-medium">
+              {d}
             </div>
           ))}
         </div>
@@ -119,7 +183,7 @@ export function GanttView({
                         : "hover:bg-muted font-medium text-foreground",
                       !isSelected &&
                         hasWorkouts &&
-                        "bg-orange-100 text-orange-700 font-bold", // Pastel orange for example
+                        "bg-orange-100 text-orange-700 font-bold",
                     )}>
                     {formatDayNumber(day.date)}
                   </button>
@@ -158,7 +222,7 @@ export function GanttView({
               ))}
             </div>
 
-            {/* Grid interactions and Lines */}
+            {/* Grid columns */}
             <div
               className="absolute inset-0 top-[33px] flex cursor-pointer"
               onClick={handleGridClick}>
@@ -170,7 +234,7 @@ export function GanttView({
               ))}
             </div>
 
-            {/* Workouts Rendering */}
+            {/* Workout blocks */}
             <div className="relative h-full p-2 py-4 space-y-2 mt-4 pointer-events-none">
               {currentDayWorkouts.length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground italic pointer-events-none">
@@ -179,8 +243,7 @@ export function GanttView({
               ) : (
                 currentDayWorkouts.map((workout, index) => {
                   const style = getWorkoutStyle(workout)
-                  // Stack items vertically to avoid overlap simplistic approach for now
-                  const top = index * 100 + 10 // Increased height + gap
+                  const top = index * 100 + 10
 
                   return (
                     <div
@@ -190,15 +253,11 @@ export function GanttView({
                         onWorkoutClick(workout)
                       }}
                       className={cn(
-                        "absolute h-[80px] rounded-lg p-3 cursor-pointer transition-all group overflow-visible pointer-events-auto shadow-sm border",
-                        "hover:scale-[1.02] hover:shadow-md hover:z-20",
-                        // Type-based styling matching MonthView
+                        "absolute h-[80px] rounded-lg p-3 cursor-pointer transition-shadow group overflow-visible pointer-events-auto shadow-sm border select-none",
+                        "hover:shadow-md hover:z-20",
                         getWorkoutColorClass(workout.type),
                       )}
-                      style={{
-                        ...style,
-                        top: `${top}px`,
-                      }}>
+                      style={{ ...style, top: `${top}px` }}>
                       <div className="flex items-start justify-between h-full">
                         <div className="flex flex-col min-w-0">
                           <div className="font-bold text-sm truncate pr-2 mb-1">
@@ -209,10 +268,17 @@ export function GanttView({
                             <span className="w-1 h-1 rounded-full bg-current opacity-50" />
                             {workout.type}
                           </div>
+                          {/* Duration label */}
+                          <div className="text-xs opacity-60 mt-1">
+                            {durationOverrides[workout.id] ??
+                              workout.durationMinutes ??
+                              60}{" "}
+                            мин
+                          </div>
                         </div>
                       </div>
 
-                      {/* Tooltip with white background */}
+                      {/* Tooltip */}
                       <div className="absolute -top-12 left-0 z-50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
                         <div className="bg-white text-zinc-950 px-3 py-2 rounded-md shadow-md border text-xs flex flex-col gap-0.5">
                           <span className="font-semibold">{workout.title}</span>
@@ -220,8 +286,16 @@ export function GanttView({
                             {workout.scheduledTime} • {workout.type}
                           </span>
                         </div>
-                        {/* White arrow */}
-                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white border-b-0 absolute left-4 -bottom-1.5 drop-shadow-sm"></div>
+                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-white border-b-0 absolute left-4 -bottom-1.5 drop-shadow-sm" />
+                      </div>
+
+                      {/* ── Resize handle ── */}
+                      <div
+                        className="absolute right-0 top-0 h-full w-3 flex items-center justify-center cursor-col-resize group/resize z-30"
+                        onMouseDown={(e) => handleResizeMouseDown(e, workout)}
+                        onClick={(e) => e.stopPropagation()}>
+                        {/* Visual indicator */}
+                        <div className="w-1 h-8 rounded-full bg-current opacity-20 group-hover/resize:opacity-60 transition-opacity" />
                       </div>
                     </div>
                   )

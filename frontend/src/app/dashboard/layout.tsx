@@ -152,7 +152,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         href: "#",
         onClick: async () => {
           await logout()
-          window.location.href = "/calendar"
+          window.location.href = "/"
         },
         icon: (
           <svg

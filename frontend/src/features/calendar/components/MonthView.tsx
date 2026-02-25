@@ -38,7 +38,7 @@ export function MonthView({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 auto-rows-[minmax(100px,_1fr)] flex-1">
+      <div className="grid grid-cols-7 auto-rows-[1fr] flex-1 overflow-hidden">
         {days.map((day, idx) => {
           const dateKey = format(day.date, "yyyy-MM-dd")
           const dayWorkouts = workouts[dateKey] || []
@@ -53,12 +53,12 @@ export function MonthView({
               key={day.date.toISOString()}
               onClick={() => onDayClick(day.date)}
               className={cn(
-                "relative p-2 transition-colors hover:bg-muted/20 cursor-pointer min-h-[100px] border-b",
+                "relative flex flex-col p-2 transition-colors hover:bg-muted/20 cursor-pointer border-b overflow-hidden",
                 !isLastCol && "border-r",
                 !day.isCurrentMonth && "bg-muted/10 text-muted-foreground/50",
                 day.isToday && "bg-primary/10",
               )}>
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start flex-shrink-0">
                 <span
                   className={cn(
                     "text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full",
@@ -70,8 +70,8 @@ export function MonthView({
                 </span>
               </div>
 
-              {/* Workout Indicators */}
-              <div className="mt-2 flex flex-col gap-1">
+              {/* Workout Indicators - scrollable */}
+              <div className="mt-1 flex flex-col gap-1 overflow-y-auto overflow-x-hidden flex-1 min-h-0">
                 {dayWorkouts.map((workout) => (
                   <div
                     key={workout.id}
@@ -80,7 +80,7 @@ export function MonthView({
                       onWorkoutClick(workout)
                     }}
                     className={cn(
-                      "text-xs truncate px-2 py-1 rounded-md font-semibold border border-transparent transition-all hover:scale-[1.02] active:scale-95 shadow-sm",
+                      "text-xs truncate px-2 py-1 rounded-md font-semibold border border-transparent transition-colors shadow-sm flex-shrink-0",
                       getWorkoutColorClass(workout.type),
                     )}>
                     {workout.title}

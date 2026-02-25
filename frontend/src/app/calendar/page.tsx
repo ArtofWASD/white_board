@@ -107,7 +107,7 @@ export default function CalendarPage() {
         href: "#",
         onClick: async () => {
           await logout()
-          window.location.href = "/calendar"
+          window.location.href = "/"
         },
         icon: (
           <svg
@@ -249,6 +249,7 @@ export default function CalendarPage() {
           timeCap: event.timeCap,
           rounds: event.rounds,
           userId: event.userId,
+          durationMinutes: event.timeCap ? parseInt(event.timeCap) || 60 : 60,
         })
       })
 
@@ -319,7 +320,7 @@ export default function CalendarPage() {
 
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 pt-0`}>
         {/* Removed padding to let CalendarSystem take full space if needed, handled by internal padding */}
-        <div className="h-[calc(100vh-140px)]">
+        <div className="h-[calc(100vh-100px)]">
           <CalendarSystem
             workouts={workouts}
             onWorkoutCreated={loadEvents}

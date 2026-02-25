@@ -59,7 +59,7 @@ export default function UserDashboard({ onClose }: UserDashboardProps) {
           <Button
             onClick={async () => {
               await logout()
-              window.location.href = "/calendar"
+              window.location.href = "/"
             }}
             variant="outline">
             Выйти
