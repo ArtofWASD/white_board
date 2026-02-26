@@ -31,7 +31,7 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
 # Копируем публичные ассеты
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/public ./app/public
 
 # Настройка standalone режима
 # Важно: Next.js копирует зависимости в .next/standalone/node_modules
