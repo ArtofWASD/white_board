@@ -44,56 +44,61 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     let listenerRef: any = null
 
     const setupSocket = async () => {
-      const { waitForSocket } = await import("../../lib/socket")
-      const socket = await waitForSocket()
+      try {
+        const { waitForSocket } = await import("../../lib/socket")
+        const socket = await waitForSocket()
 
-      if (!isMounted) return
+        if (!isMounted) return
 
-      socketInstance = socket
+        socketInstance = socket
 
-      const handleNewNotification = async (notification: any) => {
-        const isMatch =
-          notification.type === "CHAT_MESSAGE" && notification.data?.chatId === chatId
+        const handleNewNotification = async (notification: any) => {
+          // It's critical to check against the active chatId in this closure
+          const isMatch =
+            notification.type === "CHAT_MESSAGE" && notification.data?.chatId === chatId
 
-        if (isMatch) {
-          try {
-            const newMessages = await apiClient.get<Message[]>(
-              `/api/chats/${chatId}/messages`,
-              {
-                limit: "1",
-                skip: "0",
-              },
-            )
+          if (isMatch) {
+            try {
+              const newMessages = await apiClient.get<Message[]>(
+                `/api/chats/${chatId}/messages`,
+                {
+                  limit: "1",
+                  skip: "0",
+                },
+              )
 
-            if (newMessages.length > 0) {
-              const incomingMsg = newMessages[0]
+              if (newMessages.length > 0 && isMounted) {
+                const incomingMsg = newMessages[0]
 
-              setMessages((prev) => {
-                const exists = prev.some((m) => m.id === incomingMsg.id)
-                if (exists) {
-                  return prev
-                }
-                return [...prev, incomingMsg]
-              })
-
-              setTimeout(() => {
-                if (scrollContainerRef.current) {
-                  const { scrollTop, scrollHeight, clientHeight } =
-                    scrollContainerRef.current
-                  if (scrollHeight - scrollTop - clientHeight < 300) {
-                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+                setMessages((prev) => {
+                  const exists = prev.some((m) => m.id === incomingMsg.id)
+                  if (exists) {
+                    return prev
                   }
-                }
-              }, 100)
+                  return [...prev, incomingMsg]
+                })
+
+                setTimeout(() => {
+                  if (scrollContainerRef.current) {
+                    const { scrollTop, scrollHeight, clientHeight } =
+                      scrollContainerRef.current
+                    if (scrollHeight - scrollTop - clientHeight < 300) {
+                      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+                    }
+                  }
+                }, 100)
+              }
+            } catch (e) {
+              logApiError(`/api/chats/${chatId}/messages`, e, { chatId })
             }
-          } catch (e) {
-            logApiError(`/api/chats/${chatId}/messages`, e, { chatId })
           }
         }
-      }
 
-      listenerRef = handleNewNotification
-      socket.on("newNotification", handleNewNotification)
+        listenerRef = handleNewNotification
+        socket.on("newNotification", handleNewNotification)
+      } catch (err) {
+        console.error("Failed to setup chat window socket", err)
+      }
     }
 
     setupSocket()
