@@ -20,7 +20,7 @@ export const initializeSocket = (userId: string) => {
     // or we use the current host (empty string)
     const socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
     socket = io(socketUrl, {
-      path: "/api/socket.io",
+      path: "/socket.io",
       withCredentials: true,
       transports: ["websocket", "polling"],
     })

@@ -1,6 +1,6 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from "next"
 
-import path from "path";
+import path from "path"
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -17,21 +17,26 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_API_URL || "http://slate-backend-lihtfr:3001";
+    const backendUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://slate-backend-lihtfr:3001"
     return [
       {
-        source: "/api/:path*",
-        destination: `${backendUrl}/:path*`, 
+        source: "/socket.io/:path*",
+        destination: `${backendUrl}/socket.io/:path*`,
       },
-    ];
+      {
+        source: "/api/:path*",
+        destination: `${backendUrl}/:path*`,
+      },
+    ]
   },
-};
+}
 
 const withPWA = require("@ducanh2912/next-pwa").default({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
   skipWaiting: true,
-});
+})
 
-export default withPWA(nextConfig);
+export default withPWA(nextConfig)

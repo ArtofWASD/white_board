@@ -24,6 +24,7 @@ import { Logger } from '@nestjs/common';
         ],
     credentials: true,
   },
+  path: '/socket.io',
 })
 export class NotificationsGateway
   implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
