@@ -43,4 +43,4 @@ USER nextjs
 EXPOSE 3000
 
 # В режиме standalone входная точка — server.js
-CMD ["node", "server.js"]
+CMD ["node", "app/server.js"]
