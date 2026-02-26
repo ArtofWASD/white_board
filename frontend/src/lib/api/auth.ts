@@ -37,7 +37,7 @@ interface ProfileData {
 
 export const authApi = {
   /** Получить CSRF токен (вызывать перед login/register) */
-  getCsrfToken: () => apiClient.get<{ csrfToken: string }>("/api/csrf"),
+  getCsrfToken: () => apiClient.get<{ csrfToken: string }>("/api/csrf/token"),
 
   /** Авторизация */
   login: (email: string, password: string) =>

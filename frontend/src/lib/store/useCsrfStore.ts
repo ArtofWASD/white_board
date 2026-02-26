@@ -22,7 +22,7 @@ export const useCsrfStore = create<CsrfState>((set, get) => ({
     set({ isLoading: true })
 
     try {
-      const response = await fetch("/api/csrf", {
+      const response = await fetch("/api/csrf/token", {
         method: "GET",
         credentials: "include",
       })
