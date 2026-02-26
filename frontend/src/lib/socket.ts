@@ -16,9 +16,15 @@ export const initializeSocket = (userId: string) => {
   }
 
   if (!socket) {
-    // In production, NEXT_PUBLIC_API_URL should point to the public backend URL
-    // or we use the current host (empty string)
-    const socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
+    let socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
+    if (socketUrl) {
+      try {
+        const url = new URL(socketUrl)
+        socketUrl = url.origin
+      } catch (e) {
+        // If it's a relative URL or invalid, leave it as is
+      }
+    }
     socket = io(socketUrl, {
       path: "/socket.io",
       withCredentials: true,

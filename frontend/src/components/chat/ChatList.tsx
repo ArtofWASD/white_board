@@ -18,18 +18,53 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    let isMounted = true
+    let socketInstance: any = null
+    let listenerRef: any = null
+
     const fetchChats = async () => {
       try {
         const data = await getUserChats()
-        setChats(data)
+        if (isMounted) setChats(data)
       } catch (error) {
         logApiError("/api/chats", error)
       } finally {
-        setLoading(false)
+        if (isMounted) setLoading(false)
       }
     }
 
     fetchChats()
+
+    const setupSocket = async () => {
+      try {
+        const { waitForSocket } = await import("../../lib/socket")
+        const socket = await waitForSocket()
+
+        if (!isMounted) return
+
+        socketInstance = socket
+
+        const handleNewNotification = (notification: any) => {
+          if (notification.type === "CHAT_MESSAGE") {
+            fetchChats() // Re-fetch to get updated last message and unread status
+          }
+        }
+
+        listenerRef = handleNewNotification
+        socket.on("newNotification", handleNewNotification)
+      } catch (e) {
+        console.error("Failed to setup chat list socket", e)
+      }
+    }
+
+    setupSocket()
+
+    return () => {
+      isMounted = false
+      if (socketInstance && listenerRef) {
+        socketInstance.off("newNotification", listenerRef)
+      }
+    }
   }, [])
 
   if (loading) {
