@@ -235,8 +235,9 @@ model TeamMember {
 
 model EventResult {
   id        String   @id @default(uuid())
-  time      String
+  time      String?
   value     Float    @default(0)
+  completed Boolean  @default(false)
   scaling   String   @default("RX") // RX, SCALED, INDIVIDUAL
   notes     Json?    @default("[]")
   dateAdded DateTime @default(now()) @map("date_added")

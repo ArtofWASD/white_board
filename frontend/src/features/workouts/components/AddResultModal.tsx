@@ -9,9 +9,11 @@ import { Workout } from "./WorkoutCard"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { addResultSchema, AddResultFormData } from "@/lib/validators/workout"
+import { AddResultFormData, addResultSchema } from "@/lib/validators/workout"
 import { useEffect, useState } from "react"
 import { EditWorkoutModal } from "./EditWorkoutModal"
+import { useToast } from "@/lib/context/ToastContext"
+import { Checkbox } from "@/components/ui/checkbox"
 
 interface AddResultModalProps {
   workout: Workout
@@ -42,10 +44,11 @@ export function AddResultModal({
       resultValue: "",
       scaling: "RX",
       comment: "",
+      completed: false,
     },
   })
 
-  const scaling = watch("scaling")
+  const { success: successToast, error: errorToast } = useToast()
 
   // Reset form when modal opens
   useEffect(() => {
@@ -57,35 +60,43 @@ export function AddResultModal({
   const onSubmit = async (data: AddResultFormData) => {
     if (!user) return
 
+    // Validation: if not EMOM, resultValue is required
+    if (workout.type !== "EMOM" && !data.resultValue) {
+      errorToast("Пожалуйста, введите результат")
+      return
+    }
+
     try {
-      await eventsApi.addResult(workout.id, {
+      const payload: any = {
         username: user.name,
         userId: user.id,
-        time:
-          workout.type === "FOR_TIME" ||
-          workout.type === "EMOM" ||
-          workout.type === "CARDIO"
-            ? data.resultValue
-            : undefined,
-        value:
-          workout.type === "AMRAP" || workout.type === "WEIGHTLIFTING"
-            ? Number(data.resultValue)
-            : undefined,
         scaling: data.scaling,
-      })
+        completed: data.completed,
+      }
 
-      // Note: Comment is currently not supported by addResult API directly in this flow based on schema
-      // If we need to add comment, we would need to chain a call to eventsApi.addNote with the result ID
-      // but addResult returns the result object so we can do that.
+      // Map according to workout type
+      if (workout.type === "FOR_TIME" || workout.type === "CARDIO") {
+        payload.time = data.resultValue
+      } else if (workout.type === "AMRAP" || workout.type === "WEIGHTLIFTING") {
+        payload.value = Number(
+          data.resultValue?.replace(",", ".").replace(/[^0-9.]/g, ""),
+        )
+        // For compatibility, also put string in time
+        payload.time = data.resultValue
+      } else if (workout.type === "EMOM") {
+        payload.completed = data.completed
+        // Optional: put "Completed" in time for display
+        payload.time = data.completed ? "Выполнено" : "Не выполнено"
+      }
 
-      // Let's defer that for now to keep it simple or strictly follow schema.
-      // Ideally we should update addResult endpoint to accept comment.
+      await eventsApi.addResult(workout.id, payload)
 
+      successToast("Результат успешно добавлен")
       onSuccess?.()
       onClose()
     } catch (error) {
       console.error("Failed to add result:", error)
-      // Ideally show error toast
+      errorToast("Не удалось добавить результат")
     }
   }
 
@@ -110,11 +121,13 @@ export function AddResultModal({
       case "FOR_TIME":
         return "Время (ММ:СС)"
       case "AMRAP":
-        return "Количество раундов/повторений"
+        return "Количество раундов"
       case "WEIGHTLIFTING":
-        return "Количество повторений"
+        return "Результат (Вес или Повторы)"
       case "EMOM":
-        return "Результат" // Generic
+        return "Статус выполнения"
+      case "CARDIO":
+        return "Время или Дистанция"
       default:
         return "Результат"
     }
@@ -170,14 +183,39 @@ export function AddResultModal({
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="resultValue">{getResultLabel()}</Label>
-              <Input
-                id="resultValue"
-                {...register("resultValue")}
-                placeholder={workout.type === "FOR_TIME" ? "12:30" : "0"}
-                className={errors.resultValue ? "border-red-500" : ""}
-              />
-              {errors.resultValue && (
-                <p className="text-red-500 text-xs">{errors.resultValue.message}</p>
+              {workout.type === "EMOM" ? (
+                <div className="flex items-center space-x-2 py-2">
+                  <Checkbox
+                    id="completed"
+                    checked={watch("completed")}
+                    onCheckedChange={(checked: boolean) =>
+                      setValue("completed", !!checked)
+                    }
+                  />
+                  <Label
+                    htmlFor="completed"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                    Тренировка выполнена полностью
+                  </Label>
+                </div>
+              ) : (
+                <>
+                  <Input
+                    id="resultValue"
+                    {...register("resultValue")}
+                    placeholder={
+                      workout.type === "FOR_TIME"
+                        ? "12:30"
+                        : workout.type === "WEIGHTLIFTING"
+                          ? "100 кг / 5 пов"
+                          : "0"
+                    }
+                    className={errors.resultValue ? "border-red-500" : ""}
+                  />
+                  {errors.resultValue && (
+                    <p className="text-red-500 text-xs">{errors.resultValue.message}</p>
+                  )}
+                </>
               )}
             </div>
 

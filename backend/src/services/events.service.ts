@@ -424,12 +424,13 @@ export class EventsService {
 
   async createEventResult(
     eventId: string,
-    time: string,
     username: string,
+    time?: string,
     userId?: string,
     value?: number,
     scaling?: string,
     notes?: string,
+    completed?: boolean,
   ) {
     // Проверяем, существует ли событие
     const event = await this.prisma.event.findUnique({
@@ -450,6 +451,7 @@ export class EventsService {
         eventId,
         userId,
         value: value || 0,
+        completed: completed || false,
         scaling: scaling || 'RX',
         notes: initialNotes,
       },

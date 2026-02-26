@@ -43,6 +43,7 @@ interface AddResultData {
   userId?: string
   value?: number
   scaling?: string
+  completed?: boolean
 }
 
 export const eventsApi = {
@@ -62,8 +63,11 @@ export const eventsApi = {
     apiClient.put<CalendarEvent>(`/api/events/${eventId}`, data),
 
   /** Удалить событие */
-  deleteEvent: (eventId: string, userId: string) => 
-    apiClient.request<void>(`/api/events/${eventId}`, { method: 'DELETE', body: { userId } }),
+  deleteEvent: (eventId: string, userId: string) =>
+    apiClient.request<void>(`/api/events/${eventId}`, {
+      method: "DELETE",
+      body: { userId },
+    }),
 
   /** Обновить статус события */
   updateStatus: (eventId: string, status: string) =>

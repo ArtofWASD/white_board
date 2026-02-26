@@ -216,7 +216,11 @@ export function CalendarSystem({
         onClose={() => setIsCreateModalOpen(false)}
         onSave={handleCreateWorkout}
         defaultDate={createDate}
-        defaultTeamId={teamId || undefined}
+        defaultTeamId={
+          teamId === "my" || teamId === "all" || teamId === "all_teams"
+            ? undefined
+            : teamId || undefined
+        }
       />
     </div>
   )

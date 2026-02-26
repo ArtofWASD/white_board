@@ -111,12 +111,13 @@ export class EventsController {
     try {
       return await this.eventsService.createEventResult(
         eventId,
-        createEventResultDto.time,
         createEventResultDto.username,
+        createEventResultDto.time,
         createEventResultDto.userId, // Передаем userId
         createEventResultDto.value,
         createEventResultDto.scaling,
         createEventResultDto.notes,
+        createEventResultDto.completed,
       );
     } catch (error: unknown) {
       if (error instanceof NotFoundException) {

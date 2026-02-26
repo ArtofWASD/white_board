@@ -6,6 +6,7 @@ import {
   IsArray,
   IsDateString,
   IsNumber,
+  IsBoolean,
 } from 'class-validator';
 
 export class ExerciseDto {
@@ -100,8 +101,12 @@ export class CreateEventResultDto {
   eventId?: string;
 
   @IsString()
-  @IsNotEmpty()
-  time: string;
+  @IsOptional()
+  time?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  completed?: boolean;
 
   @IsString()
   @IsNotEmpty()

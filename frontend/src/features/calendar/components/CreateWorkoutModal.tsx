@@ -160,7 +160,10 @@ export function CreateWorkoutModal({
   }
 
   useEffect(() => {
-    if (selectedTeamId && selectedTeamId !== "none") {
+    const isSpecialFilter = ["all", "my", "all_teams", "none"].includes(
+      selectedTeamId || "",
+    )
+    if (selectedTeamId && !isSpecialFilter) {
       const fetchMembers = async () => {
         try {
           const response = await teamsApi.getMembers(selectedTeamId)
