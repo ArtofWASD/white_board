@@ -32,8 +32,11 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
 
   useEffect(() => {
     if (isOpen && user) {
+      // Reset state for new user
+      setActiveTab("strength")
+      setChatId(null)
+      
       fetchUserData()
-      // Initialize chat if opening
       initialiseChat()
     }
   }, [isOpen, user])
