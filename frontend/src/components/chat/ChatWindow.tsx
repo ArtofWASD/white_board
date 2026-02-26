@@ -6,6 +6,7 @@ import { Chat, Message } from "../../types/chat.types"
 import data from "@emoji-mart/data"
 import Picker from "@emoji-mart/react"
 import { logApiError } from "../../lib/logger"
+import { apiClient } from "../../lib/api/apiClient"
 
 interface ChatWindowProps {
   chatId: string
@@ -56,34 +57,34 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
         if (isMatch) {
           try {
-            const response = await fetch(`/api/chats/${chatId}/messages?limit=1&skip=0`, {
-              credentials: "include",
-            })
+            const newMessages = await apiClient.get<Message[]>(
+              `/api/chats/${chatId}/messages`,
+              {
+                limit: "1",
+                skip: "0",
+              },
+            )
 
-            if (response.ok) {
-              const newMessages = await response.json()
+            if (newMessages.length > 0) {
+              const incomingMsg = newMessages[0]
 
-              if (newMessages.length > 0) {
-                const incomingMsg = newMessages[0]
+              setMessages((prev) => {
+                const exists = prev.some((m) => m.id === incomingMsg.id)
+                if (exists) {
+                  return prev
+                }
+                return [...prev, incomingMsg]
+              })
 
-                setMessages((prev) => {
-                  const exists = prev.some((m) => m.id === incomingMsg.id)
-                  if (exists) {
-                    return prev
+              setTimeout(() => {
+                if (scrollContainerRef.current) {
+                  const { scrollTop, scrollHeight, clientHeight } =
+                    scrollContainerRef.current
+                  if (scrollHeight - scrollTop - clientHeight < 300) {
+                    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
                   }
-                  return [...prev, incomingMsg]
-                })
-
-                setTimeout(() => {
-                  if (scrollContainerRef.current) {
-                    const { scrollTop, scrollHeight, clientHeight } =
-                      scrollContainerRef.current
-                    if (scrollHeight - scrollTop - clientHeight < 300) {
-                      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-                    }
-                  }
-                }, 100)
-              }
+                }
+              }, 100)
             }
           } catch (e) {
             logApiError(`/api/chats/${chatId}/messages`, e, { chatId })
@@ -110,27 +111,22 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     setIsLoading(true)
 
     try {
-      const response = await fetch(
-        `/api/chats/${chatId}/messages?limit=${MESSAGES_PER_PAGE}&skip=${offset}`,
-        {
-          credentials: "include",
-        },
-      )
-      if (response.ok) {
-        const data = await response.json()
+      const data = await apiClient.get<Message[]>(`/api/chats/${chatId}/messages`, {
+        limit: MESSAGES_PER_PAGE.toString(),
+        skip: offset.toString(),
+      })
 
-        if (data.length < MESSAGES_PER_PAGE) {
-          setHasMore(false)
-        }
-
-        setMessages((prev) => {
-          if (isLoadMore) {
-            return [...data, ...prev]
-          } else {
-            return data
-          }
-        })
+      if (data.length < MESSAGES_PER_PAGE) {
+        setHasMore(false)
       }
+
+      setMessages((prev) => {
+        if (isLoadMore) {
+          return [...data, ...prev]
+        } else {
+          return data
+        }
+      })
     } catch (error) {
       logApiError(`/api/chats/${chatId}/messages`, error, { chatId })
     } finally {
@@ -197,26 +193,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     if (!newMessage.trim()) return
 
     try {
-      const response = await fetch(`/api/chats/${chatId}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ content: newMessage, type: "text" }),
+      const message = await apiClient.post<Message>(`/api/chats/${chatId}/messages`, {
+        content: newMessage,
+        type: "text",
       })
 
-      if (response.ok) {
-        const message = await response.json()
-        setMessages((prev) => [...prev, message])
-        setNewMessage("")
-        // Scroll to bottom
-        setTimeout(() => {
-          if (scrollContainerRef.current) {
-            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
-          }
-        }, 50)
-      }
+      setMessages((prev) => [...prev, message])
+      setNewMessage("")
+      // Scroll to bottom
+      setTimeout(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight
+        }
+      }, 50)
     } catch (error) {
       logApiError(`/api/chats/${chatId}/messages`, error, { chatId })
     }

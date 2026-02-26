@@ -16,10 +16,11 @@ export const initializeSocket = (userId: string) => {
   }
 
   if (!socket) {
-    // In production, NEXT_PUBLIC_API_URL should point to the public backend URL 
+    // In production, NEXT_PUBLIC_API_URL should point to the public backend URL
     // or we use the current host (empty string)
     const socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
     socket = io(socketUrl, {
+      path: "/api/socket.io",
       withCredentials: true,
       transports: ["websocket", "polling"],
     })
