@@ -4,17 +4,24 @@ import {
   OnGatewayInit,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from '@nestjs/common';
 
 @WebSocketGateway({
   cors: {
-    origin: [
-      'http://localhost:3000',
-      'http://127.0.0.1:3000',
-      'http://192.168.0.106:3000', // Add your local IP if needed
-    ],
+    origin: process.env.CORS_ALLOWED_ORIGINS
+      ? process.env.CORS_ALLOWED_ORIGINS.split(',').map((origin) =>
+          origin.trim(),
+        )
+      : [
+          'http://localhost:3000',
+          'http://127.0.0.1:3000',
+          'http://192.168.0.106:3000',
+        ],
     credentials: true,
   },
 })
@@ -38,7 +45,11 @@ export class NotificationsGateway
     this.logger.log(`Client connected: ${client.id}`);
   }
 
-  async handleJoinRoom(client: Socket, userId: string): Promise<void> {
+  @SubscribeMessage('joinUserRoom')
+  async handleJoinRoom(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() userId: string,
+  ): Promise<void> {
     await client.join(userId);
     this.logger.log(`Client ${client.id} joined room ${userId}`);
   }
