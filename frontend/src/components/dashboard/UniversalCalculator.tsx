@@ -35,6 +35,7 @@ export function UniversalCalculator({
     title: string
     description: string
     scheme?: string
+    exercises?: any[]
   } | null>(null)
 
   // Определение доступных модулей на основе флагов функций
@@ -56,8 +57,8 @@ export function UniversalCalculator({
   //     return null;
   // }
 
-  const openCalendarModal = (title: string, description: string, scheme?: string) => {
-    setCalendarModalData({ title, description, scheme })
+  const openCalendarModal = (title: string, description: string, scheme?: string, exercises?: any[]) => {
+    setCalendarModalData({ title, description, scheme, exercises })
     setIsCalendarModalOpen(true)
   }
 
@@ -77,6 +78,7 @@ export function UniversalCalculator({
           eventDate: date.toISOString(),
           exerciseType: calendarModalData.scheme || "WEIGHTLIFTING",
           scheme: calendarModalData.scheme || "WEIGHTLIFTING",
+          exercises: calendarModalData.exercises,
         }),
       })
 

@@ -8,7 +8,7 @@ interface Exercise {
 
 interface TexasMethodModuleProps {
   exercises: Exercise[]
-  onAddToCalendar: (title: string, description: string) => void
+  onAddToCalendar: (title: string, description: string, scheme?: string, exercises?: any[]) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
 }
@@ -142,12 +142,19 @@ export function TexasMethodModule({
                   <div className="flex items-center justify-start gap-2">
                     <span>{week.day1}</span>
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
                         onAddToCalendar(
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "TM"}: Неделя ${week.weekNum} День 1`,
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}: ${week.day1}`,
-                        )
-                      }
+                          `${exName}: Неделя ${week.weekNum} День 1`,
+                          `${exName}: ${week.day1}`,
+                          "WEIGHTLIFTING",
+                          [{
+                            name: exName,
+                            weight: week.day1.split(" ")[0], // Extract just the weight number
+                            repetitions: "5x5"
+                          }]
+                        );
+                      }}
                       className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
@@ -170,12 +177,19 @@ export function TexasMethodModule({
                   <div className="flex items-center justify-start gap-2">
                     <span>{week.day2}</span>
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
                         onAddToCalendar(
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "TM"}: Неделя ${week.weekNum} День 2`,
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}: ${week.day2}`,
-                        )
-                      }
+                          `${exName}: Неделя ${week.weekNum} День 2`,
+                          `${exName}: ${week.day2}`,
+                          "WEIGHTLIFTING",
+                          [{
+                            name: exName,
+                            weight: week.day2.split(" ")[0],
+                            repetitions: "2x5"
+                          }]
+                        );
+                      }}
                       className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
@@ -198,12 +212,19 @@ export function TexasMethodModule({
                   <div className="flex items-center justify-start gap-2">
                     <span>{week.day3}</span>
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
                         onAddToCalendar(
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "TM"}: Неделя ${week.weekNum} День 3`,
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}: ${week.day3}`,
-                        )
-                      }
+                          `${exName}: Неделя ${week.weekNum} День 3`,
+                          `${exName}: ${week.day3}`,
+                          "WEIGHTLIFTING",
+                          [{
+                            name: exName,
+                            weight: week.day3.split(" ")[0],
+                            repetitions: dayThreeMode
+                          }]
+                        );
+                      }}
                       className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>

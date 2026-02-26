@@ -184,11 +184,22 @@ const NotificationsPage: React.FC = () => {
                   </div>
 
                   <div className="ml-4 flex-1">
+                    {/* Render Sender Name from title, if it exists */}
+                    {notification.title && (
+                      <h4
+                        className={`text-sm mb-0.5 ${
+                          notification.isRead
+                            ? "text-gray-600 dark:text-gray-400 font-medium"
+                            : "text-gray-900 dark:text-white font-bold"
+                        }`}>
+                        {notification.title}
+                      </h4>
+                    )}
                     <p
-                      className={`text-base leading-relaxed ${
+                      className={`text-sm leading-relaxed ${
                         notification.isRead
-                          ? "text-gray-700 dark:text-gray-300"
-                          : "text-gray-900 dark:text-white font-medium"
+                          ? "text-gray-500 dark:text-gray-400"
+                          : "text-gray-800 dark:text-gray-200"
                       }`}>
                       {notification.message}
                     </p>

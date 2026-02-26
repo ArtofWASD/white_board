@@ -7,9 +7,10 @@ interface AddToCalendarModalProps {
   onSave: (date: Date) => void;
   title: string;
   description?: string;
+  exercises?: any[];
 }
 
-export function AddToCalendarModal({ isOpen, onClose, onSave, title, description }: AddToCalendarModalProps) {
+export function AddToCalendarModal({ isOpen, onClose, onSave, title, description, exercises }: AddToCalendarModalProps) {
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
 
   if (!isOpen) return null;
@@ -36,7 +37,22 @@ export function AddToCalendarModal({ isOpen, onClose, onSave, title, description
 
         <div>
            <p className="font-medium text-gray-900 mb-1">{title}</p>
-           {description && <p className="text-sm text-gray-500">{description}</p>}
+           {description && !exercises?.length && <p className="text-sm text-gray-500 whitespace-pre-wrap">{description}</p>}
+           
+           {exercises && exercises.length > 0 && (
+             <div className="mt-3 space-y-2 max-h-40 overflow-y-auto pr-2">
+               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Упражнения:</p>
+               {exercises.map((ex, idx) => (
+                 <div key={idx} className="bg-gray-50 rounded p-2 text-sm border border-gray-100">
+                   <div className="font-medium text-gray-800">{ex.name}</div>
+                   <div className="text-gray-500 text-xs flex gap-3 mt-1">
+                     {ex.weight && <span>Вес: <span className="font-medium">{ex.weight}</span></span>}
+                     {ex.repetitions && <span>Повторы: <span className="font-medium">{ex.repetitions}</span></span>}
+                   </div>
+                 </div>
+               ))}
+             </div>
+           )}
         </div>
 
         <div>

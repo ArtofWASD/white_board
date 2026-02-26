@@ -18,7 +18,7 @@ interface StrengthResult {
 
 interface StrengthTrainingModuleProps {
   exercises: Exercise[]
-  onAddToCalendar: (title: string, description: string) => void
+  onAddToCalendar: (title: string, description: string, scheme?: string, exercises?: any[]) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
 }
@@ -244,14 +244,22 @@ export function StrengthTrainingModule({
                 ) : (
                   <div className="flex justify-center items-center h-full">
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
                         onAddToCalendar(
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1"}: Неделя 1`,
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}:
-Разминка: 5x${calculateWeight(0.4)}кг, 5x${calculateWeight(0.5)}кг, 3x${calculateWeight(0.6)}кг
-Рабочие: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`,
-                        )
-                      }
+                          `${exName}: Неделя 1`,
+                          `${exName}:\nРазминка: 5x${calculateWeight(0.4)}кг, 5x${calculateWeight(0.5)}кг, 3x${calculateWeight(0.6)}кг\nРабочие: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`,
+                          "WEIGHTLIFTING",
+                          [
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.4), repetitions: "5" },
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.5), repetitions: "5" },
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.6), repetitions: "3" },
+                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.65), repetitions: "5" },
+                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.75), repetitions: "5" },
+                            { name: `${exName} (Рабочий: Рекорд)`, weight: calculateWeight(0.85), repetitions: "5+" }
+                          ]
+                        );
+                      }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
@@ -329,14 +337,22 @@ export function StrengthTrainingModule({
                 ) : (
                   <div className="flex justify-center items-center h-full">
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
                         onAddToCalendar(
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1"}: Неделя 2`,
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}:
-Разминка: 5x${calculateWeight(0.45)}кг, 5x${calculateWeight(0.55)}кг, 3x${calculateWeight(0.65)}кг
-Рабочие: 3x${calculateWeight(0.7)}кг, 3x${calculateWeight(0.8)}кг, 3+x${calculateWeight(0.9)}кг`,
-                        )
-                      }
+                          `${exName}: Неделя 2`,
+                          `${exName}:\nРазминка: 5x${calculateWeight(0.45)}кг, 5x${calculateWeight(0.55)}кг, 3x${calculateWeight(0.65)}кг\nРабочие: 3x${calculateWeight(0.7)}кг, 3x${calculateWeight(0.8)}кг, 3+x${calculateWeight(0.9)}кг`,
+                          "WEIGHTLIFTING",
+                          [
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.45), repetitions: "5" },
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.55), repetitions: "5" },
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.65), repetitions: "3" },
+                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.7), repetitions: "3" },
+                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.8), repetitions: "3" },
+                            { name: `${exName} (Рабочий: Рекорд)`, weight: calculateWeight(0.9), repetitions: "3+" }
+                          ]
+                        );
+                      }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в calendar"
                       onPointerDown={handleInputPointerDown}>
@@ -414,14 +430,22 @@ export function StrengthTrainingModule({
                 ) : (
                   <div className="flex justify-center items-center h-full">
                     <button
-                      onClick={() =>
+                      onClick={() => {
+                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
                         onAddToCalendar(
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1"}: Неделя 3`,
-                          `${exercises.find((e) => e.id === selectedExerciseId)?.name || "Упражнение"}:
-Разминка: 5x${calculateWeight(0.5)}кг, 5x${calculateWeight(0.6)}кг, 3x${calculateWeight(0.7)}кг
-Рабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`,
-                        )
-                      }
+                          `${exName}: Неделя 3`,
+                          `${exName}:\nРазминка: 5x${calculateWeight(0.5)}кг, 5x${calculateWeight(0.6)}кг, 3x${calculateWeight(0.7)}кг\nРабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`,
+                          "WEIGHTLIFTING",
+                          [
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.5), repetitions: "5" },
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.6), repetitions: "5" },
+                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.7), repetitions: "3" },
+                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.75), repetitions: "5" },
+                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.85), repetitions: "3" },
+                            { name: `${exName} (Рабочий: Рекорд)`, weight: calculateWeight(0.95), repetitions: "1+" }
+                          ]
+                        );
+                      }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"
                       onPointerDown={handleInputPointerDown}>
