@@ -248,7 +248,7 @@ export function StrengthTrainingModule({
                         const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
                         onAddToCalendar(
                           `${exName}: Неделя 1`,
-                          `${exName}:\nРазминка: 5x${calculateWeight(0.4)}кг, 5x${calculateWeight(0.5)}кг, 3x${calculateWeight(0.6)}кг\nРабочие: 5x${calculateWeight(0.65)}кг, 5x${calculateWeight(0.75)}кг, 5+x${calculateWeight(0.85)}кг`,
+                          "",
                           "WEIGHTLIFTING",
                           [
                             { name: `${exName} (Разминка)`, weight: calculateWeight(0.4), repetitions: "5" },
@@ -341,7 +341,7 @@ export function StrengthTrainingModule({
                         const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
                         onAddToCalendar(
                           `${exName}: Неделя 2`,
-                          `${exName}:\nРазминка: 5x${calculateWeight(0.45)}кг, 5x${calculateWeight(0.55)}кг, 3x${calculateWeight(0.65)}кг\nРабочие: 3x${calculateWeight(0.7)}кг, 3x${calculateWeight(0.8)}кг, 3+x${calculateWeight(0.9)}кг`,
+                          "",
                           "WEIGHTLIFTING",
                           [
                             { name: `${exName} (Разминка)`, weight: calculateWeight(0.45), repetitions: "5" },
@@ -434,7 +434,7 @@ export function StrengthTrainingModule({
                         const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
                         onAddToCalendar(
                           `${exName}: Неделя 3`,
-                          `${exName}:\nРазминка: 5x${calculateWeight(0.5)}кг, 5x${calculateWeight(0.6)}кг, 3x${calculateWeight(0.7)}кг\nРабочие: 5x${calculateWeight(0.75)}кг, 3x${calculateWeight(0.85)}кг, 1+x${calculateWeight(0.95)}кг`,
+                          "",
                           "WEIGHTLIFTING",
                           [
                             { name: `${exName} (Разминка)`, weight: calculateWeight(0.5), repetitions: "5" },

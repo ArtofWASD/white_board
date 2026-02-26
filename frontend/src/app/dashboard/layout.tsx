@@ -219,20 +219,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         title={activeChatId ? "Чат" : "Ваши чаты"}
-        size="lg">
+        size="lg"
+        noPadding={!!activeChatId}
+      >
         {activeChatId ? (
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full bg-white dark:bg-gray-800">
             {/* Back button for trainers who can see list */}
             {user?.role !== "ATHLETE" && (
               <button
                 onClick={() => setActiveChatId(null)}
-                className="self-start mb-2 text-sm text-blue-600 hover:underline flex items-center">
+                className="self-start m-4 mb-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center">
                 ← Назад к списку
               </button>
             )}
             <ChatWindow
               chatId={activeChatId}
-              className="!h-[500px] !border-none !shadow-none !bg-gray-50"
+              className="flex-1 !border-none !shadow-none !rounded-none"
             />
           </div>
         ) : (

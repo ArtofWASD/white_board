@@ -146,7 +146,7 @@ export function TexasMethodModule({
                         const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
                         onAddToCalendar(
                           `${exName}: Неделя ${week.weekNum} День 1`,
-                          `${exName}: ${week.day1}`,
+                          "",
                           "WEIGHTLIFTING",
                           [{
                             name: exName,
@@ -181,7 +181,7 @@ export function TexasMethodModule({
                         const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
                         onAddToCalendar(
                           `${exName}: Неделя ${week.weekNum} День 2`,
-                          `${exName}: ${week.day2}`,
+                          "",
                           "WEIGHTLIFTING",
                           [{
                             name: exName,
@@ -216,7 +216,7 @@ export function TexasMethodModule({
                         const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
                         onAddToCalendar(
                           `${exName}: Неделя ${week.weekNum} День 3`,
-                          `${exName}: ${week.day3}`,
+                          "",
                           "WEIGHTLIFTING",
                           [{
                             name: exName,
