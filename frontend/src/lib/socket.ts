@@ -17,12 +17,27 @@ export const initializeSocket = (userId: string) => {
 
   if (!socket) {
     let socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
-    if (socketUrl) {
+
+    // Dynamic resolution to bypass Next.js build-time baked variables in Docker
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname
+      // If we are on production/staging domains (not localhost), dynamically prepend 'api.'
+      if (hostname !== "localhost" && hostname !== "127.0.0.1") {
+        socketUrl = `https://api.${hostname}`
+      } else if (socketUrl) {
+        try {
+          const url = new URL(socketUrl)
+          socketUrl = url.origin
+        } catch (e) {
+          // Keep as is
+        }
+      }
+    } else if (socketUrl) {
       try {
         const url = new URL(socketUrl)
         socketUrl = url.origin
       } catch (e) {
-        // If it's a relative URL or invalid, leave it as is
+          // Keep as is
       }
     }
     socket = io(socketUrl, {
