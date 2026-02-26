@@ -238,7 +238,7 @@ export function EditWorkoutModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col max-sm:bottom-auto max-sm:top-[40%] max-sm:translate-y-[-50%]">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>Редактировать тренировку</DialogTitle>
         </DialogHeader>

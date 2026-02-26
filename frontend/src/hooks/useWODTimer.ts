@@ -199,7 +199,7 @@ export const useWODTimer = (config: TimerConfig) => {
         return {
           ...prev,
           timeLeft: newTimeLeft,
-          elapsedTime: prev.elapsedTime + deltaTime,
+          elapsedTime: prev.phase === "WARMUP" ? 0 : prev.elapsedTime + deltaTime,
         }
       })
 

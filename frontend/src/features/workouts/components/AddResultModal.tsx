@@ -136,7 +136,7 @@ export function AddResultModal({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto max-sm:bottom-auto max-sm:top-[40%] max-sm:translate-y-[-50%]">
           <DialogHeader>
             <DialogTitle>Записать результат</DialogTitle>
           </DialogHeader>

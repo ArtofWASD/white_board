@@ -6,6 +6,7 @@ import { TimerLayout } from "../../components/timer/TimerLayout"
 import { TimerSetup } from "../../components/timer/TimerSetup"
 import { TimerDisplay } from "../../components/timer/TimerDisplay"
 import { useWODTimer, TimerConfig, TimerMode, RoundRecord } from "../../hooks/useWODTimer"
+import { useWakeLock } from "../../hooks/useWakeLock"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { apiClient } from "../../lib/api/apiClient"
 
@@ -228,6 +229,7 @@ const ActiveTimer: React.FC<{
   onSaveResult?: (val: string, comment?: string, value?: number) => void
 }> = ({ config, onBack, onSaveResult }) => {
   const { state, start, pause, reset, skipWarmup, addRound } = useWODTimer(config)
+  useWakeLock(state.status === "RUNNING")
 
   React.useEffect(() => {
     start()

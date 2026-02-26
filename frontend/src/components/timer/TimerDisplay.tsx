@@ -163,19 +163,27 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
             Время по раундам
           </h3>
           <div className="flex flex-col gap-2">
-            {roundTimes.map((rec: RoundRecord, idx: number) => {
-              // Время этого раунда = elapsedMs этого раунда минус elapsedMs предыдущего
-              const prevMs = idx === 0 ? 0 : roundTimes[idx - 1].elapsedMs
-              const roundDuration = rec.elapsedMs - prevMs
+            {[...roundTimes].reverse().map((rec: RoundRecord) => {
+              // Находим оригинальный индекс для вычисления длительности
+              const originalIdx = roundTimes.findIndex((r) => r.round === rec.round)
+              const currentSeconds = Math.ceil(rec.elapsedMs / 1000)
+              const prevSeconds =
+                originalIdx === 0
+                  ? 0
+                  : Math.ceil(roundTimes[originalIdx - 1].elapsedMs / 1000)
+              const roundDurationSeconds = currentSeconds - prevSeconds
+
               return (
                 <div
                   key={rec.round}
-                  className="flex justify-between items-center px-4 py-2 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800">
+                  className="flex justify-between items-center px-4 py-2 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-100 dark:border-purple-800 animate-in fade-in slide-in-from-top-2 duration-300">
                   <span className="font-bold text-purple-700 dark:text-purple-400">
                     Раунд {rec.round}
                   </span>
                   <div className="flex gap-4 text-sm text-gray-600 font-mono">
-                    <span title="Время этого раунда">⏱ {formatTime(roundDuration)}</span>
+                    <span title="Время этого раунда">
+                      ⏱ {formatTime(roundDurationSeconds * 1000)}
+                    </span>
                     <span title="Общее время с начала" className="text-gray-400">
                       ({formatTime(rec.elapsedMs)} общее)
                     </span>
