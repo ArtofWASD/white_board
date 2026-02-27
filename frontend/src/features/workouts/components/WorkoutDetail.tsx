@@ -142,7 +142,14 @@ export function WorkoutDetail({
               <Calendar className="h-4 w-4" />
               <span>Тренировка дня</span>
             </div>
-            <DialogTitle className="text-2xl">{workout.title}</DialogTitle>
+            <DialogTitle className="text-2xl">
+              {workout.title}
+              {workout.teamName && (
+                <span className="text-muted-foreground text-lg font-normal ml-2">
+                  для {workout.teamName}
+                </span>
+              )}
+            </DialogTitle>
             <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
               <span
                 className={cn(

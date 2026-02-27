@@ -252,6 +252,7 @@ export default function CalendarPage() {
           timeCap: event.timeCap,
           rounds: event.rounds,
           userId: event.userId,
+          teamName: (event as any).team?.name,
           durationMinutes: event.timeCap ? parseInt(event.timeCap) || 60 : 60,
         })
       })

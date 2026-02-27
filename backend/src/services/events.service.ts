@@ -124,6 +124,11 @@ export class EventsService {
               lastName: true,
             },
           },
+          team: {
+            select: {
+              name: true,
+            },
+          },
         },
       });
     } else {
@@ -172,6 +177,11 @@ export class EventsService {
                 id: true,
                 name: true,
                 lastName: true,
+              },
+            },
+            team: {
+              select: {
+                name: true,
               },
             },
           },
@@ -226,6 +236,11 @@ export class EventsService {
               id: true,
               name: true,
               lastName: true,
+            },
+          },
+          team: {
+            select: {
+              name: true,
             },
           },
         },

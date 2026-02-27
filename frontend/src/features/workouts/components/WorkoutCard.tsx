@@ -21,6 +21,7 @@ export interface Workout {
   timeCap?: string
   rounds?: string
   userId?: string // Added for ownership check
+  teamName?: string
   durationMinutes?: number // For Gantt view duration/width
 }
 
