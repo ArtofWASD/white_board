@@ -345,7 +345,7 @@ export function CreateWorkoutModal({
       timeCap,
       rounds,
       description,
-      teamId: selectedTeamId || undefined,
+      teamId: selectedTeamId === "none" ? undefined : selectedTeamId || undefined,
       scheme,
       assignees:
         assignmentType === "specific" && selectedAthletes.length > 0

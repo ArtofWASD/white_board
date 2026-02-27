@@ -86,17 +86,24 @@ export function CalendarSystem({
     }
 
     try {
-      // Determine effective teamId
-      // complex filters like "all", "my", "all_teams" usually mean no specific team assignment for creation
-      // unless we want to enforce "my" -> null.
-      const effectiveTeamId =
-        teamId === "my" || teamId === "all" || teamId === "all_teams" ? undefined : teamId
+      let effectiveTeamId = data.teamId === "none" ? undefined : data.teamId
 
-      await eventsApi.createEvent({
+      if (effectiveTeamId === undefined && !("teamId" in data)) {
+        effectiveTeamId =
+          teamId === "my" || teamId === "all" || teamId === "all_teams"
+            ? undefined
+            : teamId
+      }
+
+      const payload = {
         ...data,
         userId: user.id,
         teamId: effectiveTeamId,
-      })
+      }
+
+      console.log("Creating event with payload:", payload)
+
+      await eventsApi.createEvent(payload)
       setIsCreateModalOpen(false)
       if (onWorkoutCreated) {
         onWorkoutCreated()
