@@ -57,7 +57,7 @@ export function MonthView({
                 !isLastCol && "border-r dark:border-r-gray-700",
                 !day.isCurrentMonth &&
                   "bg-muted/10 dark:bg-gray-900/40 text-muted-foreground/50",
-                day.isToday && "bg-primary/10 dark:bg-primary/5",
+                day.isToday && "bg-primary/15 dark:bg-primary/20 ring-1 ring-inset ring-primary/30",
               )}>
               <div className="flex justify-between items-start flex-shrink-0">
                 <span

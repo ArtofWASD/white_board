@@ -24,7 +24,9 @@ export function AgendaView({
 
   useEffect(() => {
     if (todayRef.current) {
-      todayRef.current.scrollIntoView({ behavior: "smooth", block: "center" })
+      setTimeout(() => {
+        todayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 100)
     }
   }, [])
 
