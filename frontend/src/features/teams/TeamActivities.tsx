@@ -49,8 +49,9 @@ const TeamActivities: React.FC = () => {
         trainersTeams.map(async (team: Team) => {
           try {
             const events = await eventsApi.getUserEvents(user!.id, team.id)
+            const teamEvents = events.filter((e: Event) => e.teamId === team.id)
             // Sort by date descending and find the latest one that is not in the future or just the latest one
-            const sortedEvents = events.sort(
+            const sortedEvents = teamEvents.sort(
               (a: Event, b: Event) =>
                 new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime(),
             )
@@ -139,21 +140,21 @@ const TeamActivities: React.FC = () => {
             noPadding
             className="overflow-hidden border dark:border-gray-700">
             <div
-              className={`p-5 flex flex-col sm:flex-row sm:items-center justify-between cursor-pointer transition-all duration-300 ${
+              className={`p-4 sm:p-5 flex items-center justify-between cursor-pointer transition-all duration-300 ${
                 expandedTeamId === team.id
                   ? "bg-blue-50/30 dark:bg-blue-900/10"
                   : "hover:bg-gray-50 dark:hover:bg-gray-800/50"
               }`}
               onClick={() => handleToggleExpand(team.id, team.lastEvent?.id)}>
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg">
-                  <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="flex items-center gap-3 sm:gap-4 overflow-hidden">
+                <div className="bg-blue-100 dark:bg-blue-900/30 p-2 sm:p-3 rounded-lg shrink-0">
+                  <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                <div className="min-w-0 pr-2">
+                  <h3 className="text-base sm:text-xl font-bold text-gray-900 dark:text-white truncate">
                     {team.name}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                     {team.lastEvent
                       ? `Комплекс: ${team.lastEvent.title}`
                       : "Нет запланированных комплексов"}
@@ -161,14 +162,18 @@ const TeamActivities: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 mt-4 sm:mt-0">
+              <div className="flex items-center gap-2 sm:gap-4 shrink-0">
                 {team.lastEvent && (
-                  <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 shrink-0">
                     <Trophy className="w-4 h-4" />
                     <span>{new Date(team.lastEvent.eventDate).toLocaleDateString()}</span>
                   </div>
                 )}
-                {expandedTeamId === team.id ? <ChevronUp /> : <ChevronDown />}
+                {expandedTeamId === team.id ? (
+                  <ChevronUp className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500" />
+                )}
               </div>
             </div>
 

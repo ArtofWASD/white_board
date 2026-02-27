@@ -57,7 +57,10 @@ export default function CalendarPage() {
     ) {
       items.push({
         label: "Управление",
-        href: "/dashboard/organization",
+        href:
+          user.role === "TRAINER"
+            ? "/dashboard/team-activities"
+            : "/dashboard/organization",
         icon: <Image src="/menegment.png" alt="Management" width={32} height={32} />,
         tooltip: "Управление",
       })

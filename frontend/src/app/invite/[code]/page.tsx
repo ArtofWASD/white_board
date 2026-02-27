@@ -9,7 +9,7 @@ import ErrorDisplay from "../../../components/ui/ErrorDisplay"
 export default function InvitePage() {
   const { code } = useParams()
   const router = useRouter()
-  const { user } = useAuthStore()
+  const { user, isLoading } = useAuthStore()
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading")
   const [error, setError] = useState<string | null>(null)
 
@@ -22,6 +22,10 @@ export default function InvitePage() {
     }
 
     const inviteCode = Array.isArray(code) ? code[0] : code
+
+    if (isLoading) {
+      return
+    }
 
     // If not logged in, redirect to login
     if (!user) {
@@ -62,7 +66,7 @@ export default function InvitePage() {
     }
 
     joinTeam()
-  }, [code, user, router])
+  }, [code, user, router, isLoading])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
