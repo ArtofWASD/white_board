@@ -112,6 +112,7 @@ export class EventsService {
         orderBy: { eventDate: 'asc' },
         include: {
           results: {
+            where: { userId },
             orderBy: {
               dateAdded: 'desc',
             },
@@ -159,6 +160,9 @@ export class EventsService {
           orderBy: { eventDate: 'asc' },
           include: {
             results: {
+              where: { userId: { in: orgUserIds } }, // Для админов организации показываем результаты их пользователей?
+              // На самом деле, dashboard для ORGANIZATION_ADMIN скрывает виджеты тренировок (см. page.tsx:216-225).
+              // Но для консистентности отфильтруем.
               orderBy: {
                 dateAdded: 'desc',
               },
@@ -212,6 +216,7 @@ export class EventsService {
         orderBy: { eventDate: 'asc' },
         include: {
           results: {
+            where: { userId },
             orderBy: {
               dateAdded: 'desc',
             },
@@ -240,6 +245,7 @@ export class EventsService {
       orderBy: { eventDate: 'desc' },
       include: {
         results: {
+          where: { userId },
           orderBy: {
             dateAdded: 'desc',
           },
@@ -267,6 +273,7 @@ export class EventsService {
       orderBy: { eventDate: 'asc' },
       include: {
         results: {
+          where: { userId },
           orderBy: {
             dateAdded: 'desc',
           },
