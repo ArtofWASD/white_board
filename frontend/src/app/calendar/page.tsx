@@ -1,138 +1,25 @@
 "use client"
 
-import React, { useState, useEffect, useCallback, useMemo } from "react"
-import Image from "next/image"
+import React, { useState, useEffect, useCallback } from "react"
 import Header from "../../components/layout/Header"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { useTeamStore } from "../../lib/store/useTeamStore"
 import Footer from "../../components/layout/Footer"
-import { NavItem, CalendarEvent, EventResult } from "../../types"
+import { CalendarEvent } from "../../types"
 import TeamSelector from "../../features/events/TeamSelector"
-import LeftMenu from "../../components/layout/LeftMenu"
 import { CalendarSystem } from "@/features/calendar/CalendarSystem"
 import { Workout } from "@/features/workouts/components/WorkoutCard"
 import { eventsApi } from "@/lib/api/events"
 import { format } from "date-fns"
 
 export default function CalendarPage() {
-  const [showAuth, setShowAuth] = useState(false)
-  const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false)
   const [events, setEvents] = useState<CalendarEvent[]>([]) // For LeftMenu
   const [workouts, setWorkouts] = useState<Record<string, Workout[]>>({}) // For CalendarSystem
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
   const [showEventModal, setShowEventModal] = useState(false)
 
-  const { isAuthenticated, user, logout } = useAuthStore()
+  const { isAuthenticated, user } = useAuthStore()
   const { selectedTeam, fetchTeams, teams } = useTeamStore()
-
-  // Navigation Items
-  const navItems = useMemo(() => {
-    if (!user) return []
-
-    const items: NavItem[] = [
-      {
-        label: "Личный кабинет",
-        href: "/dashboard",
-        icon: <Image src="/home_icon.png" alt="Home" width={32} height={32} />,
-        tooltip: "Личный кабинет",
-      },
-      {
-        label: "Лидерборд",
-        href: "/dashboard/leaderboard",
-        icon: <Image src="/leaderboard.png" alt="Leaderboard" width={32} height={32} />,
-        tooltip: "Лидерборд",
-      },
-      {
-        label: "Команды",
-        href: "/dashboard/teams",
-        icon: <Image src="/teams_icon.png" alt="Teams" width={32} height={32} />,
-        tooltip: "Команды",
-      },
-    ]
-
-    if (
-      user.role === "TRAINER" ||
-      user.role === "ORGANIZATION_ADMIN" ||
-      user.role === "SUPER_ADMIN"
-    ) {
-      items.push({
-        label: "Управление",
-        href:
-          user.role === "TRAINER"
-            ? "/dashboard/team-activities"
-            : "/dashboard/organization",
-        icon: <Image src="/menegment.png" alt="Management" width={32} height={32} />,
-        tooltip: "Управление",
-      })
-
-      items.push({
-        label: "Атлеты",
-        href: "/dashboard/athletes",
-        icon: <Image src="/athlet_icon.png" alt="Athletes" width={32} height={32} />,
-        tooltip: "Атлеты",
-      })
-
-      if (user.role === "TRAINER" || user.role === "SUPER_ADMIN") {
-        items.push({
-          label: "Занятия",
-          href: "/dashboard/activities",
-          icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
-          tooltip: "Занятия",
-        })
-      }
-    }
-
-    if (user.role === "SUPER_ADMIN") {
-      items.push({
-        label: "Админ",
-        href: "/admin",
-        icon: <Image src="/admin-panel.png" alt="Admin" width={32} height={32} />,
-        tooltip: "Админ",
-      })
-    }
-
-    items.push({
-      label: "Таймер",
-      href: "/timer",
-      icon: <Image src="/stopwatch.png" alt="Timer" width={32} height={32} />,
-      tooltip: "Таймер",
-    })
-
-    items.push(
-      {
-        label: "Календарь",
-        href: "/calendar",
-        icon: <Image src="/calendar_icon.png" alt="Calendar" width={32} height={32} />,
-        tooltip: "Календарь",
-      },
-      {
-        label: "Выйти",
-        href: "#",
-        onClick: async () => {
-          await logout()
-          window.location.href = "/"
-        },
-        icon: (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-8 h-8">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"
-            />
-          </svg>
-        ),
-        tooltip: "Выйти",
-      },
-    )
-
-    return items
-  }, [user, logout])
 
   useEffect(() => {
     if (isAuthenticated && teams.length === 0) {
@@ -267,10 +154,6 @@ export default function CalendarPage() {
     loadEvents()
   }, [loadEvents])
 
-  const toggleAuth = () => {
-    setShowAuth(!showAuth)
-  }
-
   const handleShowEventDetails = (event: CalendarEvent) => {
     setSelectedEvent(event)
     setShowEventModal(true)
@@ -307,19 +190,8 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header
-        onRightMenuClick={() => {}}
-        onLeftMenuClick={() => setIsLeftMenuOpen(true)}
-        navItems={navItems}
-      />
-
-      <LeftMenu
-        isOpen={isLeftMenuOpen}
-        onClose={() => setIsLeftMenuOpen(false)}
-        showAuth={showAuth}
-        toggleAuth={toggleAuth}
-        events={events} // Legacy support
+        leftMenuEvents={events}
         onShowEventDetails={handleShowEventDetails}
-        navItems={navItems}
       />
 
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 pt-0`}>

@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
@@ -10,10 +10,12 @@ import Button from "../ui/Button"
 import AnimatedLink from "../ui/AnimatedLink" // Import AnimatedLink
 import { getUnreadNotificationCount } from "../../lib/api/notifications"
 import { waitForSocket } from "../../lib/socket"
+import { useNavigation } from "../../hooks/useNavigation"
+import LeftMenu from "./LeftMenu"
 
 interface HeaderProps {
   onRightMenuClick?: () => void
-  onLeftMenuClick?: () => void
+  onLeftMenuClick?: () => void // Keep for backwards compatibility or custom handling
   navItems?: {
     label: string
     href: string
@@ -23,18 +25,36 @@ interface HeaderProps {
     variant?: "primary" | "outline" | "ghost" | "link" | "destructive"
   }[]
   rightContent?: React.ReactNode
+  // В календаре LeftMenu использует события
+  leftMenuEvents?: any[]
+  onShowEventDetails?: (event: any) => void
 }
 
 const Header: React.FC<HeaderProps> = ({
   onRightMenuClick,
   onLeftMenuClick,
-  navItems,
+  navItems: customNavItems,
   rightContent,
+  leftMenuEvents = [],
+  onShowEventDetails = () => {},
 }) => {
   const router = useRouter()
   const pathname = usePathname()
   const { user, isAuthenticated } = useAuthStore()
   const { teams, selectedTeam, selectTeam } = useTeamStore()
+  const { navItems: defaultNavItems, chatModal } = useNavigation()
+
+  const navItems = customNavItems || defaultNavItems
+  const [isLeftMenuOpen, setIsLeftMenuOpen] = useState(false)
+  const [showAuth, setShowAuth] = useState(false)
+
+  const handleLeftMenuClick = () => {
+    if (onLeftMenuClick) {
+      onLeftMenuClick()
+    } else {
+      setIsLeftMenuOpen(true)
+    }
+  }
 
   const isDashboard =
     pathname?.startsWith("/dashboard") ||
@@ -119,9 +139,10 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="sticky top-0 bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4 z-50">
       <div className="flex items-center">
-        {onLeftMenuClick && (
+        {/* Убрали жесткую зависимость от onLeftMenuClick, чтобы работало внутренне */}
+        {(onLeftMenuClick || true) && (
           <button
-            onClick={onLeftMenuClick}
+            onClick={handleLeftMenuClick}
             className="lg:hidden mr-2 p-1 text-gray-300 hover:text-white focus:outline-none">
             <svg
               className="w-6 h-6"
@@ -308,6 +329,20 @@ const Header: React.FC<HeaderProps> = ({
           <AnimatedLink href="/register">Регистрация</AnimatedLink>
         </div>
       )}
+
+      {/* Рендеринг LeftMenu внутри Header */}
+      <LeftMenu
+        isOpen={isLeftMenuOpen}
+        onClose={() => setIsLeftMenuOpen(false)}
+        showAuth={showAuth}
+        toggleAuth={() => setShowAuth(!showAuth)}
+        events={leftMenuEvents}
+        onShowEventDetails={onShowEventDetails}
+        navItems={navItems}
+      />
+
+      {/* Рендеринг ChatModal внутри Header */}
+      {chatModal}
     </header>
   )
 }
