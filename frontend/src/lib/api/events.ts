@@ -49,7 +49,7 @@ interface AddResultData {
 export const eventsApi = {
   /** Получить события пользователя */
   getUserEvents: (userId: string, teamId?: string) =>
-    apiClient.get<Event[]>(`/api/events/user/${userId}`, { teamId }),
+    apiClient.get<Event[]>(`/api/events/${userId}`, { teamId }),
 
   /** Получить событие по ID */
   getEvent: (eventId: string) => apiClient.get<CalendarEvent>(`/api/events/${eventId}`),
