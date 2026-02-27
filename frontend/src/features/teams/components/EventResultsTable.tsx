@@ -41,6 +41,7 @@ export const EventResultsTable: React.FC<EventResultsTableProps> = ({
   }
 
   const athletesToDisplay = membersData.members.filter((m) => {
+    // If the user is the owner/admin, only show them if they have a logged result
     const isOwner = m.userId === team.ownerId
     if (isOwner) {
       return resultsData?.results?.some(
@@ -49,6 +50,34 @@ export const EventResultsTable: React.FC<EventResultsTableProps> = ({
     }
     return true
   })
+
+  // Also include the current user/owner if they have a result but are somehow NOT in membersData.members
+  if (resultsData?.results) {
+    const ownerResult = resultsData.results.find(
+      (r) => 
+        (r.userId && r.userId === team.ownerId) || 
+        (!r.userId && team.owner?.name && r.username === team.owner.name)
+    )
+    
+    // If owner has a result, but isn't in athletesToDisplay (e.g. they aren't in members array)
+    if (ownerResult && !athletesToDisplay.some(m => m.userId === team.ownerId)) {
+      // Mock a TeamMember object for the owner just for display purposes
+      athletesToDisplay.unshift({
+        id: `owner-${team.ownerId}`,
+        teamId: team.id,
+        userId: team.ownerId,
+        role: "OWNER",
+        user: {
+          id: team.ownerId,
+          name: ownerResult.username.split(" ")[0] || "Тренер",
+          lastName: ownerResult.username.split(" ").slice(1).join(" ") || "",
+          email: "",
+          role: "TRAINER",
+          isAdmin: false
+        }
+      })
+    }
+  }
 
   return (
     <div className="overflow-x-auto -mx-5 sm:mx-0 mt-4 border-t dark:border-gray-700 pt-4">

@@ -102,8 +102,63 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
               </div>
             )}
 
+            {event.exercises && event.exercises.length > 0 && (
+              <div className="flex flex-col gap-1.5 min-w-0 w-full md:w-auto md:border-l md:border-gray-200 md:dark:border-gray-700 md:pl-3 md:ml-1 mt-2 md:mt-0">
+                {event.exercises.map((exercise, index) => {
+                  const rxArr = [
+                    exercise.rxWeight && `${exercise.rxWeight} кг`,
+                    exercise.rxReps && `${exercise.rxReps} пов.`,
+                    exercise.measurement === "calories" &&
+                      exercise.rxCalories &&
+                      `${exercise.rxCalories} кал.`,
+                    exercise.measurement === "time" &&
+                      exercise.rxTime &&
+                      `${exercise.rxTime}`,
+                    exercise.measurement === "distance" &&
+                      exercise.rxDistance &&
+                      `${exercise.rxDistance} м.`,
+                  ].filter(Boolean)
+
+                  const scArr = [
+                    exercise.scWeight && `${exercise.scWeight} кг`,
+                    exercise.scReps && `${exercise.scReps} пов.`,
+                    exercise.measurement === "calories" &&
+                      exercise.scCalories &&
+                      `${exercise.scCalories} кал.`,
+                    exercise.measurement === "time" &&
+                      exercise.scTime &&
+                      `${exercise.scTime}`,
+                    exercise.measurement === "distance" &&
+                      exercise.scDistance &&
+                      `${exercise.scDistance} м.`,
+                  ].filter(Boolean)
+
+                  const rxText = rxArr.length > 0 ? rxArr.join(" \\ ") : ""
+                  const scText = scArr.length > 0 ? scArr.join(" \\ ") : ""
+
+                  return (
+                    <div
+                      key={exercise.id || index}
+                      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm"
+                    >
+                      <span className="font-medium text-gray-900 dark:text-gray-200">
+                        {exercise.name}
+                      </span>
+                      {(rxText || scText) && (
+                        <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap text-xs">
+                          {rxText && scText
+                            ? `${rxText} (SC: ${scText})`
+                            : rxText || scText}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
             {event.description && (
-              <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-2 min-w-0 mt-1 md:mt-0">
                 <span className="hidden md:block w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600 shrink-0" />
                 <span className="truncate" title={event.description}>
                   {event.description}
