@@ -29,7 +29,7 @@ interface InviteResponse {
 
 export const teamsApi = {
   /** Получить команды пользователя */
-  getUserTeams: (userId: string) => apiClient.get<Team[]>("/api/teams", { userId }),
+  getUserTeams: (userId: string) => apiClient.get<Team[]>(`/api/teams/user/${userId}`),
 
   /** Получить команду по ID */
   getTeam: (teamId: string) => apiClient.get<Team>(`/api/teams/${teamId}`),

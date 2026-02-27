@@ -185,47 +185,49 @@ const TeamActivities: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                        {teamDetails[team.id]?.members.map((member) => {
-                          const result = teamDetails[team.id]?.results.find(
-                            (r) =>
-                              r.userId === member.userId ||
-                              r.username === member.user.name,
-                          )
-                          return (
-                            <tr
-                              key={member.id}
-                              className="hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors">
-                              <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                                {member.user.name} {member.user.lastName}
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
-                                {result ? (
-                                  <span
-                                    className={`px-2 py-0.5 rounded text-xs font-bold ${
-                                      result.scaling === "RX"
-                                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                                    }`}>
-                                    {result.scaling || "RX"}
-                                  </span>
-                                ) : (
-                                  "-"
-                                )}
-                              </td>
-                              <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                                {result ? (
-                                  <span className="font-semibold">
-                                    {result.time || result.value || "Выполнено"}
-                                  </span>
-                                ) : (
-                                  <span className="text-gray-400 italic">
-                                    Нет результата
-                                  </span>
-                                )}
-                              </td>
-                            </tr>
-                          )
-                        })}
+                        {teamDetails[team.id]?.members
+                          .filter((m) => m.userId !== team.ownerId)
+                          .map((member) => {
+                            const result = teamDetails[team.id]?.results.find(
+                              (r) =>
+                                r.userId === member.userId ||
+                                r.username === member.user.name,
+                            )
+                            return (
+                              <tr
+                                key={member.id}
+                                className="hover:bg-gray-100/50 dark:hover:bg-gray-800/30 transition-colors">
+                                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                  {member.user.name} {member.user.lastName}
+                                </td>
+                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">
+                                  {result ? (
+                                    <span
+                                      className={`px-2 py-0.5 rounded text-xs font-bold ${
+                                        result.scaling === "RX"
+                                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                                      }`}>
+                                      {result.scaling || "RX"}
+                                    </span>
+                                  ) : (
+                                    "-"
+                                  )}
+                                </td>
+                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                                  {result ? (
+                                    <span className="font-semibold">
+                                      {result.time || result.value || "Выполнено"}
+                                    </span>
+                                  ) : (
+                                    <span className="text-gray-400 italic">
+                                      Нет результата
+                                    </span>
+                                  )}
+                                </td>
+                              </tr>
+                            )
+                          })}
                         {teamDetails[team.id]?.members.length === 0 && (
                           <tr>
                             <td
