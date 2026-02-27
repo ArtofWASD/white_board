@@ -139,7 +139,11 @@ export default function TeamsPage() {
 
       {!isManagement ? (
         <div className="mt-8">
-          {loadingTeams ? <Loader /> : <AthleteTeamView teams={teams} />}
+          {loadingTeams ? (
+            <Loader />
+          ) : (
+            <AthleteTeamView teams={teams} onLeaveTeam={handleLeaveTeam} />
+          )}
         </div>
       ) : (
         <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
