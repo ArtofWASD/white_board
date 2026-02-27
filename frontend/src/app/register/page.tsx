@@ -77,7 +77,7 @@ function RegisterForm() {
       if (inviteCode) {
         router.push(`/invite/${inviteCode}`)
       } else {
-        router.push("/")
+        window.location.href = "/overview"
       }
     }
   }, [isAuthenticated, router, showSuccessModal, isLoading, inviteCode])
