@@ -23,8 +23,9 @@ const AthleteTeamView: React.FC<
     onRemoveMember?: (teamId: string, userId: string) => Promise<void>
     onEditTeam?: (teamId: string) => void
     onDeleteTeam?: (teamId: string) => void
+    onLeaveTeam?: (teamId: string) => void
   }
-> = ({ teams, isTrainer, onRemoveMember, onEditTeam, onDeleteTeam }) => {
+> = ({ teams, isTrainer, onRemoveMember, onEditTeam, onDeleteTeam, onLeaveTeam }) => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [viewMode, setViewMode] = useState<ViewMode>("card")
@@ -167,6 +168,31 @@ const AthleteTeamView: React.FC<
               </div>
 
               <div className="flex gap-4">
+                {/* Leave Team Button for Athletes */}
+                {!isTrainer && onLeaveTeam && team.ownerId !== user?.id && (
+                  <div
+                    className="flex items-center justify-center p-3 sm:p-4 rounded-xl border border-red-100 dark:border-red-900 cursor-pointer hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors bg-white dark:bg-gray-900 h-16 sm:min-w-[120px]"
+                    onClick={() => onLeaveTeam(team.id)}
+                    title="Покинуть команду">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 sm:h-6 sm:w-6 text-red-600 dark:text-red-400 sm:mr-2"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                      />
+                    </svg>
+                    <span className="hidden sm:inline font-medium text-red-600 dark:text-red-400">
+                      Покинуть
+                    </span>
+                  </div>
+                )}
+
                 {/* Invite Button for Trainers */}
                 {isTrainer && (
                   <div

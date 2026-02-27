@@ -63,4 +63,7 @@ export const teamsApi = {
   /** Присоединиться по коду приглашения */
   joinByInviteCode: (code: string) =>
     apiClient.post<Team>(`/api/teams/invite/${code}/join`),
+
+  /** Покинуть команду */
+  leaveTeam: (teamId: string) => apiClient.post<void>(`/api/teams/${teamId}/leave`),
 }

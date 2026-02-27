@@ -68,6 +68,17 @@ export class TeamsController {
   }
 
   @HttpCode(HttpStatus.OK)
+  @Post(':teamId/leave')
+  async leaveTeam(
+    @Param('teamId') teamId: string,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const userId = req.user.id;
+    const result = await this.teamsService.leaveTeam(teamId, userId);
+    return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
   @Get(':teamId/members')
   async getTeamMembers(@Param('teamId') teamId: string) {
     const result = await this.teamsService.getTeamMembers(teamId);

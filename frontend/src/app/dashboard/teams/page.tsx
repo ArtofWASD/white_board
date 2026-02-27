@@ -100,6 +100,21 @@ export default function TeamsPage() {
     router.push(`/dashboard/teams/${teamId}`)
   }
 
+  const handleLeaveTeam = async (teamId: string) => {
+    if (!confirm("Вы уверены, что хотите покинуть эту команду?")) return
+
+    try {
+      setLoading(true)
+      await teamsApi.leaveTeam(teamId)
+      setTeams((prev) => prev.filter((t) => t.id !== teamId))
+      info("Вы успешно покинули команду")
+    } catch (err) {
+      setError("Ошибка при выходе из команды")
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (!user) {
     return (
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md dark:border dark:border-gray-700">
@@ -254,6 +269,7 @@ export default function TeamsPage() {
                 }}
                 onEditTeam={handleEditTeam}
                 onDeleteTeam={handleDeleteTeam}
+                onLeaveTeam={handleLeaveTeam}
               />
             )}
           </div>

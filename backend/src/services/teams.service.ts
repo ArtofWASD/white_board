@@ -342,30 +342,61 @@ export class TeamsService {
       );
     }
 
-    // Ручное каскадное удаление (чтобы избежать миграций схемы на данном этапе)
+    // Используем транзакцию для атомарного удаления
+    await this.prisma.$transaction(async (tx) => {
+      // 1. Удаляем участников команды
+      await tx.teamMember.deleteMany({
+        where: { teamId },
+      });
 
-    // 1. Удаляем участников команды
-    await this.prisma.teamMember.deleteMany({
-      where: { teamId },
-    });
+      // 2. Отвязываем события от команды
+      await tx.event.updateMany({
+        where: { teamId },
+        data: { teamId: null },
+      });
 
-    // 2. Отвязываем события от команды
-    await this.prisma.event.updateMany({
-      where: { teamId },
-      data: { teamId: null },
-    });
+      // 3. Удаляем чаты команды
+      await tx.chat.deleteMany({
+        where: { teamId },
+      });
 
-    // 3. Удаляем чаты команды (ChatParticipant и Message удалятся каскадно по схеме)
-    await this.prisma.chat.deleteMany({
-      where: { teamId },
-    });
-
-    // 4. И наконец, удаляем саму команду
-    await this.prisma.team.delete({
-      where: { id: teamId },
+      // 4. Удаляем саму команду
+      await tx.team.delete({
+        where: { id: teamId },
+      });
     });
 
     return { message: 'Team deleted successfully' };
+  }
+
+  async leaveTeam(teamId: string, userId: string) {
+    // Проверяем, существует ли команда
+    const team = await this.prisma.team.findUnique({
+      where: { id: teamId },
+    });
+
+    if (!team) {
+      throw new NotFoundException('Team not found');
+    }
+
+    // Владелец не может просто выйти, он должен удалить команду или передать права
+    if (team.ownerId === userId) {
+      throw new ForbiddenException(
+        'Owners cannot leave their own team. Delete the team instead.',
+      );
+    }
+
+    // Удаляем участника из команды
+    const result = await this.prisma.teamMember.delete({
+      where: {
+        teamId_userId: {
+          teamId: teamId,
+          userId: userId,
+        },
+      },
+    });
+
+    return { message: 'Successfully left the team' };
   }
 
   async updateTeam(
