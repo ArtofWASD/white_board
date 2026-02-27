@@ -77,6 +77,24 @@ export default function OrganizationPage() {
 
   if (isLoading) return <Loader />
 
+  // Content is hidden but code is preserved per request
+  const showContent = false
+
+  if (!showContent) {
+    return (
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-800 dark:text-white mb-8">
+          Управление организацией
+        </h1>
+        <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md border dark:border-gray-700 text-center">
+          <p className="text-gray-500 dark:text-gray-400 italic">
+            Этот раздел временно недоступен.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8 py-8">
       <div className="flex justify-between items-center mb-8">

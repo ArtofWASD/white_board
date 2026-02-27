@@ -88,7 +88,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     ) {
       items.push({
         label: "Управление",
-        href: "/dashboard/organization",
+        href:
+          user.role === "TRAINER"
+            ? "/dashboard/team-activities"
+            : "/dashboard/organization",
         icon: <Image src="/menegment.png" alt="Management" width={32} height={32} />,
         tooltip: "Управление",
       })
@@ -220,8 +223,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         onClose={() => setIsChatOpen(false)}
         title={activeChatId ? "Чат" : "Ваши чаты"}
         size="lg"
-        noPadding={!!activeChatId}
-      >
+        noPadding={!!activeChatId}>
         {activeChatId ? (
           <div className="flex flex-col h-full bg-white dark:bg-gray-800">
             {/* Back button for trainers who can see list */}
