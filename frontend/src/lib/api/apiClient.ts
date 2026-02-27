@@ -80,7 +80,9 @@ class ApiClient {
       ...fetchOptions,
       headers,
       credentials: "include",
-      ...(body !== undefined && { body: isFormData ? (body as FormData) : JSON.stringify(body) }),
+      ...(body !== undefined && {
+        body: isFormData ? (body as FormData) : JSON.stringify(body),
+      }),
     }
 
     try {
@@ -158,8 +160,8 @@ class ApiClient {
     return this.request<T>(endpoint, { method: "PATCH", body })
   }
 
-  async delete<T>(endpoint: string): Promise<T> {
-    return this.request<T>(endpoint, { method: "DELETE" })
+  async delete<T>(endpoint: string, body?: unknown): Promise<T> {
+    return this.request<T>(endpoint, { method: "DELETE", body })
   }
 
   // ─── Внутренние методы ─────────────────────────────────────────────────────

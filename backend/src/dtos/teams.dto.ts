@@ -27,6 +27,8 @@ export class AddTeamMemberDto {
 }
 
 export class RemoveTeamMemberDto {
+  @IsUUID()
+  @IsNotEmpty()
   userId: string;
 }
 

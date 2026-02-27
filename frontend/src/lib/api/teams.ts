@@ -54,7 +54,7 @@ export const teamsApi = {
 
   /** Удалить участника из команды */
   removeMember: (teamId: string, userId: string) =>
-    apiClient.delete<void>(`/api/teams/${teamId}/members`),
+    apiClient.delete<void>(`/api/teams/${teamId}/members/remove`, { userId }),
 
   /** Создать приглашение в команду */
   createInvite: (teamId: string) =>

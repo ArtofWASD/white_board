@@ -327,10 +327,40 @@ export class TeamsService {
       throw new NotFoundException('Team not found');
     }
 
-    if (team.ownerId !== userId) {
-      throw new ForbiddenException('Only the owner can delete the team');
+    // Проверяем роль пользователя
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
     }
 
+    if (team.ownerId !== userId && user.role !== UserRole.SUPER_ADMIN) {
+      throw new ForbiddenException(
+        'Only the owner or SUPER_ADMIN can delete the team',
+      );
+    }
+
+    // Ручное каскадное удаление (чтобы избежать миграций схемы на данном этапе)
+
+    // 1. Удаляем участников команды
+    await this.prisma.teamMember.deleteMany({
+      where: { teamId },
+    });
+
+    // 2. Отвязываем события от команды
+    await this.prisma.event.updateMany({
+      where: { teamId },
+      data: { teamId: null },
+    });
+
+    // 3. Удаляем чаты команды (ChatParticipant и Message удалятся каскадно по схеме)
+    await this.prisma.chat.deleteMany({
+      where: { teamId },
+    });
+
+    // 4. И наконец, удаляем саму команду
     await this.prisma.team.delete({
       where: { id: teamId },
     });

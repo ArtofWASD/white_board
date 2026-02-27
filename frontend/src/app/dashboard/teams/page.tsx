@@ -253,6 +253,7 @@ export default function TeamsPage() {
                   }
                 }}
                 onEditTeam={handleEditTeam}
+                onDeleteTeam={handleDeleteTeam}
               />
             )}
           </div>
