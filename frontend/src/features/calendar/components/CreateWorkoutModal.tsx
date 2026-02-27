@@ -130,7 +130,11 @@ export function CreateWorkoutModal({
       setDescription("")
       setErrors({})
 
-      setSelectedTeamId(defaultTeamId || "")
+      setSelectedTeamId(
+        defaultTeamId === "my" || defaultTeamId === "all" || defaultTeamId === "all_teams"
+          ? "none"
+          : defaultTeamId || "none",
+      )
       setAssignmentType("all")
       setSelectedAthletes([])
 
