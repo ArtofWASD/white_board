@@ -50,7 +50,7 @@ const TeamActivities: React.FC = () => {
           try {
             const events = await eventsApi.getUserEvents(user!.id, team.id)
             const teamEvents = events.filter((e: Event) => e.teamId === team.id)
-            // Sort by date descending and find the latest one that is not in the future or just the latest one
+            // Sort by date descending to get the most recent event (past or future)
             const sortedEvents = teamEvents.sort(
               (a: Event, b: Event) =>
                 new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime(),
@@ -156,8 +156,8 @@ const TeamActivities: React.FC = () => {
                   </h3>
                   <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                     {team.lastEvent
-                      ? `Комплекс: ${team.lastEvent.title}`
-                      : "Нет запланированных комплексов"}
+                      ? `Последний комплекс: ${team.lastEvent.title}`
+                      : "Нет комплексов"}
                   </p>
                 </div>
               </div>
@@ -183,12 +183,14 @@ const TeamActivities: React.FC = () => {
                   <div className="flex justify-center py-6">
                     <Loader />
                   </div>
-                ) : !team.lastEvent ? (
-                  <p className="text-center text-gray-500 py-4">
-                    Нет данных для отображения
-                  </p>
                 ) : (
                   <div className="overflow-x-auto -mx-5 sm:mx-0">
+                    {!team.lastEvent && (
+                      <p className="text-center text-sm font-medium text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/20 py-3 mb-4 rounded-lg">
+                        Внимание: Для этой команды еще не создано ни одного комплекса.
+                        Ниже представлен список участников.
+                      </p>
+                    )}
                     {/* Desktop Table View */}
                     <table className="hidden sm:table min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-700/50">
