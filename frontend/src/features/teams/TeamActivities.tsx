@@ -186,6 +186,16 @@ const TeamActivities: React.FC = () => {
       )
     }
 
+    const athletesToDisplay = membersData.members.filter((m) => {
+      const isOwner = m.userId === team.ownerId
+      if (isOwner) {
+        return resultsData?.results?.some(
+          (r) => r.userId === m.userId || r.username === m.user.name,
+        )
+      }
+      return true
+    })
+
     return (
       <div className="overflow-x-auto -mx-5 sm:mx-0 mt-4 border-t dark:border-gray-700 pt-4">
         {/* Desktop Table View */}
@@ -204,65 +214,61 @@ const TeamActivities: React.FC = () => {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-transparent">
-            {membersData.members
-              .filter((m) => m.userId !== team.ownerId)
-              .map((member) => {
-                const result = resultsData?.results?.find(
-                  (r) =>
-                    r.userId === member.userId ||
-                    r.username === member.user.name,
-                )
-                return (
-                  <tr
-                    key={member.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                      {member.user.name} {member.user.lastName}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      {result ? (
-                        <span
-                          className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
-                            result.scaling === "RX"
-                              ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
-                              : result.scaling === "SCALED"
-                                ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                                : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                          }`}>
-                          {result.scaling || "RX"}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-600">
-                          -
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900 dark:text-white">
-                      {result ? (
-                        formatResultValue(result, event.scheme)
-                      ) : (
-                        <span className="text-gray-400 dark:text-gray-600 italic font-normal">
-                          Нет результата
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-          </tbody>
-        </table>
-
-        {/* Mobile Card View */}
-        <div className="block sm:hidden space-y-3 px-5 py-3">
-          {membersData.members
-            .filter((m) => m.userId !== team.ownerId)
-            .map((member) => {
+            {athletesToDisplay.map((member) => {
               const result = resultsData?.results?.find(
                 (r) =>
                   r.userId === member.userId ||
                   r.username === member.user.name,
               )
               return (
+                <tr
+                  key={member.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                    {member.user.name} {member.user.lastName}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    {result ? (
+                      <span
+                        className={`px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full ${
+                          result.scaling === "RX"
+                            ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
+                            : result.scaling === "SCALED"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                        }`}>
+                        {result.scaling || "RX"}
+                      </span>
+                    ) : (
+                      <span className="text-gray-400 dark:text-gray-600">
+                        -
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-bold text-gray-900 dark:text-white">
+                    {result ? (
+                      formatResultValue(result, event.scheme)
+                    ) : (
+                      <span className="text-gray-400 dark:text-gray-600 italic font-normal">
+                        Нет результата
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+
+        {/* Mobile Card View */}
+        <div className="block sm:hidden space-y-3 px-5 py-3">
+          {athletesToDisplay.map((member) => {
+            const result = resultsData?.results?.find(
+              (r) =>
+                r.userId === member.userId ||
+                r.username === member.user.name,
+            )
+            return (
                 <div
                   key={member.id}
                   className="bg-white dark:bg-gray-800/40 p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm active:scale-[0.98] transition-all">
