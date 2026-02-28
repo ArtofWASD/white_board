@@ -178,6 +178,11 @@ export default function CalendarPage() {
     const updateVisibleFooterHeight = () => {
       if (footerRef.current) {
         const rect = footerRef.current.getBoundingClientRect()
+        // If the footer is hidden (e.g. on mobile), its height will be 0
+        if (rect.height === 0) {
+          setVisibleFooterHeight(0)
+          return
+        }
         // How many pixels of the footer are currently visible from the bottom of the viewport
         const visible = Math.max(0, window.innerHeight - rect.top)
         setVisibleFooterHeight(visible)
