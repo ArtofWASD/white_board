@@ -78,7 +78,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
   if (chats.length === 0) {
     return (
       <div
-        className={`flex flex-col items-center justify-center h-64 text-gray-400 ${className}`}>
+        className={`flex flex-col items-center justify-center h-full text-gray-400 dark:text-gray-500 py-10 ${className}`}>
         <MessageSquare className="w-12 h-12 mb-2 opacity-20" />
         <p>У вас пока нет чатов</p>
       </div>
@@ -105,12 +105,12 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
           <div
             key={chat.id}
             onClick={() => onSelectChat(chat.id)}
-            className="flex items-center p-3 hover:bg-gray-50 rounded-lg cursor-pointer border border-transparent hover:border-gray-100 transition-all">
+            className="flex items-center p-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 rounded-lg cursor-pointer border border-transparent hover:border-gray-200 dark:hover:border-gray-600 transition-all">
             <div
               className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
                 chat.type === "group"
-                  ? "bg-orange-100 text-orange-600"
-                  : "bg-blue-100 text-blue-600"
+                  ? "bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400"
+                  : "bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400"
               }`}>
               {chat.type === "group" ? (
                 <Users size={20} />
@@ -123,9 +123,9 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
 
             <div className="ml-3 flex-1 overflow-hidden">
               <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-900 truncate">{name}</span>
+                <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{name}</span>
                 {lastMessage && (
-                  <span className="text-xs text-gray-400 flex-shrink-0">
+                  <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
                     {new Date(lastMessage.createdAt).toLocaleDateString()}
                   </span>
                 )}

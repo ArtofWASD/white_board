@@ -10,32 +10,16 @@ import { NavItem } from "../types"
 import { createDirectChat } from "../lib/api/chat"
 import { logApiError } from "../lib/logger"
 import { Modal } from "../components/ui/Modal"
-import { ChatWindow } from "../components/chat/ChatWindow"
-import { ChatList } from "../components/chat/ChatList"
 
 export function useNavigation() {
   const { user, logout } = useAuthStore()
   const { teams, selectedTeam } = useTeamStore()
 
   const [isChatOpen, setIsChatOpen] = useState(false)
-  const [activeChatId, setActiveChatId] = useState<string | null>(null)
 
   const handleChatClick = async () => {
-    if (user?.role === "ATHLETE") {
-      const team = selectedTeam || teams[0]
-      if (team && team.ownerId) {
-        try {
-          const chat = await createDirectChat(team.ownerId)
-          setActiveChatId(chat.id)
-          setIsChatOpen(true)
-        } catch (error) {
-          logApiError("/api/chats/direct", error, { targetUserId: team.ownerId })
-        }
-      }
-    } else {
-      setActiveChatId(null)
-      setIsChatOpen(true)
-    }
+    // The logic has been moved to /chat page client component
+    // We just return here as the Link href handles the navigation
   }
 
   const navItems = useMemo<NavItem[]>(() => {
@@ -134,8 +118,7 @@ export function useNavigation() {
       },
       {
         label: "Чат",
-        href: "#",
-        onClick: handleChatClick,
+        href: "/chat",
         icon: <MessageSquare className="w-8 h-8 text-white" />,
         tooltip: "Чат",
       },
@@ -169,32 +152,7 @@ export function useNavigation() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, logout, selectedTeam, teams])
 
-  const chatModal = user ? (
-    <Modal
-      isOpen={isChatOpen}
-      onClose={() => setIsChatOpen(false)}
-      title={activeChatId ? "Чат" : "Ваши чаты"}
-      size="lg"
-      noPadding={!!activeChatId}>
-      {activeChatId ? (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-800">
-          {user?.role !== "ATHLETE" && (
-            <button
-              onClick={() => setActiveChatId(null)}
-              className="self-start m-4 mb-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline flex items-center">
-              ← Назад к списку
-            </button>
-          )}
-          <ChatWindow
-            chatId={activeChatId}
-            className="flex-1 !border-none !shadow-none !rounded-none"
-          />
-        </div>
-      ) : (
-        <ChatList onSelectChat={setActiveChatId} />
-      )}
-    </Modal>
-  ) : null
+  const chatModal = null
 
   return { navItems, chatModal }
 }

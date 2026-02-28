@@ -57,7 +57,7 @@ export function ExerciseTracker({
 
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-6"}`}>
+      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md h-full flex flex-col transition-all duration-300 ${!isExpanded ? "overflow-hidden justify-center px-4" : "p-3 sm:p-6"}`}>
       <div className={`flex justify-between items-center ${!isExpanded ? "" : "mb-6"}`}>
         <h2
           className={`font-bold text-gray-800 dark:text-white transition-all ${!isExpanded ? "text-lg" : "text-2xl"}`}>
@@ -102,14 +102,14 @@ export function ExerciseTracker({
               onSubmit={handleCreateExercise}
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => e.stopPropagation()}
-              className="bg-white dark:bg-gray-700 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-600 animate-in fade-in slide-in-from-top-4">
-              <div className="flex gap-4">
+              className="mb-4 bg-white dark:bg-gray-700 p-3 sm:p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-600 animate-in fade-in slide-in-from-top-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <input
                   type="text"
                   placeholder="Название упражнения (например, Жим лежа)"
                   value={newExerciseName}
                   onChange={(e) => setNewExerciseName(e.target.value)}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
+                  className="w-full sm:flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                   autoFocus
                 />
                 <input
@@ -118,9 +118,9 @@ export function ExerciseTracker({
                   placeholder="Вес (кг)"
                   value={initialWeight}
                   onChange={(e) => setInitialWeight(e.target.value)}
-                  className="w-24 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
+                  className="w-full sm:w-24 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                 />
-                <Button type="submit" disabled={!newExerciseName.trim()}>
+                <Button type="submit" disabled={!newExerciseName.trim()} className="w-full sm:w-auto">
                   Сохранить упражнение
                 </Button>
               </div>

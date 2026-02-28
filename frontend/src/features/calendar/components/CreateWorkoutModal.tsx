@@ -36,6 +36,7 @@ interface FieldErrors {
   title?: string
   rounds?: string
   timeCap?: string
+  exercises?: string
   // Exercise inputs
   exName?: string
   rxWeight?: string
@@ -283,6 +284,13 @@ export function CreateWorkoutModal({
 
     setExercises([...exercises, newExercise])
     resetExerciseInput()
+    if (errors.exercises) {
+      setErrors((prev) => {
+        const next = { ...prev }
+        delete next.exercises
+        return next
+      })
+    }
   }
 
   const handleRemoveExercise = (id: string) => {
@@ -312,6 +320,10 @@ export function CreateWorkoutModal({
   // ── Validate main form ──────────────────────────────────────────────
   const validateForm = (): boolean => {
     const newErrors: FieldErrors = {}
+
+    if (exercises.length === 0) {
+      newErrors.exercises = "Необходимо добавить хотя бы 1 упражнение"
+    }
 
     if (!title.trim()) {
       newErrors.title = "Введите название тренировки"
@@ -589,57 +601,56 @@ export function CreateWorkoutModal({
           )}
 
           {/* Exercises Section */}
-          <div className="border rounded-lg p-4 bg-muted/20 space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold">Упражнения</h4>
-              <div className="flex gap-1 bg-muted rounded-md p-1">
-                {(["weight", "calories", "time", "distance"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => {
-                      setExMeasurement(m)
-                      // Clear only the numeric fields, keep exercise name and new measurement
-                      setRxWeight("")
-                      setRxReps("")
-                      setScWeight("")
-                      setScReps("")
-                      setRxCalories("")
-                      setScCalories("")
-                      setRxTime("")
-                      setScTime("")
-                      setRxDistance("")
-                      setScDistance("")
-                      setErrors((prev) => {
-                        const next = { ...prev }
-                        delete next.rxWeight
-                        delete next.rxReps
-                        delete next.scWeight
-                        delete next.scReps
-                        delete next.rxCalories
-                        delete next.scCalories
-                        delete next.rxTime
-                        delete next.scTime
-                        delete next.rxDistance
-                        delete next.scDistance
-                        return next
-                      })
-                    }}
-                    className={cn(
-                      "px-2 py-1 text-xs rounded-sm transition-all",
-                      exMeasurement === m
-                        ? "bg-background shadow-sm text-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}>
-                    {m === "weight"
-                      ? "Вес/Повторы"
-                      : m === "calories"
-                        ? "Калории"
-                        : m === "time"
-                          ? "Время"
-                          : "Дистанция"}
-                  </button>
-                ))}
+          <div className={cn("border rounded-lg p-4 bg-muted/20 space-y-4", errors.exercises && "border-red-500")}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <h4 className="text-sm font-semibold">Упражнения</h4>
+                {errors.exercises && (
+                  <span className="text-xs text-red-500 font-medium">{errors.exercises}</span>
+                )}
+              </div>
+              <div className="w-full sm:w-auto mt-2 sm:mt-0">
+                <Select
+                  value={exMeasurement}
+                  onValueChange={(val: any) => {
+                    setExMeasurement(val)
+                    // Clear only the numeric fields, keep exercise name and new measurement
+                    setRxWeight("")
+                    setRxReps("")
+                    setScWeight("")
+                    setScReps("")
+                    setRxCalories("")
+                    setScCalories("")
+                    setRxTime("")
+                    setScTime("")
+                    setRxDistance("")
+                    setScDistance("")
+                    setErrors((prev) => {
+                      const next = { ...prev }
+                      delete next.rxWeight
+                      delete next.rxReps
+                      delete next.scWeight
+                      delete next.scReps
+                      delete next.rxCalories
+                      delete next.scCalories
+                      delete next.rxTime
+                      delete next.scTime
+                      delete next.rxDistance
+                      delete next.scDistance
+                      return next
+                    })
+                  }}
+                >
+                  <SelectTrigger className="w-full sm:w-[180px] text-base sm:text-sm font-medium bg-background">
+                    <SelectValue placeholder="Тип упражнения" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                    <SelectItem value="weight" className="text-base sm:text-sm py-2">Вес/Повторы</SelectItem>
+                    <SelectItem value="calories" className="text-base sm:text-sm py-2">Калории</SelectItem>
+                    <SelectItem value="time" className="text-base sm:text-sm py-2">Время</SelectItem>
+                    <SelectItem value="distance" className="text-base sm:text-sm py-2">Дистанция</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
