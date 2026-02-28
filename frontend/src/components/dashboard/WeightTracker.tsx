@@ -55,6 +55,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
         setIsEditing(false)
         success("Вес успешно обновлен")
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toastError(
         `Не удалось обновить вес: ${error.message || "Ошибка при обновлении веса"}`,

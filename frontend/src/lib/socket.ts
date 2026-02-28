@@ -28,7 +28,7 @@ export const initializeSocket = (userId: string) => {
         try {
           const url = new URL(socketUrl)
           socketUrl = url.origin
-        } catch (e) {
+        } catch {
           // Keep as is
         }
       }
@@ -36,7 +36,7 @@ export const initializeSocket = (userId: string) => {
       try {
         const url = new URL(socketUrl)
         socketUrl = url.origin
-      } catch (e) {
+      } catch {
           // Keep as is
       }
     }
@@ -50,7 +50,7 @@ export const initializeSocket = (userId: string) => {
       socket?.emit("joinUserRoom", userId)
     })
 
-    socket.on("disconnect", (reason) => {
+    socket.on("disconnect", (_reason) => {
       // Socket disconnected
     })
   }

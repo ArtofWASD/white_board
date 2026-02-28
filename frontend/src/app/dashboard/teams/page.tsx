@@ -13,7 +13,7 @@ import AthleteTeamView from "../../../features/teams/AthleteTeamView"
 export default function TeamsPage() {
   const { user } = useAuthStore()
   const router = useRouter()
-  const { error: toastError, info } = useToast()
+  const { info } = useToast()
   const [showCreateTeamForm, setShowCreateTeamForm] = useState(false)
   const [teamName, setTeamName] = useState("")
   const [teamDescription, setTeamDescription] = useState("")
@@ -89,7 +89,7 @@ export default function TeamsPage() {
       await teamsApi.deleteTeam(teamId)
       setTeams((prev) => prev.filter((t) => t.id !== teamId))
       info("Команда успешно удалена")
-    } catch (err) {
+    } catch {
       setError("Ошибка при удалении команды")
     } finally {
       setLoading(false)
@@ -108,7 +108,7 @@ export default function TeamsPage() {
       await teamsApi.leaveTeam(teamId)
       setTeams((prev) => prev.filter((t) => t.id !== teamId))
       info("Вы успешно покинули команду")
-    } catch (err) {
+    } catch {
       setError("Ошибка при выходе из команды")
     } finally {
       setLoading(false)
@@ -265,7 +265,7 @@ export default function TeamsPage() {
                       }),
                     )
                     info("Спортсмен успешно удален из команды")
-                  } catch (err) {
+                  } catch {
                     setError("Ошибка при удалении спортсмена")
                   } finally {
                     setLoading(false)

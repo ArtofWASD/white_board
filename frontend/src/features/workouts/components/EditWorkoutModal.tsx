@@ -71,6 +71,7 @@ export function EditWorkoutModal({
       setScheduledTime(workout.scheduledTime || "09:00")
 
       // Initialize date if available in workout object
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rawDate = (workout as any).eventDate || (workout as any).date
       if (rawDate) {
         const d = new Date(rawDate)
@@ -86,7 +87,9 @@ export function EditWorkoutModal({
 
       // Check if workout has exercises (e.g. from WorkoutCard or WorkoutDetail)
       // Some properties might be undefined if `Workout` type does not include them, so fallback gracefully
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if ((workout as any).exercises) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setExercises((workout as any).exercises)
       }
 
@@ -98,6 +101,7 @@ export function EditWorkoutModal({
 
   const fetchFullEvent = async () => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const fullEvent: any = await eventsApi.getEvent(workout.id)
       if (fullEvent) {
         setTitle(fullEvent.title || workout.title || "")
@@ -127,6 +131,7 @@ export function EditWorkoutModal({
         setDescription(fullEvent.description || workout.description || "")
         setTimeCap(fullEvent.timeCap || workout.timeCap || "")
         setRounds(fullEvent.rounds || workout.rounds || "")
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setExercises(fullEvent.exercises || (workout as any).exercises || [])
       }
     } catch (error) {

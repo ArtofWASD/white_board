@@ -71,6 +71,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       }
     }
     fetchTeams()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const handleAddExercise = () => {
@@ -153,6 +154,7 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       reset()
       if (onClose) onClose()
       success("Событие успешно создано")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setError("root", {
         message: error.message || "Произошла ошибка при создании события",

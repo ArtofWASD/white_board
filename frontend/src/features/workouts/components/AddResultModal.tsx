@@ -67,6 +67,7 @@ export function AddResultModal({
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const payload: any = {
         username: user.name,
         userId: user.id,

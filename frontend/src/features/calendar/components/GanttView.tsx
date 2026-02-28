@@ -83,6 +83,7 @@ export function GanttView({
   }
 
   // ── Drag-resize handlers ──
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleResizeMouseDown = useCallback(
     (e: React.MouseEvent, workout: Workout) => {
       e.stopPropagation()
@@ -125,6 +126,7 @@ export function GanttView({
       window.addEventListener("mousemove", onMouseMove)
       window.addEventListener("mouseup", onMouseUp)
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [durationOverrides, onDurationChange],
   )
 

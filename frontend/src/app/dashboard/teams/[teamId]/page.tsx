@@ -56,6 +56,7 @@ export default function EditTeamPage() {
   // Add Member Modal state
   const [isAddMemberModalOpen, setIsAddMemberModalOpen] = useState(false)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUserClick = (user: any) => {
     setSelectedUserForDetail(user as FullUser)
     setIsDetailModalOpen(true)
@@ -125,7 +126,7 @@ export default function EditTeamPage() {
         const errorData = await response.json().catch(() => ({}))
         setError(errorData.message || "Не удалось загрузить участников команды")
       }
-    } catch (err) {
+    } catch {
     } finally {
       setLoading(false)
     }
@@ -156,7 +157,7 @@ export default function EditTeamPage() {
         const errorData = await response.json().catch(() => ({}))
         setError(errorData.message || "Не удалось удалить участника")
       }
-    } catch (err) {
+    } catch {
       setError("Ошибка при удалении участника")
     } finally {
       setLoading(false)
@@ -190,7 +191,7 @@ export default function EditTeamPage() {
         const errorData = await response.json().catch(() => ({}))
         setError(errorData.message || "Не удалось обновить название команды")
       }
-    } catch (err) {
+    } catch {
       setError("Ошибка при обновлении названия")
     } finally {
       setLoading(false)

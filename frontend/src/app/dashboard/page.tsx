@@ -35,12 +35,14 @@ interface Exercise {
   id: string
   name: string
   maxWeight: number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   records: any[]
 }
 
 interface Event {
   id: string
   title: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   results: any[]
 }
 
@@ -115,6 +117,7 @@ export default function DashboardPage() {
         )
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const fetchData = async () => {
@@ -132,7 +135,7 @@ export default function DashboardPage() {
       if (eventsData) {
         setEvents(eventsData)
       }
-    } catch (error) {
+    } catch {
     } finally {
       setIsLoading(false)
     }
@@ -145,6 +148,7 @@ export default function DashboardPage() {
     if (!user) return
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data = await apiClient.put<{ user: any }>(`/api/auth/profile/${user.id}`, {
         dashboardLayout: newItems,
         dashboardLayoutMode: newMode,
@@ -158,12 +162,13 @@ export default function DashboardPage() {
           dashboardLayoutMode: newMode,
         })
       }
-    } catch (error) {}
+    } catch {}
   }
 
   const handleCreateExercise = async (name: string, initialWeight?: number) => {
     if (!user) return
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body: any = { name, userId: user.id }
       if (initialWeight) {
         body.initialWeight = initialWeight
@@ -171,14 +176,14 @@ export default function DashboardPage() {
 
       await apiClient.post("/api/exercises", body)
       fetchData()
-    } catch (error) {}
+    } catch {}
   }
 
   const handleAddRecord = async (exerciseId: string, weight: number) => {
     try {
       await apiClient.post(`/api/exercises/${exerciseId}/records`, { weight })
       fetchData()
-    } catch (error) {}
+    } catch {}
   }
 
   const handleUpdateExercise = async (id: string, name: string) => {
@@ -186,7 +191,7 @@ export default function DashboardPage() {
       await apiClient.put(`/api/exercises/${id}`, { name })
 
       await fetchData()
-    } catch (error) {}
+    } catch {}
   }
 
   const handleGoToProfile = () => {
@@ -405,9 +410,6 @@ export default function DashboardPage() {
 
               // Расчет высоты для мобильных устройств
               const isExpanded = expandedItems[id] ?? true
-              const visibleExpandedCount = visibleItems.filter(
-                (i) => expandedItems[i] ?? true,
-              ).length
 
               let mobileClass = ""
               if (!isExpanded) {

@@ -1,4 +1,4 @@
-import { User } from "./index"
+
 
 export interface Chat {
   id: string

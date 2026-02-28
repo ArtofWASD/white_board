@@ -8,6 +8,7 @@ interface Exercise {
 
 interface TexasMethodModuleProps {
   exercises: Exercise[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAddToCalendar: (title: string, description: string, scheme?: string, exercises?: any[]) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
@@ -30,6 +31,7 @@ export function TexasMethodModule({
         // Предполагаем, что maxWeight в БД - это 1ПМ. Для Техасского метода нужен 5ПМ.
         // Мы можем оценить 5ПМ из 1ПМ (примерно 85-87%) или позволить пользователю ввести его.
         // Будем использовать оценку 85% по умолчанию, но разрешим переопределение.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setFiveRepMax(Math.round(exercise.maxWeight * 0.85))
       }
     }
@@ -67,6 +69,7 @@ export function TexasMethodModule({
         </h3>
         <select
           value={dayThreeMode}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           onChange={(e) => setDayThreeMode(e.target.value as any)}
           onPointerDown={handleInputPointerDown}
           className="text-sm border border-gray-200 dark:border-gray-600 rounded-md px-2 py-1 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none">

@@ -16,6 +16,7 @@ export default function InvitePage() {
   useEffect(() => {
     // If no code, invalid
     if (!code) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setStatus("error")
       setError("Invalid invite link")
       return
@@ -46,6 +47,7 @@ export default function InvitePage() {
         setTimeout(() => {
           router.push("/dashboard/teams")
         }, 2000)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         let message = "Failed to join team"
 

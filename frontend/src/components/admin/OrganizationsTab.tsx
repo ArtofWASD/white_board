@@ -4,6 +4,7 @@ import { logApiError } from "../../lib/logger"
 import { organizationApi } from "../../lib/api/users"
 
 export const OrganizationsTab: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [organizations, setOrganizations] = useState<any[]>([])
   const [loadingOrganizations, setLoadingOrganizations] = useState(false)
 
@@ -23,6 +24,7 @@ export const OrganizationsTab: React.FC = () => {
     fetchOrganizations()
   }, [])
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleToggleOrganizationBlock = async (org: any) => {
     if (
       !confirm(

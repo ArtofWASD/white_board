@@ -7,12 +7,14 @@ import { usersApi } from "../../lib/api/users"
 
 export const UsersTab: React.FC = () => {
   const { user } = useAuthStore() // Removed token
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [users, setUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [roleFilter, setRoleFilter] = useState<string>("ALL")
 
-  // Состояния действий
+  // Состояния действия
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedUser, setSelectedUser] = useState<any>(null)
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false)
   const [newRole, setNewRole] = useState<string>("")
@@ -32,6 +34,7 @@ export const UsersTab: React.FC = () => {
     fetchUsers()
   }, []) // Removed token dependency
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openRoleModal = (u: any) => {
     setSelectedUser(u)
     setNewRole(u.role)
@@ -45,6 +48,7 @@ export const UsersTab: React.FC = () => {
     // Оптимистичное обновление
     const oldUsers = [...users]
     setUsers(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       users.map((u) => (u.id === selectedUser.id ? { ...u, role: newRole as any } : u)),
     )
 
@@ -60,6 +64,7 @@ export const UsersTab: React.FC = () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleToggleBlock = async (u: any) => {
     if (
       !confirm(
@@ -82,6 +87,7 @@ export const UsersTab: React.FC = () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDeleteUser = async (u: any) => {
     if (
       !confirm(

@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         { status: response.status },
       )
     }
-  } catch (error) {
+  } catch {
 
     return NextResponse.json({ error: "Failed to lookup user" }, { status: 500 })
   }

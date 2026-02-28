@@ -148,7 +148,7 @@ export const organizationApi = {
     apiClient.patch<void>(`/api/organization/${orgId}/block`, { isBlocked }),
 
   /** Получить все организации (для супер-админа) */
-  getAll: () => apiClient.get<any[]>("/api/organization/admin/all"),
+  getAll: () => apiClient.get<unknown[]>("/api/organization/admin/all"),
 }
 
 // ─── Статистика ────────────────────────────────────────────────────────────────

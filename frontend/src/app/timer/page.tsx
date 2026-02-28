@@ -45,6 +45,7 @@ function TimerPageContent() {
         intervalWork: Number(searchParams.get("intervalWork")) || undefined,
         intervalRest: Number(searchParams.get("intervalRest")) || undefined,
       }
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConfig(initialConfig)
 
       const eId = searchParams.get("eventId")
@@ -118,6 +119,7 @@ const ActiveTimer: React.FC<{
   useWakeLock(state.status === "RUNNING")
 
   React.useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     start()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

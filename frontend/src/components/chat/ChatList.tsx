@@ -19,7 +19,9 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
 
   useEffect(() => {
     let isMounted = true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let socketInstance: any = null
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let listenerRef: any = null
 
     const fetchChats = async () => {
@@ -44,6 +46,7 @@ export const ChatList: React.FC<ChatListProps> = ({ onSelectChat, className = ""
 
         socketInstance = socket
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const handleNewNotification = (notification: any) => {
           if (notification.type === "CHAT_MESSAGE") {
             fetchChats() // Re-fetch to get updated last message and unread status

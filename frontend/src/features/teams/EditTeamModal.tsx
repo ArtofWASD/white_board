@@ -37,6 +37,7 @@ export default function EditTeamModal({
       setLoading(true)
       const members = await teamsApi.getMembers(teamId)
       setTeamMembers(members || [])
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Не удалось загрузить участников команды")
       setTeamMembers([])
@@ -52,8 +53,11 @@ export default function EditTeamModal({
       // We'll use getTeam for now as a substitute for fetching team details which likely contains invite info for owner.
       // But wait, original code fetched `/api/teams/${teamId}`.
       const team = await teamsApi.getTeam(teamId)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (team && (team as any).inviteCode) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setInviteCode((team as any).inviteCode)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         setInviteLink(`${window.location.origin}/invite/${(team as any).inviteCode}`)
       }
     } catch (err) {
@@ -98,6 +102,7 @@ export default function EditTeamModal({
       // Refresh team members
       fetchTeamMembers()
       onTeamUpdated()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Не удалось удалить участника")
     } finally {

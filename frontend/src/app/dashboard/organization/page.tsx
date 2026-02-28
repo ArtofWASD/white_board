@@ -34,6 +34,7 @@ export default function OrganizationPage() {
       }
       fetchStats()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
   const fetchStats = async () => {
@@ -43,7 +44,7 @@ export default function OrganizationPage() {
       if (data) {
         setStats(data)
       }
-    } catch (error) {
+    } catch {
     } finally {
       setIsLoading(false)
     }

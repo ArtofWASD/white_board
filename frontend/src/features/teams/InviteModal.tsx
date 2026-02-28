@@ -28,6 +28,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
       setError(null)
       setSuccess(null)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, teamId])
 
   const fetchInviteCode = async () => {
@@ -65,6 +66,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
       } else {
         setError("Не удалось создать пригласительную ссылку")
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Не удалось создать пригласительную ссылку")
     } finally {

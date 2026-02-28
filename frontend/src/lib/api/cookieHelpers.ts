@@ -4,7 +4,7 @@ import { cookies } from "next/headers"
 /**
  * Получить cookies из запроса для проброса в backend
  */
-export async function getCookieHeader(request: NextRequest): Promise<string> {
+export async function getCookieHeader(_request: NextRequest): Promise<string> {
   const cookieStore = await cookies()
   const accessToken = cookieStore.get("access_token")
   const refreshToken = cookieStore.get("refresh_token")
@@ -36,8 +36,8 @@ export async function getCsrfTokenFromCookie(): Promise<string | null> {
 /**
  * Создать headers для запроса к backend с пробросом cookies
  */
-export async function createBackendHeaders(request: NextRequest): Promise<HeadersInit> {
-  const cookieHeader = await getCookieHeader(request)
+export async function createBackendHeaders(_request: NextRequest): Promise<HeadersInit> {
+  const cookieHeader = await getCookieHeader(_request)
 
   return {
     "Content-Type": "application/json",
@@ -49,9 +49,9 @@ export async function createBackendHeaders(request: NextRequest): Promise<Header
  * Создать headers для запроса к backend с пробросом cookies и CSRF токеном
  */
 export async function createBackendHeadersWithCsrf(
-  request: NextRequest,
+  _request: NextRequest,
 ): Promise<HeadersInit> {
-  const cookieHeader = await getCookieHeader(request)
+  const cookieHeader = await getCookieHeader(_request)
   const csrfToken = await getCsrfTokenFromCookie()
 
   return {

@@ -145,7 +145,7 @@ export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
             </div>
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-              Вы еще не внесли результат для этого комплекса. Перейдите в "Календарь", чтобы добавить.
+              Вы еще не внесли результат для этого комплекса. Перейдите в &quot;Календарь&quot;, чтобы добавить.
             </p>
           )}
         </div>

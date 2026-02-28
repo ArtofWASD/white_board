@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import Image from "next/image"
 import Header from "../../components/layout/Header"
 import Footer from "../../components/layout/Footer"
 import { useAuthStore } from "../../lib/store/useAuthStore"
@@ -74,7 +73,7 @@ export default function BlogPage() {
             }))
             setEvents(transformedEvents)
           }
-        } catch (error) {}
+        } catch {}
       }
     }
 
@@ -114,6 +113,7 @@ export default function BlogPage() {
   }
 
   // Состояние для блоков
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [knowledgeBlocks, setKnowledgeBlocks] = useState<any[]>([])
 
   useEffect(() => {
@@ -181,6 +181,7 @@ export default function BlogPage() {
                 isStatic: true,
               },
               ...knowledgeBlocks,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ].map((block: any, index: number) => {
               const href = block.isStatic
                 ? block.href

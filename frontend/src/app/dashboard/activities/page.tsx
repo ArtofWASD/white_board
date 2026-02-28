@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from "react"
 import { useAuthStore } from "../../../lib/store/useAuthStore"
-import { useRouter } from "next/navigation"
 import { Event, Team } from "../../../types"
 import { teamsApi } from "@/lib/api/teams"
 import { eventsApi } from "@/lib/api/events"

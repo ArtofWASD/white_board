@@ -19,8 +19,11 @@ import { statisticsApi } from "../../lib/api/users"
 export const OverviewTab: React.FC = () => {
   // Removed token usage as apiClient handles it
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [dashboardStats, setDashboardStats] = useState<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [registrationHistory, setRegistrationHistory] = useState<any[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [roleDistribution, setRoleDistribution] = useState<any[]>([])
   const [loadingStats, setLoadingStats] = useState(false)
 
@@ -38,7 +41,9 @@ export const OverviewTab: React.FC = () => {
         ])
 
         if (stats) setDashboardStats(stats)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (history) setRegistrationHistory(history as any[])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (roles) setRoleDistribution(roles as any[])
       } catch (e) {
         logApiError("/api/statistics/dashboard", e)

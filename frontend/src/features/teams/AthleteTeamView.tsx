@@ -44,6 +44,7 @@ const AthleteTeamView: React.FC<
 
   useEffect(() => {
     if (isMobileOrTablet) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setViewMode("list")
     }
   }, [isMobileOrTablet])

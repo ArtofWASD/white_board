@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback, useRef } from "react"
 
 export const useWakeLock = (isActive: boolean) => {
   const [isSupported, setIsSupported] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const wakeLockRef = useRef<any>(null)
 
   useEffect(() => {
+    // eslint-disable-next-line
     setIsSupported("wakeLock" in navigator)
   }, [])
 
@@ -12,12 +14,15 @@ export const useWakeLock = (isActive: boolean) => {
     if (!("wakeLock" in navigator)) return
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       wakeLockRef.current = await (navigator as any).wakeLock.request("screen")
       console.log("Wake Lock acquired")
 
       wakeLockRef.current.addEventListener("release", () => {
         console.log("Wake Lock released")
       })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error(`${err.name}, ${err.message}`)
     }

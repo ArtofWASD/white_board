@@ -26,7 +26,9 @@ interface HeaderProps {
   }[]
   rightContent?: React.ReactNode
   // В календаре LeftMenu использует события
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   leftMenuEvents?: any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onShowEventDetails?: (event: any) => void
 }
 
@@ -86,6 +88,7 @@ const Header: React.FC<HeaderProps> = ({
   // Интеграция с WebSocket
   React.useEffect(() => {
     let isMounted = true
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let socketInstance: any = null
 
     const fetchUnreadCount = async () => {
@@ -98,6 +101,7 @@ const Header: React.FC<HeaderProps> = ({
       }
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleNewNotification = (data: any) => {
       fetchUnreadCount()
     }

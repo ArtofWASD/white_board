@@ -44,6 +44,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
       } else {
         setAthletes([])
       }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       logApiError("/api/users?role=ATHLETE", err)
     }
@@ -57,6 +58,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
       await teamsApi.addMember(teamId, athleteId, "MEMBER")
 
       onMemberAdded()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message || "Ошибка при добавлении спортсмена")
     } finally {

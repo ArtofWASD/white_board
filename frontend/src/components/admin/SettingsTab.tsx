@@ -16,6 +16,7 @@ export const SettingsTab: React.FC = () => {
         if (data) {
           // Преобразование массива в объект
           const settingsMap: Record<string, string> = {}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data.forEach((s: any) => (settingsMap[s.key] = s.value))
           setSettings(settingsMap)
         }

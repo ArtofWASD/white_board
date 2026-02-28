@@ -34,6 +34,7 @@ export const ChatPageClient: React.FC = () => {
     try {
       const storedChatId = localStorage.getItem("activeChatId")
       if (storedChatId) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setActiveChatId(storedChatId)
         localStorage.removeItem("activeChatId") // clear it right after reading
         return // if we have a stored chat, we don't need to auto-create

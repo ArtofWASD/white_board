@@ -43,6 +43,7 @@ const LeftMenu: React.FC<LeftMenuProps> = ({
 }) => {
   const { user, isAuthenticated } = useAuthStore()
   const { selectedTeam } = useTeamStore()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [teamMembers, setTeamMembers] = useState<any[]>([])
 
   useEffect(() => {

@@ -39,6 +39,7 @@ export const UserDetailModal: React.FC<UserDetailModalProps> = ({
       fetchUserData()
       initialiseChat()
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, user])
 
   const initialiseChat = async () => {

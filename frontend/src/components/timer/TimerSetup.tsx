@@ -27,6 +27,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart, onModeSelect })
     watch,
     formState: { errors },
   } = useForm<TimerConfigFormData>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(timerConfigSchema) as any,
     defaultValues: {
       timeCapMinutes: 20,
@@ -36,6 +37,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart, onModeSelect })
       workBytes: 20,
       restBytes: 10,
       rounds: 8,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   })
 

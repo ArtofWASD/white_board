@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
             return true
           }
           return false
-        } catch (error) {
+        } catch {
           return false
         }
       },
@@ -80,7 +80,7 @@ export const useAuthStore = create<AuthState>()(
             return true
           }
           return false
-        } catch (error) {
+        } catch {
           return false
         }
       },
@@ -88,7 +88,7 @@ export const useAuthStore = create<AuthState>()(
       logout: async () => {
         try {
           await authApi.logout()
-        } catch (error) {
+        } catch {
           // Игнорируем ошибки logout
         }
         set({
@@ -119,7 +119,7 @@ export const useAuthStore = create<AuthState>()(
             return true
           }
           return false
-        } catch (error) {
+        } catch {
           return false
         }
       },
@@ -132,7 +132,7 @@ export const useAuthStore = create<AuthState>()(
           // Проверяем токен, запрашивая профиль
           await authApi.getProfile(state.user.id)
           return true
-        } catch (error) {
+        } catch {
           // Если ошибка (например 401), apiClient уже попытался обновить токен.
           // Если все еще ошибка, значит токен невалиден.
           get().logout()

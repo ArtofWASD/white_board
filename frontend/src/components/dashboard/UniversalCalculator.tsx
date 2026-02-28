@@ -35,6 +35,7 @@ export function UniversalCalculator({
     title: string
     description: string
     scheme?: string
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     exercises?: any[]
   } | null>(null)
 
@@ -45,6 +46,7 @@ export function UniversalCalculator({
   useEffect(() => {
     // Установка активного модуля по умолчанию на основе доступности
     if (showTexas && !show531) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveModule("texas")
     } else if (!showTexas && show531) {
       setActiveModule("531")
@@ -57,6 +59,7 @@ export function UniversalCalculator({
   //     return null;
   // }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openCalendarModal = (title: string, description: string, scheme?: string, exercises?: any[]) => {
     setCalendarModalData({ title, description, scheme, exercises })
     setIsCalendarModalOpen(true)

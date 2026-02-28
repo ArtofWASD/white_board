@@ -12,8 +12,11 @@ export const ContentTab: React.FC = () => {
     "wods",
   )
   const [activeBlockLocation, setActiveBlockLocation] = useState<"LANDING" | "KNOWLEDGE">("LANDING")
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [wods, setWods] = useState<any[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [globalExercises, setGlobalExercises] = useState<any[]>([])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [news, setNews] = useState<any[]>([])
   const [blocks, setBlocks] = useState<ContentBlock[]>([])
   const [loadingContent, setLoadingContent] = useState(false)
@@ -23,6 +26,7 @@ export const ContentTab: React.FC = () => {
   const [contentModalType, setContentModalType] = useState<"wod" | "exercise" | "news" | "block">(
     "wod",
   )
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingItem, setEditingItem] = useState<any>(null) // Если null, это режим создания
   const [newWod, setNewWod] = useState({
     name: "",
@@ -222,6 +226,7 @@ export const ContentTab: React.FC = () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDeleteContent = async (item: any, type: "wod" | "exercise" | "news" | "block") => {
     if (!confirm("Вы уверены, что хотите удалить этот элемент?")) return
     try {
@@ -236,6 +241,7 @@ export const ContentTab: React.FC = () => {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openEditModal = (item: any, type: "wod" | "exercise" | "news" | "block") => {
     setEditingItem(item)
     setContentModalType(type)

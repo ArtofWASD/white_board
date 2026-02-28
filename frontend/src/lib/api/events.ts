@@ -83,7 +83,7 @@ export const eventsApi = {
 
   /** Получить результаты пользователя */
   getUserResults: (userId: string) =>
-    apiClient.get<UserEventResult[]>("/api/events/results/user/${userId}"),
+    apiClient.get<UserEventResult[]>(`/api/events/results/user/${userId}`),
 
   /** Поставить/убрать лайк результату */
   toggleLike: (resultId: string) =>

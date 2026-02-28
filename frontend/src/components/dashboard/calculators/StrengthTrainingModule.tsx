@@ -18,6 +18,7 @@ interface StrengthResult {
 
 interface StrengthTrainingModuleProps {
   exercises: Exercise[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onAddToCalendar: (title: string, description: string, scheme?: string, exercises?: any[]) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
@@ -53,6 +54,7 @@ export function StrengthTrainingModule({
     } else {
       setHistory([])
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedExerciseId, exercises])
 
   // Округление до ближайших 2.5 кг (минимальный шаг блинов на штанге: 1.25×2)
@@ -61,6 +63,7 @@ export function StrengthTrainingModule({
   useEffect(() => {
     // Тренировочный Максимум обычно составляет 90% от 1ПМ, округлённый до 2.5 кг
     setTrainingMax(roundToPlates(oneRepMax * 0.9))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [oneRepMax])
 
   const fetchHistory = async () => {

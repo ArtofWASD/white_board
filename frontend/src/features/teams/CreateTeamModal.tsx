@@ -49,6 +49,7 @@ export default function CreateTeamModal({
       onClose()
 
       success("Команда успешно создана!")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError("root", { message: err.message || "Не удалось создать команду" })
     }

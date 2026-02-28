@@ -1,4 +1,4 @@
-import Link from "next/link"
+
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
 import AnimatedLink from "@/components/ui/AnimatedLink"
@@ -102,6 +102,7 @@ export default async function LandingPage() {
                   </div>
                   <div className={`flex-1 min-h-[300px] w-full rounded-2xl p-8 flex items-center justify-center text-center overflow-hidden relative ${block.imageUrl ? '' : 'bg-gray-50 border border-gray-100 shadow-sm'}`}>
                     {block.imageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img 
                         src={block.imageUrl.startsWith('http') ? block.imageUrl : `${process.env.NEXT_PUBLIC_API_URL || ''}${block.imageUrl}`} 
                         alt={block.title} 

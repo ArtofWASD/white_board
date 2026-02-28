@@ -55,8 +55,10 @@ const NotificationsPage: React.FC = () => {
     const chatGroups = new Map<string, GroupedNotification>()
 
     notifications.forEach((notif) => {
-      if (notif.type === "CHAT_MESSAGE" && notif.data?.chatId) {
-        const cId = notif.data.chatId
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (notif.type === "CHAT_MESSAGE" && (notif.data as any)?.chatId) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const cId = (notif.data as any).chatId
         const existingGroup = chatGroups.get(cId)
 
         if (existingGroup) {
@@ -112,9 +114,11 @@ const NotificationsPage: React.FC = () => {
       await handleMarkAsRead(notif.id, notif.groupIds, notif.unreadGroupIds)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if (notif.type === "CHAT_MESSAGE" && (notif.data as any)?.chatId) {
       // Store the active chat ID in localStorage so the chat page knows which one to open initially
       try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         localStorage.setItem("activeChatId", (notif.data as any).chatId)
       } catch (e) {
         console.error("Failed to save activeChatId", e)

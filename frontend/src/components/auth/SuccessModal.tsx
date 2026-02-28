@@ -17,6 +17,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) =
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCountdown(10);
       timer = setInterval(() => {
         setCountdown((prev) => {

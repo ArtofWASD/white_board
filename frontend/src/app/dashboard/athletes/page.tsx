@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react"
 import { useTeamStore } from "../../../lib/store/useTeamStore"
-import { useAuthStore } from "../../../lib/store/useAuthStore"
 import { teamsApi } from "../../../lib/api/teams"
 import { Team } from "../../../types"
 import { TeamMember } from "../../../types/TeamManagement.types"
@@ -68,7 +67,7 @@ export default function AthletesPage() {
         })
 
         setAthletes(Array.from(athleteMap.values()))
-      } catch (error) {
+      } catch {
       } finally {
         setLoading(false)
       }

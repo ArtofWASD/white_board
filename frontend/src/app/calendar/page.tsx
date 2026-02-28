@@ -56,6 +56,7 @@ export default function CalendarPage() {
       const data = await eventsApi.getUserEvents(user.id, filterTeamId)
 
       // Transform for Legacy Support (LeftMenu)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const calendarEvents: CalendarEvent[] = data.map((event: any) => ({
         id: event.id,
         title: event.title,
@@ -75,9 +76,11 @@ export default function CalendarPage() {
       // Filtering Logic
       const filteredEvents = calendarEvents.filter((event) => {
         if (!calendarTeamId || calendarTeamId === "my") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return event.id && !event.teamId && (event as any).userId === user?.id
         }
         if (calendarTeamId === "all_teams") {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return !(!event.teamId && (event as any).userId === user?.id)
         }
         if (calendarTeamId === "all") return true
@@ -124,6 +127,7 @@ export default function CalendarPage() {
 
         // Try to find user result
         const userResult = event.results?.find(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (r: any) => r.username === user.name || r.userId === user.id,
         )
 
@@ -134,11 +138,13 @@ export default function CalendarPage() {
           result: userResult ? userResult.time : undefined,
           scheduledTime,
           description: event.description || "",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           movements: event.exercises?.map((e: any) => e.name) || [],
           exercises: event.exercises || [],
           timeCap: event.timeCap,
           rounds: event.rounds,
           userId: event.userId,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           teamName: (event as any).team?.name,
           durationMinutes: event.timeCap ? parseInt(event.timeCap) || 60 : 60,
         })

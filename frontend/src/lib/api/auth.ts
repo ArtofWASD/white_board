@@ -8,7 +8,7 @@
  * ```
  */
 
-import { apiClient, ApiError } from "./apiClient"
+import { apiClient } from "./apiClient"
 import { User } from "../../types"
 
 interface LoginResponse {

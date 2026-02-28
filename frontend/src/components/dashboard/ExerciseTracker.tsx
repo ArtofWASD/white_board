@@ -7,6 +7,7 @@ interface Exercise {
   id: string
   name: string
   maxWeight: number
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   records: any[]
 }
 

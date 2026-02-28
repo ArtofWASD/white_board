@@ -54,6 +54,7 @@ interface FieldErrors {
 interface CreateWorkoutModalProps {
   isOpen: boolean
   onClose: () => void
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onSave: (data: any) => void
   defaultDate?: Date
   defaultTeamId?: string
@@ -152,7 +153,7 @@ export function CreateWorkoutModal({
     }
   }, [isOpen, defaultDate, defaultTeamId, user])
 
-  const fetchUserTeams = async () => {
+  async function fetchUserTeams() {
     if (!user) return
     try {
       const response = await teamsApi.getUserTeams(user.id)
@@ -185,7 +186,7 @@ export function CreateWorkoutModal({
     }
   }, [selectedTeamId])
 
-  const resetExerciseInput = () => {
+  function resetExerciseInput() {
     setExName("")
     setExMeasurement("weight")
     setRxWeight("")
@@ -612,6 +613,7 @@ export function CreateWorkoutModal({
               <div className="w-full sm:w-auto mt-2 sm:mt-0">
                 <Select
                   value={exMeasurement}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   onValueChange={(val: any) => {
                     setExMeasurement(val)
                     // Clear only the numeric fields, keep exercise name and new measurement

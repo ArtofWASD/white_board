@@ -47,7 +47,7 @@ export default function AboutPage() {
             </div>
             
             <p>
-              <span className="font-semibold">The Slate</span> — это не просто "белая доска", это чистый лист для ваших новых достижений. Начните свою историю успеха уже сегодня.
+              <span className="font-semibold">The Slate</span> — это не просто &quot;белая доска&quot;, это чистый лист для ваших новых достижений. Начните свою историю успеха уже сегодня.
             </p>
           </div>
         </div>

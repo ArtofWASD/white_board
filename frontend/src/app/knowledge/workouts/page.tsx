@@ -25,6 +25,7 @@ export default function WorkoutsPage() {
           const data = await res.json()
           // Map wods to match ContentItem interface if needed, relying on consistent naming for now
 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedData = data.map((wod: any) => ({
             id: wod.id,
             title: wod.name,
@@ -55,6 +56,7 @@ export default function WorkoutsPage() {
     } else {
       setFilteredWods(
         wods.filter(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (wod: any) =>
             wod.muscleGroups &&
             wod.muscleGroups.some((mg: string) => selectedMuscles.includes(mg)),

@@ -44,8 +44,7 @@ export const useWODTimer = (config: TimerConfig) => {
 
   const requestRef = useRef<number | undefined>(undefined)
   const startTimeRef = useRef<number | undefined>(undefined)
-  const baseTimeRef = useRef<number>(0) // Время, накопленное до текущего сегмента запуска
-  const lastTickRef = useRef<number>(0)
+
 
   // Помощник для обработки смены фаз
   const transitionPhase = useCallback(
@@ -132,20 +131,7 @@ export const useWODTimer = (config: TimerConfig) => {
     [config],
   )
 
-  const tick = useCallback((timestamp: number) => {
-    if (!startTimeRef.current) startTimeRef.current = timestamp
 
-    // Расчет дельты с начала этого сегмента RUNNING
-    // Мы добавляем baseTimeRef (накопленное время до паузы)
-    // Но на самом деле, более простая логика:
-    // Мы отслеживаем `endTime` для текущей фазы?
-    // Или просто `remaining = initialDuration - (now - start)`.
-
-    // Лучший подход для точности:
-    // Хранить `endTime` текущей фазы.
-    // пауза: `remaining = endTime - now`.
-    // возобновление: `endTime = now + remaining`.
-  }, [])
 
   // Пересмотренная логика тика с useEffect
   useEffect(() => {
@@ -166,7 +152,7 @@ export const useWODTimer = (config: TimerConfig) => {
       pPreviousTime = time
 
       setState((prev) => {
-        let newTimeLeft = prev.timeLeft - deltaTime
+        const newTimeLeft = prev.timeLeft - deltaTime
 
         // Аудио проверки для отсчета (3, 2, 1)
         const prevSeconds = Math.ceil(prev.timeLeft / 1000)

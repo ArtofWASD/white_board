@@ -18,7 +18,7 @@ export interface Notification {
   message: string
   isRead: boolean
   createdAt: string
-  data?: any
+  data?: unknown
 }
 
 export const notificationsApi = {

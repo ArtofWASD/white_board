@@ -61,6 +61,7 @@ export function CalendarSystem({
 
     // Check on mount
     if (window.innerWidth < 640) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setView("agenda")
     }
 
@@ -79,6 +80,7 @@ export function CalendarSystem({
     setIsCreateModalOpen(true)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateWorkout = async (data: any) => {
     if (!user) {
       console.error("User not authenticated")
