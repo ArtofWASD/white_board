@@ -213,7 +213,7 @@ export default function CalendarPage() {
         </div>
       </main>
 
-      <div ref={footerRef}>
+      <div ref={footerRef} className="hidden lg:block">
         <Footer />
       </div>
 
