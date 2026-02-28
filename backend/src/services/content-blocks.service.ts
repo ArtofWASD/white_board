@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateContentBlockDto, UpdateContentBlockDto } from '../dtos/content-blocks.dto';
+import {
+  CreateContentBlockDto,
+  UpdateContentBlockDto,
+} from '../dtos/content-blocks.dto';
 import { ContentLocation, ContentBlock } from '@prisma/client';
 import { generateSlug } from '../utils/slugify';
 
@@ -10,7 +13,7 @@ export class ContentBlocksService {
 
   async create(createDto: CreateContentBlockDto) {
     const slug = createDto.slug || generateSlug(createDto.title);
-    
+
     // Ensure slug is unique by appending a random string if it exists
     let uniqueSlug = slug;
     let counter = 1;
@@ -53,7 +56,7 @@ export class ContentBlocksService {
     return block;
   }
 
-  async findBySlug(slug: string) {
+  async findBySlug(slug: string): Promise<ContentBlock> {
     const block = await this.prisma.contentBlock.findUnique({
       where: { slug },
     });
@@ -70,17 +73,27 @@ export class ContentBlocksService {
         // Optionally update slug if title changes, but normally slug shouldn't change
         // To be safe, let's keep it unmodified unless explicitly provided
       }
-      
+
       if (updateDto.slug) {
-         let uniqueSlug = updateDto.slug;
-         let counter = 1;
-         let existing = await this.findBySlug(uniqueSlug).catch(() => null);
-         while (existing && existing.id !== id) {
-           uniqueSlug = `${updateDto.slug}-${counter}`;
-           counter++;
-           existing = await this.findBySlug(uniqueSlug).catch(() => null);
-         }
-         dataToUpdate.slug = uniqueSlug;
+        let uniqueSlug = updateDto.slug;
+        let counter = 1;
+        let existing: ContentBlock | null = null;
+        try {
+          existing = await this.findBySlug(uniqueSlug);
+        } catch {
+          existing = null;
+        }
+
+        while (existing && existing.id !== id) {
+          uniqueSlug = `${updateDto.slug}-${counter}`;
+          counter++;
+          try {
+            existing = await this.findBySlug(uniqueSlug);
+          } catch {
+            existing = null;
+          }
+        }
+        dataToUpdate.slug = uniqueSlug;
       }
 
       return await this.prisma.contentBlock.update({

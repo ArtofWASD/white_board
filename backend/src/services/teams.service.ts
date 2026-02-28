@@ -387,7 +387,7 @@ export class TeamsService {
     }
 
     // Удаляем участника из команды
-    const result = await this.prisma.teamMember.delete({
+    await this.prisma.teamMember.delete({
       where: {
         teamId_userId: {
           teamId: teamId,

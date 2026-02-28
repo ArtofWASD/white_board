@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsBoolean, IsInt, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsInt,
+  IsEnum,
+} from 'class-validator';
 import { ContentLocation } from '@prisma/client';
 
 export class CreateContentBlockDto {
