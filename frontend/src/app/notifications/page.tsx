@@ -11,8 +11,6 @@ import {
 } from "../../lib/api/notifications"
 import Header from "../../components/layout/Header"
 import { Heart, MessageSquare, CheckCheck } from "lucide-react"
-import { Modal } from "../../components/ui/Modal"
-import { ChatWindow } from "../../components/chat/ChatWindow"
 
 type GroupedNotification = Notification & { groupIds?: string[], unreadGroupIds?: string[] }
 
@@ -50,9 +48,6 @@ const NotificationsPage: React.FC = () => {
       }
     }
   }, [isAuthenticated, router, user?.id])
-
-  const [chatId, setChatId] = useState<string | null>(null)
-  const [isChatOpen, setIsChatOpen] = useState(false)
 
   // Group notifications
   const groupedNotifications = useMemo(() => {
@@ -118,8 +113,13 @@ const NotificationsPage: React.FC = () => {
     }
 
     if (notif.type === "CHAT_MESSAGE" && (notif.data as any)?.chatId) {
-      setChatId((notif.data as any).chatId)
-      setIsChatOpen(true)
+      // Store the active chat ID in localStorage so the chat page knows which one to open initially
+      try {
+        localStorage.setItem("activeChatId", (notif.data as any).chatId)
+      } catch (e) {
+        console.error("Failed to save activeChatId", e)
+      }
+      router.push("/chat")
     }
   }
 
@@ -187,7 +187,7 @@ const NotificationsPage: React.FC = () => {
                     {/* Render Sender Name from title, if it exists */}
                     {notification.title && (
                       <h4
-                        className={`text-sm mb-0.5 ${
+                         className={`text-sm mb-0.5 ${
                           notification.isRead
                             ? "text-gray-600 dark:text-gray-400 font-medium"
                             : "text-gray-900 dark:text-white font-bold"
@@ -217,26 +217,6 @@ const NotificationsPage: React.FC = () => {
           </div>
         )}
       </main>
-
-      <Modal
-        isOpen={isChatOpen}
-        onClose={() => {
-          setIsChatOpen(false)
-          setChatId(null)
-        }}
-        title="Чат"
-        size="lg">
-        {chatId ? (
-          <ChatWindow
-            chatId={chatId}
-            className="!h-[500px] !border-none !shadow-none !bg-gray-50"
-          />
-        ) : (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400"></div>
-          </div>
-        )}
-      </Modal>
     </div>
   )
 }

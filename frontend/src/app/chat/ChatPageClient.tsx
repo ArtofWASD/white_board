@@ -28,8 +28,21 @@ export const ChatPageClient: React.FC = () => {
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  // Auto-create chat for athletes
+  // Auto-create chat for athletes or read from notification link
   useEffect(() => {
+    // 1. Check if we arrived from a notification link
+    try {
+      const storedChatId = localStorage.getItem("activeChatId")
+      if (storedChatId) {
+        setActiveChatId(storedChatId)
+        localStorage.removeItem("activeChatId") // clear it right after reading
+        return // if we have a stored chat, we don't need to auto-create
+      }
+    } catch (e) {
+      console.error("Failed to read activeChatId from storage", e)
+    }
+
+    // 2. Fallback: auto-create chat for athletes if no chat is active
     const setupAthleteChat = async () => {
       if (user?.role === "ATHLETE" && !activeChatId) {
         const team = selectedTeam || teams[0]
