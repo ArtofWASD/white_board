@@ -10,7 +10,10 @@ interface ContentItem {
   id: string
   title: string
   content?: string // для новостей
+  excerpt?: string // для новостей
   description?: string // для воркаутов/упражнений
+  preview?: string // для всех, краткое описание
+  slug?: string // для URL, если есть
   imageUrl?: string // для новостей
   videoUrl?: string // для упражнений
   date?: string // для новостей/воркаутов
@@ -56,7 +59,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
   const openCalendarModal = (item: ContentItem) => {
     setCalendarModalData({
       title: item.title,
-      description: item.description || item.content || "",
+      description: item.preview || item.description || item.content || "",
     })
     setIsCalendarModalOpen(true)
   }
@@ -113,8 +116,8 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
             if (type === "workout" || type === "exercise") {
               const href =
                 type === "workout"
-                  ? `/knowledge/workouts/${item.id}`
-                  : `/knowledge/exercises/${item.id}`
+                  ? `/knowledge/workouts/${item.slug || item.id}`
+                  : `/knowledge/exercises/${item.slug || item.id}`
               return (
                 <Link href={href} className="block h-full">
                   {children}
@@ -180,8 +183,8 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
 
                     <div className="text-gray-600 mb-4 line-clamp-3 text-sm">
                       {type === "news"
-                        ? item.content?.substring(0, 150) + "..."
-                        : item.description}
+                        ? item.preview || item.excerpt || (item.content ? item.content.substring(0, 150) + "..." : "")
+                        : item.preview || item.description}
                     </div>
 
                     {type === "news" && item.date && (

@@ -23,11 +23,12 @@ export default function ExercisesPage() {
         const res = await fetch("/api/content-exercises") // Verify endpoint if needed, but assuming it's correct
         if (res.ok) {
           const data = await res.json()
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedData = data.map((ex: any) => ({
             id: ex.id,
+            slug: ex.slug,
             title: ex.name,
             description: ex.description,
+            preview: ex.preview,
             videoUrl: ex.videoUrl,
             type: "exercise",
             rating: ex.rating,

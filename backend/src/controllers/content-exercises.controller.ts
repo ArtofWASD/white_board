@@ -31,12 +31,7 @@ export class ContentExercisesController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ORGANIZATION_ADMIN)
   @UsePipes(new ValidationPipe())
   async create(@Body() dto: CreateContentExerciseDto) {
-    return this.contentExercisesService.createContentExercise(
-      dto.name,
-      dto.description,
-      dto.videoUrl,
-      dto.muscleGroups,
-    );
+    return this.contentExercisesService.createContentExercise(dto);
   }
 
   @Get()

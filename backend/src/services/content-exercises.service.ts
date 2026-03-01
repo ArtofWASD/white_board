@@ -1,22 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { CreateContentExerciseDto, UpdateContentExerciseDto } from '../dtos/content-exercises.dto';
+import { generateSlug } from '../utils/slugify';
 
 @Injectable()
 export class ContentExercisesService {
   constructor(private prisma: PrismaService) {}
 
-  async createContentExercise(
-    name: string,
-    description?: string,
-    videoUrl?: string,
-    muscleGroups?: string[],
-  ) {
+  async createContentExercise(dto: CreateContentExerciseDto) {
+    const slug = dto.slug || generateSlug(dto.name);
     return this.prisma.contentExercise.create({
       data: {
-        name,
-        description,
-        videoUrl,
-        muscleGroups,
+        ...dto,
+        slug,
       },
     });
   }
@@ -28,8 +24,10 @@ export class ContentExercisesService {
   }
 
   async getContentExerciseById(id: string) {
-    const exercise = await this.prisma.contentExercise.findUnique({
-      where: { id },
+    const exercise = await this.prisma.contentExercise.findFirst({
+      where: {
+        OR: [{ id }, { slug: id }]
+      },
     });
 
     if (!exercise) {
@@ -39,15 +37,7 @@ export class ContentExercisesService {
     return exercise;
   }
 
-  async updateContentExercise(
-    id: string,
-    data: {
-      name?: string;
-      description?: string;
-      videoUrl?: string;
-      muscleGroups?: string[];
-    },
-  ) {
+  async updateContentExercise(id: string, dto: UpdateContentExerciseDto) {
     const exercise = await this.prisma.contentExercise.findUnique({
       where: { id },
     });
@@ -56,9 +46,14 @@ export class ContentExercisesService {
       throw new NotFoundException('Content exercise not found');
     }
 
+    const dataToUpdate = { ...dto };
+    if (dto.name && !dto.slug) {
+      dataToUpdate.slug = generateSlug(dto.name);
+    }
+
     return this.prisma.contentExercise.update({
       where: { id },
-      data,
+      data: dataToUpdate,
     });
   }
 

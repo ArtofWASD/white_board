@@ -142,6 +142,8 @@ model ContentExercise {
   id          String   @id @default(uuid())
   name        String
   description String?
+  preview     String?  @db.Text
+  slug        String?  @unique
   videoUrl    String?  @map("video_url")
   muscleGroups String[] @map("muscle_groups")
   rating      Float    @default(0)
@@ -155,7 +157,9 @@ model Wod {
   id          String   @id @default(uuid())
   name        String
   description String
-  type        String   // GIRL, HERO, OTHER
+  preview     String?  @db.Text
+  slug        String?  @unique
+  type        String   // GIRL, HERO, BENCHMARK, OTHER
   scheme      String   @default("FOR_TIME") // FOR_TIME, AMRAP, EMOM
   isGlobal    Boolean  @default(true) @map("is_global")
   muscleGroups String[] @map("muscle_groups")

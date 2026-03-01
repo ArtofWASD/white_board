@@ -31,6 +31,7 @@ export const ContentTab: React.FC = () => {
   const [newWod, setNewWod] = useState({
     name: "",
     description: "",
+    preview: "",
     type: "CLASSIC",
     scheme: "FOR_TIME",
     isGlobal: true,
@@ -39,6 +40,7 @@ export const ContentTab: React.FC = () => {
   const [newExercise, setNewExercise] = useState({
     name: "",
     description: "",
+    preview: "",
     videoUrl: "",
     muscleGroups: [] as string[],
   })
@@ -104,6 +106,7 @@ export const ContentTab: React.FC = () => {
         setNewWod({
           name: "",
           description: "",
+          preview: "",
           type: "CLASSIC",
           scheme: "FOR_TIME",
           isGlobal: true,
@@ -151,7 +154,7 @@ export const ContentTab: React.FC = () => {
         await adminApi.createExercise(newExercise)
         fetchContent()
         setIsContentModalOpen(false)
-        setNewExercise({ name: "", description: "", videoUrl: "", muscleGroups: [] })
+        setNewExercise({ name: "", description: "", preview: "", videoUrl: "", muscleGroups: [] })
       } catch (e) {
         alert("Ошибка создания упражнения")
       }
@@ -169,6 +172,7 @@ export const ContentTab: React.FC = () => {
         setNewWod({
           name: "",
           description: "",
+          preview: "",
           type: "CLASSIC",
           scheme: "FOR_TIME",
           isGlobal: true,
@@ -219,7 +223,7 @@ export const ContentTab: React.FC = () => {
         fetchContent()
         setIsContentModalOpen(false)
         setEditingItem(null)
-        setNewExercise({ name: "", description: "", videoUrl: "", muscleGroups: [] })
+        setNewExercise({ name: "", description: "", preview: "", videoUrl: "", muscleGroups: [] })
       } catch (e) {
         alert("Ошибка обновления упражнения")
       }
@@ -250,6 +254,7 @@ export const ContentTab: React.FC = () => {
       setNewWod({
         name: item.name,
         description: item.description,
+        preview: item.preview || "",
         type: item.type,
         scheme: item.scheme || "FOR_TIME",
         isGlobal: item.isGlobal,
@@ -279,6 +284,7 @@ export const ContentTab: React.FC = () => {
       setNewExercise({
         name: item.name,
         description: item.description || "",
+        preview: item.preview || "",
         videoUrl: item.videoUrl || "",
         muscleGroups: item.muscleGroups || [],
       })
@@ -354,6 +360,7 @@ export const ContentTab: React.FC = () => {
               setNewWod({
                 name: "",
                 description: "",
+                preview: "",
                 type: "CLASSIC",
                 scheme: "FOR_TIME",
                 isGlobal: true,
@@ -377,6 +384,7 @@ export const ContentTab: React.FC = () => {
               setNewExercise({
                 name: "",
                 description: "",
+                preview: "",
                 videoUrl: "",
                 muscleGroups: [],
               })
@@ -614,6 +622,7 @@ export const ContentTab: React.FC = () => {
                 onChange={(e) => setNewWod({ ...newWod, type: e.target.value })}>
                 <option value="CLASSIC">CLASSIC (Классический)</option>
                 <option value="HERO">HERO (Герои)</option>
+                <option value="BENCHMARK">BENCHMARK (Бенчмарк)</option>
               </select>
             </div>
             <div>
@@ -633,7 +642,17 @@ export const ContentTab: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Описание
+                Краткое описание (превью)
+              </label>
+              <textarea
+                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                value={newWod.preview}
+                onChange={(e) => setNewWod({ ...newWod, preview: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Полное описание
               </label>
               <textarea
                 className="w-full border border-gray-300 rounded px-3 py-2 h-32 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -683,7 +702,19 @@ export const ContentTab: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Описание (опционально)
+                Краткое описание (превью)
+              </label>
+              <textarea
+                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                value={newExercise.preview}
+                onChange={(e) =>
+                  setNewExercise({ ...newExercise, preview: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Полное описание (опционально)
               </label>
               <textarea
                 className="w-full border border-gray-300 rounded px-3 py-2 h-24 focus:ring-2 focus:ring-indigo-500 focus:outline-none"

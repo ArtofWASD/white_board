@@ -28,8 +28,10 @@ export default function WorkoutsPage() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const mappedData = data.map((wod: any) => ({
             id: wod.id,
+            slug: wod.slug,
             title: wod.name,
             description: wod.description,
+            preview: wod.preview,
             type: "wod", // Internal type for ContentDisplay logic if needed
             rating: wod.rating,
             muscleGroups: wod.muscleGroups,

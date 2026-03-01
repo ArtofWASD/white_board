@@ -23,6 +23,14 @@ export class CreateWodDto {
   @IsNotEmpty()
   scheme: string;
 
+  @IsString()
+  @IsOptional()
+  preview?: string;
+
+  @IsString()
+  @IsOptional()
+  slug?: string;
+
   @IsBoolean()
   @IsOptional()
   isGlobal?: boolean;
@@ -49,6 +57,14 @@ export class UpdateWodDto {
   @IsString()
   @IsOptional()
   scheme?: string;
+
+  @IsString()
+  @IsOptional()
+  preview?: string;
+
+  @IsString()
+  @IsOptional()
+  slug?: string;
 
   @IsBoolean()
   @IsOptional()

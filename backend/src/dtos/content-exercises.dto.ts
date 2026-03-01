@@ -11,6 +11,14 @@ export class CreateContentExerciseDto {
 
   @IsString()
   @IsOptional()
+  preview?: string;
+
+  @IsString()
+  @IsOptional()
+  slug?: string;
+
+  @IsString()
+  @IsOptional()
   videoUrl?: string;
 
   @IsArray()
@@ -26,6 +34,14 @@ export class UpdateContentExerciseDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @IsString()
+  @IsOptional()
+  preview?: string;
+
+  @IsString()
+  @IsOptional()
+  slug?: string;
 
   @IsString()
   @IsOptional()
