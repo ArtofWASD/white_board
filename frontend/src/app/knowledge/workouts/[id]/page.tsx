@@ -262,9 +262,10 @@ export default function WodDetailsPage() {
                 <h3 className="text-xl font-semibold text-gray-900 mb-4 border-b pb-2">
                   Задание
                 </h3>
-                <div className="whitespace-pre-wrap text-gray-800 font-medium text-lg bg-gray-50 p-6 rounded-xl border border-gray-100">
-                  {wod.description}
-                </div>
+                <div 
+                  className="text-gray-800 font-medium text-lg bg-gray-50 p-6 rounded-xl border border-gray-100"
+                  dangerouslySetInnerHTML={{ __html: wod.description || "" }}
+                />
               </div>
             </div>
           </article>

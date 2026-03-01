@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from "react"
+import { ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react"
+import { RichTextEditor } from "@/components/ui/RichTextEditor"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Modal } from "../ui/Modal"
 import { logApiError } from "../../lib/logger"
@@ -644,20 +646,20 @@ export const ContentTab: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Краткое описание (превью)
               </label>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              <RichTextEditor
                 value={newWod.preview}
-                onChange={(e) => setNewWod({ ...newWod, preview: e.target.value })}
+                onChange={(content) => setNewWod({ ...newWod, preview: content })}
+                placeholder="Текст для карточки..."
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Полное описание
               </label>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 h-32 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              <RichTextEditor
                 value={newWod.description}
-                onChange={(e) => setNewWod({ ...newWod, description: e.target.value })}
+                onChange={(content) => setNewWod({ ...newWod, description: content })}
+                placeholder="Полное описание..."
               />
             </div>
             <div>
@@ -704,24 +706,20 @@ export const ContentTab: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Краткое описание (превью)
               </label>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              <RichTextEditor
                 value={newExercise.preview}
-                onChange={(e) =>
-                  setNewExercise({ ...newExercise, preview: e.target.value })
-                }
+                onChange={(content) => setNewExercise({ ...newExercise, preview: content })}
+                placeholder="Текст для карточки..."
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Полное описание (опционально)
               </label>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 h-24 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              <RichTextEditor
                 value={newExercise.description}
-                onChange={(e) =>
-                  setNewExercise({ ...newExercise, description: e.target.value })
-                }
+                onChange={(content) => setNewExercise({ ...newExercise, description: content })}
+                placeholder="Полное описание..."
               />
             </div>
             <div>

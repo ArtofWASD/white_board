@@ -201,9 +201,10 @@ export default function ExerciseDetailsPage() {
             <div className="p-6 md:p-8">
               <div className="prose prose-indigo max-w-none">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Описание</h3>
-                <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">
-                  {exercise.description || "Описание отсутствует."}
-                </div>
+                <div 
+                  className="text-gray-600 leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: exercise.description || "Описание отсутствует." }}
+                />
               </div>
             </div>
           </article>

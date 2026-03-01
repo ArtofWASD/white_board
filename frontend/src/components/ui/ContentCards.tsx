@@ -181,10 +181,16 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                       </div>
                     )}
 
-                    <div className="text-gray-600 mb-4 line-clamp-3 text-sm">
-                      {type === "news"
-                        ? item.preview || item.excerpt || (item.content ? item.content.substring(0, 150) + "..." : "")
-                        : item.preview || item.description}
+                    <div className="text-gray-600 mb-4 line-clamp-3 text-sm prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0">
+                      {type === "news" ? (
+                        <div dangerouslySetInnerHTML={{
+                          __html: item.preview || item.excerpt || (item.content ? item.content.substring(0, 150) + "..." : "")
+                        }} />
+                      ) : (
+                        <div dangerouslySetInnerHTML={{
+                          __html: item.preview || item.description || ""
+                        }} />
+                      )}
                     </div>
 
                     {type === "news" && item.date && (
