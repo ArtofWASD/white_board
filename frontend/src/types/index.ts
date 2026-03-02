@@ -27,6 +27,7 @@ export interface User {
   weightHistory?: { weight: number; date: string }[]
   dashboardLayout?: string[]
   dashboardLayoutMode?: string
+  avatarUrl?: string
   isBlocked?: boolean
 }
 

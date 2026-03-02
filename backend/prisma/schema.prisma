@@ -63,6 +63,7 @@ model User {
   updatedAt          DateTime     @updatedAt @map("updated_at")
   lastName           String?      @map("last_name")
   isBlocked          Boolean      @default(false) @map("is_blocked")
+  avatarUrl          String?      @map("avatar_url")
   
   // Relations
   events             Event[]
@@ -145,6 +146,7 @@ model ContentExercise {
   preview     String?  @db.Text
   slug        String?  @unique
   videoUrl    String?  @map("video_url")
+  imageUrl    String?  @map("image_url")
   muscleGroups String[] @map("muscle_groups")
   rating      Float    @default(0)
   createdAt   DateTime @default(now()) @map("created_at")
@@ -161,6 +163,7 @@ model Wod {
   slug        String?  @unique
   type        String   // GIRL, HERO, BENCHMARK, OTHER
   scheme      String   @default("FOR_TIME") // FOR_TIME, AMRAP, EMOM
+  imageUrl    String?  @map("image_url")
   isGlobal    Boolean  @default(true) @map("is_global")
   muscleGroups String[] @map("muscle_groups")
   rating      Float    @default(0)

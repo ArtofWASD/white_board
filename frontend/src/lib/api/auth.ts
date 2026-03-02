@@ -74,6 +74,22 @@ export const authApi = {
   updateProfile: (userId: string, data: ProfileData) =>
     apiClient.put<User>(`/api/auth/profile/${userId}`, data),
 
+  /** Загрузить аватар пользователя */
+  uploadAvatar: async (userId: string, file: File): Promise<{ avatarUrl: string }> => {
+    const formData = new FormData()
+    formData.append("file", file)
+
+    // Using native fetch for FormData, or apiClient depending on your client wrapper.
+    // apiClient often assumes JSON body if not handled explicitly.
+    // However, if apiClient handles FormData properly:
+    // Please note if apiClient doesn't automatically drop Content-Type for FormData, native fetch is required.
+    const response = await apiClient.post<{ avatarUrl: string }>(
+      `/api/users/${userId}/avatar`,
+      formData,
+    )
+    return response
+  },
+
   /** Получить список атлетов */
   getAthletes: () => apiClient.get<User[]>("/api/auth/athletes"),
 }

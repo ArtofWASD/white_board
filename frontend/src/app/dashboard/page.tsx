@@ -307,8 +307,20 @@ export default function DashboardPage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mr-4">
-              <span className="text-2xl font-bold text-white">{user.name.charAt(0)}</span>
+            <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mr-4 overflow-hidden border border-gray-600">
+              {user.avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={user.avatarUrl}
+                  alt="User Avatar"
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <span className="text-2xl font-bold text-white">
+                  {user.name.charAt(0)}
+                </span>
+              )}
             </div>
             <div>
               <h2 className="text-2xl font-semibold dark:text-white">{user.name}</h2>

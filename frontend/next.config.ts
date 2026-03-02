@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "picsum.photos",
       },
+      {
+        protocol: "https",
+        hostname: "*.storage.beget.cloud",
+      },
+      {
+        protocol: "https",
+        hostname: "*.s3.yandex.net",
+      },
+      {
+        protocol: "https",
+        hostname: "*.amazonaws.com",
+      },
     ],
   },
   async rewrites() {

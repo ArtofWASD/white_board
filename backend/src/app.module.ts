@@ -19,6 +19,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { ChatModule } from './modules/chat.module';
 import { CsrfModule } from './modules/csrf.module';
 import { ContentBlocksModule } from './modules/content-blocks.module';
+import { S3Module } from './services/s3.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { ContentBlocksModule } from './modules/content-blocks.module';
     ChatModule,
     CsrfModule,
     ContentBlocksModule,
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService],

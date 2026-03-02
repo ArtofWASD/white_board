@@ -16,9 +16,9 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
 import { ContentBlocksService } from '../services/content-blocks.service';
+import { S3Service } from '../services/s3.service';
 import {
   CreateContentBlockDto,
   UpdateContentBlockDto,
@@ -32,7 +32,10 @@ import { UserRole, ContentLocation } from '@prisma/client';
 @Controller('content-blocks')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ContentBlocksController {
-  constructor(private readonly contentBlocksService: ContentBlocksService) {}
+  constructor(
+    private readonly contentBlocksService: ContentBlocksService,
+    private readonly s3Service: S3Service,
+  ) {}
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN)
@@ -72,15 +75,7 @@ export class ContentBlocksController {
   @Roles(UserRole.SUPER_ADMIN)
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-          const ext = extname(file.originalname);
-          cb(null, `block-${uniqueSuffix}${ext}`);
-        },
-      }),
+      storage: memoryStorage(),
       fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
           return cb(
@@ -95,13 +90,16 @@ export class ContentBlocksController {
       },
     }),
   )
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    // file.filename represents the stored file
+
+    // Upload file to S3
+    const imageUrl = await this.s3Service.uploadFile(file, 'content-blocks');
+
     return {
-      imageUrl: `/uploads/${file.filename}`,
+      imageUrl,
     };
   }
 

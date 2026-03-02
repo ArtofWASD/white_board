@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateContentExerciseDto, UpdateContentExerciseDto } from '../dtos/content-exercises.dto';
+import {
+  CreateContentExerciseDto,
+  UpdateContentExerciseDto,
+} from '../dtos/content-exercises.dto';
 import { generateSlug } from '../utils/slugify';
 
 @Injectable()
@@ -26,7 +29,7 @@ export class ContentExercisesService {
   async getContentExerciseById(id: string) {
     const exercise = await this.prisma.contentExercise.findFirst({
       where: {
-        OR: [{ id }, { slug: id }]
+        OR: [{ id }, { slug: id }],
       },
     });
 

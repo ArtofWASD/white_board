@@ -26,7 +26,7 @@ export class WodsService {
   async findOne(id: string) {
     const wod = await this.prisma.wod.findFirst({
       where: {
-        OR: [{ id }, { slug: id }]
+        OR: [{ id }, { slug: id }],
       },
     });
     if (!wod) {

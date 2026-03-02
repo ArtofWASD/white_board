@@ -7,7 +7,13 @@ import {
   Body,
   UseGuards,
   ParseUUIDPipe,
+  Post,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { UsersService } from '../services/users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -47,5 +53,39 @@ export class UsersController {
   @Roles(UserRole.SUPER_ADMIN)
   delete(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deleteUser(id);
+  }
+
+  @Post(':id/avatar')
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.ATHLETE,
+    UserRole.TRAINER,
+    UserRole.ORGANIZATION_ADMIN,
+  )
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|webp)$/)) {
+          return cb(
+            new BadRequestException('Only image files are allowed!'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit
+      },
+    }),
+  )
+  uploadAvatar(
+    @Param('id', ParseUUIDPipe) id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+    return this.usersService.uploadAvatar(id, file);
   }
 }
