@@ -7,13 +7,23 @@ import { logApiError } from "../../lib/logger"
 
 import { adminApi, ContentBlock } from "../../lib/api/admin"
 
+const stripHtml = (html: string) => {
+  if (!html) return ""
+  return html
+    .replace(/<[^>]*>?/gm, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+}
+
 export const ContentTab: React.FC = () => {
   // const { token } = useAuthStore() // Token no longer needed explicitely
 
-  const [activeContentTab, setActiveContentTab] = useState<"wods" | "exercises" | "news" | "blocks">(
-    "wods",
+  const [activeContentTab, setActiveContentTab] = useState<
+    "wods" | "exercises" | "news" | "blocks"
+  >("wods")
+  const [activeBlockLocation, setActiveBlockLocation] = useState<"LANDING" | "KNOWLEDGE">(
+    "LANDING",
   )
-  const [activeBlockLocation, setActiveBlockLocation] = useState<"LANDING" | "KNOWLEDGE">("LANDING")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [wods, setWods] = useState<any[]>([])
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,9 +35,9 @@ export const ContentTab: React.FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null)
 
   const [isContentModalOpen, setIsContentModalOpen] = useState(false)
-  const [contentModalType, setContentModalType] = useState<"wod" | "exercise" | "news" | "block">(
-    "wod",
-  )
+  const [contentModalType, setContentModalType] = useState<
+    "wod" | "exercise" | "news" | "block"
+  >("wod")
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [editingItem, setEditingItem] = useState<any>(null) // Если null, это режим создания
   const [newWod, setNewWod] = useState({
@@ -156,7 +166,13 @@ export const ContentTab: React.FC = () => {
         await adminApi.createExercise(newExercise)
         fetchContent()
         setIsContentModalOpen(false)
-        setNewExercise({ name: "", description: "", preview: "", videoUrl: "", muscleGroups: [] })
+        setNewExercise({
+          name: "",
+          description: "",
+          preview: "",
+          videoUrl: "",
+          muscleGroups: [],
+        })
       } catch (e) {
         alert("Ошибка создания упражнения")
       }
@@ -225,7 +241,13 @@ export const ContentTab: React.FC = () => {
         fetchContent()
         setIsContentModalOpen(false)
         setEditingItem(null)
-        setNewExercise({ name: "", description: "", preview: "", videoUrl: "", muscleGroups: [] })
+        setNewExercise({
+          name: "",
+          description: "",
+          preview: "",
+          videoUrl: "",
+          muscleGroups: [],
+        })
       } catch (e) {
         alert("Ошибка обновления упражнения")
       }
@@ -233,7 +255,10 @@ export const ContentTab: React.FC = () => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleDeleteContent = async (item: any, type: "wod" | "exercise" | "news" | "block") => {
+  const handleDeleteContent = async (
+    item: any,
+    type: "wod" | "exercise" | "news" | "block",
+  ) => {
     if (!confirm("Вы уверены, что хотите удалить этот элемент?")) return
     try {
       if (type === "wod") await adminApi.deleteWod(item.id)
@@ -369,7 +394,13 @@ export const ContentTab: React.FC = () => {
                 muscleGroups: [],
               })
             else if (activeContentTab === "news")
-              setNewNews({ title: "", content: "", excerpt: "", imageUrl: "", createdAt: "" })
+              setNewNews({
+                title: "",
+                content: "",
+                excerpt: "",
+                imageUrl: "",
+                createdAt: "",
+              })
             else if (activeContentTab === "blocks")
               setNewBlock({
                 title: "",
@@ -434,7 +465,7 @@ export const ContentTab: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-gray-600 text-sm whitespace-pre-wrap mb-4 h-24 overflow-hidden">
-                  {wod.description}
+                  {stripHtml(wod.description)}
                 </p>
                 <div className="flex justify-end gap-2 border-t pt-2">
                   <button
@@ -461,7 +492,9 @@ export const ContentTab: React.FC = () => {
                   <h3 className="font-bold text-lg text-gray-800">{ex.name}</h3>
                 </div>
                 {ex.description && (
-                  <p className="text-gray-600 text-sm mb-2">{ex.description}</p>
+                  <p className="text-gray-600 text-sm mb-2">
+                    {stripHtml(ex.description)}
+                  </p>
                 )}
                 {ex.videoUrl && (
                   <a
@@ -500,7 +533,9 @@ export const ContentTab: React.FC = () => {
                   </span>
                 </div>
                 {n.excerpt && (
-                  <p className="text-gray-600 text-sm mb-2 italic">{n.excerpt}</p>
+                  <p className="text-gray-600 text-sm mb-2 italic">
+                    {stripHtml(n.excerpt)}
+                  </p>
                 )}
                 <div className="flex justify-end gap-2 border-t pt-2">
                   <button
@@ -519,43 +554,49 @@ export const ContentTab: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {blocks.filter(b => b.location === activeBlockLocation).length > 0 ? (
+            {blocks.filter((b) => b.location === activeBlockLocation).length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {blocks
-                  .filter(b => b.location === activeBlockLocation)
+                  .filter((b) => b.location === activeBlockLocation)
                   .map((b) => (
-                  <div
-                    key={b.id}
-                    className={`border rounded-lg p-4 hover:shadow-md transition bg-white flex flex-col ${!b.isActive ? "opacity-60" : "border-gray-200"}`}>
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-bold text-lg text-gray-800">{b.title}</h3>
-                      <span className="px-2 py-1 bg-gray-100 text-xs rounded text-gray-600">
-                        {b.isActive ? "Активен" : "Скрыт"}
-                      </span>
-                    </div>
-                    {b.imageUrl && (
-                      <img src={b.imageUrl} alt={b.title} className="w-full h-32 object-cover rounded mb-2" />
-                    )}
-                    {b.description && (
-                      <p className="text-gray-600 text-sm mb-2 h-10 overflow-hidden text-ellipsis">{b.description}</p>
-                    )}
-                    <div className="flex justify-between items-center border-t pt-2 mt-auto">
-                      <span className="text-xs text-gray-500">Порядок: {b.order}</span>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => openEditModal(b, "block")}
-                          className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
-                          Ред.
-                        </button>
-                        <button
-                          onClick={() => handleDeleteContent(b, "block")}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium">
-                          Удалить
-                        </button>
+                    <div
+                      key={b.id}
+                      className={`border rounded-lg p-4 hover:shadow-md transition bg-white flex flex-col ${!b.isActive ? "opacity-60" : "border-gray-200"}`}>
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-lg text-gray-800">{b.title}</h3>
+                        <span className="px-2 py-1 bg-gray-100 text-xs rounded text-gray-600">
+                          {b.isActive ? "Активен" : "Скрыт"}
+                        </span>
+                      </div>
+                      {b.imageUrl && (
+                        <img
+                          src={b.imageUrl}
+                          alt={b.title}
+                          className="w-full h-32 object-cover rounded mb-2"
+                        />
+                      )}
+                      {b.description && (
+                        <p className="text-gray-600 text-sm mb-2 h-10 overflow-hidden text-ellipsis">
+                          {stripHtml(b.description)}
+                        </p>
+                      )}
+                      <div className="flex justify-between items-center border-t pt-2 mt-auto">
+                        <span className="text-xs text-gray-500">Порядок: {b.order}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => openEditModal(b, "block")}
+                            className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
+                            Ред.
+                          </button>
+                          <button
+                            onClick={() => handleDeleteContent(b, "block")}
+                            className="text-red-600 hover:text-red-800 text-sm font-medium">
+                            Удалить
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             ) : (
               <div className="text-center py-10 bg-gray-50 rounded-lg border border-dashed border-gray-300">
@@ -708,7 +749,9 @@ export const ContentTab: React.FC = () => {
               </label>
               <RichTextEditor
                 value={newExercise.preview}
-                onChange={(content) => setNewExercise({ ...newExercise, preview: content })}
+                onChange={(content) =>
+                  setNewExercise({ ...newExercise, preview: content })
+                }
                 placeholder="Текст для карточки..."
               />
             </div>
@@ -718,7 +761,9 @@ export const ContentTab: React.FC = () => {
               </label>
               <RichTextEditor
                 value={newExercise.description}
-                onChange={(content) => setNewExercise({ ...newExercise, description: content })}
+                onChange={(content) =>
+                  setNewExercise({ ...newExercise, description: content })
+                }
                 placeholder="Полное описание..."
               />
             </div>
@@ -830,7 +875,9 @@ export const ContentTab: React.FC = () => {
                 checked={newBlock.isActive}
                 onChange={(e) => setNewBlock({ ...newBlock, isActive: e.target.checked })}
               />
-              <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900 font-medium">
+              <label
+                htmlFor="isActive"
+                className="ml-2 block text-sm text-gray-900 font-medium">
                 Активен (Отображается на сайте)
               </label>
             </div>
@@ -842,7 +889,12 @@ export const ContentTab: React.FC = () => {
                 <select
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   value={newBlock.location}
-                  onChange={(e) => setNewBlock({ ...newBlock, location: e.target.value as "LANDING" | "KNOWLEDGE" })}>
+                  onChange={(e) =>
+                    setNewBlock({
+                      ...newBlock,
+                      location: e.target.value as "LANDING" | "KNOWLEDGE",
+                    })
+                  }>
                   <option value="LANDING">Главная страница</option>
                   <option value="KNOWLEDGE">Страница Знаний</option>
                 </select>
@@ -855,7 +907,9 @@ export const ContentTab: React.FC = () => {
                   type="number"
                   className="w-full border border-gray-300 rounded px-3 py-2"
                   value={newBlock.order}
-                  onChange={(e) => setNewBlock({ ...newBlock, order: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setNewBlock({ ...newBlock, order: parseInt(e.target.value) || 0 })
+                  }
                 />
               </div>
             </div>
@@ -877,7 +931,9 @@ export const ContentTab: React.FC = () => {
               <textarea
                 className="w-full border border-gray-300 rounded px-3 py-2 h-20"
                 value={newBlock.description}
-                onChange={(e) => setNewBlock({ ...newBlock, description: e.target.value })}
+                onChange={(e) =>
+                  setNewBlock({ ...newBlock, description: e.target.value })
+                }
               />
             </div>
             <div>
@@ -896,7 +952,8 @@ export const ContentTab: React.FC = () => {
               />
               {newBlock.imageUrl && !imageFile && (
                 <div className="mt-2 text-sm text-gray-500">
-                  Текущее: <br/> <img src={newBlock.imageUrl} alt="preview" className="h-20 rounded" />
+                  Текущее: <br />{" "}
+                  <img src={newBlock.imageUrl} alt="preview" className="h-20 rounded" />
                 </div>
               )}
             </div>
@@ -904,20 +961,28 @@ export const ContentTab: React.FC = () => {
               <h4 className="text-sm font-bold text-gray-700 mb-2">SEO настройки</h4>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">SEO Title (опционально)</label>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    SEO Title (опционально)
+                  </label>
                   <input
                     type="text"
                     className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm"
                     value={newBlock.seoTitle}
-                    onChange={(e) => setNewBlock({ ...newBlock, seoTitle: e.target.value })}
+                    onChange={(e) =>
+                      setNewBlock({ ...newBlock, seoTitle: e.target.value })
+                    }
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">SEO Description (опционально)</label>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    SEO Description (опционально)
+                  </label>
                   <textarea
                     className="w-full border border-gray-300 rounded px-3 py-1.5 text-sm h-16"
                     value={newBlock.seoDescription}
-                    onChange={(e) => setNewBlock({ ...newBlock, seoDescription: e.target.value })}
+                    onChange={(e) =>
+                      setNewBlock({ ...newBlock, seoDescription: e.target.value })
+                    }
                   />
                 </div>
               </div>
