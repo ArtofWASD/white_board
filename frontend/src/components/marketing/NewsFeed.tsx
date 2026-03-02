@@ -72,7 +72,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
           </div>
           <div className="hidden md:block">
             <AnimatedLink
-              href="/login"
+              href="/news"
               className="flex items-center gap-2 group text-black hover:text-gray-700 transition-colors font-medium">
               Все новости
             </AnimatedLink>
@@ -88,7 +88,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
           {/* Main News Card */}
           {mainNews && (
             <motion.div
-              onClick={() => router.push("/knowledge")}
+              onClick={() => router.push(`/news/${mainNews.id}`)}
               variants={itemVariants}
               className="md:col-span-2 md:row-span-2 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-50 flex flex-col justify-end min-h-[400px] md:min-h-0">
               <div className="absolute inset-0 z-0">
@@ -126,7 +126,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
           {secondaryNews.map((newsItem, index) => (
             <motion.div
               key={newsItem.id}
-              onClick={() => router.push("/knowledge")}
+              onClick={() => router.push(`/news/${newsItem.id}`)}
               variants={itemVariants}
               className="md:col-span-1 md:row-span-1 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-100 flex flex-col justify-end min-h-[300px]">
               <div className="absolute inset-0 z-0">
@@ -160,7 +160,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
 
         <div className="md:hidden mt-8 flex justify-center">
           <AnimatedLink
-            href="/login"
+            href="/news"
             className="flex items-center gap-2 group text-black hover:text-gray-700 transition-colors font-medium">
             Все новости
           </AnimatedLink>

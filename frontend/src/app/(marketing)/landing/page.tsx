@@ -104,6 +104,8 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        <NewsFeed news={news} />
+
         {/* Dynamic Features Grid */}
         {blocks.length > 0
           ? blocks.map((block, index) => (
@@ -152,8 +154,6 @@ export default async function LandingPage() {
               </section>
             ))
           : null}
-
-        <NewsFeed news={news} />
       </main>
 
       <Footer />
