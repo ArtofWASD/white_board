@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState, useEffect } from "react"
-import { Plus, Trash2, Edit2 } from "lucide-react"
+import { Plus, Trash2, Edit2, Check } from "lucide-react"
 import { Exercise } from "@/types"
 import { cn } from "@/lib/utils"
 import { eventsApi } from "@/lib/api/events"
@@ -45,6 +45,7 @@ export function EditWorkoutModal({
   const [rounds, setRounds] = useState("")
   const [description, setDescription] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const { user } = useAuthStore()
 
   // Exercise Input State
@@ -52,14 +53,18 @@ export function EditWorkoutModal({
   const [exMeasurement, setExMeasurement] = useState<
     "weight" | "calories" | "time" | "distance"
   >("weight")
-  const [rxWeight, setRxWeight] = useState("")
-  const [rxReps, setRxReps] = useState("")
-  const [scWeight, setScWeight] = useState("")
-  const [scReps, setScReps] = useState("")
-  const [rxCalories, setRxCalories] = useState("")
-  const [scCalories, setScCalories] = useState("")
-  const [rxTime, setRxTime] = useState("")
-  const [scTime, setScTime] = useState("")
+  const [rxWeight, setRxWeight] = useState("0")
+  const [rxReps, setRxReps] = useState("0")
+  const [scWeight, setScWeight] = useState("0")
+  const [scReps, setScReps] = useState("0")
+  const [rxCalories, setRxCalories] = useState("0")
+  const [scCalories, setScCalories] = useState("0")
+  const [rxTime, setRxTime] = useState("00:00")
+  const [scTime, setScTime] = useState("00:00")
+  const [rxDistance, setRxDistance] = useState("0")
+  const [scDistance, setScDistance] = useState("0")
+  const [rxDistanceWeight, setRxDistanceWeight] = useState("0")
+  const [scDistanceWeight, setScDistanceWeight] = useState("0")
 
   useEffect(() => {
     if (isOpen && workout) {
@@ -148,34 +153,49 @@ export function EditWorkoutModal({
   const resetExerciseInput = () => {
     setExName("")
     setExMeasurement("weight")
-    setRxWeight("")
-    setRxReps("")
-    setScWeight("")
-    setScReps("")
-    setRxCalories("")
-    setScCalories("")
-    setRxTime("")
-    setScTime("")
+    setRxWeight("0")
+    setRxReps("0")
+    setScWeight("0")
+    setScReps("0")
+    setRxCalories("0")
+    setScCalories("0")
+    setRxTime("00:00")
+    setScTime("00:00")
+    setRxDistance("0")
+    setScDistance("0")
+    setRxDistanceWeight("0")
+    setScDistanceWeight("0")
+    setEditingId(null)
   }
 
   const handleAddExercise = () => {
     if (!exName.trim()) return
 
     const newExercise: Exercise = {
-      id: Date.now().toString(),
+      id: editingId || Date.now().toString(),
       name: exName.trim(),
       measurement: exMeasurement,
-      weight: rxWeight,
-      repetitions: rxReps,
-      scWeight,
-      scReps,
+      weight: exMeasurement === "weight" ? rxWeight : undefined,
+      repetitions: exMeasurement === "weight" ? rxReps : undefined,
+      scWeight: exMeasurement === "weight" ? scWeight : undefined,
+      scReps: exMeasurement === "weight" ? scReps : undefined,
       rxCalories: exMeasurement === "calories" ? rxCalories : undefined,
       scCalories: exMeasurement === "calories" ? scCalories : undefined,
       rxTime: exMeasurement === "time" ? rxTime : undefined,
       scTime: exMeasurement === "time" ? scTime : undefined,
+      distance: exMeasurement === "distance" ? rxDistance : undefined,
+      scDistance: exMeasurement === "distance" ? scDistance : undefined,
+      rxDistanceWeight: exMeasurement === "distance" ? rxDistanceWeight : undefined,
+      scDistanceWeight: exMeasurement === "distance" ? scDistanceWeight : undefined,
     }
 
-    setExercises([...exercises, newExercise])
+    if (editingId) {
+      setExercises(exercises.map((e) => (e.id === editingId ? newExercise : e)))
+      setEditingId(null)
+    } else {
+      setExercises([...exercises, newExercise])
+    }
+
     resetExerciseInput()
   }
 
@@ -190,17 +210,20 @@ export function EditWorkoutModal({
     // Populate inputs
     setExName(exerciseToEdit.name)
     setExMeasurement(exerciseToEdit.measurement || "weight")
-    setRxWeight(exerciseToEdit.weight || "")
-    setRxReps(exerciseToEdit.repetitions || "")
-    setScWeight(exerciseToEdit.scWeight || "")
-    setScReps(exerciseToEdit.scReps || "")
-    setRxCalories(exerciseToEdit.rxCalories || "")
-    setScCalories(exerciseToEdit.scCalories || "")
-    setRxTime(exerciseToEdit.rxTime || "")
-    setScTime(exerciseToEdit.scTime || "")
+    setRxWeight(exerciseToEdit.weight || "0")
+    setRxReps(exerciseToEdit.repetitions || "0")
+    setScWeight(exerciseToEdit.scWeight || "0")
+    setScReps(exerciseToEdit.scReps || "0")
+    setRxCalories(exerciseToEdit.rxCalories || "0")
+    setScCalories(exerciseToEdit.scCalories || "0")
+    setRxTime(exerciseToEdit.rxTime || "00:00")
+    setScTime(exerciseToEdit.scTime || "00:00")
+    setRxDistance(exerciseToEdit.rxDistance || "0")
+    setScDistance(exerciseToEdit.scDistance || "0")
+    setRxDistanceWeight(exerciseToEdit.rxDistanceWeight || "0")
+    setScDistanceWeight(exerciseToEdit.scDistanceWeight || "0")
 
-    // Remove from list so it can be re-added
-    handleRemoveExercise(id)
+    setEditingId(id)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,7 +266,9 @@ export function EditWorkoutModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col max-sm:bottom-auto max-sm:top-[40%] max-sm:translate-y-[-50%]">
+      <DialogContent
+        aria-describedby={undefined}
+        className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col max-sm:bottom-auto max-sm:top-[40%] max-sm:translate-y-[-50%]">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>Редактировать тренировку</DialogTitle>
         </DialogHeader>
@@ -369,6 +394,17 @@ export function EditWorkoutModal({
                   )}>
                   Время
                 </button>
+                <button
+                  type="button"
+                  onClick={() => setExMeasurement("distance")}
+                  className={cn(
+                    "px-2 py-1 text-xs rounded-sm transition-all",
+                    exMeasurement === "distance"
+                      ? "bg-background shadow-sm text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}>
+                  Дистанция
+                </button>
               </div>
             </div>
 
@@ -455,7 +491,15 @@ export function EditWorkoutModal({
                 variant="outline"
                 className="w-full">
                 <span className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" /> Добавить
+                  {editingId ? (
+                    <>
+                      <Check className="h-4 w-4" /> Обновить упражнение
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" /> Добавить
+                    </>
+                  )}
                 </span>
               </Button>
             </div>

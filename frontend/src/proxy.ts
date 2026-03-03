@@ -5,17 +5,12 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Check if the user is authenticated (using the cookie names we identified)
-  const isAuth = request.cookies.has("access_token") || request.cookies.has("refresh_token")
+  const isAuth =
+    request.cookies.has("access_token") || request.cookies.has("refresh_token")
 
   // Handle the root path '/'
   if (pathname === "/") {
-    if (isAuth) {
-      // If authenticated, rewrite to the (app) overview page
-      return NextResponse.rewrite(new URL("/overview", request.url))
-    } else {
-      // If not authenticated, rewrite to the (marketing) landing page
-      return NextResponse.rewrite(new URL("/landing", request.url))
-    }
+    return NextResponse.rewrite(new URL("/landing", request.url))
   }
 
   // Allow all other requests to proceed as normal

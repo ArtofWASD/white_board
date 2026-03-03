@@ -136,7 +136,9 @@ export function WorkoutDetail({
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[600px] gap-0 p-0 overflow-hidden flex flex-col max-h-[90vh]">
+        <DialogContent
+          aria-describedby={undefined}
+          className="sm:max-w-[600px] gap-0 p-0 overflow-hidden flex flex-col max-h-[90vh]">
           <DialogHeader className="p-6 pb-2">
             <div className="flex items-center gap-2 text-muted-foreground text-sm mb-1">
               <Calendar className="h-4 w-4" />

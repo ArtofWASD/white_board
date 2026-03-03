@@ -112,7 +112,7 @@ export function CalendarSystem({
       }
     } catch (error) {
       console.error("Failed to create workout:", error)
-      // Ideally show toast here
+      throw error
     }
   }
 

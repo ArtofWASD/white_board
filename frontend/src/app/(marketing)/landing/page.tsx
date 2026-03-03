@@ -47,15 +47,7 @@ export default async function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Header */}
-      <Header
-        navItems={[]}
-        rightContent={
-          <div className="flex items-center gap-6">
-            <AnimatedLink href="/login">Войти</AnimatedLink>
-            <AnimatedLink href="/register">Регистрация</AnimatedLink>
-          </div>
-        }
-      />
+      <Header />
 
       {/* Hero Section */}
       <main className="flex-grow">

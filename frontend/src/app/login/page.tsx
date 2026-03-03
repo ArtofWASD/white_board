@@ -29,7 +29,7 @@ function LoginForm() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      window.location.href = redirect || "/overview"
+      window.location.href = redirect || "/"
     }
   }, [isAuthenticated, router, isLoading, redirect])
 
@@ -38,7 +38,7 @@ function LoginForm() {
     try {
       const success = await login(data.email, data.password)
       if (success) {
-        window.location.href = redirect || "/overview"
+        window.location.href = redirect || "/"
       } else {
         setFormError("root", {
           type: "manual",

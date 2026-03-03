@@ -75,6 +75,8 @@ export interface Exercise {
   scTime?: string
   rxDistance?: string
   scDistance?: string
+  rxDistanceWeight?: string
+  scDistanceWeight?: string
 }
 
 export interface EventResult {

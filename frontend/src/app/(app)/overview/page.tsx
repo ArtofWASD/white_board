@@ -1,5 +1,20 @@
 "use client"
 
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+
+export default function Home() {
+  const router = useRouter()
+
+  useEffect(() => {
+    router.replace("/")
+  }, [router])
+
+  return null
+}
+
+/* 
+// OLD OVERVIEW CODE COMMENTED OUT
 import React, { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -10,9 +25,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Основной контент разделенного экрана */}
       <main className="flex-grow flex flex-col md:flex-row h-screen">
-        {/* Раздел блога - Верхняя половина на мобильных, Левая половина на десктопе */}
         <Link
           href="/knowledge"
           className={`transition-all duration-300 ease-in-out p-8 flex flex-col justify-center relative ${
@@ -24,7 +37,6 @@ export default function Home() {
           } bg-gradient-to-br from-blue-50 to-indigo-100 cursor-pointer w-full h-1/2 md:h-full overflow-hidden`}
           onMouseEnter={() => setHoveredSection("knowledge")}
           onMouseLeave={() => setHoveredSection(null)}>
-          {/* Изображение блога, появляющееся при наведении */}
           <div
             className={`absolute inset-0 transition-opacity duration-300 flex items-center justify-center ${
               hoveredSection === "knowledge" ? "opacity-30" : "opacity-0"
@@ -32,7 +44,6 @@ export default function Home() {
             <Image src="/blog.png" alt="Knowledge Base" fill className="object-cover" />
           </div>
 
-          {/* Текстовый контент с высоким z-index, чтобы оставаться сверху */}
           <div className="max-w-2xl mx-auto w-full text-center relative z-10">
             <h1
               className={`text-4xl font-bold mb-6 transition-all duration-300 ${
@@ -46,7 +57,6 @@ export default function Home() {
           </div>
         </Link>
 
-        {/* Раздел календаря - Нижняя половина на мобильных, Правая половина на десктопе */}
         <Link
           href="/calendar"
           className={`transition-all duration-300 ease-in-out p-8 flex flex-col justify-center relative ${
@@ -58,7 +68,6 @@ export default function Home() {
           } bg-gradient-to-br from-gray-50 to-gray-100 cursor-pointer w-full h-1/2 md:h-full overflow-hidden`}
           onMouseEnter={() => setHoveredSection("calendar")}
           onMouseLeave={() => setHoveredSection(null)}>
-          {/* Изображение календаря, появляющееся при наведении */}
           <div
             className={`absolute inset-0 transition-opacity duration-300 flex items-center justify-center ${
               hoveredSection === "calendar" ? "opacity-30" : "opacity-0"
@@ -66,7 +75,6 @@ export default function Home() {
             <Image src="/calendar.png" alt="Calendar" fill className="object-cover" />
           </div>
 
-          {/* Текстовый контент с высоким z-index, чтобы оставаться сверху */}
           <div className="max-w-2xl mx-auto w-full text-center relative z-10">
             <h1
               className={`text-4xl font-bold mb-6 transition-all duration-300 ${
@@ -82,3 +90,4 @@ export default function Home() {
     </div>
   )
 }
+*/
