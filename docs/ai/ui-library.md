@@ -63,24 +63,24 @@ import { Button } from "@/components/ui/Button"
 <Button variant="outline" size="sm">Отмена</Button>
 <Button variant="ghost" size="icon"><Icon /></Button>
 <Button href="/path">Ссылка-кнопка</Button>
-<Button variant="staticWhite" size="xl" href="/calendar">Hero-кнопка</Button>
+<Button variant="static" size="xl" href="/calendar">Hero-кнопка</Button>
 ```
 
-**Варианты:** `default` | `outline` | `ghost` | `link` | `staticWhite`  
+**Варианты:** `default` | `outline` | `ghost` | `link` | `static`  
 **Размеры:** `sm` | `default` | `md` | `lg` | `xl` | `icon`  
 **Доп. пропы:** `href` (рендерит как `<a>`), `asChild` (Radix Slot)
 
-| Размер    | Высота | Padding         | Применение              |
-| --------- | ------ | --------------- | ----------------------- |
-| `sm`      | h-9    | px-3            | Компактные действия     |
-| `default` | h-10   | px-4 py-2       | Стандартная кнопка      |
-| `md`      | h-10   | px-6            | Немного шире default    |
-| `lg`      | h-11   | px-8            | Акцентные CTA           |
-| `xl`      | h-14   | px-10 text-base | Hero / над изображением |
-| `icon`    | h-10   | —               | Только иконка           |
+| Размер    | Высота | Padding   | Текст   | Применение              |
+| --------- | ------ | --------- | ------- | ----------------------- |
+| `sm`      | h-7    | px-3      | text-sm | Компактные действия     |
+| `default` | h-10   | px-4 py-2 | text-sm | Стандартная кнопка      |
+| `md`      | h-8    | px-5      | text-md | Крупнее sm              |
+| `lg`      | h-10   | px-7      | text-lg | Акцентные CTA           |
+| `xl`      | h-12   | px-9      | text-xl | Hero / над изображением |
+| `icon`    | h-10   | —         | —       | Только иконка           |
 
 > [!NOTE]
-> **Вариант `staticWhite`** — outline-кнопка с жёстко заданным белым цветом (`border-white text-white`), которая **не меняется** в зависимости от активной темы (светлой/тёмной). Используйте исключительно поверх изображений или тёмных фонов.
+> **Вариант `static`** — outline-кнопка с жёстко заданным белым бордером (`border-2 border-white`) и тёмным текстом (`text-gray-900`), которая **не меняется** в зависимости от активной темы. Используйте поверх изображений (hero-секция) или фиксированных тёмных фонов.
 
 > [!IMPORTANT]
 > Варианты `primary`, `destructive`, `secondary` **удалены**. Используйте `default`. Проп `tooltip` → нативный `title`. Проп `isIcon` → `size="icon"`.
@@ -208,7 +208,7 @@ import {
 
 1. **Никогда не использовать** `dark:bg-gray-*` напрямую в компонентах — только CSS-токены (`bg-[var(--card)]`, `text-muted-foreground` и т.д.)
 2. **Portal-компоненты** (Select, Popover, Dialog, HoverCard) — использовать `bg-[var(--...)]` вместо Tailwind-утилит для цветов фона
-3. **Button** — только варианты `default`, `outline`, `ghost`, `link`, `staticWhite`
+3. **Button** — только варианты `default`, `outline`, `ghost`, `link`, `static`
 4. **Switch.onChange** — всегда оборачивать в `(v) => fn(v)`
 5. **SelectContent** — не передавать `className` с цветами, тема применяется автоматически
 6. **Иконки** — только из `lucide-react`

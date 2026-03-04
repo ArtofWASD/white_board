@@ -14,6 +14,7 @@ import {
 } from "../../lib/validators/event"
 import { eventsApi } from "../../lib/api/events"
 import { teamsApi } from "../../lib/api/teams"
+import { ApiError } from "../../lib/api/apiClient"
 
 type ExerciseFieldErrors = Partial<
   Record<
@@ -23,7 +24,7 @@ type ExerciseFieldErrors = Partial<
 >
 
 export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormProps) {
-  const { success } = useToast()
+  const { success, error } = useToast()
   const [teams, setTeams] = useState<Team[]>([])
 
   const {
@@ -154,10 +155,17 @@ export default function AddEventForm({ user, onSubmit, onClose }: AddEventFormPr
       reset()
       if (onClose) onClose()
       success("Событие успешно создано")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      // Сессия истекла — показываем toast и закрываем форму.
+      // apiClient уже вызвал forceLogout(), который сбросил Zustand-стор.
+      if (err instanceof ApiError && err.status === 401) {
+        error("Ваша сессия истекла. Пожалуйста, войдите снова.")
+        if (onClose) onClose()
+        return
+      }
       setError("root", {
-        message: error.message || "Произошла ошибка при создании события",
+        message: err.message || "Произошла ошибка при создании события",
       })
     }
   }

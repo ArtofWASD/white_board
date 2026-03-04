@@ -199,7 +199,7 @@ const Header: React.FC<HeaderProps> = ({
                       href={item.href !== "#" ? item.href : undefined}
                       variant="ghost"
                       title={item.tooltip}
-                      className="text-white hover:text-blue-300"
+                      className="text-white hover:text-blue-300 hover:bg-transparent"
                       size="icon">
                       {item.icon}
                     </Button>
@@ -303,11 +303,11 @@ const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Подсказка */}
-            <div className="absolute top-full right-0 mt-2 w-max bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
+            <div className="absolute top-full right-0 mt-4 w-max bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-none">
               {unreadCount > 0
                 ? `${unreadCount} новых уведомлений`
                 : "Нет новых уведомлений"}
-              <div className="absolute  right-3 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+              <div className="absolute -top-1 right-3 w-2 h-2 bg-gray-900 transform rotate-45"></div>
             </div>
           </div>
 

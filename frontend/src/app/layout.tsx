@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import { ToastProvider } from "@/lib/context/ToastContext"
 import { CookieBanner } from "@/components/ui/CookieBanner"
 import { ThemeProvider } from "@/components/ui/ThemeProvider"
+import { AuthSessionWatcher } from "@/components/ui/AuthSessionWatcher"
 import "./globals.css"
 
 const geistSans = Geist({
@@ -34,7 +35,10 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider />
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <AuthSessionWatcher />
+          {children}
+        </ToastProvider>
         <CookieBanner />
       </body>
     </html>

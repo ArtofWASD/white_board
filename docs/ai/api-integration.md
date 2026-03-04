@@ -33,8 +33,36 @@
 
 ## 3. Интеграция с Frontend (Связки)
 
-При написании фронтенд вызовов API:
-
 1. Не ходите напрямую через `fetch` в UI-компонентах. Всю логику общения с API необходимо выносить в специальные модули внутри `frontend/src/lib/api/` (например `authApi`, `eventsApi`, `teamApi`).
 2. Эти API модули затем вызываются либо из Zustand сторов для глобальных состояний, либо через React Server Components / Client fetcher-ы в связке с хуками загрузки для локальных данных.
 3. Обязательно подставляйте авторизационный токен (обычно `Bearer JWT`) в заголовки запросов, если API-клиент не настроен делать это автоматически с помощью axios/interceptor-ов.
+
+## 4. Обработка истёкшей сессии (Auth Session Expiry)
+
+`apiClient` (`frontend/src/lib/api/apiClient.ts`) автоматически обрабатывает 401:
+
+1. При первом 401 — пытается обновить access_token через `POST /api/auth/refresh`.
+2. Если refresh тоже 401/403 — вызывает `forceLogout()`.
+
+### Что делает `forceLogout()`
+
+```
+POST /api/auth/logout          ← отзываем refresh_token на бэкенде
+window.dispatchEvent("auth:session-expired")  ← глобальный browser event
+useAuthStore.getState().logout()              ← сброс Zustand in-memory state
+```
+
+### Компонент `AuthSessionWatcher`
+
+Расположен в `frontend/src/components/ui/AuthSessionWatcher.tsx`.  
+Монтируется **один раз** в `app/layout.tsx` внутри `<ToastProvider>`.
+
+При получении события `auth:session-expired`:
+
+- Показывает `error` toast «Сессия истекла. Пожалуйста, войдите снова.»
+- Через 300мс делает `router.push('/login')` — это закрывает все открытые модалы и сбрасывает локальный UI-стейт.
+
+### Правило для новых компонентов
+
+**Не** добавляйте отдельную обработку 401 в каждый компонент или форму.  
+Вся логика централизована в `apiClient` → `AuthSessionWatcher`. Компоненты просто пробрасывают ошибки выше через `throw`.

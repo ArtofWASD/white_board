@@ -58,8 +58,8 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <div className="max-w-4xl w-full bg-[var(--card)] rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
         {/* Левая сторона - Изображение (Видно на md+) */}
         <div className="hidden md:block md:w-1/2 relative min-h-[500px] rounded-2xl overflow-hidden">
           <AnimatePresence mode="wait">
@@ -82,10 +82,10 @@ function LoginForm() {
 
         {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
-          <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">Вход</h2>
+          <h2 className="text-3xl font-bold text-center mb-6 text-foreground">Вход</h2>
 
           <div className="text-center mb-6">
-            <p className="text-gray-600 text-sm">
+            <p className="text-muted-foreground text-sm">
               Добро пожаловать обратно! Пожалуйста, войдите в свой аккаунт.
             </p>
           </div>
@@ -103,53 +103,51 @@ function LoginForm() {
               transition={{ duration: 0.3 }}
               className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
+                <label htmlFor="email" className="block text-foreground font-medium mb-2">
                   Email
                 </label>
                 <input
                   type="email"
                   id="email"
                   {...register("email")}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                    errors.email ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                    errors.email ? "border-destructive" : "border-input"
                   }`}
                 />
                 {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                  <p className="text-destructive text-xs mt-1">{errors.email.message}</p>
                 )}
               </div>
 
               <div>
                 <label
                   htmlFor="password"
-                  className="block text-gray-700 font-medium mb-2">
+                  className="block text-foreground font-medium mb-2">
                   Пароль
                 </label>
                 <input
                   type="password"
                   id="password"
                   {...register("password")}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                    errors.password ? "border-red-500" : "border-gray-300"
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                    errors.password ? "border-destructive" : "border-input"
                   }`}
                 />
                 {errors.password && (
-                  <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>
+                  <p className="text-destructive text-xs mt-1">
+                    {errors.password.message}
+                  </p>
                 )}
               </div>
 
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                
-                className="w-full mt-6">
+              <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
                 {isSubmitting ? "Обработка..." : "Войти"}
               </Button>
             </motion.div>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Нет аккаунта?{" "}
               <Button
                 href={inviteCode ? `/register?inviteCode=${inviteCode}` : "/register"}
@@ -169,7 +167,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           Загрузка...
         </div>
       }>

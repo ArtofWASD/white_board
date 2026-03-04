@@ -84,7 +84,7 @@ function RegisterForm() {
 
   if (loadingSettings) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         Загрузка...
       </div>
     )
@@ -92,12 +92,12 @@ function RegisterForm() {
 
   if (settings["MAINTENANCE_MODE"]) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-        <div className="bg-white p-8 rounded-xl shadow-lg text-center max-w-md">
-          <h2 className="text-2xl font-bold mb-4 text-gray-800">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <div className="bg-[var(--card)] p-8 rounded-xl shadow-lg text-center max-w-md">
+          <h2 className="text-2xl font-bold mb-4 text-foreground">
             Техническое обслуживание
           </h2>
-          <p className="text-gray-600">
+          <p className="text-muted-foreground">
             В данный момент регистрация недоступна. Пожалуйста, попробуйте позже.
           </p>
           <Button href="/" variant="outline" className="mt-6">
@@ -163,12 +163,14 @@ function RegisterForm() {
         <div key={item} className="flex items-center">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-              step >= item ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-600"
+              step >= item
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-muted-foreground"
             }`}>
             {item}
           </div>
           {item < 3 && (
-            <div className={`w-12 h-1 ${step > item ? "bg-blue-600" : "bg-gray-200"}`} />
+            <div className={`w-12 h-1 ${step > item ? "bg-primary" : "bg-muted"}`} />
           )}
         </div>
       ))}
@@ -189,13 +191,13 @@ function RegisterForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
       />
 
-      <div className="max-w-4xl w-full bg-white rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
+      <div className="max-w-4xl w-full bg-[var(--card)] rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
         {/* Левая сторона - Изображение */}
         <div className="hidden md:block md:w-1/2 relative min-h-[500px] rounded-2xl overflow-hidden">
           <AnimatePresence mode="wait">
@@ -219,7 +221,7 @@ function RegisterForm() {
 
         {/* Правая сторона - Форма */}
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-center overflow-hidden">
-          <h2 className="text-3xl font-bold text-center mb-6 text-gray-900">
+          <h2 className="text-3xl font-bold text-center mb-6 text-foreground">
             Регистрация
           </h2>
 
@@ -242,49 +244,51 @@ function RegisterForm() {
                   transition={{ duration: 0.3 }}
                   className="space-y-4">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                    <h3 className="text-xl font-semibold mb-2 text-foreground">
                       Данные аккаунта
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       Начните свой путь к успеху сегодня.
                     </p>
                   </div>
                   <div>
                     <label
                       htmlFor="email"
-                      className="block text-gray-700 font-medium mb-2">
+                      className="block text-foreground font-medium mb-2">
                       Email
                     </label>
                     <input
                       type="email"
                       id="email"
                       {...register("email")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                        errors.email ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                        errors.email ? "border-destructive" : "border-input"
                       }`}
                       required
                     />
                     {errors.email && (
-                      <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
+                      <p className="text-destructive text-xs mt-1">
+                        {errors.email.message}
+                      </p>
                     )}
                   </div>
                   <div>
                     <label
                       htmlFor="password"
-                      className="block text-gray-700 font-medium mb-2">
+                      className="block text-foreground font-medium mb-2">
                       Пароль
                     </label>
                     <input
                       type="password"
                       id="password"
                       {...register("password")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                        errors.password ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                        errors.password ? "border-destructive" : "border-input"
                       }`}
                       required
                     />
                     {errors.password && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-destructive text-xs mt-1">
                         {errors.password.message}
                       </p>
                     )}
@@ -292,20 +296,20 @@ function RegisterForm() {
                   <div>
                     <label
                       htmlFor="confirmPassword"
-                      className="block text-gray-700 font-medium mb-2">
+                      className="block text-foreground font-medium mb-2">
                       Подтвердите пароль
                     </label>
                     <input
                       type="password"
                       id="confirmPassword"
                       {...register("confirmPassword")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                        errors.confirmPassword ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                        errors.confirmPassword ? "border-destructive" : "border-input"
                       }`}
                       required
                     />
                     {errors.confirmPassword && (
-                      <p className="text-red-500 text-xs mt-1">
+                      <p className="text-destructive text-xs mt-1">
                         {errors.confirmPassword.message}
                       </p>
                     )}
@@ -322,65 +326,67 @@ function RegisterForm() {
                   transition={{ duration: 0.3 }}
                   className="space-y-4">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                    <h3 className="text-xl font-semibold mb-2 text-foreground">
                       Личные данные
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       Расскажите нам немного о себе.
                     </p>
                   </div>
                   <div>
                     <label
                       htmlFor="name"
-                      className="block text-gray-700 font-medium mb-2">
+                      className="block text-foreground font-medium mb-2">
                       Имя
                     </label>
                     <input
                       type="text"
                       id="name"
                       {...register("name")}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                        errors.name ? "border-red-500" : "border-gray-300"
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                        errors.name ? "border-destructive" : "border-input"
                       }`}
                       required
                     />
                     {errors.name && (
-                      <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
+                      <p className="text-destructive text-xs mt-1">
+                        {errors.name.message}
+                      </p>
                     )}
                   </div>
                   <div>
                     <label
                       htmlFor="lastName"
-                      className="block text-gray-700 font-medium mb-2">
+                      className="block text-foreground font-medium mb-2">
                       Фамилия
                     </label>
                     <input
                       type="text"
                       id="lastName"
                       {...register("lastName")}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900"
+                      className="w-full px-3 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Пол</label>
+                    <label className="block text-foreground font-medium mb-2">Пол</label>
                     <div className="flex space-x-4">
                       <label className="inline-flex items-center">
                         <input
                           type="radio"
                           value="MALE"
                           {...register("gender")}
-                          className="form-radio h-4 w-4 text-blue-600"
+                          className="form-radio h-4 w-4 text-primary"
                         />
-                        <span className="ml-2">Мужской</span>
+                        <span className="ml-2 text-foreground">Мужской</span>
                       </label>
                       <label className="inline-flex items-center">
                         <input
                           type="radio"
                           value="FEMALE"
                           {...register("gender")}
-                          className="form-radio h-4 w-4 text-blue-600"
+                          className="form-radio h-4 w-4 text-primary"
                         />
-                        <span className="ml-2">Женский</span>
+                        <span className="ml-2 text-foreground">Женский</span>
                       </label>
                     </div>
                   </div>
@@ -396,10 +402,10 @@ function RegisterForm() {
                   transition={{ duration: 0.3 }}
                   className="space-y-6">
                   <div className="text-center mb-6">
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900">
+                    <h3 className="text-xl font-semibold mb-2 text-foreground">
                       Выберите цель
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       Как вы планируете использовать сервис?
                     </p>
                   </div>
@@ -410,8 +416,8 @@ function RegisterForm() {
                       <div
                         className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                           role === "ATHLETE" && userType === "individual"
-                            ? "border-blue-600 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-300"
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => {
                           setValue("role", "ATHLETE")
@@ -421,8 +427,8 @@ function RegisterForm() {
                           <div
                             className={`p-2 rounded-lg ${
                               role === "ATHLETE" && userType === "individual"
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-100"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
                             }`}>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -439,8 +445,8 @@ function RegisterForm() {
                             </svg>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900">Я Атлет</h4>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <h4 className="font-semibold text-foreground">Я Атлет</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
                               Хочу вести дневник тренировок, следить за прогрессом и
                               достигать целей.
                             </p>
@@ -454,8 +460,8 @@ function RegisterForm() {
                       <div
                         className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                           role === "TRAINER" && userType === "individual"
-                            ? "border-blue-600 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-300"
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => {
                           setValue("role", "TRAINER")
@@ -465,8 +471,8 @@ function RegisterForm() {
                           <div
                             className={`p-2 rounded-lg ${
                               role === "TRAINER" && userType === "individual"
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-100"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
                             }`}>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -483,8 +489,8 @@ function RegisterForm() {
                             </svg>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900">Я Тренер</h4>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <h4 className="font-semibold text-foreground">Я Тренер</h4>
+                            <p className="text-sm text-muted-foreground mt-1">
                               Тренирую клиентов, составляю программы и сам занимаюсь
                               спортом.
                             </p>
@@ -498,8 +504,8 @@ function RegisterForm() {
                       <div
                         className={`relative p-4 rounded-xl border-2 cursor-pointer transition-all ${
                           userType === "organization"
-                            ? "border-blue-600 bg-blue-50"
-                            : "border-gray-200 hover:border-blue-300"
+                            ? "border-primary bg-primary/10"
+                            : "border-border hover:border-primary/50"
                         }`}
                         onClick={() => {
                           setValue("role", "ORGANIZATION_ADMIN")
@@ -510,8 +516,8 @@ function RegisterForm() {
                           <div
                             className={`p-2 rounded-lg ${
                               userType === "organization"
-                                ? "bg-blue-600 text-white"
-                                : "bg-gray-100"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
                             }`}>
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -528,10 +534,10 @@ function RegisterForm() {
                             </svg>
                           </div>
                           <div>
-                            <h4 className="font-semibold text-gray-900">
+                            <h4 className="font-semibold text-foreground">
                               Организация / Клуб
                             </h4>
-                            <p className="text-sm text-gray-500 mt-1">
+                            <p className="text-sm text-muted-foreground mt-1">
                               Управление штатом тренеров, группами спортсменов и
                               аналитикой клуба.
                             </p>
@@ -549,20 +555,22 @@ function RegisterForm() {
                       <div>
                         <label
                           htmlFor="organizationName"
-                          className="block text-gray-700 font-medium mb-2">
+                          className="block text-foreground font-medium mb-2">
                           Название организации
                         </label>
                         <input
                           type="text"
                           id="organizationName"
                           {...register("organizationName")}
-                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-900 ${
-                            errors.organizationName ? "border-red-500" : "border-gray-300"
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground color-scheme-inherit ${
+                            errors.organizationName
+                              ? "border-destructive"
+                              : "border-input"
                           }`}
                           placeholder="Например: Спортивный клуб 'Олимп'"
                         />
                         {errors.organizationName && (
-                          <p className="text-red-500 text-xs mt-1">
+                          <p className="text-destructive text-xs mt-1">
                             {errors.organizationName.message}
                           </p>
                         )}
@@ -580,11 +588,11 @@ function RegisterForm() {
                               e.target.checked ? "TRAINER" : "ORGANIZATION_ADMIN",
                             )
                           }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="h-4 w-4 text-primary focus:ring-primary border-input rounded"
                         />
                         <label
                           htmlFor="is-trainer"
-                          className="ml-2 block text-sm text-gray-900">
+                          className="ml-2 block text-sm text-foreground">
                           Я также являюсь тренером (хочу вести клиентов)
                         </label>
                       </div>
@@ -592,23 +600,23 @@ function RegisterForm() {
                   )}
 
                   {/* Чекбокс согласия на обработку персональных данных */}
-                  <div className="mt-6 pt-6 border-t border-gray-200">
+                  <div className="mt-6 pt-6 border-t border-border">
                     <div className="flex items-start">
                       <input
                         id="accept-terms"
                         type="checkbox"
                         {...register("acceptTerms")}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1 flex-shrink-0"
+                        className="h-4 w-4 text-primary focus:ring-primary border-input rounded mt-1 flex-shrink-0"
                       />
                       <label
                         htmlFor="accept-terms"
-                        className="ml-3 block text-sm text-gray-700">
+                        className="ml-3 block text-sm text-foreground">
                         Я принимаю условия{" "}
                         <a
                           href="/docs/terms"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 underline">
+                          className="text-primary hover:underline">
                           Пользовательского соглашения
                         </a>{" "}
                         и даю согласие на обработку персональных данных в соответствии с{" "}
@@ -616,13 +624,13 @@ function RegisterForm() {
                           href="/docs/privacy"
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-blue-600 hover:text-blue-800 underline">
+                          className="text-primary hover:underline">
                           Политикой конфиденциальности
                         </a>
                       </label>
                     </div>
                     {errors.acceptTerms && (
-                      <p className="text-red-500 text-xs mt-1 ml-7">
+                      <p className="text-destructive text-xs mt-1 ml-7">
                         {errors.acceptTerms.message}
                       </p>
                     )}
@@ -636,7 +644,7 @@ function RegisterForm() {
                 <Button
                   type="button"
                   onClick={handleBack}
-                  
+                  variant="outline"
                   className="flex-1">
                   Назад
                 </Button>
@@ -647,7 +655,6 @@ function RegisterForm() {
                   key="next-btn"
                   type="button"
                   onClick={handleNext}
-                  
                   className="flex-1">
                   Далее
                 </Button>
@@ -656,7 +663,6 @@ function RegisterForm() {
                   key="submit-btn"
                   type="submit"
                   disabled={isSubmitting}
-                  
                   className="flex-1">
                   {isSubmitting ? "Обработка..." : "Зарегистрироваться"}
                 </Button>
@@ -665,13 +671,13 @@ function RegisterForm() {
 
             {/* Текст согласия на 1-м шаге */}
             {step === 1 && (
-              <p className="mt-3 text-xs text-gray-500 text-center">
+              <p className="mt-3 text-xs text-muted-foreground text-center">
                 Нажимая «Далее», вы соглашаетесь с условиями{" "}
                 <a
                   href="/docs/terms"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-800 underline">
+                  className="text-foreground hover:underline">
                   Пользовательского соглашения
                 </a>{" "}
                 и даете{" "}
@@ -679,7 +685,7 @@ function RegisterForm() {
                   href="/docs/consent"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-600 hover:text-gray-800 underline">
+                  className="text-foreground hover:underline">
                   Согласие на обработку персональных данных
                 </a>
               </p>
@@ -687,7 +693,7 @@ function RegisterForm() {
           </form>
 
           <div className="mt-4 text-center">
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Уже есть аккаунт?{" "}
               <Button href="/login" variant="link" className="font-medium p-0 h-auto">
                 Войдите
@@ -704,7 +710,7 @@ export default function RegisterPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-background">
           Загрузка...
         </div>
       }>

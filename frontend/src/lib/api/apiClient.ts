@@ -19,6 +19,7 @@
 
 import { logApiError, logApiSuccess } from "../logger"
 import { useCsrfStore } from "../store/useCsrfStore"
+import { useAuthStore } from "../store/useAuthStore"
 
 // ─── Типы ──────────────────────────────────────────────────────────────────────
 
@@ -208,6 +209,8 @@ class ApiClient {
 
   /**
    * Принудительный logout при невозможности обновить токен.
+   * Вызывает useAuthStore.logout() напрямую, чтобы немедленно обновить
+   * in-memory состояние Zustand в текущей вкладке (а не только localStorage).
    */
   private async forceLogout(): Promise<void> {
     try {
@@ -227,10 +230,11 @@ class ApiClient {
       // Игнорируем ошибки logout
     }
 
-    // Очищаем zustand auth store через localStorage event
+    // Диспатчим кастомный событие, чтобы React-компоненты могли показать toast.
+    // Это должно происходить ДО logout(), пока компоненты ещё смонтированы.
     if (typeof window !== "undefined") {
-      localStorage.removeItem("auth-storage")
-      window.dispatchEvent(new Event("storage"))
+      window.dispatchEvent(new CustomEvent("auth:session-expired"))
+      await useAuthStore.getState().logout()
     }
   }
 }
