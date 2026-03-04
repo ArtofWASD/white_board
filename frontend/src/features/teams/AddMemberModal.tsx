@@ -127,7 +127,7 @@ export const AddMemberModal: React.FC<AddMemberModalProps> = ({
                     onClick={() => addTeamMember(athlete.id)}
                     disabled={addingId !== null}
                     size="sm"
-                    variant="primary"
+                    
                     className="!py-1 !px-3">
                     {addingId === athlete.id ? "..." : "Добавить"}
                   </Button>

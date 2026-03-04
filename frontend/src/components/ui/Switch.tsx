@@ -1,36 +1,42 @@
-import React from 'react';
+"use client"
 
-interface SwitchProps {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  disabled?: boolean;
+import * as React from "react"
+import * as SwitchPrimitives from "@radix-ui/react-switch"
+import { cn } from "@/lib/utils"
+
+// We deliberately omit `onChange` from the Radix props to avoid the type conflict
+// with React's FormEventHandler. We expose it as a typed `onCheckedChange` alias.
+type SwitchProps = Omit<
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>,
+  "onCheckedChange" | "onChange"
+> & {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  disabled?: boolean
 }
 
-export function Switch({ checked, onChange, disabled = false }: SwitchProps) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={() => !disabled && onChange(!checked)}
-      className={`
-        relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent 
-        transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 
-        focus-visible:ring-blue-600 focus-visible:ring-offset-2
-        ${checked ? 'bg-blue-600' : 'bg-gray-200'}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
-      `}
-    >
-      <span className="sr-only">Use setting</span>
-      <span
-        aria-hidden="true"
-        className={`
-          pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 
-          transition duration-200 ease-in-out
-          ${checked ? 'translate-x-5' : 'translate-x-0'}
-        `}
-      />
-    </button>
-  );
-}
+const Switch = React.forwardRef<
+  React.ElementRef<typeof SwitchPrimitives.Root>,
+  SwitchProps
+>(({ className, checked, onChange, disabled, ...props }, ref) => (
+  <SwitchPrimitives.Root
+    className={cn(
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      className,
+    )}
+    checked={checked}
+    onCheckedChange={onChange}
+    disabled={disabled}
+    ref={ref}
+    {...props}>
+    <SwitchPrimitives.Thumb
+      className={cn(
+        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0",
+      )}
+    />
+  </SwitchPrimitives.Root>
+))
+Switch.displayName = SwitchPrimitives.Root.displayName
+
+export { Switch }
+export default Switch

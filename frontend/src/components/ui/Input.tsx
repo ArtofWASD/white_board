@@ -1,47 +1,49 @@
-import React, { forwardRef } from "react"
+import * as React from "react"
+import { cn } from "@/lib/utils"
 
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string
   error?: string
   helperText?: string
 }
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className = "", label, error, helperText, disabled, ...props }, ref) => {
+const Input = React.forwardRef<HTMLInputElement, InputProps>(
+  ({ className, type, label, error, helperText, id, ...props }, ref) => {
+    const inputId = id ?? label?.toLowerCase().replace(/\s+/g, "-")
     return (
-      <div className="w-full">
+      <div className="w-full space-y-1.5">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+          <label
+            htmlFor={inputId}
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            {label}
+          </label>
         )}
-        <div className="relative">
-          <input
-            ref={ref}
-            disabled={disabled}
-            className={`
-              w-full px-3 py-2 border rounded-md shadow-sm outline-none transition-all
-              ${
-                error
-                  ? "border-red-500 focus:ring-2 focus:ring-red-200"
-                  : "border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 focus:border-blue-500 hover:border-gray-400 dark:hover:border-gray-500"
-              }
-              ${
-                disabled
-                  ? "bg-gray-100 text-gray-500 cursor-not-allowed"
-                  : "bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-400"
-              }
-              ${className}
-            `}
-            {...props}
-          />
-        </div>
+        <input
+          id={inputId}
+          type={type}
+          className={cn(
+            "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            error && "border-destructive focus-visible:ring-destructive",
+            className,
+          )}
+          ref={ref}
+          {...props}
+        />
         {(error || helperText) && (
-          <p className={`text-xs mt-1 ${error ? "text-red-500" : "text-gray-500"}`}>
-            {error || helperText}
+          <p
+            className={cn(
+              "text-xs",
+              error ? "text-destructive" : "text-muted-foreground",
+            )}>
+            {error ?? helperText}
           </p>
         )}
       </div>
     )
   },
 )
-
 Input.displayName = "Input"
+
+export { Input }
+export default Input

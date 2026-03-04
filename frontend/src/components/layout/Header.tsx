@@ -9,7 +9,7 @@ import { useTeamStore } from "../../lib/store/useTeamStore"
 import Button from "../ui/Button"
 import AnimatedLink from "../ui/AnimatedLink" // Import AnimatedLink
 import { getUnreadNotificationCount } from "../../lib/api/notifications"
-import { waitForSocket } from "../../lib/socket"
+import { waitForSocket, initializeSocket, disconnectSocket } from "../../lib/socket"
 import { useNavigation } from "../../hooks/useNavigation"
 import LeftMenu from "./LeftMenu"
 
@@ -22,7 +22,7 @@ interface HeaderProps {
     icon?: React.ReactNode
     onClick?: () => void
     tooltip?: string
-    variant?: "primary" | "outline" | "ghost" | "link" | "destructive"
+    variant?: "default" | "outline" | "ghost" | "link"
   }[]
   rightContent?: React.ReactNode
   // В календаре LeftMenu использует события
@@ -42,7 +42,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, isAuthenticated } = useAuthStore()
+  const { user, isAuthenticated, isLoading } = useAuthStore()
   const { teams, selectedTeam, selectTeam } = useTeamStore()
   const { navItems: defaultNavItems, chatModal } = useNavigation()
 
@@ -113,7 +113,6 @@ const Header: React.FC<HeaderProps> = ({
 
         try {
           // Инициализируем сокет (увеличиваем счетчик ссылок)
-          const { initializeSocket } = await import("../../lib/socket")
           const socket = initializeSocket(user.id)
 
           if (isMounted) {
@@ -133,9 +132,7 @@ const Header: React.FC<HeaderProps> = ({
       if (socketInstance) {
         socketInstance.off("newNotification", handleNewNotification)
         // Отключаемся (уменьшаем счетчик ссылок)
-        import("../../lib/socket").then(({ disconnectSocket }) => {
-          disconnectSocket()
-        })
+        disconnectSocket()
       }
     }
   }, [isAuthenticated, user])
@@ -201,9 +198,9 @@ const Header: React.FC<HeaderProps> = ({
                       onClick={item.onClick}
                       href={item.href !== "#" ? item.href : undefined}
                       variant="ghost"
-                      isIcon={true}
-                      tooltip={item.tooltip}
-                      className="text-white hover:text-blue-300">
+                      title={item.tooltip}
+                      className="text-white hover:text-blue-300"
+                      size="icon">
                       {item.icon}
                     </Button>
                   ) : item.onClick ? (
@@ -276,6 +273,8 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center space-x-4 cursor-pointer ml-auto pointer-events-auto z-50">
           {rightContent}
         </div>
+      ) : isLoading ? (
+        <div className="w-24 h-8" />
       ) : isAuthenticated && user ? (
         <div className="flex items-center space-x-1 sm:space-x-4 cursor-pointer ml-auto">
           <div className="relative group">

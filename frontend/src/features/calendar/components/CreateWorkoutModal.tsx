@@ -603,7 +603,7 @@ export function CreateWorkoutModal({
                       <SelectTrigger id="scheme">
                         <SelectValue placeholder="Выберите тип" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white text-gray-900">
+                      <SelectContent>
                         <SelectItem value="FOR_TIME">На время (For Time)</SelectItem>
                         <SelectItem value="AMRAP">AMRAP</SelectItem>
                         <SelectItem value="EMOM">EMOM</SelectItem>
@@ -678,7 +678,7 @@ export function CreateWorkoutModal({
                         <SelectTrigger id="team-select" className="bg-background">
                           <SelectValue placeholder="Выберите команду..." />
                         </SelectTrigger>
-                        <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white border dark:border-gray-700">
+                        <SelectContent>
                           <SelectItem value="none">Личная тренировка</SelectItem>
                           {availableTeams.map((team) => (
                             <SelectItem key={team.id} value={team.id}>

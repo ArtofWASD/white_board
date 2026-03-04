@@ -636,7 +636,7 @@ function RegisterForm() {
                 <Button
                   type="button"
                   onClick={handleBack}
-                  variant="primary"
+                  
                   className="flex-1">
                   Назад
                 </Button>
@@ -647,7 +647,7 @@ function RegisterForm() {
                   key="next-btn"
                   type="button"
                   onClick={handleNext}
-                  variant="primary"
+                  
                   className="flex-1">
                   Далее
                 </Button>
@@ -656,7 +656,7 @@ function RegisterForm() {
                   key="submit-btn"
                   type="submit"
                   disabled={isSubmitting}
-                  variant="primary"
+                  
                   className="flex-1">
                   {isSubmitting ? "Обработка..." : "Зарегистрироваться"}
                 </Button>

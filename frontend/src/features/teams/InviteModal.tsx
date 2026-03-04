@@ -120,7 +120,7 @@ export const InviteModal: React.FC<InviteModalProps> = ({
                 <Button
                   onClick={generateInviteCode}
                   disabled={loading}
-                  variant="primary"
+                  
                   className="w-full"
                 >
                   Создать ссылку

@@ -1,106 +1,235 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode for Tailwind v4 */
+/* ─────────────────────────────────────────────────────────────────────────────
+   Enable class-based dark mode (set by ThemeProvider on <html>)
+────────────────────────────────────────────────────────────────────────────── */
 @custom-variant dark (&:is(.dark, .dark *));
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   LIGHT THEME  — clean whites & subtle grays
+────────────────────────────────────────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
   scrollbar-gutter: stable;
+
+  /* Base */
+  --background: #ffffff;
+  --foreground: #0f172a;
+
+  /* Card / popover surfaces */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+
+  /* Primary action colour — neutral dark */
+  --primary: #1e293b;
+  --primary-foreground: #f8fafc;
+
+  /* Subtle secondary shade */
+  --secondary: #f1f5f9;
+  --secondary-foreground: #1e293b;
+
+  /* Muted text & backgrounds */
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+
+  /* Accent (hover highlights) */
+  --accent: #f1f5f9;
+  --accent-foreground: #1e293b;
+
+  /* Borders & rings */
+  --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #94a3b8;
+
+  /* Semantic */
+  --destructive: #ef4444;
+  --destructive-foreground: #fafafa;
+
+  /* Shape */
+  --radius: 0.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─────────────────────────────────────────────────────────────────────────────
+   DARK THEME  — matches the navy/slate UI in the app screenshots
+   Dialog bg ≈ #1e2535, card surface ≈ #253047, input ≈ #2d3c56
+────────────────────────────────────────────────────────────────────────────── */
+html.dark {
+  color-scheme: dark; /* makes native date/time icons match text color */
+
+  /* Base */
+  --background: #1e2535;
+  --foreground: #e2e8f0;
+
+  /* Card / popover surfaces */
+  --card: #253047;
+  --card-foreground: #e2e8f0;
+  --popover: #253047;
+  --popover-foreground: #e2e8f0;
+
+  /* Primary action colour — light so it pops on dark bg */
+  --primary: #e2e8f0;
+  --primary-foreground: #1e2535;
+
+  /* Subtle secondary shade */
+  --secondary: #2d3c56;
+  --secondary-foreground: #e2e8f0;
+
+  /* Muted text & backgrounds */
+  --muted: #2d3c56;
+  --muted-foreground: #94a3b8;
+
+  /* Accent (hover highlights) */
+  --accent: #354760;
+  --accent-foreground: #e2e8f0;
+
+  /* Borders & rings */
+  --border: #2d3c56;
+  --input: #2d3c56; /* input field background */
+  --ring: #64748b;
+
+  /* Semantic */
+  --destructive: #7f1d1d;
+  --destructive-foreground: #fca5a5;
 }
 
-/* System preference (when no explicit theme class is set) */
+/* ─────────────────────────────────────────────────────────────────────────────
+   System preference fallback (no explicit dark/light class)
+────────────────────────────────────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   html:not(.dark):not(.light) {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: dark;
+    --background: #1e2535;
+    --foreground: #e2e8f0;
+    --card: #253047;
+    --card-foreground: #e2e8f0;
+    --popover: #253047;
+    --popover-foreground: #e2e8f0;
+    --primary: #e2e8f0;
+    --primary-foreground: #1e2535;
+    --secondary: #2d3c56;
+    --secondary-foreground: #e2e8f0;
+    --muted: #2d3c56;
+    --muted-foreground: #94a3b8;
+    --accent: #354760;
+    --accent-foreground: #e2e8f0;
+    --border: #2d3c56;
+    --input: #2d3c56;
+    --ring: #64748b;
+    --destructive: #7f1d1d;
+    --destructive-foreground: #fca5a5;
   }
 }
 
-/* Explicit dark mode class */
-html.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
-
-/* Explicit light mode class */
 html.light {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Tailwind v4 theme mapping  — wire CSS vars → Tailwind colour tokens
+────────────────────────────────────────────────────────────────────────────── */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --radius: var(--radius);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Base styles
+────────────────────────────────────────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
 }
 
-/* Custom styles for FullCalendar on small screens */
+/* Borders default to theme token */
+*,
+*::before,
+*::after {
+  border-color: var(--border);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   FullCalendar responsive overrides
+────────────────────────────────────────────────────────────────────────────── */
 @media (max-width: 425px) {
   .fc .fc-toolbar-title {
     font-size: 1rem !important;
   }
-
   .fc .fc-button {
     padding: 0.25rem 0.5rem !important;
     font-size: 0.75rem !important;
     height: auto !important;
   }
-
   .fc .fc-button-group {
     gap: 0.125rem !important;
   }
-
   .fc .fc-toolbar-chunk {
     display: flex;
     align-items: center;
     gap: 0.25rem;
   }
-
   .fc .fc-toolbar-chunk .fc-today-button {
     padding: 0.25rem 0.5rem !important;
     font-size: 0.75rem !important;
   }
-
   .fc .fc-prev-button,
   .fc .fc-next-button {
     padding: 0.25rem !important;
   }
-
-  /* Ensure proper cell height on mobile */
   .fc .fc-daygrid-day-frame {
     min-height: 40px !important;
   }
-
   .fc .fc-daygrid-day-events {
     min-height: 30px !important;
   }
 }
 
-/* Desktop styles for larger cells */
 @media (min-width: 768px) {
   .fc .fc-daygrid-day-frame {
     min-height: 120px !important;
   }
-
   .fc .fc-daygrid-day-events {
     min-height: 100px !important;
+  }
+  .fc .fc-daygrid-day-frame {
+    padding: 4px 6px !important;
+  }
+  .fc-event-main {
+    min-height: 30px !important;
   }
 }
 
 @media (min-width: 1024px) {
   .fc .fc-daygrid-day-frame {
     min-height: 150px !important;
+    padding: 6px 8px !important;
   }
-
   .fc .fc-daygrid-day-events {
     min-height: 130px !important;
+  }
+  .fc-event-main {
+    min-height: 35px !important;
   }
 }
 
@@ -108,13 +237,14 @@ body {
   .fc .fc-daygrid-day-frame {
     min-height: 180px !important;
   }
-
   .fc .fc-daygrid-day-events {
     min-height: 160px !important;
   }
+  .fc-event-main {
+    min-height: 40px !important;
+  }
 }
 
-/* Responsive event styles */
 .fc-event-main {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -139,29 +269,5 @@ body {
   .fc-event-main {
     font-size: 0.875rem;
     line-height: 1.4;
-  }
-
-  .fc .fc-daygrid-day-frame {
-    padding: 4px 6px !important;
-  }
-
-  .fc-event-main {
-    min-height: 30px !important;
-  }
-}
-
-@media (min-width: 1024px) {
-  .fc .fc-daygrid-day-frame {
-    padding: 6px 8px !important;
-  }
-
-  .fc-event-main {
-    min-height: 35px !important;
-  }
-}
-
-@media (min-width: 1280px) {
-  .fc-event-main {
-    min-height: 40px !important;
   }
 }

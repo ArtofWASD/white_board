@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { persist, createJSONStorage } from "zustand/middleware"
 import { User } from "../../types"
 import { authApi } from "../api/auth"
+import { ApiError } from "../api/apiClient" // Import ApiError
 
 interface AuthState {
   user: User | null
@@ -132,10 +133,16 @@ export const useAuthStore = create<AuthState>()(
           // Проверяем токен, запрашивая профиль
           await authApi.getProfile(state.user.id)
           return true
-        } catch {
-          // Если ошибка (например 401), apiClient уже попытался обновить токен.
-          // Если все еще ошибка, значит токен невалиден.
-          get().logout()
+        } catch (error) {
+          // Если ошибка 401 или 404, токен невалиден или пользователь удален.
+          if (
+            error instanceof ApiError &&
+            (error.status === 401 || error.status === 404)
+          ) {
+            get().logout()
+          }
+          // Иначе (сетевая ошибка, 500 etc) мы не разлогиниваем пользователя,
+          // чтобы сессия не сбрасывалась при падении dev-сервера.
           return false
         }
       },

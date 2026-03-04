@@ -68,7 +68,7 @@ export function AddToCalendarModal({ isOpen, onClose, onSave, title, description
 
         <div className="flex justify-end gap-2 pt-2">
           <Button variant="ghost" size="sm" onClick={onClose}>Отмена</Button>
-          <Button variant="primary" size="sm" onClick={handleSave}>Сохранить</Button>
+          <Button  size="sm" onClick={handleSave}>Сохранить</Button>
         </div>
       </div>
     </div>

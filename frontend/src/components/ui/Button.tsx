@@ -1,130 +1,70 @@
-import React from "react"
+import * as React from "react"
+import { Slot } from "@radix-ui/react-slot"
+import { cva, type VariantProps } from "class-variance-authority"
 import Link from "next/link"
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  size?: "sm" | "md" | "lg"
-  variant?: "primary" | "outline" | "ghost" | "link" | "destructive"
-  tooltip?: string
+import { cn } from "@/lib/utils"
+
+const buttonVariants = cva(
+  "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  {
+    variants: {
+      variant: {
+        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        outline:
+          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+        ghost: "hover:bg-accent hover:text-accent-foreground",
+        link: "text-primary underline-offset-4 hover:underline",
+        static: "border-2 border-white bg-transparent text-gray-900 hover:bg-white/10",
+      },
+      size: {
+        default: "h-10 px-4 py-2",
+        sm: "h-7 rounded-md px-3 text-sm",
+        md: "h-8 rounded-md px-5 text-md",
+        lg: "h-10 rounded-md px-7 text-lg",
+        xl: "h-12 rounded-lg px-9 text-xl",
+        icon: "h-10 w-10",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "default",
+    },
+  },
+)
+
+export interface ButtonProps
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean
   href?: string
-  isIcon?: boolean
-  layout?: "vertical" | "horizontal"
 }
 
-export const Button: React.FC<ButtonProps> = ({
-  children,
-  className = "",
-  size = "md",
-  variant = "primary",
-  tooltip,
-  href,
-  isIcon = false,
-  layout = "vertical",
-  ...props
-}) => {
-  // Base styles
-  const flexDirection = layout === "horizontal" ? "flex-row" : "flex-col"
-  const baseStyles = `relative group inline-flex ${flexDirection} items-center justify-center font-medium transition-all duration-300 ease-in-out cursor-pointer`
+const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant, size, asChild = false, href, ...props }, ref) => {
+    if (href) {
+      return (
+        <Link
+          href={href}
+          className={cn(buttonVariants({ variant, size, className }))}
+          {...(props as any)}>
+          {props.children}
+        </Link>
+      )
+    }
 
-  // Size styles
-  const sizeStyles = {
-    sm: isIcon ? "h-8 w-8 p-0 text-sm" : "text-sm px-3 py-1.5",
-    md: isIcon ? "h-10 w-10 p-0 text-base" : "text-base px-6 py-3",
-    lg: isIcon ? "h-12 w-12 p-0 text-lg" : "text-lg px-8 py-4",
-  }
-
-  // Variant styles
-  const variantStyles = {
-    primary: "text-black dark:text-white bg-transparent border-none", // Underline style
-    outline:
-      "text-black dark:text-white bg-white dark:bg-gray-700 border border-black dark:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600 rounded-lg", // Frame style
-    ghost:
-      "text-gray-600 dark:text-gray-300 hover:text-black dark:hover:text-white bg-transparent border-none",
-    link: "text-blue-500 hover:text-blue-700 underline-offset-4 hover:underline bg-transparent border-none",
-    destructive: "text-white bg-red-600 hover:bg-red-700 border-none rounded-lg",
-  }
-
-  // Underline styles
-  const showUnderline =
-    !isIcon && layout === "vertical" && (variant === "primary" || variant === "ghost")
-
-  const underlineStyles = "h-0.5 bg-current mt-1 transition-all duration-300"
-  const underlineWidths = {
-    sm: "w-full",
-    md: "w-full",
-    lg: "w-full",
-  }
-
-  // Tooltip positioning
-  // We want the tooltip to be 4px (mt-1 equivalent) below the line.
-  // For primary/ghost, the line is inside the padding.
-  // For outline, the line is the bottom border.
-  const tooltipBottomOffsets = {
-    primary: {
-      sm: isIcon ? "bottom-[-8px]" : "bottom-[2px]", // py-1.5 (6px) - 4px = 2px
-      md: isIcon ? "bottom-[-8px]" : "bottom-[8px]", // py-3 (12px) - 4px = 8px
-      lg: isIcon ? "bottom-[-8px]" : "bottom-[12px]", // py-4 (16px) - 4px = 12px
-    },
-    ghost: {
-      sm: isIcon ? "bottom-[-8px]" : "bottom-[2px]",
-      md: isIcon ? "bottom-[-8px]" : "bottom-[8px]",
-      lg: isIcon ? "bottom-[-8px]" : "bottom-[12px]",
-    },
-    outline: {
-      sm: isIcon ? "bottom-[-8px]" : "bottom-[-4px]", // 0px - 4px = -4px
-      md: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
-      lg: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
-    },
-    link: {
-      sm: isIcon ? "bottom-[-8px]" : "bottom-[2px]",
-      md: isIcon ? "bottom-[-8px]" : "bottom-[8px]",
-      lg: isIcon ? "bottom-[-8px]" : "bottom-[12px]",
-    },
-    destructive: {
-      sm: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
-      md: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
-      lg: isIcon ? "bottom-[-8px]" : "bottom-[-4px]",
-    },
-  }
-
-  const combinedClassName = `${baseStyles} ${sizeStyles[size]} ${variantStyles[variant]} ${className}`
-
-  const content = (
-    <>
-      <span className={`flex ${flexDirection} items-center justify-center w-full h-full`}>
-        <span className={`flex ${flexDirection} items-center`}>
-          <span className={layout === "horizontal" ? "flex items-center gap-2" : ""}>
-            {children}
-          </span>
-          {showUnderline && (
-            <span className={`${underlineStyles} ${underlineWidths[size]} block`}></span>
-          )}
-        </span>
-      </span>
-
-      {tooltip && (
-        <div
-          className={`absolute left-1/2 transform -translate-x-1/2 ${tooltipBottomOffsets[variant][size]} translate-y-[120%] opacity-0 group-hover:translate-y-full group-hover:opacity-100 transition-all duration-300 ease-in-out pointer-events-none z-10`}>
-          <div className="text-black text-sm py-1 px-2 whitespace-nowrap font-medium bg-white rounded shadow-sm">
-            {tooltip}
-          </div>
-        </div>
-      )}
-    </>
-  )
-
-  if (href) {
+    const Comp = asChild ? Slot : "button"
     return (
-      <Link href={href} className={combinedClassName}>
-        {content}
-      </Link>
+      <Comp
+        className={cn(buttonVariants({ variant, size, className }))}
+        ref={ref}
+        {...props}
+      />
     )
-  }
+  },
+)
+Button.displayName = "Button"
 
-  return (
-    <button className={combinedClassName} {...props}>
-      {content}
-    </button>
-  )
-}
-
+export { Button, buttonVariants }
 export default Button

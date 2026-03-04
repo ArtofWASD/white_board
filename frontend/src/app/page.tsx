@@ -1,9 +1,8 @@
 import Footer from "@/components/layout/Footer"
 import Header from "@/components/layout/Header"
-import AnimatedLink from "@/components/ui/AnimatedLink"
-import Link from "next/link"
-import { ContentBlock } from "@/lib/api/admin"
+import type { ContentBlock } from "@/lib/api/admin"
 import NewsFeed, { NewsItem } from "@/components/marketing/NewsFeed"
+import HeroActions from "@/components/marketing/HeroActions"
 
 async function getLandingBlocks(): Promise<ContentBlock[]> {
   try {
@@ -11,7 +10,7 @@ async function getLandingBlocks(): Promise<ContentBlock[]> {
     console.log("Fetching landing blocks from:", url)
 
     const res = await fetch(url, {
-      next: { revalidate: 60 }, // Can re-enable cache now that URL is correct
+      next: { revalidate: 60 },
     })
 
     if (!res.ok) {
@@ -68,28 +67,17 @@ export default async function LandingPage() {
           <div className="container mx-auto px-4 relative z-10 pt-10">
             <div className="max-w-4xl mx-auto text-center">
               <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-gray-900 mb-6 drop-shadow-sm">
-                Ваш зал. Ваша команда. <span className="text-black">Ваша доска.</span>
+                Ваш зал. Ваша команда. <span className="text-gray-900">Ваша доска.</span>
               </h1>
               <p className="text-xl text-gray-900 font-medium mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-sm">
                 Цифровое пространство для атлетов и тренеров. Отслеживайте прогресс,
                 соревнуйтесь в лидербордах и планируйте тренировки.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                <Link
-                  href="/register"
-                  className="text-black font-medium text-lg hover:text-gray-700 transition-colors">
-                  Начать бесплатно
-                </Link>
-                <Link
-                  href="/login"
-                  className="text-black font-medium text-lg hover:text-gray-700 transition-colors">
-                  Уже есть аккаунт
-                </Link>
-              </div>
+              <HeroActions />
             </div>
           </div>
 
-          {/* Abstract Background Elements (Hidden if main banner is used, kept for fallback/layering) */}
+          {/* Abstract Background Elements */}
           <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 opacity-30 pointer-events-none mix-blend-overlay">
             <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-100 rounded-full blur-3xl"></div>
             <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-indigo-100 rounded-full blur-3xl"></div>

@@ -235,7 +235,7 @@ export function StrengthTrainingModule({
                         Отм
                       </button>
                       <Button
-                        variant="primary"
+                        
                         size="sm"
                         onClick={saveResult}
                         disabled={isSubmitting}
@@ -327,7 +327,7 @@ export function StrengthTrainingModule({
                         Отм
                       </button>
                       <Button
-                        variant="primary"
+                        
                         size="sm"
                         onClick={saveResult}
                         disabled={isSubmitting}
@@ -420,7 +420,7 @@ export function StrengthTrainingModule({
                         Отм
                       </button>
                       <Button
-                        variant="primary"
+                        
                         size="sm"
                         onClick={saveResult}
                         disabled={isSubmitting}

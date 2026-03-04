@@ -339,9 +339,9 @@ export default function DashboardPage() {
             <Button
               onClick={handleGoToProfile}
               variant="ghost"
-              isIcon={true}
-              tooltip="Редактировать профиль"
-              className="mr-2 sm:mr-12">
+              
+              title="Редактировать профиль"
+              className="mr-2 sm:mr-12" size="icon" >
               <Image
                 src="/edit_profile_icon.png"
                 alt="Редактировать профиль"

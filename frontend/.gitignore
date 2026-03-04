@@ -28,3 +28,5 @@ coverage/
 
 # Typescript
 *.tsbuildinfo
+*storybook.log
+storybook-static

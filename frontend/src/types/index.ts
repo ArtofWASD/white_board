@@ -156,5 +156,5 @@ export interface NavItem {
   onClick?: () => void
   icon?: React.ReactNode
   tooltip?: string
-  variant?: "primary" | "outline" | "ghost" | "link" | "destructive"
+  variant?: "default" | "outline" | "ghost" | "link"
 }

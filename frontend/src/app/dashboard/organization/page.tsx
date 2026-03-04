@@ -102,7 +102,7 @@ export default function OrganizationPage() {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Управление организацией
         </h1>
-        <Button onClick={handleExportCSV} variant="primary">
+        <Button onClick={handleExportCSV} >
           Скачать отчет (CSV)
         </Button>
       </div>

@@ -141,7 +141,7 @@ function LoginForm() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                variant="primary"
+                
                 className="w-full mt-6">
                 {isSubmitting ? "Обработка..." : "Войти"}
               </Button>

@@ -1,53 +1,215 @@
 # UI Library & Components
 
-Фронтенд проекта Whiteboard использует связку Tailwind CSS и компонентов, вдохновленных/использующих библиотеку **shadcn/ui** (построенную на Radix UI).
+Фронтенд проекта Whiteboard использует единую систему компонентов на базе **shadcn/ui** и **Radix UI**.
 
-## Базовая структура и стили
+---
 
-- Компоненты лежат в каталоге `frontend/src/components/ui/`.
-- **Слияние классов:** Для композиции Tailwind-классов в компонентах строго применяется утилита `cn` из `src/lib/utils.ts` (оболочка над `clsx` и `tailwind-merge`).
-- **Цветовые схемы (Темная тема):**
-  - Проект активно поддерживает Next.js Theme Provider.
-  - Обязательно учитывайте тёмную тему. Используйте классы вроде `dark:bg-gray-900`, `dark:text-white`, `dark:border-gray-800`.
-  - У компонентов есть переменные CSS, встроенные темы (возможность кастомизации под разные бренды/организации).
+## Система тем (CSS-переменные)
 
-## Типы UI компонентов
+Все цвета управляются через CSS-переменные в `src/app/globals.css`. **Никогда не используйте хардкоды** `dark:bg-gray-*` в компонентах — только токены.
 
-### 1. Кастомные обособленные компоненты (Tailwind-native)
+### Доступные токены
 
-Пример: `Button` (`Button.tsx`)
+| Токен                                          | Назначение                              |
+| ---------------------------------------------- | --------------------------------------- |
+| `--background` / `bg-background`               | Базовый фон страницы/формы              |
+| `--card` / `bg-[var(--card)]`                  | Поверхность карточек и диалогов         |
+| `--popover` / `bg-[var(--popover)]`            | Выпадающие списки, поповеры             |
+| `--input` / `border-input`                     | Граница инпутов                         |
+| `--muted` / `bg-muted`                         | Приглушённые фоны (секции, разделители) |
+| `--muted-foreground` / `text-muted-foreground` | Вторичный текст                         |
+| `--border` / `border-border`                   | Граница элементов                       |
+| `--primary` / `bg-primary`                     | Акцентный цвет                          |
+| `--accent` / `bg-accent`                       | Hover-подсветка                         |
+| `--destructive`                                | Цвет ошибок/удаления                    |
 
-- Реализованы с различными вариантами (`variant`: primary, outline, ghost, link, destructive).
-- Поддерживают разные размеры (`size`: sm, md, lg).
-- Кастомизированы под специфический дизайн продукта (например, интересная логика подчеркиваний при ховере, tooltip-и, layout `vertical / horizontal`).
-- Если нужен элемент управления, сначала проверяйте наличие кастомного варианта (например, Button, AnimatedLink).
+### Значения по умолчанию
 
-### 2. Примитивы Radix UI (Shadcn)
+| Токен              | Светлая тема | Тёмная тема |
+| ------------------ | ------------ | ----------- |
+| `--background`     | `#ffffff`    | `#1e2535`   |
+| `--card`           | `#ffffff`    | `#253047`   |
+| `--popover`        | `#ffffff`    | `#253047`   |
+| `--input` (border) | `#e2e8f0`    | `#2d3c56`   |
+| `--muted`          | `#f1f5f9`    | `#2d3c56`   |
 
-Пример: `Dialog` (`dialog.tsx`), `Popover` (`popover.tsx`), `Select` (`select.tsx`)
+> [!IMPORTANT]
+> Radix UI-компоненты рендерятся в Portal (вне DOM-дерева родителя). Для фона используйте прямую ссылку `bg-[var(--popover)]` вместо утилита `bg-popover`, чтобы гарантировать корректное разрешение CSS-переменной.
 
-- Данные компоненты строятся на базе `@radix-ui/react-*` пакетов, предоставляющих базовую доступность (A11y), фокус-менеджмент и логику клавиатуры.
-- **Анимации:** Они интегрированы с пакетом `tailwindcss-animate`. В стилях компонентов можно встретить `data-[state=open]:animate-in`, `data-[state=closed]:fade-out-0`, `slide-in-from-bottom` и т.д.
-- **Использование:** Компонент разбивается на подотделы (Compound Components pattern).
-  - Пример использования диалогового окна:
-  ```tsx
-  <Dialog>
-    <DialogTrigger asChild>
-      <Button>Open</Button>
-    </DialogTrigger>
-    <DialogContent>
-      <DialogHeader>
-        <DialogTitle>Заголовок</DialogTitle>
-        <DialogDescription>Описание</DialogDescription>
-      </DialogHeader>
-      <div>Контент окна</div>
-    </DialogContent>
-  </Dialog>
-  ```
-- Для мобильных устройств окна часто адаптируются (Bottom sheet behavior), поэтому обращайте внимание на стили `max-sm:bottom-0 max-sm:w-full`, чтобы всё корректно отображалось на телефонах.
+---
 
-## Касательно новых разработок
+## Слияние классов
 
-1. Не пишите "грязный" CSS или встроенные стили (inline-styles), если задачу можно решить с помощью Tailwind.
-2. При создании модальных элементов, селектов или всплывающих окон всегда переиспользуйте существующие UI-примитивы. Не пишите их с нуля.
-3. Используйте векторные иконки из библиотеки `lucide-react`.
+Для композиции классов — утилита `cn` из `src/lib/utils.ts`:
+
+```tsx
+import { cn } from "@/lib/utils"
+// ...
+className={cn("base-class", condition && "conditional-class", className)}
+```
+
+---
+
+## Компоненты
+
+Все компоненты в `src/components/ui/`. Все построены на shadcn/cva паттерне.
+
+### Button
+
+```tsx
+import { Button } from "@/components/ui/Button"
+
+<Button variant="default">Сохранить</Button>
+<Button variant="outline" size="sm">Отмена</Button>
+<Button variant="ghost" size="icon"><Icon /></Button>
+<Button href="/path">Ссылка-кнопка</Button>
+<Button variant="staticWhite" size="xl" href="/calendar">Hero-кнопка</Button>
+```
+
+**Варианты:** `default` | `outline` | `ghost` | `link` | `staticWhite`  
+**Размеры:** `sm` | `default` | `md` | `lg` | `xl` | `icon`  
+**Доп. пропы:** `href` (рендерит как `<a>`), `asChild` (Radix Slot)
+
+| Размер    | Высота | Padding         | Применение              |
+| --------- | ------ | --------------- | ----------------------- |
+| `sm`      | h-9    | px-3            | Компактные действия     |
+| `default` | h-10   | px-4 py-2       | Стандартная кнопка      |
+| `md`      | h-10   | px-6            | Немного шире default    |
+| `lg`      | h-11   | px-8            | Акцентные CTA           |
+| `xl`      | h-14   | px-10 text-base | Hero / над изображением |
+| `icon`    | h-10   | —               | Только иконка           |
+
+> [!NOTE]
+> **Вариант `staticWhite`** — outline-кнопка с жёстко заданным белым цветом (`border-white text-white`), которая **не меняется** в зависимости от активной темы (светлой/тёмной). Используйте исключительно поверх изображений или тёмных фонов.
+
+> [!IMPORTANT]
+> Варианты `primary`, `destructive`, `secondary` **удалены**. Используйте `default`. Проп `tooltip` → нативный `title`. Проп `isIcon` → `size="icon"`.
+
+---
+
+### Input
+
+```tsx
+import { Input } from "@/components/ui/Input"
+
+<Input placeholder="Текст..." />
+<Input label="Email" type="email" helperText="Подсказка" />
+<Input label="Пароль" error="Минимум 8 символов" />
+<Input disabled />
+```
+
+**Удобные пропы:** `label`, `error`, `helperText` — встроенная обёртка с Label.  
+Фон: `bg-background` — берётся из CSS-переменной темы.
+
+---
+
+### Card (Compound Components)
+
+```tsx
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/Card"
+
+<Card>
+  <CardHeader>
+    <CardTitle>Заголовок</CardTitle>
+    <CardDescription>Подзаголовок</CardDescription>
+  </CardHeader>
+  <CardContent>Контент</CardContent>
+  <CardFooter className="justify-end gap-2">
+    <Button variant="outline">Отмена</Button>
+    <Button>Сохранить</Button>
+  </CardFooter>
+</Card>
+
+// Без внутренних отступов (для full-bleed контента):
+<Card noPadding>...</Card>
+```
+
+---
+
+### Switch
+
+```tsx
+import { Switch } from "@/components/ui/Switch"
+
+<Switch checked={isOn} onChange={(v) => setIsOn(v)} />
+<Switch checked={isOn} onChange={(v) => setIsOn(v)} disabled />
+```
+
+Построен на `@radix-ui/react-switch`. Использует `data-[state=checked]` для стилизации.
+
+> [!IMPORTANT]
+> Prop `onChange` принимает `(checked: boolean) => void`. Не передавайте `setStateFunction` напрямую — оборачивайте в стрелочную функцию: `onChange={(v) => setState(v)}`.
+
+---
+
+### Select (Radix)
+
+```tsx
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select"
+;<Select value={value} onValueChange={setValue}>
+  <SelectTrigger>
+    <SelectValue placeholder="Выберите..." />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="a">Вариант A</SelectItem>
+    <SelectItem value="b">Вариант B</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+> [!CAUTION]
+> **Не передавайте** `className="bg-white ..."` в `SelectContent` — это перебьёт тему. Не указывайте `className` вообще, если не нужна специфическая кастомизация.
+
+---
+
+### Dialog (Radix)
+
+```tsx
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog"
+;<Dialog open={isOpen} onOpenChange={onClose}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Заголовок</DialogTitle>
+    </DialogHeader>
+    <div>Контент</div>
+    <DialogFooter>
+      <Button variant="outline" onClick={onClose}>
+        Отмена
+      </Button>
+      <Button>Подтвердить</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
+```
+
+На мобильных автоматически становится bottom sheet (`max-sm:bottom-0 max-sm:rounded-t-xl`).
+
+---
+
+### Прочие Radix компоненты
+
+`Popover`, `HoverCard`, `Checkbox`, `RadioGroup`, `Label`, `Badge` — стандартные shadcn реализации. Документация: [ui.shadcn.com](https://ui.shadcn.com).
+
+---
+
+## Правила для AI-агента
+
+1. **Никогда не использовать** `dark:bg-gray-*` напрямую в компонентах — только CSS-токены (`bg-[var(--card)]`, `text-muted-foreground` и т.д.)
+2. **Portal-компоненты** (Select, Popover, Dialog, HoverCard) — использовать `bg-[var(--...)]` вместо Tailwind-утилит для цветов фона
+3. **Button** — только варианты `default`, `outline`, `ghost`, `link`, `staticWhite`
+4. **Switch.onChange** — всегда оборачивать в `(v) => fn(v)`
+5. **SelectContent** — не передавать `className` с цветами, тема применяется автоматически
+6. **Иконки** — только из `lucide-react`
+7. **Новые компоненты** — использовать `cn()`, `forwardRef`, `cva` по shadcn-паттерну

@@ -86,7 +86,7 @@ export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose }) =
 
             <Button
               onClick={handleGoToCalendar}
-              variant="primary"
+              
               className="w-full"
             >
               Перейти в календарь
