@@ -53,18 +53,20 @@ export function EditWorkoutModal({
   const [exMeasurement, setExMeasurement] = useState<
     "weight" | "calories" | "time" | "distance"
   >("weight")
-  const [rxWeight, setRxWeight] = useState("0")
-  const [rxReps, setRxReps] = useState("0")
-  const [scWeight, setScWeight] = useState("0")
-  const [scReps, setScReps] = useState("0")
-  const [rxCalories, setRxCalories] = useState("0")
-  const [scCalories, setScCalories] = useState("0")
-  const [rxTime, setRxTime] = useState("00:00")
-  const [scTime, setScTime] = useState("00:00")
-  const [rxDistance, setRxDistance] = useState("0")
-  const [scDistance, setScDistance] = useState("0")
-  const [rxDistanceWeight, setRxDistanceWeight] = useState("0")
-  const [scDistanceWeight, setScDistanceWeight] = useState("0")
+  const [exInputs, setExInputs] = useState({
+    rxWeight: "0",
+    rxReps: "0",
+    scWeight: "0",
+    scReps: "0",
+    rxCalories: "0",
+    scCalories: "0",
+    rxTime: "0",
+    scTime: "0",
+    rxDistance: "0",
+    scDistance: "0",
+    rxDistanceWeight: "0",
+    scDistanceWeight: "0",
+  })
 
   useEffect(() => {
     if (isOpen && workout) {
@@ -77,7 +79,7 @@ export function EditWorkoutModal({
 
       // Initialize date if available in workout object
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const rawDate = (workout as any).eventDate || (workout as any).date
+      const rawDate = (workout as any).eventDate || workout.date
       if (rawDate) {
         const d = new Date(rawDate)
         if (!isNaN(d.getTime())) {
@@ -153,19 +155,37 @@ export function EditWorkoutModal({
   const resetExerciseInput = () => {
     setExName("")
     setExMeasurement("weight")
-    setRxWeight("0")
-    setRxReps("0")
-    setScWeight("0")
-    setScReps("0")
-    setRxCalories("0")
-    setScCalories("0")
-    setRxTime("00:00")
-    setScTime("00:00")
-    setRxDistance("0")
-    setScDistance("0")
-    setRxDistanceWeight("0")
-    setScDistanceWeight("0")
+    setExInputs({
+      rxWeight: "0",
+      rxReps: "0",
+      scWeight: "0",
+      scReps: "0",
+      rxCalories: "0",
+      scCalories: "0",
+      rxTime: "0",
+      scTime: "0",
+      rxDistance: "0",
+      scDistance: "0",
+      rxDistanceWeight: "0",
+      scDistanceWeight: "0",
+    })
     setEditingId(null)
+  }
+
+  const handleExInputChange = (field: string, value: string) => {
+    setExInputs((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleExInputFocus = (field: keyof typeof exInputs, defaultValue: string) => {
+    if (exInputs[field] === defaultValue) {
+      handleExInputChange(field, "")
+    }
+  }
+
+  const handleExInputBlur = (field: keyof typeof exInputs, defaultValue: string) => {
+    if (exInputs[field] === "") {
+      handleExInputChange(field, defaultValue)
+    }
   }
 
   const handleAddExercise = () => {
@@ -175,18 +195,20 @@ export function EditWorkoutModal({
       id: editingId || Date.now().toString(),
       name: exName.trim(),
       measurement: exMeasurement,
-      weight: exMeasurement === "weight" ? rxWeight : "",
-      repetitions: exMeasurement === "weight" ? rxReps : "",
-      scWeight: exMeasurement === "weight" ? scWeight : undefined,
-      scReps: exMeasurement === "weight" ? scReps : undefined,
-      rxCalories: exMeasurement === "calories" ? rxCalories : undefined,
-      scCalories: exMeasurement === "calories" ? scCalories : undefined,
-      rxTime: exMeasurement === "time" ? rxTime : undefined,
-      scTime: exMeasurement === "time" ? scTime : undefined,
-      rxDistance: exMeasurement === "distance" ? rxDistance : undefined,
-      scDistance: exMeasurement === "distance" ? scDistance : undefined,
-      rxDistanceWeight: exMeasurement === "distance" ? rxDistanceWeight : undefined,
-      scDistanceWeight: exMeasurement === "distance" ? scDistanceWeight : undefined,
+      weight: exMeasurement === "weight" ? exInputs.rxWeight : "",
+      repetitions: exMeasurement === "weight" ? exInputs.rxReps : "",
+      scWeight: exMeasurement === "weight" ? exInputs.scWeight || "0" : undefined,
+      scReps: exMeasurement === "weight" ? exInputs.scReps || "0" : undefined,
+      rxCalories: exMeasurement === "calories" ? exInputs.rxCalories : undefined,
+      scCalories: exMeasurement === "calories" ? exInputs.scCalories || "0" : undefined,
+      rxTime: exMeasurement === "time" ? exInputs.rxTime : undefined,
+      scTime: exMeasurement === "time" ? exInputs.scTime || "0" : undefined,
+      rxDistance: exMeasurement === "distance" ? exInputs.rxDistance : undefined,
+      scDistance: exMeasurement === "distance" ? exInputs.scDistance || "0" : undefined,
+      rxDistanceWeight:
+        exMeasurement === "distance" ? exInputs.rxDistanceWeight : undefined,
+      scDistanceWeight:
+        exMeasurement === "distance" ? exInputs.scDistanceWeight || "0" : undefined,
     }
 
     if (editingId) {
@@ -207,21 +229,22 @@ export function EditWorkoutModal({
     const exerciseToEdit = exercises.find((e) => e.id === id)
     if (!exerciseToEdit) return
 
-    // Populate inputs
     setExName(exerciseToEdit.name)
     setExMeasurement(exerciseToEdit.measurement || "weight")
-    setRxWeight(exerciseToEdit.weight || "0")
-    setRxReps(exerciseToEdit.repetitions || "0")
-    setScWeight(exerciseToEdit.scWeight || "0")
-    setScReps(exerciseToEdit.scReps || "0")
-    setRxCalories(exerciseToEdit.rxCalories || "0")
-    setScCalories(exerciseToEdit.scCalories || "0")
-    setRxTime(exerciseToEdit.rxTime || "00:00")
-    setScTime(exerciseToEdit.scTime || "00:00")
-    setRxDistance(exerciseToEdit.rxDistance || "0")
-    setScDistance(exerciseToEdit.scDistance || "0")
-    setRxDistanceWeight(exerciseToEdit.rxDistanceWeight || "0")
-    setScDistanceWeight(exerciseToEdit.scDistanceWeight || "0")
+    setExInputs({
+      rxWeight: exerciseToEdit.weight || "0",
+      rxReps: exerciseToEdit.repetitions || "0",
+      scWeight: exerciseToEdit.scWeight || "0",
+      scReps: exerciseToEdit.scReps || "0",
+      rxCalories: exerciseToEdit.rxCalories || "0",
+      scCalories: exerciseToEdit.scCalories || "0",
+      rxTime: exerciseToEdit.rxTime || "0",
+      scTime: exerciseToEdit.scTime || "0",
+      rxDistance: exerciseToEdit.rxDistance || "0",
+      scDistance: exerciseToEdit.scDistance || "0",
+      rxDistanceWeight: exerciseToEdit.rxDistanceWeight || "0",
+      scDistanceWeight: exerciseToEdit.scDistanceWeight || "0",
+    })
 
     setEditingId(id)
   }
@@ -313,7 +336,7 @@ export function EditWorkoutModal({
                 <SelectTrigger id="scheme">
                   <SelectValue placeholder="Выберите тип" />
                 </SelectTrigger>
-                <SelectContent className="bg-white">
+                <SelectContent>
                   <SelectItem value="FOR_TIME">На время (For Time)</SelectItem>
                   <SelectItem value="AMRAP">AMRAP</SelectItem>
                   <SelectItem value="EMOM">EMOM</SelectItem>
@@ -357,130 +380,294 @@ export function EditWorkoutModal({
             />
           </div>
 
-          <div className="border rounded-lg p-4 bg-muted/20 dark:bg-gray-800/50 dark:border-gray-700 space-y-4">
+          <div className="border rounded-lg p-4 bg-muted/20 space-y-4">
             <div className="flex items-center justify-between">
-              <h4 className="text-sm font-semibold dark:text-white">Упражнения</h4>
-              <div className="flex gap-1 bg-muted dark:bg-gray-700 rounded-md p-1">
-                <button
-                  type="button"
-                  onClick={() => setExMeasurement("weight")}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-sm transition-all",
-                    exMeasurement === "weight"
-                      ? "bg-background dark:bg-gray-600 shadow-sm text-foreground dark:text-white"
-                      : "text-muted-foreground hover:text-foreground dark:hover:text-white",
-                  )}>
-                  Вес/Повторы
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExMeasurement("calories")}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-sm transition-all",
-                    exMeasurement === "calories"
-                      ? "bg-background shadow-sm text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}>
-                  Калории
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExMeasurement("time")}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-sm transition-all",
-                    exMeasurement === "time"
-                      ? "bg-background shadow-sm text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}>
-                  Время
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setExMeasurement("distance")}
-                  className={cn(
-                    "px-2 py-1 text-xs rounded-sm transition-all",
-                    exMeasurement === "distance"
-                      ? "bg-background shadow-sm text-foreground"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}>
-                  Дистанция
-                </button>
-              </div>
+              <h4 className="text-sm font-semibold">Упражнения</h4>
             </div>
 
             <div className="space-y-3">
-              <Input
-                value={exName || ""}
-                onChange={(e) => setExName(e.target.value)}
-                placeholder="Название упражнения"
-                className="bg-background"
-              />
+              <div className="flex flex-col sm:flex-row gap-2">
+                <div className="flex-1">
+                  <Input
+                    value={exName || ""}
+                    onChange={(e) => setExName(e.target.value)}
+                    placeholder="Название упражнения"
+                    className="bg-background"
+                  />
+                </div>
+                <div className="w-full sm:w-[180px]">
+                  <Select
+                    value={exMeasurement}
+                    onValueChange={(val: any) => {
+                      setExMeasurement(val)
+                      setExInputs({
+                        rxWeight: "0",
+                        rxReps: "0",
+                        scWeight: "0",
+                        scReps: "0",
+                        rxCalories: "0",
+                        scCalories: "0",
+                        rxTime: "0",
+                        scTime: "0",
+                        rxDistance: "0",
+                        scDistance: "0",
+                        rxDistanceWeight: "0",
+                        scDistanceWeight: "0",
+                      })
+                    }}>
+                    <SelectTrigger className="w-full text-base sm:text-sm font-medium bg-background">
+                      <SelectValue placeholder="Тип упражнения" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="weight">Вес/Повторы</SelectItem>
+                      <SelectItem value="calories">Калории</SelectItem>
+                      <SelectItem value="time">Время</SelectItem>
+                      <SelectItem value="distance">Дистанция</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 mt-3">
+                {/* RX */}
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-primary">RX</span>
+                  <span className="text-xs font-bold text-primary">RX *</span>
                   {exMeasurement === "weight" ? (
-                    <div className="flex gap-2">
-                      <Input
-                        value={rxWeight || ""}
-                        onChange={(e) => setRxWeight(e.target.value)}
-                        placeholder="Кг"
-                        className="bg-background"
-                      />
-                      <Input
-                        value={rxReps || ""}
-                        onChange={(e) => setRxReps(e.target.value)}
-                        placeholder="Повт"
-                        className="bg-background"
-                      />
+                    <div className="flex gap-2 flex-col">
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={exInputs.rxWeight}
+                            onChange={(e) =>
+                              handleExInputChange("rxWeight", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("rxWeight", "0")}
+                            onBlur={() => handleExInputBlur("rxWeight", "0")}
+                            className="pr-8 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            кг
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            step="1"
+                            value={exInputs.rxReps}
+                            onChange={(e) =>
+                              handleExInputChange("rxReps", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("rxReps", "0")}
+                            onBlur={() => handleExInputBlur("rxReps", "0")}
+                            className="pr-12 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            повт
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   ) : exMeasurement === "calories" ? (
-                    <Input
-                      value={rxCalories || ""}
-                      onChange={(e) => setRxCalories(e.target.value)}
-                      placeholder="Кал"
-                      className="bg-background"
-                    />
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        step="1"
+                        value={exInputs.rxCalories}
+                        onChange={(e) =>
+                          handleExInputChange("rxCalories", e.target.value)
+                        }
+                        onFocus={() => handleExInputFocus("rxCalories", "0")}
+                        onBlur={() => handleExInputBlur("rxCalories", "0")}
+                        className="pr-10 bg-background"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                        кал
+                      </span>
+                    </div>
+                  ) : exMeasurement === "time" ? (
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={exInputs.rxTime}
+                        onChange={(e) => handleExInputChange("rxTime", e.target.value)}
+                        onFocus={() => handleExInputFocus("rxTime", "0")}
+                        onBlur={() => handleExInputBlur("rxTime", "0")}
+                        className="pr-10 bg-background"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                        мин
+                      </span>
+                    </div>
                   ) : (
-                    <Input
-                      value={rxTime || ""}
-                      onChange={(e) => setRxTime(e.target.value)}
-                      placeholder="Мин"
-                      className="bg-background"
-                    />
+                    <div className="flex gap-2 flex-col">
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={exInputs.rxDistance}
+                            onChange={(e) =>
+                              handleExInputChange("rxDistance", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("rxDistance", "0")}
+                            onBlur={() => handleExInputBlur("rxDistance", "0")}
+                            className="pr-8 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            м
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={exInputs.rxDistanceWeight}
+                            onChange={(e) =>
+                              handleExInputChange("rxDistanceWeight", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("rxDistanceWeight", "0")}
+                            onBlur={() => handleExInputBlur("rxDistanceWeight", "0")}
+                            className="pr-8 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            кг
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
+
+                {/* Scaled */}
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-muted-foreground">Scaled</span>
+                  <span className="text-xs font-bold text-muted-foreground">
+                    Scaled (опц.)
+                  </span>
                   {exMeasurement === "weight" ? (
-                    <div className="flex gap-2">
-                      <Input
-                        value={scWeight || ""}
-                        onChange={(e) => setScWeight(e.target.value)}
-                        placeholder="Кг"
-                        className="bg-background"
-                      />
-                      <Input
-                        value={scReps || ""}
-                        onChange={(e) => setScReps(e.target.value)}
-                        placeholder="Повт"
-                        className="bg-background"
-                      />
+                    <div className="flex gap-2 flex-col">
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={exInputs.scWeight}
+                            onChange={(e) =>
+                              handleExInputChange("scWeight", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("scWeight", "0")}
+                            onBlur={() => handleExInputBlur("scWeight", "0")}
+                            className="pr-8 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            кг
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            step="1"
+                            value={exInputs.scReps}
+                            onChange={(e) =>
+                              handleExInputChange("scReps", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("scReps", "0")}
+                            onBlur={() => handleExInputBlur("scReps", "0")}
+                            className="pr-12 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            повт
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   ) : exMeasurement === "calories" ? (
-                    <Input
-                      value={scCalories || ""}
-                      onChange={(e) => setScCalories(e.target.value)}
-                      placeholder="Кал"
-                      className="bg-background"
-                    />
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        step="1"
+                        value={exInputs.scCalories}
+                        onChange={(e) =>
+                          handleExInputChange("scCalories", e.target.value)
+                        }
+                        onFocus={() => handleExInputFocus("scCalories", "0")}
+                        onBlur={() => handleExInputBlur("scCalories", "0")}
+                        className="pr-10 bg-background"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                        кал
+                      </span>
+                    </div>
+                  ) : exMeasurement === "time" ? (
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={exInputs.scTime}
+                        onChange={(e) => handleExInputChange("scTime", e.target.value)}
+                        onFocus={() => handleExInputFocus("scTime", "0")}
+                        onBlur={() => handleExInputBlur("scTime", "0")}
+                        className="pr-10 bg-background"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                        мин
+                      </span>
+                    </div>
                   ) : (
-                    <Input
-                      value={scTime || ""}
-                      onChange={(e) => setScTime(e.target.value)}
-                      placeholder="Мин"
-                      className="bg-background"
-                    />
+                    <div className="flex gap-2 flex-col">
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="1"
+                            value={exInputs.scDistance}
+                            onChange={(e) =>
+                              handleExInputChange("scDistance", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("scDistance", "0")}
+                            onBlur={() => handleExInputBlur("scDistance", "0")}
+                            className="pr-8 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            м
+                          </span>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="relative">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="0.5"
+                            value={exInputs.scDistanceWeight}
+                            onChange={(e) =>
+                              handleExInputChange("scDistanceWeight", e.target.value)
+                            }
+                            onFocus={() => handleExInputFocus("scDistanceWeight", "0")}
+                            onBlur={() => handleExInputBlur("scDistanceWeight", "0")}
+                            className="pr-8 bg-background"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                            кг
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>

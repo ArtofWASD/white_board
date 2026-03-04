@@ -69,9 +69,11 @@ const exerciseInputSchema = z
     scDistanceWeight: z.string().optional(),
   })
   .superRefine((data, ctx) => {
+    // Only Rx fields are required; Sc fields are optional
     const isPosNum = (v: string | undefined) =>
-      !v || (!isNaN(Number(v)) && Number(v) >= 0)
-    const isPosInt = (v: string | undefined) => !v || (/^\d+$/.test(v) && Number(v) >= 1)
+      v === undefined || v === "" || (!isNaN(Number(v)) && Number(v) >= 0)
+    const isPosInt = (v: string | undefined) =>
+      v === undefined || v === "" || (/^\d+$/.test(v) && Number(v) >= 1)
 
     if (data.exMeasurement === "weight") {
       if (!isPosNum(data.rxWeight))
@@ -86,18 +88,6 @@ const exerciseInputSchema = z
           message: "Введите целое число ≥ 1",
           path: ["rxReps"],
         })
-      if (!isPosNum(data.scWeight))
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Введите число ≥ 0",
-          path: ["scWeight"],
-        })
-      if (!isPosInt(data.scReps))
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Введите целое число ≥ 1",
-          path: ["scReps"],
-        })
     }
     if (data.exMeasurement === "calories") {
       if (!isPosInt(data.rxCalories))
@@ -105,12 +95,6 @@ const exerciseInputSchema = z
           code: z.ZodIssueCode.custom,
           message: "Введите целое число ≥ 1",
           path: ["rxCalories"],
-        })
-      if (!isPosInt(data.scCalories))
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Введите целое число ≥ 1",
-          path: ["scCalories"],
         })
     }
     if (data.exMeasurement === "time") {
@@ -120,12 +104,6 @@ const exerciseInputSchema = z
           message: "Введите число ≥ 0",
           path: ["rxTime"],
         })
-      if (!isPosNum(data.scTime))
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Введите число ≥ 0",
-          path: ["scTime"],
-        })
     }
     if (data.exMeasurement === "distance") {
       if (!isPosNum(data.rxDistance))
@@ -134,23 +112,11 @@ const exerciseInputSchema = z
           message: "Введите число ≥ 0",
           path: ["rxDistance"],
         })
-      if (!isPosNum(data.scDistance))
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Введите число ≥ 0",
-          path: ["scDistance"],
-        })
       if (!isPosNum(data.rxDistanceWeight))
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Введите число ≥ 0",
           path: ["rxDistanceWeight"],
-        })
-      if (!isPosNum(data.scDistanceWeight))
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Введите число ≥ 0",
-          path: ["scDistanceWeight"],
         })
     }
   })
@@ -457,18 +423,18 @@ export function CreateWorkoutModal({
       measurement: data.exMeasurement,
       weight: data.exMeasurement === "weight" ? data.rxWeight : undefined,
       repetitions: data.exMeasurement === "weight" ? data.rxReps : undefined,
-      scWeight: data.exMeasurement === "weight" ? data.scWeight : undefined,
-      scReps: data.exMeasurement === "weight" ? data.scReps : undefined,
+      scWeight: data.exMeasurement === "weight" ? data.scWeight || "0" : undefined,
+      scReps: data.exMeasurement === "weight" ? data.scReps || "0" : undefined,
       rxCalories: data.exMeasurement === "calories" ? data.rxCalories : undefined,
-      scCalories: data.exMeasurement === "calories" ? data.scCalories : undefined,
+      scCalories: data.exMeasurement === "calories" ? data.scCalories || "0" : undefined,
       rxTime: data.exMeasurement === "time" ? data.rxTime : undefined,
-      scTime: data.exMeasurement === "time" ? data.scTime : undefined,
+      scTime: data.exMeasurement === "time" ? data.scTime || "0" : undefined,
       rxDistance: data.exMeasurement === "distance" ? data.rxDistance : undefined,
-      scDistance: data.exMeasurement === "distance" ? data.scDistance : undefined,
+      scDistance: data.exMeasurement === "distance" ? data.scDistance || "0" : undefined,
       rxDistanceWeight:
         data.exMeasurement === "distance" ? data.rxDistanceWeight : undefined,
       scDistanceWeight:
-        data.exMeasurement === "distance" ? data.scDistanceWeight : undefined,
+        data.exMeasurement === "distance" ? data.scDistanceWeight || "0" : undefined,
     }
 
     if (editingIndex !== null) {
@@ -541,7 +507,7 @@ export function CreateWorkoutModal({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent
         aria-describedby={undefined}
-        className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col bg-white dark:bg-gray-800 dark:border-gray-700">
+        className="max-w-2xl max-h-[90vh] overflow-y-auto gap-0 p-0 flex flex-col bg-[var(--card)]">
         <DialogHeader className="p-6 pb-2">
           <DialogTitle>Создать тренировку</DialogTitle>
           <div className="sr-only">Заполните форму для создания новой тренировки</div>
@@ -804,7 +770,7 @@ export function CreateWorkoutModal({
                 </div>
               </div>
 
-              <div className="space-y-3 bg-white dark:bg-gray-800 p-3 rounded-md border shadow-sm">
+              <div className="space-y-3 bg-[var(--card)] p-3 rounded-md border shadow-sm">
                 <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">
                   Добавить новое
                 </div>
@@ -851,7 +817,7 @@ export function CreateWorkoutModal({
                       <SelectTrigger className="w-full text-base sm:text-sm font-medium bg-background">
                         <SelectValue placeholder="Тип упражнения" />
                       </SelectTrigger>
-                      <SelectContent className="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                      <SelectContent>
                         <SelectItem value="weight" className="text-base sm:text-sm auto">
                           Вес/Повторы
                         </SelectItem>
@@ -877,7 +843,7 @@ export function CreateWorkoutModal({
                 <div className="grid grid-cols-2 gap-4 mt-3">
                   {/* RX */}
                   <div className="space-y-2">
-                    <span className="text-xs font-bold text-primary">RX</span>
+                    <span className="text-xs font-bold text-primary">RX *</span>
                     {exMeasurement === "weight" ? (
                       <div className="flex gap-2 flex-col">
                         <div>
@@ -1010,7 +976,7 @@ export function CreateWorkoutModal({
                   {/* Scaled */}
                   <div className="space-y-2">
                     <span className="text-xs font-bold text-muted-foreground">
-                      Scaled
+                      Scaled (опц.)
                     </span>
                     {exMeasurement === "weight" ? (
                       <div className="flex gap-2 flex-col">

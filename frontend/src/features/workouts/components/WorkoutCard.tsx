@@ -23,6 +23,7 @@ export interface Workout {
   userId?: string // Added for ownership check
   teamName?: string
   durationMinutes?: number // For Gantt view duration/width
+  date?: string // Used for pre-filling edit modal
 }
 
 interface WorkoutCardProps {

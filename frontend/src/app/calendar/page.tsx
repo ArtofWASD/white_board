@@ -147,6 +147,7 @@ export default function CalendarPage() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           teamName: (event as any).team?.name,
           durationMinutes: event.timeCap ? parseInt(event.timeCap) || 60 : 60,
+          date: dateKey,
         })
       })
 
@@ -200,10 +201,7 @@ export default function CalendarPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header
-        leftMenuEvents={events}
-        onShowEventDetails={handleShowEventDetails}
-      />
+      <Header leftMenuEvents={events} onShowEventDetails={handleShowEventDetails} />
 
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 pt-0`}>
         {/* Removed padding to let CalendarSystem take full space if needed, handled by internal padding */}

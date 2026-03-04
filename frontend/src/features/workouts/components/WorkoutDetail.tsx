@@ -157,12 +157,12 @@ export function WorkoutDetail({
                 className={cn(
                   "px-3 py-1 rounded text-sm sm:text-base font-bold ring-1 ring-inset",
                   workout.type === "AMRAP"
-                    ? "bg-orange-500/10 text-orange-600 ring-orange-500/20"
+                    ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 ring-orange-500/20"
                     : workout.type === "EMOM"
-                      ? "bg-blue-500/10 text-blue-600 ring-blue-500/20"
+                      ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-blue-500/20"
                       : workout.type === "CARDIO"
-                        ? "bg-red-500/10 text-red-600 ring-red-500/20"
-                        : "bg-slate-500/10 text-slate-600 ring-slate-500/20",
+                        ? "bg-red-500/10 text-red-600 dark:text-red-400 ring-red-500/20"
+                        : "bg-slate-500/10 text-slate-600 dark:text-slate-300 ring-slate-500/20",
                 )}>
                 {workout.type === "FOR_TIME"
                   ? "На время"
