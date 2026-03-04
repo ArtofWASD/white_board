@@ -103,8 +103,6 @@ export function CalendarSystem({
         teamId: effectiveTeamId,
       }
 
-      console.log("Creating event with payload:", payload)
-
       await eventsApi.createEvent(payload)
       setIsCreateModalOpen(false)
       if (onWorkoutCreated) {
