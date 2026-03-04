@@ -738,14 +738,14 @@ export function EditWorkoutModal({
             onClick={onClose}
             type="button"
             disabled={isSubmitting}
-            className="dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition-colors">
+            className="min-h-[48px] h-12 text-base dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 transition-colors">
             Отмена
           </Button>
           <Button
             onClick={handleSubmit}
             type="button"
             variant="outline"
-            className="border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
+            className="min-h-[48px] h-12 text-base border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
             disabled={isSubmitting}>
             {isSubmitting ? "Сохранение..." : "Сохранить изменения"}
           </Button>

@@ -1176,6 +1176,7 @@ export function CreateWorkoutModal({
               variant="outline"
               onClick={onClose}
               type="button"
+              className="min-h-[48px] h-12 text-base"
               disabled={isSubmitting}>
               Отмена
             </Button>
@@ -1183,7 +1184,7 @@ export function CreateWorkoutModal({
               type="submit"
               variant="outline"
               disabled={isSubmitting}
-              className="border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600 bg-transparent transition-colors">
+              className="min-h-[48px] h-12 text-base border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-700 dark:hover:bg-gray-600 bg-transparent transition-colors">
               {isSubmitting ? "Создание..." : "Создать тренировку"}
             </Button>
           </DialogFooter>
