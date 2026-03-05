@@ -3,16 +3,22 @@ import { ExerciseCard } from "./ExerciseCard"
 import { ListFilters, ViewMode } from "../ui/ListFilters"
 import Button from "../ui/Button"
 
+interface ExerciseRecord {
+  id: string
+  weight: number
+  date: string
+}
+
 interface Exercise {
   id: string
   name: string
   maxWeight: number
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  records: any[]
+  records: ExerciseRecord[]
 }
 
 interface ExerciseTrackerProps {
   exercises: Exercise[]
+  events?: any[]
   isLoading: boolean
   onCreateExercise: (name: string, initialWeight?: number) => Promise<void>
   onAddRecord: (exerciseId: string, weight: number) => Promise<void>
@@ -25,6 +31,7 @@ interface ExerciseTrackerProps {
 
 export const ExerciseTracker = React.memo(function ExerciseTracker({
   exercises,
+  events,
   isLoading,
   onCreateExercise,
   onAddRecord,
@@ -40,8 +47,6 @@ export const ExerciseTracker = React.memo(function ExerciseTracker({
   const [newExerciseName, setNewExerciseName] = useState("")
   const [initialWeight, setInitialWeight] = useState("")
 
-  // const [isCollapsed, setIsCollapsed] = useState(false); // УДАЛЕНО локальное состояние
-
   const handleCreateExercise = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newExerciseName.trim()) return
@@ -56,7 +61,97 @@ export const ExerciseTracker = React.memo(function ExerciseTracker({
     setIsCreating(false)
   }
 
-  const filteredExercises = exercises.filter((ex) =>
+  // Merge exercises from DB and Calendar Events
+  const allExercisesMap = new Map<string, Exercise>()
+
+  // 1. Add DB exercises (deep copy to avoid mutating props directly if we add records)
+  exercises.forEach((ex) => {
+    allExercisesMap.set(ex.name.toLowerCase().trim(), {
+      ...ex,
+      records: [...(ex.records || [])]
+    })
+  })
+
+  // 2. Add Calendar Events exercises
+  if (events && Array.isArray(events)) {
+    events.forEach((event) => {
+      // Look for strength events
+      if (
+        event.scheme === "WEIGHTLIFTING" ||
+        event.exerciseType === "Weightlifting" ||
+        (event.exercises && event.exercises.length > 0)
+      ) {
+        const eventDate = event.eventDate || event.date || new Date().toISOString()
+        
+        // Sometimes weight is strictly in the results
+        let resultWeight = 0
+        if (event.results && Array.isArray(event.results) && event.results.length > 0) {
+           event.results.forEach((r: any) => {
+             const weight = parseFloat(r.value || r.time || "0")
+             if (!isNaN(weight) && weight > resultWeight) {
+               resultWeight = weight
+             }
+           })
+        }
+
+        if (event.exercises && Array.isArray(event.exercises)) {
+          event.exercises.forEach((ex: any) => {
+             const exName = ex.name
+             if (!exName) return
+             
+             const parsedWeight = parseFloat(ex.weight)
+             let exWeight = !isNaN(parsedWeight) ? parsedWeight : 0
+             
+             // The actual lifted weight is max of planned and result
+             const actualWeight = Math.max(exWeight, resultWeight)
+
+             const key = exName.toLowerCase().trim()
+             if (allExercisesMap.has(key)) {
+                // Update existing exercise
+                const existing = allExercisesMap.get(key)!
+                if (actualWeight > existing.maxWeight) {
+                   existing.maxWeight = actualWeight
+                }
+                
+                if (actualWeight > 0) {
+                   // Add to history if not exact duplicate
+                   const isDuplicate = existing.records.some(
+                     (r) => r.date.startsWith(eventDate.split("T")[0]) && r.weight === actualWeight
+                   )
+                   if (!isDuplicate) {
+                     existing.records.push({
+                        id: `event-${event.id}-${exName}`,
+                        weight: actualWeight,
+                        date: eventDate
+                     })
+                     existing.records.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                   }
+                }
+             } else {
+                // Create new exercise entry from calendar
+                const newEx: Exercise = {
+                   id: `calendar-${exName}`,
+                   name: exName,
+                   maxWeight: actualWeight,
+                   records: actualWeight > 0 ? [{
+                     id: `event-${event.id}-${exName}`,
+                     weight: actualWeight,
+                     date: eventDate
+                   }] : []
+                }
+                allExercisesMap.set(key, newEx)
+             }
+          })
+        }
+      }
+    })
+  }
+
+  const combinedExercises = Array.from(allExercisesMap.values())
+  // Sort by name or maxWeight if desired. Let's sort alphabetically for now.
+  combinedExercises.sort((a, b) => a.name.localeCompare(b.name))
+
+  const filteredExercises = combinedExercises.filter((ex) =>
     ex.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
@@ -148,7 +243,7 @@ export const ExerciseTracker = React.memo(function ExerciseTracker({
                   type="submit"
                   disabled={!newExerciseName.trim()}
                   className="w-full sm:w-auto">
-                  Сохранить упражнение
+                  Сохранить
                 </Button>
               </div>
             </form>
@@ -161,7 +256,7 @@ export const ExerciseTracker = React.memo(function ExerciseTracker({
             searchPlaceholder="Фильтр упражнений..."
           />
 
-          <div className="flex-1 overflow-y-auto min-h-0 pr-2">
+          <div className="flex-1 overflow-y-auto min-h-0 pr-2 pb-4">
             {isLoading ? (
               <div className="text-center py-10">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
@@ -169,7 +264,7 @@ export const ExerciseTracker = React.memo(function ExerciseTracker({
             ) : filteredExercises.length === 0 ? (
               <div className="text-center py-10 bg-gray-50 dark:bg-gray-700 rounded-lg border border-dashed border-gray-300 dark:border-gray-600">
                 <p className="text-gray-500 dark:text-gray-300">
-                  Упражнения не найдены. Начните с добавления нового!
+                  Упражнения не найдены. Начните с добавления нового или создайте тренировку в календаре!
                 </p>
               </div>
             ) : (
@@ -179,6 +274,14 @@ export const ExerciseTracker = React.memo(function ExerciseTracker({
                     ? "space-y-4"
                     : "grid grid-cols-1 md:grid-cols-2 gap-6"
                 }>
+                {filteredExercises.map((ex) => (
+                  <ExerciseCard
+                    key={ex.id}
+                    exercise={ex}
+                    onAddRecord={onAddRecord}
+                    onUpdateExercise={onUpdateExercise}
+                  />
+                ))}
                 {hasMore && (
                   <div
                     ref={observerTarget}
