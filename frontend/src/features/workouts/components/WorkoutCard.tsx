@@ -47,7 +47,7 @@ export function WorkoutCard({ workout, onOpenDetail }: WorkoutCardProps) {
           <div
             onClick={onOpenDetail}
             className={cn(
-              "group relative flex w-full cursor-pointer flex-col gap-1 rounded-xl border border-border p-2 shadow-sm transition-all hover:shadow-md active:scale-95",
+              "group relative flex w-full h-full min-h-[100px] cursor-pointer flex-col gap-1 rounded-xl border border-border p-3 shadow-sm transition-all hover:shadow-md active:scale-95",
               getWorkoutColorClass(workout.type),
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
             )}
@@ -84,21 +84,19 @@ export function WorkoutCard({ workout, onOpenDetail }: WorkoutCardProps) {
                     {workout.scheduledTime}
                   </span>
                 )}
-                {workout.result && (
-                  <span className="font-mono text-[10px] font-medium text-muted-foreground">
-                    {workout.result}
-                  </span>
-                )}
               </div>
             </div>
 
-            <h3 className="font-bold leading-tight tracking-tight text-foreground group-hover:text-primary">
-              {workout.title}
-            </h3>
-
-            {/* Visual indicator for interaction */}
-            <div className="absolute bottom-4 right-4 opacity-0 transition-opacity group-hover:opacity-100">
-              {/* Could add an icon here if needed */}
+            {/* Title and Result pinned to bottom */}
+            <div className="mt-auto flex w-full items-end justify-between gap-2 pt-2">
+              <h3 className="font-bold leading-tight tracking-tight text-foreground group-hover:text-primary mb-0.5 line-clamp-2">
+                {workout.title}
+              </h3>
+              {workout.result && (
+                <span className="text-sm sm:text-base font-extrabold text-foreground shrink-0 ml-auto px-2 py-0.5 rounded-md bg-background/40 backdrop-blur-sm border border-border/50 shadow-sm">
+                  {workout.result}
+                </span>
+              )}
             </div>
           </div>
         </HoverCardTrigger>

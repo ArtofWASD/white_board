@@ -25,6 +25,7 @@ import { ExerciseTracker } from "../../components/dashboard/ExerciseTracker"
 import { RecentActivities } from "../../components/dashboard/RecentActivities"
 import { WeightTracker } from "../../components/dashboard/WeightTracker"
 import { UniversalCalculator } from "../../components/dashboard/UniversalCalculator"
+import { widgetRegistry } from "../../components/dashboard/WidgetRegistry"
 
 import { SortableItem } from "../../components/dashboard/SortableItem"
 import { useAuthStore } from "../../lib/store/useAuthStore"
@@ -332,45 +333,32 @@ export default function DashboardPage() {
 
   const renderWidget = (id: string) => {
     const isExpanded = expandedItems[id] ?? true
+    const widgetDef = widgetRegistry[id]
 
-    // Общие свойства для всех виджетов
-    const commonProps = {
-      isExpanded,
-      onToggle: () => handleToggleExpand(id),
+    if (!widgetDef) {
+      return null
     }
 
-    switch (id) {
-      case "exercise-tracker":
-        return (
-          <ExerciseTracker
-            exercises={exercises}
-            isLoading={isLoading}
-            onCreateExercise={handleCreateExercise}
-            onAddRecord={handleAddRecord}
-            onUpdateExercise={handleUpdateExercise}
-            hasMore={hasMoreExercises}
-            onLoadMore={loadMoreExercises}
-            {...commonProps}
-          />
-        )
-      case "weight-tracker":
-        return user ? <WeightTracker user={user} {...commonProps} /> : null
-      case "recent-activities":
-        return (
-          <RecentActivities
-            exercises={exercises}
-            events={events}
-            hasMoreEvents={hasMoreEvents}
-            onLoadMoreEvents={loadMoreEvents}
-            {...commonProps}
-          />
-        )
-      case "universal-calculator":
-        return <UniversalCalculator exercises={exercises} {...commonProps} />
+    const WidgetComponent = widgetDef.component
 
-      default:
-        return null
-    }
+    return (
+      <WidgetComponent
+        id={id}
+        isExpanded={isExpanded}
+        onToggle={() => handleToggleExpand(id)}
+        user={user}
+        exercises={exercises}
+        events={events}
+        isLoading={isLoading}
+        hasMoreExercises={hasMoreExercises}
+        hasMoreEvents={hasMoreEvents}
+        onLoadMoreExercises={loadMoreExercises}
+        onLoadMoreEvents={loadMoreEvents}
+        onCreateExercise={handleCreateExercise}
+        onAddRecord={handleAddRecord}
+        onUpdateExercise={handleUpdateExercise}
+      />
+    )
   }
 
   if (isLoading) {

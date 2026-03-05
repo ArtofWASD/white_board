@@ -230,6 +230,8 @@ export function WorkoutDetail({
                         } else if (exercise.measurement === "distance") {
                           const val = isRx ? exercise.rxDistance : exercise.scDistance
                           if (val && val !== "0") details.push(`${val} м.`)
+                          const w = isRx ? exercise.weight : exercise.scWeight
+                          if (w && w !== "0") details.push(`${w} кг.`)
                         } else if (exercise.measurement === "calories") {
                           const val = isRx ? exercise.rxCalories : exercise.scCalories
                           if (val && val !== "0") details.push(`${val} кал.`)

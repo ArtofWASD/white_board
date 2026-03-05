@@ -130,7 +130,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
           return (
             <div
               key={item.id}
-              className={`bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 ${
+              className={`bg-[var(--card)] text-card-foreground rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 ${
                 viewMode === "list" ? "flex flex-row items-center" : "flex flex-col"
               }`}>
               <ContentWrapper>
@@ -150,17 +150,17 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
 
                   <div className={`flex-1 ${viewMode === "grid" ? "p-6" : "pl-4"}`}>
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-bold text-gray-800">{item.title}</h3>
+                      <h3 className="text-xl font-bold text-foreground">{item.title}</h3>
                       {/* Отображение бейджей типа и схемы WOD */}
                       {type === "workout" && (
                         <div className="flex space-x-2 ml-auto">
                           {item.wodType && (
-                            <span className="px-2 py-1 text-xs font-semibold rounded bg-white text-gray-900 border border-gray-900 shadow-sm">
+                            <span className="px-2 py-1 text-xs font-semibold rounded bg-background text-foreground border border-border shadow-sm">
                               {item.wodType}
                             </span>
                           )}
                           {item.wodScheme && (
-                            <span className="px-2 py-1 text-xs font-semibold rounded bg-white text-gray-900 border border-gray-900 shadow-sm">
+                            <span className="px-2 py-1 text-xs font-semibold rounded bg-background text-foreground border border-border shadow-sm">
                               {SCHEME_MAP[item.wodScheme] || item.wodScheme}
                             </span>
                           )}
@@ -174,27 +174,36 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         {item.muscleGroups.map((mg) => (
                           <span
                             key={mg}
-                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800">
+                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/20 text-primary">
                             {MUSCLE_GROUPS_MAP[mg] || mg}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    <div className="text-gray-600 mb-4 line-clamp-3 text-sm prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0">
+                    <div className="text-muted-foreground mb-4 line-clamp-3 text-sm prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0">
                       {type === "news" ? (
-                        <div dangerouslySetInnerHTML={{
-                          __html: item.preview || item.excerpt || (item.content ? item.content.substring(0, 150) + "..." : "")
-                        }} />
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html:
+                              item.preview ||
+                              item.excerpt ||
+                              (item.content
+                                ? item.content.substring(0, 150) + "..."
+                                : ""),
+                          }}
+                        />
                       ) : (
-                        <div dangerouslySetInnerHTML={{
-                          __html: item.preview || item.description || ""
-                        }} />
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: item.preview || item.description || "",
+                          }}
+                        />
                       )}
                     </div>
 
                     {type === "news" && item.date && (
-                      <div className="text-sm text-gray-500 mb-4">
+                      <div className="text-sm text-muted-foreground mb-4">
                         {new Date(item.date).toLocaleDateString("ru-RU")}
                       </div>
                     )}
@@ -203,7 +212,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                       {type === "news" ? (
                         <Link
                           href={`/news/${item.id}`}
-                          className="text-indigo-600 font-medium hover:text-indigo-800 text-sm">
+                          className="text-primary font-medium hover:text-primary/80 text-sm">
                           Читать далее →
                         </Link>
                       ) : (
@@ -213,7 +222,7 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                             e.stopPropagation()
                             openCalendarModal(item)
                           }}
-                          className="flex items-center space-x-2 text-sm bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition-colors z-10 relative">
+                          className="flex items-center space-x-2 text-sm bg-primary/10 text-primary px-3 py-1.5 rounded-lg hover:bg-primary/20 transition-colors z-10 relative">
                           <svg
                             className="w-4 h-4"
                             fill="none"

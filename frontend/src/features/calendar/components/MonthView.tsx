@@ -3,6 +3,8 @@ import { CalendarDay } from "../hooks/useCalendar"
 import { Workout } from "@/features/workouts/components/WorkoutCard"
 import { getWorkoutColorClass } from "../utils/workoutColors"
 import { format } from "date-fns"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { WorkoutQuickView } from "@/features/workouts/components/WorkoutQuickView"
 
 interface MonthViewProps {
   days: CalendarDay[]
@@ -57,7 +59,8 @@ export function MonthView({
                 !isLastCol && "border-r dark:border-r-gray-700",
                 !day.isCurrentMonth &&
                   "bg-muted/10 dark:bg-gray-900/40 text-muted-foreground/50",
-                day.isToday && "bg-primary/15 dark:bg-primary/20 ring-1 ring-inset ring-primary/30",
+                day.isToday &&
+                  "bg-primary/15 dark:bg-primary/20 ring-1 ring-inset ring-primary/30",
               )}>
               <div className="flex justify-between items-start flex-shrink-0">
                 <span
@@ -74,18 +77,28 @@ export function MonthView({
               {/* Workout Indicators - scrollable */}
               <div className="mt-1 flex flex-col gap-1 overflow-y-auto overflow-x-hidden flex-1 min-h-0">
                 {dayWorkouts.map((workout) => (
-                  <div
-                    key={workout.id}
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onWorkoutClick(workout)
-                    }}
-                    className={cn(
-                      "text-xs truncate px-2 py-1 rounded-md font-semibold border border-transparent transition-colors shadow-sm flex-shrink-0",
-                      getWorkoutColorClass(workout.type),
-                    )}>
-                    {workout.title}
-                  </div>
+                  <HoverCard key={workout.id} openDelay={200} closeDelay={150}>
+                    <HoverCardTrigger asChild>
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onWorkoutClick(workout)
+                        }}
+                        className={cn(
+                          "cursor-pointer text-xs truncate px-2 py-1 rounded-md font-semibold border border-transparent transition-colors shadow-sm flex-shrink-0",
+                          getWorkoutColorClass(workout.type),
+                        )}>
+                        {workout.title}
+                      </div>
+                    </HoverCardTrigger>
+                    <HoverCardContent
+                      align="start"
+                      className="w-72 p-3 z-50 pointer-events-none"
+                      side="right"
+                      sideOffset={5}>
+                      <WorkoutQuickView workout={workout} />
+                    </HoverCardContent>
+                  </HoverCard>
                 ))}
               </div>
             </div>

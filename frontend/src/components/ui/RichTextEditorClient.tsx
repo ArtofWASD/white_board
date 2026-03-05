@@ -66,7 +66,7 @@ export default function RichTextEditorClient({
   ]
 
   return (
-    <div className="bg-white">
+    <div className="bg-background text-foreground">
       <ReactQuill
         theme="snow"
         value={value}
