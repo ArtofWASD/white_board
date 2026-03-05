@@ -9,6 +9,7 @@ import {
   NotFoundException,
   BadRequestException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ExercisesService } from '../services/exercises.service';
 import { CreateExerciseDto, AddExerciseRecordDto } from '../dtos/exercises.dto';
@@ -33,8 +34,19 @@ export class ExercisesController {
   }
 
   @Get(':userId')
-  async getExercises(@Param('userId') userId: string) {
-    return this.exercisesService.getExercisesByUserId(userId);
+  async getExercises(
+    @Param('userId') userId: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+
+    return this.exercisesService.getExercisesByUserId(
+      userId,
+      pageNum,
+      limitNum,
+    );
   }
 
   @Post(':id/records')

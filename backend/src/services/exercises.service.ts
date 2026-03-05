@@ -26,25 +26,35 @@ export class ExercisesService {
     return exercise;
   }
 
-  async getExercisesByUserId(userId: string) {
-    const exercises = await this.prisma.userExercise.findMany({
-      where: {
-        userId,
-      },
+  async getExercisesByUserId(userId: string, page?: number, limit?: number) {
+    const skip = page && limit ? (page - 1) * limit : undefined;
+    const take = limit ? limit + 1 : undefined;
+
+    const query: any = {
+      where: { userId },
       include: {
         records: {
-          orderBy: {
-            date: 'desc',
-          },
+          orderBy: { date: 'desc' },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+      orderBy: { createdAt: 'desc' },
+    };
 
-    return exercises.map((exercise) => {
-      const maxWeight = exercise.records.reduce((max, record) => {
+    if (skip !== undefined) query.skip = skip;
+    if (take !== undefined) query.take = take;
+
+    const rawExercises = await this.prisma.userExercise.findMany(query);
+
+    let hasMore = false;
+    let exercisesToReturn = rawExercises;
+
+    if (page !== undefined && limit !== undefined) {
+      hasMore = rawExercises.length > limit;
+      exercisesToReturn = hasMore ? rawExercises.slice(0, limit) : rawExercises;
+    }
+
+    const mapped = (exercisesToReturn as any[]).map((exercise) => {
+      const maxWeight = exercise.records.reduce((max: number, record: any) => {
         return record.weight > max ? record.weight : max;
       }, 0);
 
@@ -53,6 +63,11 @@ export class ExercisesService {
         maxWeight,
       };
     });
+
+    if (page !== undefined && limit !== undefined) {
+      return { data: mapped, meta: { hasMore } };
+    }
+    return mapped;
   }
 
   async addExerciseRecord(exerciseId: string, weight: number, date?: Date) {

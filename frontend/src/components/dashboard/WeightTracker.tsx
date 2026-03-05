@@ -10,7 +10,11 @@ interface WeightTrackerProps {
   onToggle?: () => void
 }
 
-export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrackerProps) {
+export const WeightTracker = React.memo(function WeightTracker({
+  user,
+  isExpanded = true,
+  onToggle,
+}: WeightTrackerProps) {
   const { updateUser } = useAuthStore()
   const { success, error: toastError } = useToast()
   const [isEditing, setIsEditing] = useState(false)
@@ -55,7 +59,7 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
         setIsEditing(false)
         success("Вес успешно обновлен")
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toastError(
         `Не удалось обновить вес: ${error.message || "Ошибка при обновлении веса"}`,
@@ -243,4 +247,4 @@ export function WeightTracker({ user, isExpanded = true, onToggle }: WeightTrack
       )}
     </div>
   )
-}
+})

@@ -9,7 +9,19 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 })
   }
 
-  return BackendClient.forwardRequest(request, `/exercises/${userId}`)
+  const page = searchParams.get("page")
+  const limit = searchParams.get("limit")
+
+  const queryParams = new URLSearchParams()
+  if (page) queryParams.append("page", page)
+  if (limit) queryParams.append("limit", limit)
+
+  const queryString = queryParams.toString()
+  const endpoint = queryString
+    ? `/exercises/${userId}?${queryString}`
+    : `/exercises/${userId}`
+
+  return BackendClient.forwardRequest(request, endpoint)
 }
 
 export async function POST(request: NextRequest) {

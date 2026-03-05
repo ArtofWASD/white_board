@@ -169,13 +169,35 @@ class ApiClient {
 
   /**
    * Пытается обновить access_token через /api/auth/refresh.
-   * Гарантирует, что одновременно выполняется только один refresh.
+   * Гарантирует, что одновременно выполняется только один refresh
+   * (в том числе между вкладками через Web Locks API).
    */
   private async tryRefreshToken(): Promise<boolean> {
     if (this.isRefreshing && this.refreshPromise) {
       return this.refreshPromise
     }
 
+    if (typeof navigator !== "undefined" && navigator.locks) {
+      return navigator.locks.request("auth_refresh", async () => {
+        // Проверяем, не был ли токен только что обновлен другой вкладкой (в пределах 5 сек)
+        const lastRefresh = parseInt(localStorage.getItem("auth_last_refresh") || "0", 10)
+        if (Date.now() - lastRefresh < 5000) {
+          return true
+        }
+
+        const success = await this.performRefresh()
+        if (success) {
+          localStorage.setItem("auth_last_refresh", Date.now().toString())
+        }
+        return success
+      })
+    }
+
+    // Fallback для старых браузеров или SSR
+    return this.performRefresh()
+  }
+
+  private async performRefresh(): Promise<boolean> {
     this.isRefreshing = true
     this.refreshPromise = this.executeRefresh()
 

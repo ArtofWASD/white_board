@@ -157,10 +157,14 @@ export const useAuthStore = create<AuthState>()(
       }),
       onRehydrateStorage: () => (state) => {
         if (state) {
-          state.isLoading = false
           // Проверка существования пользователя при регидратации
           if (state.isAuthenticated && state.user) {
-            state.verifyUser()
+            // Оставляем isLoading = true на время проверки, чтобы избежать мигания UI
+            state.verifyUser().finally(() => {
+              useAuthStore.setState({ isLoading: false })
+            })
+          } else {
+            state.isLoading = false
           }
         }
       },

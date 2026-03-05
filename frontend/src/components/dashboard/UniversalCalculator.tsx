@@ -19,7 +19,7 @@ interface UniversalCalculatorProps {
   onToggle?: () => void
 }
 
-export function UniversalCalculator({
+export const UniversalCalculator = React.memo(function UniversalCalculator({
   exercises,
   isExpanded,
   onToggle,
@@ -60,7 +60,12 @@ export function UniversalCalculator({
   // }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const openCalendarModal = (title: string, description: string, scheme?: string, exercises?: any[]) => {
+  const openCalendarModal = (
+    title: string,
+    description: string,
+    scheme?: string,
+    exercises?: any[],
+  ) => {
     setCalendarModalData({ title, description, scheme, exercises })
     setIsCalendarModalOpen(true)
   }
@@ -163,4 +168,4 @@ export function UniversalCalculator({
       )}
     </DashboardWidget>
   )
-}
+})

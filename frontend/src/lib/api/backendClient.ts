@@ -63,7 +63,7 @@ const CSRF_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"])
 
 export class BackendClient {
   private static get baseUrl() {
-    return process.env.BACKEND_URL || "http://localhost:3001";
+    return process.env.BACKEND_URL || "http://localhost:3001"
   }
 
   /**
@@ -125,17 +125,22 @@ export class BackendClient {
     try {
       const response = await this.request(nextRequest, endpoint, options)
 
-      let data: unknown
-      const contentType = response.headers.get("content-type")
-      if (contentType?.includes("application/json")) {
-        data = await response.json()
-      } else {
-        data = await response.text()
-      }
+      let nextResponse: NextResponse
 
-      const nextResponse = NextResponse.json(data, {
-        status: response.status,
-      })
+      if (response.status === 204 || response.status === 205 || response.status === 304) {
+        // These status codes cannot have a body
+        nextResponse = new NextResponse(null, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        })
+      } else {
+        nextResponse = new NextResponse(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        })
+      }
 
       // Пробрасываем Set-Cookie headers от backend
       forwardSetCookieHeaders(response, nextResponse.headers)

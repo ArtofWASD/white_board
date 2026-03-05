@@ -61,8 +61,18 @@ export class EventsController {
   async getEventsByUserId(
     @Param('userId') userId: string,
     @Query('teamId') teamId?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
   ) {
-    return this.eventsService.getEventsByUserId(userId, teamId);
+    const pageNum = page ? parseInt(page, 10) : undefined;
+    const limitNum = limit ? parseInt(limit, 10) : undefined;
+
+    return this.eventsService.getEventsByUserId(
+      userId,
+      teamId,
+      pageNum,
+      limitNum,
+    );
   }
 
   @Get(':userId/past')

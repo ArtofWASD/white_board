@@ -21,8 +21,20 @@ export async function GET(request: NextRequest) {
   }
 
   let endpoint = `/events/${userId}`
+  const queryParams = new URLSearchParams()
   if (teamId) {
-    endpoint += `?teamId=${teamId}`
+    queryParams.append("teamId", teamId)
+  }
+
+  const page = searchParams.get("page")
+  if (page) queryParams.append("page", page)
+
+  const limit = searchParams.get("limit")
+  if (limit) queryParams.append("limit", limit)
+
+  const queryString = queryParams.toString()
+  if (queryString) {
+    endpoint += `?${queryString}`
   }
 
   return BackendClient.forwardRequest(request, endpoint)

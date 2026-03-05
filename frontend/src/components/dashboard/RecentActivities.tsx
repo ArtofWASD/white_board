@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 
 interface Exercise {
   id: string
@@ -28,6 +28,8 @@ interface RecentActivitiesProps {
   events: Event[]
   isExpanded?: boolean
   onToggle?: () => void
+  hasMoreEvents?: boolean
+  onLoadMoreEvents?: () => void
 }
 
 interface Activity {
@@ -39,13 +41,14 @@ interface Activity {
   originalId: string // ID упражнения или ID события
 }
 
-export function RecentActivities({
+export const RecentActivities = React.memo(function RecentActivities({
   exercises,
   events,
   isExpanded = true,
   onToggle,
+  hasMoreEvents = false,
+  onLoadMoreEvents,
 }: RecentActivitiesProps) {
-  // const [isCollapsed, setIsCollapsed] = useState(false);
   // Разворачивание записей упражнений
   const exerciseActivities: Activity[] = exercises.flatMap((exercise) =>
     exercise.records.map((record) => ({
@@ -71,12 +74,28 @@ export function RecentActivities({
   )
 
   // Объединение и сортировка по убыванию даты
-  const allActivities = [...exerciseActivities, ...eventActivities].sort(
+  const recentActivities = [...exerciseActivities, ...eventActivities].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )
 
-  // Взять топ-10
-  const recentActivities = allActivities.slice(0, 10)
+  const observerTarget = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const target = observerTarget.current
+    if (!target || !hasMoreEvents || !onLoadMoreEvents) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMoreEvents()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(target)
+    return () => observer.unobserve(target)
+  }, [hasMoreEvents, onLoadMoreEvents])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -144,6 +163,13 @@ export function RecentActivities({
                     </div>
                   </div>
                 ))}
+                {hasMoreEvents && (
+                  <div
+                    ref={observerTarget}
+                    className="h-10 flex justify-center items-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -151,4 +177,4 @@ export function RecentActivities({
       )}
     </div>
   )
-}
+})

@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { ExerciseCard } from "./ExerciseCard"
 import { ListFilters, ViewMode } from "../ui/ListFilters"
 import Button from "../ui/Button"
@@ -19,9 +19,11 @@ interface ExerciseTrackerProps {
   onUpdateExercise: (id: string, name: string) => Promise<void>
   isExpanded?: boolean
   onToggle?: () => void
+  hasMore?: boolean
+  onLoadMore?: () => void
 }
 
-export function ExerciseTracker({
+export const ExerciseTracker = React.memo(function ExerciseTracker({
   exercises,
   isLoading,
   onCreateExercise,
@@ -29,6 +31,8 @@ export function ExerciseTracker({
   onUpdateExercise,
   isExpanded = true,
   onToggle,
+  hasMore = false,
+  onLoadMore,
 }: ExerciseTrackerProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("list")
   const [searchQuery, setSearchQuery] = useState("")
@@ -55,6 +59,25 @@ export function ExerciseTracker({
   const filteredExercises = exercises.filter((ex) =>
     ex.name.toLowerCase().includes(searchQuery.toLowerCase()),
   )
+
+  const observerTarget = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const target = observerTarget.current
+    if (!target || !hasMore || !onLoadMore) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          onLoadMore()
+        }
+      },
+      { threshold: 0.1 },
+    )
+
+    observer.observe(target)
+    return () => observer.unobserve(target)
+  }, [hasMore, onLoadMore])
 
   return (
     <div
@@ -121,7 +144,10 @@ export function ExerciseTracker({
                   onChange={(e) => setInitialWeight(e.target.value)}
                   className="w-full sm:w-24 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white dark:placeholder-gray-400"
                 />
-                <Button type="submit" disabled={!newExerciseName.trim()} className="w-full sm:w-auto">
+                <Button
+                  type="submit"
+                  disabled={!newExerciseName.trim()}
+                  className="w-full sm:w-auto">
                   Сохранить упражнение
                 </Button>
               </div>
@@ -153,14 +179,13 @@ export function ExerciseTracker({
                     ? "space-y-4"
                     : "grid grid-cols-1 md:grid-cols-2 gap-6"
                 }>
-                {filteredExercises.map((exercise) => (
-                  <ExerciseCard
-                    key={exercise.id}
-                    exercise={exercise}
-                    onAddRecord={onAddRecord}
-                    onUpdateExercise={onUpdateExercise}
-                  />
-                ))}
+                {hasMore && (
+                  <div
+                    ref={observerTarget}
+                    className="h-10 flex justify-center items-center col-span-full">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -168,4 +193,4 @@ export function ExerciseTracker({
       )}
     </div>
   )
-}
+})

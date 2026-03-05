@@ -92,9 +92,31 @@ export class EventsService {
     return event;
   }
 
-  async getEventsByUserId(userId: string, teamId?: string) {
+  async getEventsByUserId(
+    userId: string,
+    teamId?: string,
+    page?: number,
+    limit?: number,
+  ) {
     // Сначала обновляем статусы событий на основании текущей даты
     await this.updateEventStatuses();
+
+    const skip = page && limit ? (page - 1) * limit : undefined;
+    const take = limit ? limit + 1 : undefined;
+
+    const executeQuery = async (query: any) => {
+      if (skip !== undefined) query.skip = skip;
+      if (take !== undefined) query.take = take;
+
+      const results = await this.prisma.event.findMany(query);
+
+      if (page !== undefined && limit !== undefined) {
+        const hasMore = results.length > limit;
+        const data = hasMore ? results.slice(0, limit) : results;
+        return { data, meta: { hasMore } };
+      }
+      return results;
+    };
 
     if (teamId) {
       // Просмотр для конкретной команды
@@ -105,7 +127,7 @@ export class EventsService {
 
       const memberIds = teamMembers.map((m) => m.userId);
 
-      return this.prisma.event.findMany({
+      return executeQuery({
         where: {
           OR: [{ teamId: teamId }, { userId: { in: memberIds } }],
         },
@@ -155,7 +177,7 @@ export class EventsService {
         });
         const orgTeamIds = orgTeams.map((t) => t.id);
 
-        return this.prisma.event.findMany({
+        return executeQuery({
           where: {
             OR: [
               { userId: { in: orgUserIds } },
@@ -165,9 +187,7 @@ export class EventsService {
           orderBy: { eventDate: 'asc' },
           include: {
             results: {
-              where: { userId: { in: orgUserIds } }, // Для админов организации показываем результаты их пользователей?
-              // На самом деле, dashboard для ORGANIZATION_ADMIN скрывает виджеты тренировок (см. page.tsx:216-225).
-              // Но для консистентности отфильтруем.
+              where: { userId: { in: orgUserIds } },
               orderBy: {
                 dateAdded: 'desc',
               },
@@ -215,7 +235,7 @@ export class EventsService {
       // Уникальные ID участников
       const allMemberIds = [...new Set(teamMembers.map((m) => m.userId))];
 
-      return this.prisma.event.findMany({
+      return executeQuery({
         where: {
           OR: [
             { userId: userId }, // Личные события

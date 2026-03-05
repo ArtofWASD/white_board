@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import {
@@ -53,6 +53,14 @@ export default function DashboardPage() {
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // Пагинация
+  const [exercisesPage, setExercisesPage] = useState(1)
+  const [eventsPage, setEventsPage] = useState(1)
+  const [hasMoreExercises, setHasMoreExercises] = useState(true)
+  const [hasMoreEvents, setHasMoreEvents] = useState(true)
+  const [isLoadingMoreExercises, setIsLoadingMoreExercises] = useState(false)
+  const [isLoadingMoreEvents, setIsLoadingMoreEvents] = useState(false)
 
   // Инициализируем состояние из объекта пользователя или значений по умолчанию
   // По умолчанию универсальный калькулятор, но поддерживаются все ID
@@ -120,26 +128,91 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user])
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!user) return
     try {
-      const [exercisesData, eventsData] = await Promise.all([
-        apiClient.get<Exercise[]>(`/api/exercises?userId=${user.id}`),
-        apiClient.get<Event[]>(`/api/events?userId=${user.id}`),
+      const [exercisesRes, eventsRes] = await Promise.all([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        apiClient.get<any>(`/api/exercises?userId=${user.id}&page=1&limit=10`),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        apiClient.get<any>(`/api/events?userId=${user.id}&page=1&limit=10`),
       ])
 
-      if (exercisesData) {
-        setExercises(exercisesData)
+      if (exercisesRes && exercisesRes.data) {
+        setExercises(exercisesRes.data)
+        setHasMoreExercises(exercisesRes.meta?.hasMore || false)
+      } else if (Array.isArray(exercisesRes)) {
+        setExercises(exercisesRes)
+        setHasMoreExercises(false)
       }
 
-      if (eventsData) {
-        setEvents(eventsData)
+      if (eventsRes && eventsRes.data) {
+        setEvents(eventsRes.data)
+        setHasMoreEvents(eventsRes.meta?.hasMore || false)
+      } else if (Array.isArray(eventsRes)) {
+        setEvents(eventsRes)
+        setHasMoreEvents(false)
       }
+
+      setExercisesPage(1)
+      setEventsPage(1)
     } catch {
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [user])
+
+  const loadMoreExercises = useCallback(async () => {
+    if (!user || !hasMoreExercises || isLoadingMoreExercises) return
+    setIsLoadingMoreExercises(true)
+    try {
+      const nextPage = exercisesPage + 1
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = await apiClient.get<any>(
+        `/api/exercises?userId=${user.id}&page=${nextPage}&limit=10`,
+      )
+      if (res && res.data) {
+        setExercises((prev) => {
+          // Avoid duplicates by checking IDs
+          const newExercises = res.data.filter(
+            (newEx: any) => !prev.some((ex) => ex.id === newEx.id),
+          )
+          return [...prev, ...newExercises]
+        })
+        setHasMoreExercises(res.meta?.hasMore || false)
+        setExercisesPage(nextPage)
+      }
+    } catch {
+    } finally {
+      setIsLoadingMoreExercises(false)
+    }
+  }, [user, hasMoreExercises, isLoadingMoreExercises, exercisesPage])
+
+  const loadMoreEvents = useCallback(async () => {
+    if (!user || !hasMoreEvents || isLoadingMoreEvents) return
+    setIsLoadingMoreEvents(true)
+    try {
+      const nextPage = eventsPage + 1
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res = await apiClient.get<any>(
+        `/api/events?userId=${user.id}&page=${nextPage}&limit=10`,
+      )
+      if (res && res.data) {
+        setEvents((prev) => {
+          // Avoid duplicates
+          const newEvents = res.data.filter(
+            (newEv: any) => !prev.some((ev) => ev.id === newEv.id),
+          )
+          return [...prev, ...newEvents]
+        })
+        setHasMoreEvents(res.meta?.hasMore || false)
+        setEventsPage(nextPage)
+      }
+    } catch {
+    } finally {
+      setIsLoadingMoreEvents(false)
+    }
+  }, [user, hasMoreEvents, isLoadingMoreEvents, eventsPage])
 
   const saveLayout = async (
     newItems: string[],
@@ -165,38 +238,47 @@ export default function DashboardPage() {
     } catch {}
   }
 
-  const handleCreateExercise = async (name: string, initialWeight?: number) => {
-    if (!user) return
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const body: any = { name, userId: user.id }
-      if (initialWeight) {
-        body.initialWeight = initialWeight
-      }
+  const handleCreateExercise = useCallback(
+    async (name: string, initialWeight?: number) => {
+      if (!user) return
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const body: any = { name, userId: user.id }
+        if (initialWeight) {
+          body.initialWeight = initialWeight
+        }
 
-      await apiClient.post("/api/exercises", body)
-      fetchData()
-    } catch {}
-  }
+        await apiClient.post("/api/exercises", body)
+        fetchData()
+      } catch {}
+    },
+    [user, fetchData],
+  )
 
-  const handleAddRecord = async (exerciseId: string, weight: number) => {
-    try {
-      await apiClient.post(`/api/exercises/${exerciseId}/records`, { weight })
-      fetchData()
-    } catch {}
-  }
+  const handleAddRecord = useCallback(
+    async (exerciseId: string, weight: number) => {
+      try {
+        await apiClient.post(`/api/exercises/${exerciseId}/records`, { weight })
+        fetchData()
+      } catch {}
+    },
+    [fetchData],
+  )
 
-  const handleUpdateExercise = async (id: string, name: string) => {
-    try {
-      await apiClient.put(`/api/exercises/${id}`, { name })
+  const handleUpdateExercise = useCallback(
+    async (id: string, name: string) => {
+      try {
+        await apiClient.put(`/api/exercises/${id}`, { name })
 
-      await fetchData()
-    } catch {}
-  }
+        await fetchData()
+      } catch {}
+    },
+    [fetchData],
+  )
 
-  const handleGoToProfile = () => {
+  const handleGoToProfile = useCallback(() => {
     router.push("/profile")
-  }
+  }, [router])
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -266,13 +348,23 @@ export default function DashboardPage() {
             onCreateExercise={handleCreateExercise}
             onAddRecord={handleAddRecord}
             onUpdateExercise={handleUpdateExercise}
+            hasMore={hasMoreExercises}
+            onLoadMore={loadMoreExercises}
             {...commonProps}
           />
         )
       case "weight-tracker":
         return user ? <WeightTracker user={user} {...commonProps} /> : null
       case "recent-activities":
-        return <RecentActivities exercises={exercises} events={events} {...commonProps} />
+        return (
+          <RecentActivities
+            exercises={exercises}
+            events={events}
+            hasMoreEvents={hasMoreEvents}
+            onLoadMoreEvents={loadMoreEvents}
+            {...commonProps}
+          />
+        )
       case "universal-calculator":
         return <UniversalCalculator exercises={exercises} {...commonProps} />
 
@@ -339,9 +431,9 @@ export default function DashboardPage() {
             <Button
               onClick={handleGoToProfile}
               variant="ghost"
-              
               title="Редактировать профиль"
-              className="mr-2 sm:mr-12" size="icon" >
+              className="mr-2 sm:mr-12"
+              size="icon">
               <Image
                 src="/edit_profile_icon.png"
                 alt="Редактировать профиль"

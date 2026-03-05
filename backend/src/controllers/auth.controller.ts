@@ -42,14 +42,14 @@ export class AuthController {
     response.cookie('access_token', result.accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 минут
     });
 
     response.cookie('refresh_token', result.refreshToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
     });
 
@@ -115,14 +115,14 @@ export class AuthController {
       response.cookie('access_token', result.accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'lax',
+        sameSite: 'strict',
         maxAge: 15 * 60 * 1000,
       });
 
       response.cookie('refresh_token', result.refreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: 'lax',
+        sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -217,7 +217,7 @@ export class AuthController {
     response.cookie('access_token', result.accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000,
     });
 
