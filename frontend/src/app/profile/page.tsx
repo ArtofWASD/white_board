@@ -18,6 +18,7 @@ import {
   UpdateEmailFormData,
   UpdatePasswordFormData,
 } from "../../lib/validators/profile"
+import { Avatar } from "../../components/ui/Avatar"
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuthStore()
@@ -213,7 +214,7 @@ export default function ProfilePage() {
       {/* Настройка Аватара */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6 flex items-center space-x-6">
         <div
-          className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-blue-500 flex items-center justify-center cursor-pointer group flex-shrink-0 border border-gray-200 dark:border-gray-600"
+          className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden flex items-center justify-center cursor-pointer group flex-shrink-0 border border-gray-200 dark:border-gray-600"
           onClick={handleAvatarIconClick}>
           {isUploadingAvatar ? (
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 z-10">
@@ -237,20 +238,7 @@ export default function ProfilePage() {
             </div>
           ) : null}
 
-          {user.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.avatarUrl}
-              alt="User Avatar"
-              className="w-full h-full object-cover rounded-full"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <span className="font-bold text-4xl sm:text-5xl text-white">
-              {user.name.charAt(0)}
-              {user.lastName ? user.lastName.charAt(0) : ""}
-            </span>
-          )}
+          <Avatar user={user} size="xxl" className="w-full h-full border-0 rounded-none bg-blue-500 text-white dark:bg-blue-500 dark:text-white" />
 
           {/* Hover Overlay */}
           <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">

@@ -12,6 +12,7 @@ import { createDirectChat, getTeamChat } from "../../lib/api/chat"
 import { useRouter } from "next/navigation"
 import { logApiError } from "../../lib/logger"
 import { MessageSquare, UserPlus, LogOut } from "lucide-react"
+import { Avatar } from "../../components/ui/Avatar"
 
 interface AthleteTeamViewProps {
   teams: Team[]
@@ -237,21 +238,7 @@ const AthleteTeamView: React.FC<
                 <div
                   className="flex items-center bg-gray-50 dark:bg-gray-900 p-2 pr-6 rounded-xl border border-gray-100 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => team.owner && handleUserClick(team.owner)}>
-                  <div className="h-12 w-12 bg-blue-100 dark:bg-gray-800 rounded-full flex items-center justify-center text-blue-600 dark:text-white mr-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      />
-                    </svg>
-                  </div>
+                  <Avatar user={team.owner} size="lg" className="mr-4 border-none shadow-sm" />
                   <div>
                     <p className="text-xs text-gray-400 dark:text-gray-300 uppercase font-bold tracking-wider mb-0.5">
                       Тренер
@@ -304,12 +291,11 @@ const AthleteTeamView: React.FC<
                       key={member.id}
                       className="relative flex items-center p-4 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-700 hover:border-blue-300 dark:hover:border-gray-500 hover:bg-white dark:hover:bg-gray-800 transition-all duration-200 group shadow-sm hover:shadow-md cursor-pointer"
                       onClick={() => handleUserClick(member.user)}>
-                      <div className="h-10 w-10 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 dark:text-white group-hover:text-blue-600 group-hover:border-blue-200 dark:group-hover:text-white transition-colors shadow-sm">
-                        <span className="text-xs font-bold uppercase">
-                          {member.user.name.charAt(0)}
-                          {member.user.lastName?.charAt(0) || ""}
-                        </span>
-                      </div>
+                      <Avatar
+                        size="md"
+                        user={member.user}
+                        className="group-hover:text-blue-600 group-hover:border-blue-200 dark:group-hover:border-gray-500 dark:group-hover:text-white transition-colors shadow-sm bg-white dark:bg-gray-800 text-gray-400 dark:text-white"
+                      />
                       <div className="ml-4 overflow-hidden flex-1">
                         <p className="font-bold text-gray-900 dark:text-white truncate">
                           {member.user.name} {member.user.lastName}
@@ -387,10 +373,7 @@ const AthleteTeamView: React.FC<
                           <td className="px-4 py-2 sm:px-6 sm:py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className="flex-shrink-0 h-10 w-10 hidden sm:block">
-                                <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-500 dark:text-white font-bold border border-gray-200 dark:border-gray-600">
-                                  {member.user.name.charAt(0)}
-                                  {member.user.lastName?.charAt(0) || ""}
-                                </div>
+                                <Avatar size="md" user={member.user} className="bg-gray-100 dark:bg-gray-800 text-gray-500" />
                               </div>
                               <div className="sm:ml-4">
                                 <div className="text-xs sm:text-sm font-medium text-blue-600 dark:text-white hover:text-blue-900 dark:hover:text-gray-200">

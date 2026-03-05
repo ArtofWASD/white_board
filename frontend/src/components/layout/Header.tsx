@@ -11,6 +11,7 @@ import AnimatedLink from "../ui/AnimatedLink" // Import AnimatedLink
 import { getUnreadNotificationCount } from "../../lib/api/notifications"
 import { waitForSocket, initializeSocket, disconnectSocket } from "../../lib/socket"
 import { useNavigation } from "../../hooks/useNavigation"
+import { Avatar } from "../../components/ui/Avatar"
 import LeftMenu from "./LeftMenu"
 
 interface HeaderProps {
@@ -318,22 +319,7 @@ const Header: React.FC<HeaderProps> = ({
               Привет, {user.name}
               {user.lastName ? ` ${user.lastName}` : ""}!
             </span>
-            <div className="w-[27px] h-[27px] sm:w-[35px] sm:h-[35px] rounded-full bg-blue-500 flex items-center justify-center overflow-hidden relative border border-gray-600">
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatarUrl}
-                  alt="User Avatar"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span className="font-bold text-sm sm:text-base">
-                  {user.name.charAt(0)}
-                  {user.lastName ? user.lastName.charAt(0) : ""}
-                </span>
-              )}
-            </div>
+            <Avatar user={user} className="w-[27px] h-[27px] sm:w-[35px] sm:h-[35px] text-sm sm:text-base" />
           </div>
         </div>
       ) : (

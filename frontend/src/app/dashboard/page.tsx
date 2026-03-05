@@ -25,6 +25,7 @@ import { ExerciseTracker } from "../../components/dashboard/ExerciseTracker"
 import { RecentActivities } from "../../components/dashboard/RecentActivities"
 import { WeightTracker } from "../../components/dashboard/WeightTracker"
 import { UniversalCalculator } from "../../components/dashboard/UniversalCalculator"
+import { Avatar } from "../../components/ui/Avatar"
 import { widgetRegistry } from "../../components/dashboard/WidgetRegistry"
 
 import { SortableItem } from "../../components/dashboard/SortableItem"
@@ -387,21 +388,7 @@ export default function DashboardPage() {
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 mb-8">
         <div className="flex justify-between items-center">
           <div className="flex items-center">
-            <div className="w-16 h-16 rounded-full bg-blue-500 flex items-center justify-center mr-4 overflow-hidden border border-gray-600">
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={user.avatarUrl}
-                  alt="User Avatar"
-                  className="w-full h-full object-cover"
-                  referrerPolicy="no-referrer"
-                />
-              ) : (
-                <span className="text-2xl font-bold text-white">
-                  {user.name.charAt(0)}
-                </span>
-              )}
-            </div>
+            <Avatar size="xl" user={user} className="mr-4" />
             <div>
               <h2 className="text-2xl font-semibold dark:text-white">{user.name}</h2>
               <p className="text-gray-600 dark:text-gray-300">{user.email}</p>
