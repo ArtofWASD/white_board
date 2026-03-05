@@ -62,26 +62,13 @@ export function useNavigation() {
       })
     }
 
-    if (
-      user.role === "TRAINER" ||
-      user.role === "ORGANIZATION_ADMIN" ||
-      user.role === "SUPER_ADMIN"
-    ) {
+    if (user.role === "TRAINER" || user.role === "SUPER_ADMIN") {
       items.push({
-        label: "Атлеты",
-        href: "/dashboard/athletes",
-        icon: <Image src="/athlet_icon.png" alt="Athletes" width={32} height={32} />,
-        tooltip: "Атлеты",
+        label: "Занятия",
+        href: "/dashboard/activities",
+        icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
+        tooltip: "Занятия",
       })
-
-      if (user.role === "TRAINER" || user.role === "SUPER_ADMIN") {
-        items.push({
-          label: "Занятия",
-          href: "/dashboard/activities",
-          icon: <Image src="/workout_icon.png" alt="Activities" width={32} height={32} />,
-          tooltip: "Занятия",
-        })
-      }
     }
 
     if (user.role === "ATHLETE") {
@@ -149,7 +136,7 @@ export function useNavigation() {
     )
 
     return items
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, logout, selectedTeam, teams])
 
   const chatModal = null
