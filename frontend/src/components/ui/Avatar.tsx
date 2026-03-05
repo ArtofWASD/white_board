@@ -26,9 +26,11 @@ export const getFullImageUrl = (url?: string | null): string => {
     return url
   }
   
-  // It's a relative path, optionally append API URL
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || ""
-  return `${baseUrl}${url.startsWith("/") ? "" : "/"}${url}`
+  // Возвращаем относительный путь как есть. Браузер сам подставит текущий домен,
+  // а Next.js благодаря rewrites проксирует запрос на бэкенд.
+  // Это решает проблему на PWA, когда NEXT_PUBLIC_API_URL (например, localhost)
+  // недоступен с телефона.
+  return url.startsWith("/") ? url : `/${url}`
 }
 
 /**
