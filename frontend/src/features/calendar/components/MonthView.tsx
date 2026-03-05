@@ -40,7 +40,7 @@ export function MonthView({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 auto-rows-[1fr] flex-1 overflow-hidden">
+      <div className="grid grid-cols-7 auto-rows-[minmax(144px,1fr)] flex-1 overflow-hidden">
         {days.map((day, idx) => {
           const dateKey = format(day.date, "yyyy-MM-dd")
           const dayWorkouts = workouts[dateKey] || []

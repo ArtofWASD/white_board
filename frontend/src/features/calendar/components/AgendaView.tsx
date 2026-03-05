@@ -23,12 +23,14 @@ export function AgendaView({
   const todayRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (todayRef.current) {
-      setTimeout(() => {
-        todayRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
-      }, 100)
+    if (todayRef.current && days.length > 0) {
+      // Use a slightly longer timeout for mobile/PWA rendering
+      const timer = setTimeout(() => {
+        todayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+      }, 300)
+      return () => clearTimeout(timer)
     }
-  }, [])
+  }, [days])
 
   return (
     <div className="flex flex-col gap-1 pb-10 h-full overflow-y-auto px-2">
