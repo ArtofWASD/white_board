@@ -68,6 +68,7 @@ export class AuthService {
         weight: user.weight,
         dashboardLayout: user.dashboardLayout,
         dashboardLayoutMode: user.dashboardLayoutMode,
+        avatarUrl: (user as any).avatarUrl,
       } as UserResponse,
       accessToken,
       refreshToken,
@@ -177,6 +178,7 @@ export class AuthService {
         weight: newUser.weight,
         dashboardLayout: newUser.dashboardLayout,
         dashboardLayoutMode: newUser.dashboardLayoutMode,
+        avatarUrl: (newUser as any).avatarUrl,
         organizationId: newUser.organization?.id,
       } as UserResponse,
       accessToken,
@@ -261,6 +263,7 @@ export class AuthService {
         weight: updatedUser.weight,
         dashboardLayout: updatedUser.dashboardLayout,
         dashboardLayoutMode: updatedUser.dashboardLayoutMode,
+        avatarUrl: (updatedUser as any).avatarUrl,
       } as UserResponse,
     };
   }
@@ -280,6 +283,7 @@ export class AuthService {
       lastName: user.lastName,
       email: user.email,
       role: user.role,
+      avatarUrl: (user as any).avatarUrl,
     };
   }
 
@@ -326,6 +330,7 @@ export class AuthService {
         weight: user.weight,
         dashboardLayout: user.dashboardLayout,
         dashboardLayoutMode: user.dashboardLayoutMode,
+        avatarUrl: (user as any).avatarUrl,
         organizationId: user.organizationId,
       } as UserResponse,
     };
@@ -399,6 +404,7 @@ export class AuthService {
           weight: storedToken.user.weight,
           dashboardLayout: storedToken.user.dashboardLayout,
           dashboardLayoutMode: storedToken.user.dashboardLayoutMode,
+          avatarUrl: (storedToken.user as any).avatarUrl,
           organizationId: storedToken.user.organizationId,
         } as UserResponse,
       };

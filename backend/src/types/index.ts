@@ -9,6 +9,7 @@ export interface User {
   weight?: number;
   dashboardLayout?: string[];
   dashboardLayoutMode?: string;
+  avatarUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +28,7 @@ export interface PrismaUser {
   weight?: number;
   dashboard_layout?: string[];
   dashboard_layout_mode?: string;
+  avatarUrl?: string | null;
   created_at: Date;
   updated_at: Date;
 }
@@ -44,6 +46,7 @@ export interface ProcessedUser {
   weight?: number;
   dashboardLayout?: string[];
   dashboardLayoutMode?: string;
+  avatarUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -61,5 +64,6 @@ export interface UserResponse {
   weight?: number;
   dashboardLayout?: string[];
   dashboardLayoutMode?: string;
+  avatarUrl?: string | null;
   organizationId?: string;
 }
