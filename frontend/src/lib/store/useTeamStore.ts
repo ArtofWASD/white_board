@@ -31,8 +31,16 @@ export const useTeamStore = create<TeamState>()(
 
         set({ loading: true, error: null })
         try {
-          // Используем teamsApi, он берет userId из второго аргумента? Нет, getUserTeams(userId)
-          const data = await teamsApi.getUserTeams(user.id)
+          // Извлекаем ID безопасно, учитывая возможные вложенные объекты из кэша
+          const actualUser = (user as any).user || user
+          const userId = actualUser.id
+
+          if (!userId) {
+            set({ teams: [], loading: false })
+            return
+          }
+
+          const data = await teamsApi.getUserTeams(userId)
 
           if (data && Array.isArray(data)) {
             set({ teams: data })

@@ -25,8 +25,8 @@ export default function NewsFeed({ news }: NewsFeedProps) {
 
   if (!news || news.length === 0) return null
 
-  // We need exactly up to 3 news for the bento grid
-  const displayNews = news.slice(0, 3)
+  // We need exactly up to 5 news items for the layout (carousel on mobile, 4-col bento grid on desktop)
+  const displayNews = news.slice(0, 5)
   const mainNews = displayNews[0]
   const secondaryNews = displayNews.slice(1)
 
@@ -84,13 +84,13 @@ export default function NewsFeed({ news }: NewsFeedProps) {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-6 md:h-[600px]">
+          className="flex md:grid md:grid-cols-4 md:grid-rows-2 gap-4 md:gap-6 md:h-[600px] overflow-x-auto snap-x snap-mandatory md:overflow-visible pb-8 md:pb-0 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 md:mx-0 md:px-0">
           {/* Main News Card */}
           {mainNews && (
             <motion.div
               onClick={() => router.push(`/news/${mainNews.id}`)}
               variants={itemVariants}
-              className="md:col-span-2 md:row-span-2 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-50 flex flex-col justify-end min-h-[400px] md:min-h-0">
+              className="w-[85vw] shrink-0 snap-center md:w-auto md:col-span-2 md:row-span-2 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-50 flex flex-col justify-end min-h-[400px] md:min-h-0">
               <div className="absolute inset-0 z-0">
                 {mainNews.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -128,7 +128,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
               key={newsItem.id}
               onClick={() => router.push(`/news/${newsItem.id}`)}
               variants={itemVariants}
-              className="md:col-span-1 md:row-span-1 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-100 flex flex-col justify-end min-h-[300px]">
+              className="w-[85vw] shrink-0 snap-center md:w-auto md:col-span-1 md:row-span-1 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-100 flex flex-col justify-end min-h-[400px] md:min-h-0">
               <div className="absolute inset-0 z-0">
                 {newsItem.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -139,7 +139,15 @@ export default function NewsFeed({ news }: NewsFeedProps) {
                   />
                 ) : (
                   <div
-                    className={`w-full h-full opacity-80 ${index === 0 ? "bg-gradient-to-br from-purple-500 to-pink-500" : "bg-gradient-to-br from-teal-400 to-emerald-500"}`}
+                    className={`w-full h-full opacity-80 ${
+                      index % 4 === 0
+                        ? "bg-gradient-to-br from-purple-500 to-pink-500"
+                        : index % 4 === 1
+                          ? "bg-gradient-to-br from-teal-400 to-emerald-500"
+                          : index % 4 === 2
+                            ? "bg-gradient-to-br from-orange-400 to-rose-400"
+                            : "bg-gradient-to-br from-blue-400 to-cyan-500"
+                    }`}
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />

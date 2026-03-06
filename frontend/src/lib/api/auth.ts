@@ -68,11 +68,12 @@ export const authApi = {
   },
 
   /** Получить профиль пользователя */
-  getProfile: (userId: string) => apiClient.get<User>(`/api/auth/user/${userId}`),
+  getProfile: (userId: string) =>
+    apiClient.get<{ user: User }>(`/api/auth/user/${userId}`),
 
   /** Обновить профиль пользователя */
   updateProfile: (userId: string, data: ProfileData) =>
-    apiClient.put<User>(`/api/auth/profile/${userId}`, data),
+    apiClient.put<{ user: User }>(`/api/auth/profile/${userId}`, data),
 
   /** Загрузить аватар пользователя */
   uploadAvatar: async (userId: string, file: File): Promise<{ avatarUrl: string }> => {

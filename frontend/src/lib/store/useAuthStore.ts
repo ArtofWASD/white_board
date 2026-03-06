@@ -129,12 +129,24 @@ export const useAuthStore = create<AuthState>()(
         const state = get()
         if (!state.user) return false
 
+        // Нормализация: если в стейт попал вложенный объект { user: { ... } }
+        // (последствие старого бага), извлекаем реального пользователя.
+        const currentUser = (state.user as any).user || state.user
+        const userId = currentUser.id
+
+        if (!userId) {
+          console.warn("[AuthStore] verifyUser: userId not found", state.user)
+          // Если ID вообще нет, разлогиниваем для безопасности
+          get().logout()
+          return false
+        }
+
         try {
           // Проверяем токен, запрашивая профиль
-          const user = await authApi.getProfile(state.user.id)
+          const response = await authApi.getProfile(userId)
           // Синхронизируем локальный стор с актуальными данными с сервера
-          if (user) {
-            set({ user })
+          if (response && response.user) {
+            set({ user: response.user, isAuthenticated: true })
           }
           return true
         } catch (error) {
@@ -145,8 +157,6 @@ export const useAuthStore = create<AuthState>()(
           ) {
             get().logout()
           }
-          // Иначе (сетевая ошибка, 500 etc) мы не разлогиниваем пользователя,
-          // чтобы сессия не сбрасывалась при падении dev-сервера.
           return false
         }
       },
