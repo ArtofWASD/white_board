@@ -837,20 +837,20 @@ export const ContentTab: React.FC = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Краткое описание (превью)
               </label>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 h-20 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              <RichTextEditor
                 value={newNews.excerpt}
-                onChange={(e) => setNewNews({ ...newNews, excerpt: e.target.value })}
+                onChange={(content) => setNewNews({ ...newNews, excerpt: content })}
+                placeholder="Краткое описание для карточки..."
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Контент
               </label>
-              <textarea
-                className="w-full border border-gray-300 rounded px-3 py-2 h-40 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              <RichTextEditor
                 value={newNews.content}
-                onChange={(e) => setNewNews({ ...newNews, content: e.target.value })}
+                onChange={(content) => setNewNews({ ...newNews, content: content })}
+                placeholder="Полный текст новости..."
               />
             </div>
             <div>
