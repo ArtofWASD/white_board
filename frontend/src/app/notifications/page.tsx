@@ -12,7 +12,10 @@ import {
 import Header from "../../components/layout/Header"
 import { Heart, MessageSquare, CheckCheck } from "lucide-react"
 
-type GroupedNotification = Notification & { groupIds?: string[], unreadGroupIds?: string[] }
+type GroupedNotification = Notification & {
+  groupIds?: string[]
+  unreadGroupIds?: string[]
+}
 
 const NotificationsPage: React.FC = () => {
   const { user, isAuthenticated } = useAuthStore()
@@ -84,7 +87,11 @@ const NotificationsPage: React.FC = () => {
     return result
   }, [notifications])
 
-  const handleMarkAsRead = async (id: string, groupIds?: string[], unreadGroupIds?: string[]) => {
+  const handleMarkAsRead = async (
+    id: string,
+    groupIds?: string[],
+    unreadGroupIds?: string[],
+  ) => {
     // If it's a group, mark all unread members of the group as read
     const idsToMark = unreadGroupIds && unreadGroupIds.length > 0 ? unreadGroupIds : [id]
 
@@ -131,12 +138,14 @@ const NotificationsPage: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 font-sans text-gray-900 dark:text-gray-100">
       {/* Header */}
       <div className="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-sm dark:border-b dark:border-gray-700">
-        <Header onRightMenuClick={() => {}} onLeftMenuClick={() => {}} navItems={[]} />
+        <Header />
       </div>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Уведомления</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            Уведомления
+          </h1>
           {notifications.some((n) => !n.isRead) && (
             <button
               onClick={handleMarkAllAsRead}
@@ -191,7 +200,7 @@ const NotificationsPage: React.FC = () => {
                     {/* Render Sender Name from title, if it exists */}
                     {notification.title && (
                       <h4
-                         className={`text-sm mb-0.5 ${
+                        className={`text-sm mb-0.5 ${
                           notification.isRead
                             ? "text-gray-600 dark:text-gray-400 font-medium"
                             : "text-gray-900 dark:text-white font-bold"

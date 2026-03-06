@@ -53,24 +53,23 @@ export default function RichTextEditorClient({
     [],
   )
 
-  const formats = [
-    "header",
-    "bold",
-    "italic",
-    "underline",
-    "strike",
-    "list",
-    "bullet",
-    "link",
-    "divider",
-  ]
+  const formats = useMemo(
+    () => ["header", "bold", "italic", "underline", "strike", "list", "link", "divider"],
+    [],
+  )
+
+  const handleChange = (content: string) => {
+    if (content !== value) {
+      onChange(content)
+    }
+  }
 
   return (
     <div className="bg-background text-foreground">
       <ReactQuill
         theme="snow"
         value={value}
-        onChange={onChange}
+        onChange={handleChange}
         modules={modules}
         formats={formats}
         placeholder={placeholder}
