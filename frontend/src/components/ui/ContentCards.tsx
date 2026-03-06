@@ -47,6 +47,12 @@ const SCHEME_MAP: Record<string, string> = {
   NOT_SPECIFIED: "Other",
 }
 
+const getImageUrl = (url?: string) => {
+  if (!url) return null
+  if (url.startsWith("http")) return url
+  return `${process.env.NEXT_PUBLIC_API_URL || ""}${url}`
+}
+
 export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
   const { user } = useAuthStore()
   const { success, error: toastError } = useToast()
@@ -137,11 +143,10 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                 {/* Background Image for News */}
                 {type === "news" && item.imageUrl && viewMode === "grid" && (
                   <div className="absolute inset-0 z-0">
-                    <Image
-                      src={item.imageUrl}
+                    <img
+                      src={getImageUrl(item.imageUrl)!}
                       alt={item.title}
-                      fill
-                      className="object-cover transition-transform duration-500 hover:scale-105"
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
                   </div>

@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "*.storage.yandexcloud.net",
+      },
+      {
+        protocol: "https",
         hostname: "*.s3.yandex.net",
       },
       {

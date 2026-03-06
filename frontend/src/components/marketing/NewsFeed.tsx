@@ -25,9 +25,11 @@ export default function NewsFeed({ news }: NewsFeedProps) {
 
   if (!news || news.length === 0) return null
 
-  // We need exactly up to 5 news items for the layout (carousel on mobile, 4-col bento grid on desktop)
+  // We need up to 5 news items for the layout
   const displayNews = news.slice(0, 5)
   const mainNews = displayNews[0]
+  // On desktop we only show 2 secondary items (total 3), on mobile up to 4 (total 5)
+  // We'll filter these in the JSX or handle here
   const secondaryNews = displayNews.slice(1)
 
   const containerVariants: Variants = {
@@ -84,7 +86,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-100px" }}
-          className="flex md:grid md:grid-cols-4 md:grid-rows-2 gap-4 md:gap-6 md:h-[600px] overflow-x-auto snap-x snap-mandatory md:overflow-visible pb-8 md:pb-0 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 md:mx-0 md:px-0">
+          className="flex md:grid md:grid-cols-3 md:grid-rows-2 gap-4 md:gap-6 md:h-[600px] overflow-x-auto snap-x snap-mandatory md:overflow-visible pb-8 md:pb-0 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden -mx-4 px-4 md:mx-0 md:px-0">
           {/* Main News Card */}
           {mainNews && (
             <motion.div
@@ -128,7 +130,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
               key={newsItem.id}
               onClick={() => router.push(`/news/${newsItem.id}`)}
               variants={itemVariants}
-              className="w-[85vw] shrink-0 snap-center md:w-auto md:col-span-1 md:row-span-1 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-100 flex flex-col justify-end min-h-[400px] md:min-h-0">
+              className={`w-[85vw] shrink-0 snap-center md:w-auto md:col-span-1 md:row-span-1 relative rounded-[2rem] overflow-hidden group cursor-pointer bg-gray-100 flex flex-col justify-end min-h-[400px] md:min-h-0 ${index >= 2 ? "md:hidden" : ""}`}>
               <div className="absolute inset-0 z-0">
                 {newsItem.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
