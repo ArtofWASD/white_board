@@ -185,7 +185,6 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         </div>
                       )}
                     </div>
-
                     {/* Чипсы групп мышц */}
                     {item.muscleGroups && item.muscleGroups.length > 0 && (
                       <div className="flex flex-wrap gap-2 mb-3">
@@ -202,7 +201,6 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         ))}
                       </div>
                     )}
-
                     <div
                       className={`mb-4 line-clamp-3 text-sm ${
                         type === "news" && item.imageUrl && viewMode === "grid"
@@ -221,7 +219,6 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         <div>{stripHtml(item.preview || item.description || "")}</div>
                       )}
                     </div>
-
                     {type === "news" && item.date && (
                       <div
                         className={`text-sm mb-4 ${
@@ -232,7 +229,6 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         {new Date(item.date).toLocaleDateString("ru-RU")}
                       </div>
                     )}
-
                     <div className="flex justify-between items-center mt-auto">
                       {type === "news" ? (
                         <Link
