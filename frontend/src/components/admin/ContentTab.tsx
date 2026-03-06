@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react"
 import { RichTextEditor } from "@/components/ui/RichTextEditor"
-import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Modal } from "../ui/Modal"
 import { logApiError } from "../../lib/logger"
 import { stripHtml } from "@/lib/utils"
