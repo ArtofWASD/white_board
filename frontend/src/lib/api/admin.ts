@@ -87,6 +87,11 @@ export const adminApi = {
   updateNews: (id: string, data: Partial<News>) =>
     apiClient.patch<News>(`/api/news/${id}`, data),
   deleteNews: (id: string) => apiClient.delete<void>(`/api/news/${id}`),
+  uploadNewsImage: (file: File) => {
+    const formData = new FormData()
+    formData.append("file", file)
+    return apiClient.post<{ imageUrl: string }>("/api/news/upload-image", formData)
+  },
 
   // --- Settings ---
   getSettings: () => apiClient.get<SystemSetting[]>("/api/settings"),

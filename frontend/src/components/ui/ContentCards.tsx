@@ -130,27 +130,39 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
           return (
             <div
               key={item.id}
-              className={`bg-[var(--card)] text-card-foreground rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 ${
+              className={`bg-[var(--card)] text-card-foreground rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 relative ${
                 viewMode === "list" ? "flex flex-row items-center" : "flex flex-col"
-              }`}>
+              } ${type === "news" && item.imageUrl && viewMode === "grid" ? "min-h-[300px]" : ""}`}>
               <ContentWrapper>
-                <div
-                  className={`${viewMode === "list" ? "flex flex-row items-center w-full p-4" : "flex flex-col h-full"}`}>
-                  {/* Изображение для Новости */}
-                  {type === "news" && item.imageUrl && viewMode === "grid" && (
-                    <div className="h-48 w-full relative">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                  )}
+                {/* Background Image for News */}
+                {type === "news" && item.imageUrl && viewMode === "grid" && (
+                  <div className="absolute inset-0 z-0">
+                    <Image
+                      src={item.imageUrl}
+                      alt={item.title}
+                      fill
+                      className="object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                  </div>
+                )}
 
+                <div
+                  className={`relative z-10 ${viewMode === "list" ? "flex flex-row items-center w-full p-4" : "flex flex-col h-full"} ${
+                    type === "news" && item.imageUrl && viewMode === "grid"
+                      ? "text-white"
+                      : ""
+                  }`}>
                   <div className={`flex-1 ${viewMode === "grid" ? "p-6" : "pl-4"}`}>
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-bold text-foreground">{item.title}</h3>
+                      <h3
+                        className={`text-xl font-bold ${
+                          type === "news" && item.imageUrl && viewMode === "grid"
+                            ? "text-white group-hover:text-blue-200"
+                            : "text-foreground"
+                        }`}>
+                        {item.title}
+                      </h3>
                       {/* Отображение бейджей типа и схемы WOD */}
                       {type === "workout" && (
                         <div className="flex space-x-2 ml-auto">
@@ -174,14 +186,23 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                         {item.muscleGroups.map((mg) => (
                           <span
                             key={mg}
-                            className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/20 text-primary">
+                            className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                              type === "news" && item.imageUrl && viewMode === "grid"
+                                ? "bg-white/20 text-white"
+                                : "bg-primary/20 text-primary"
+                            }`}>
                             {MUSCLE_GROUPS_MAP[mg] || mg}
                           </span>
                         ))}
                       </div>
                     )}
 
-                    <div className="text-muted-foreground mb-4 line-clamp-3 text-sm prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0">
+                    <div
+                      className={`mb-4 line-clamp-3 text-sm prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 ${
+                        type === "news" && item.imageUrl && viewMode === "grid"
+                          ? "text-gray-200"
+                          : "text-muted-foreground"
+                      }`}>
                       {type === "news" ? (
                         <div
                           dangerouslySetInnerHTML={{
@@ -203,7 +224,12 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                     </div>
 
                     {type === "news" && item.date && (
-                      <div className="text-sm text-muted-foreground mb-4">
+                      <div
+                        className={`text-sm mb-4 ${
+                          type === "news" && item.imageUrl && viewMode === "grid"
+                            ? "text-white/60"
+                            : "text-muted-foreground"
+                        }`}>
                         {new Date(item.date).toLocaleDateString("ru-RU")}
                       </div>
                     )}
@@ -212,7 +238,11 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                       {type === "news" ? (
                         <Link
                           href={`/news/${item.id}`}
-                          className="text-primary font-medium hover:text-primary/80 text-sm">
+                          className={`font-medium text-sm transition-colors ${
+                            type === "news" && item.imageUrl && viewMode === "grid"
+                              ? "text-blue-300 hover:text-white"
+                              : "text-primary hover:text-primary/80"
+                          }`}>
                           Читать далее →
                         </Link>
                       ) : (

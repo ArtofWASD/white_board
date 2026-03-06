@@ -129,10 +129,16 @@ export const ContentTab: React.FC = () => {
       }
     } else if (contentModalType === "news") {
       try {
-        await adminApi.createNews(newNews)
+        let imageUrl = newNews.imageUrl
+        if (imageFile) {
+          const uploadRes = await adminApi.uploadNewsImage(imageFile)
+          imageUrl = uploadRes.imageUrl
+        }
+        await adminApi.createNews({ ...newNews, imageUrl })
         fetchContent()
         setIsContentModalOpen(false)
         setNewNews({ title: "", content: "", excerpt: "", imageUrl: "", createdAt: "" })
+        setImageFile(null)
       } catch (e) {
         alert("Ошибка создания новости")
       }
@@ -201,11 +207,17 @@ export const ContentTab: React.FC = () => {
       }
     } else if (contentModalType === "news") {
       try {
-        await adminApi.updateNews(editingItem.id, newNews)
+        let imageUrl = newNews.imageUrl
+        if (imageFile) {
+          const uploadRes = await adminApi.uploadNewsImage(imageFile)
+          imageUrl = uploadRes.imageUrl
+        }
+        await adminApi.updateNews(editingItem.id, { ...newNews, imageUrl })
         fetchContent()
         setIsContentModalOpen(false)
         setEditingItem(null)
         setNewNews({ title: "", content: "", excerpt: "", imageUrl: "", createdAt: "" })
+        setImageFile(null)
       } catch (e) {
         alert("Ошибка обновления новости")
       }
@@ -843,7 +855,32 @@ export const ContentTab: React.FC = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL Изображения (опционально)
+                Фоновое изображение (Загрузить новое)
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                onChange={(e) => {
+                  if (e.target.files && e.target.files.length > 0) {
+                    setImageFile(e.target.files[0])
+                  }
+                }}
+              />
+              {newNews.imageUrl && !imageFile && (
+                <div className="mt-2 text-sm text-gray-500">
+                  Текущее: <br />{" "}
+                  <img
+                    src={newNews.imageUrl}
+                    alt="preview"
+                    className="h-20 rounded mt-1"
+                  />
+                </div>
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                URL Изображения (вручную)
               </label>
               <input
                 type="text"
