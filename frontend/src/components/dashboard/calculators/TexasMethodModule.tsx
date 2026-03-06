@@ -9,7 +9,12 @@ interface Exercise {
 interface TexasMethodModuleProps {
   exercises: Exercise[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAddToCalendar: (title: string, description: string, scheme?: string, exercises?: any[]) => void
+  onAddToCalendar: (
+    title: string,
+    description: string,
+    scheme?: string,
+    exercises?: any[],
+  ) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
 }
@@ -146,17 +151,26 @@ export function TexasMethodModule({
                     <span>{week.day1}</span>
                     <button
                       onClick={() => {
-                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
+                        const exName =
+                          exercises.find((e) => e.id === selectedExerciseId)?.name ||
+                          "Texas Method"
+                        const now = Date.now()
                         onAddToCalendar(
-                          `${exName}: Неделя ${week.weekNum} День 1`,
+                          `${exName} - Неделя ${week.weekNum} День 1`,
                           "",
                           "WEIGHTLIFTING",
-                          [{
-                            name: exName,
-                            weight: week.day1.split(" ")[0], // Extract just the weight number
-                            repetitions: "5x5"
-                          }]
-                        );
+                          [
+                            {
+                              id: `ex-${now}-1`,
+                              name: `${exName} (5x5)`,
+                              measurement: "weight",
+                              weight: week.day1.split(" ")[0],
+                              repetitions: "5",
+                              rxWeight: week.day1.split(" ")[0],
+                              rxReps: "5",
+                            },
+                          ],
+                        )
                       }}
                       className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
@@ -181,17 +195,26 @@ export function TexasMethodModule({
                     <span>{week.day2}</span>
                     <button
                       onClick={() => {
-                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
+                        const exName =
+                          exercises.find((e) => e.id === selectedExerciseId)?.name ||
+                          "Texas Method"
+                        const now = Date.now()
                         onAddToCalendar(
-                          `${exName}: Неделя ${week.weekNum} День 2`,
+                          `${exName} - Неделя ${week.weekNum} День 2`,
                           "",
                           "WEIGHTLIFTING",
-                          [{
-                            name: exName,
-                            weight: week.day2.split(" ")[0],
-                            repetitions: "2x5"
-                          }]
-                        );
+                          [
+                            {
+                              id: `ex-${now}-1`,
+                              name: `${exName} (2x5)`,
+                              measurement: "weight",
+                              weight: week.day2.split(" ")[0],
+                              repetitions: "5",
+                              rxWeight: week.day2.split(" ")[0],
+                              rxReps: "5",
+                            },
+                          ],
+                        )
                       }}
                       className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"
@@ -216,17 +239,27 @@ export function TexasMethodModule({
                     <span>{week.day3}</span>
                     <button
                       onClick={() => {
-                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "Texas Method";
+                        const exName =
+                          exercises.find((e) => e.id === selectedExerciseId)?.name ||
+                          "Texas Method"
+                        const now = Date.now()
+                        const reps = dayThreeMode.split("x")[1] || "1"
                         onAddToCalendar(
-                          `${exName}: Неделя ${week.weekNum} День 3`,
+                          `${exName} - Неделя ${week.weekNum} День 3`,
                           "",
                           "WEIGHTLIFTING",
-                          [{
-                            name: exName,
-                            weight: week.day3.split(" ")[0],
-                            repetitions: dayThreeMode
-                          }]
-                        );
+                          [
+                            {
+                              id: `ex-${now}-1`,
+                              name: `${exName} (${dayThreeMode})`,
+                              measurement: "weight",
+                              weight: week.day3.split(" ")[0],
+                              repetitions: reps,
+                              rxWeight: week.day3.split(" ")[0],
+                              rxReps: reps,
+                            },
+                          ],
+                        )
                       }}
                       className="text-gray-300 hover:text-gray-700 p-1"
                       title="Добавить в календарь"

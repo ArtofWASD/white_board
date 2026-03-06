@@ -19,7 +19,12 @@ interface StrengthResult {
 interface StrengthTrainingModuleProps {
   exercises: Exercise[]
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onAddToCalendar: (title: string, description: string, scheme?: string, exercises?: any[]) => void
+  onAddToCalendar: (
+    title: string,
+    description: string,
+    scheme?: string,
+    exercises?: any[],
+  ) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
 }
@@ -235,7 +240,6 @@ export function StrengthTrainingModule({
                         Отм
                       </button>
                       <Button
-                        
                         size="sm"
                         onClick={saveResult}
                         disabled={isSubmitting}
@@ -248,20 +252,66 @@ export function StrengthTrainingModule({
                   <div className="flex justify-center items-center h-full">
                     <button
                       onClick={() => {
-                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
-                        onAddToCalendar(
-                          `${exName}: Неделя 1`,
-                          "",
-                          "WEIGHTLIFTING",
-                          [
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.4), repetitions: "5" },
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.5), repetitions: "5" },
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.6), repetitions: "3" },
-                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.65), repetitions: "5" },
-                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.75), repetitions: "5" },
-                            { name: `${exName} (Рабочий: Рекорд)`, weight: calculateWeight(0.85), repetitions: "5+" }
-                          ]
-                        );
+                        const exName =
+                          exercises.find((e) => e.id === selectedExerciseId)?.name ||
+                          "5/3/1"
+                        const now = Date.now()
+                        onAddToCalendar(`${exName} - Неделя 1`, "", "WEIGHTLIFTING", [
+                          {
+                            id: `ex-${now}-1`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.4)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.4)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-2`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.5)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.5)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-3`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.6)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.6)),
+                            rxReps: "3",
+                          },
+                          {
+                            id: `ex-${now}-4`,
+                            name: `${exName} (Рабочий)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.65)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.65)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-5`,
+                            name: `${exName} (Рабочий)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.75)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.75)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-6`,
+                            name: `${exName} (Рабочий: Рекорд)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.85)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.85)),
+                            rxReps: "5",
+                          },
+                        ])
                       }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"
@@ -327,7 +377,6 @@ export function StrengthTrainingModule({
                         Отм
                       </button>
                       <Button
-                        
                         size="sm"
                         onClick={saveResult}
                         disabled={isSubmitting}
@@ -341,20 +390,66 @@ export function StrengthTrainingModule({
                   <div className="flex justify-center items-center h-full">
                     <button
                       onClick={() => {
-                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
-                        onAddToCalendar(
-                          `${exName}: Неделя 2`,
-                          "",
-                          "WEIGHTLIFTING",
-                          [
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.45), repetitions: "5" },
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.55), repetitions: "5" },
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.65), repetitions: "3" },
-                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.7), repetitions: "3" },
-                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.8), repetitions: "3" },
-                            { name: `${exName} (Рабочий: Рекорд)`, weight: calculateWeight(0.9), repetitions: "3+" }
-                          ]
-                        );
+                        const exName =
+                          exercises.find((e) => e.id === selectedExerciseId)?.name ||
+                          "5/3/1"
+                        const now = Date.now()
+                        onAddToCalendar(`${exName} - Неделя 2`, "", "WEIGHTLIFTING", [
+                          {
+                            id: `ex-${now}-1`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.45)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.45)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-2`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.55)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.55)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-3`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.65)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.65)),
+                            rxReps: "3",
+                          },
+                          {
+                            id: `ex-${now}-4`,
+                            name: `${exName} (Рабочий)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.7)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.7)),
+                            rxReps: "3",
+                          },
+                          {
+                            id: `ex-${now}-5`,
+                            name: `${exName} (Рабочий)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.8)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.8)),
+                            rxReps: "3",
+                          },
+                          {
+                            id: `ex-${now}-6`,
+                            name: `${exName} (Рабочий: Рекорд)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.9)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.9)),
+                            rxReps: "3",
+                          },
+                        ])
                       }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в calendar"
@@ -420,7 +515,6 @@ export function StrengthTrainingModule({
                         Отм
                       </button>
                       <Button
-                        
                         size="sm"
                         onClick={saveResult}
                         disabled={isSubmitting}
@@ -434,20 +528,66 @@ export function StrengthTrainingModule({
                   <div className="flex justify-center items-center h-full">
                     <button
                       onClick={() => {
-                        const exName = exercises.find((e) => e.id === selectedExerciseId)?.name || "5/3/1";
-                        onAddToCalendar(
-                          `${exName}: Неделя 3`,
-                          "",
-                          "WEIGHTLIFTING",
-                          [
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.5), repetitions: "5" },
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.6), repetitions: "5" },
-                            { name: `${exName} (Разминка)`, weight: calculateWeight(0.7), repetitions: "3" },
-                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.75), repetitions: "5" },
-                            { name: `${exName} (Рабочий)`, weight: calculateWeight(0.85), repetitions: "3" },
-                            { name: `${exName} (Рабочий: Рекорд)`, weight: calculateWeight(0.95), repetitions: "1+" }
-                          ]
-                        );
+                        const exName =
+                          exercises.find((e) => e.id === selectedExerciseId)?.name ||
+                          "5/3/1"
+                        const now = Date.now()
+                        onAddToCalendar(`${exName} - Неделя 3`, "", "WEIGHTLIFTING", [
+                          {
+                            id: `ex-${now}-1`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.5)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.5)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-2`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.6)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.6)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-3`,
+                            name: `${exName} (Разминка)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.7)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.7)),
+                            rxReps: "3",
+                          },
+                          {
+                            id: `ex-${now}-4`,
+                            name: `${exName} (Рабочий)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.75)),
+                            repetitions: "5",
+                            rxWeight: String(calculateWeight(0.75)),
+                            rxReps: "5",
+                          },
+                          {
+                            id: `ex-${now}-5`,
+                            name: `${exName} (Рабочий)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.85)),
+                            repetitions: "3",
+                            rxWeight: String(calculateWeight(0.85)),
+                            rxReps: "3",
+                          },
+                          {
+                            id: `ex-${now}-6`,
+                            name: `${exName} (Рабочий: Рекорд)`,
+                            measurement: "weight",
+                            weight: String(calculateWeight(0.95)),
+                            repetitions: "1",
+                            rxWeight: String(calculateWeight(0.95)),
+                            rxReps: "1",
+                          },
+                        ])
                       }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"

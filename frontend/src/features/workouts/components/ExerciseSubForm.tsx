@@ -181,9 +181,7 @@ export function ExerciseSubForm({ form, exercisesFieldArray }: ExerciseSubFormPr
       </div>
 
       <div className="space-y-3 bg-[var(--card)] p-3 rounded-md border shadow-sm">
-        <div className="text-xs font-semibold uppercase text-muted-foreground mb-1">
-          Добавить новое
-        </div>
+        <div className="text-xs uppercase text-muted-foreground mb-1">Добавить</div>
         {/* Exercise name and Selection layout change for mobile */}
         <div className="flex flex-col sm:flex-row gap-2">
           <div className="flex-1 space-y-2">

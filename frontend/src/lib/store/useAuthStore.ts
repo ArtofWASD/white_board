@@ -131,7 +131,11 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           // Проверяем токен, запрашивая профиль
-          await authApi.getProfile(state.user.id)
+          const user = await authApi.getProfile(state.user.id)
+          // Синхронизируем локальный стор с актуальными данными с сервера
+          if (user) {
+            set({ user })
+          }
           return true
         } catch (error) {
           // Если ошибка 401 или 404, токен невалиден или пользователь удален.
