@@ -5,6 +5,7 @@ import { AddToCalendarModal } from "../dashboard/AddToCalendarModal"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { useToast } from "@/lib/context/ToastContext"
 import { RatingStar } from "./RatingStar"
+import { stripHtml } from "@/lib/utils"
 
 interface ContentItem {
   id: string
@@ -203,28 +204,21 @@ export function ContentCards({ items, viewMode, type }: ContentCardsProps) {
                     )}
 
                     <div
-                      className={`mb-4 line-clamp-3 text-sm prose prose-sm max-w-none prose-p:my-0 prose-ul:my-0 prose-li:my-0 ${
+                      className={`mb-4 line-clamp-3 text-sm ${
                         type === "news" && item.imageUrl && viewMode === "grid"
                           ? "text-gray-200"
                           : "text-muted-foreground"
                       }`}>
                       {type === "news" ? (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html:
-                              item.preview ||
+                        <div>
+                          {stripHtml(
+                            item.preview ||
                               item.excerpt ||
-                              (item.content
-                                ? item.content.substring(0, 150) + "..."
-                                : ""),
-                          }}
-                        />
+                              (item.content ? item.content.substring(0, 150) : ""),
+                          )}
+                        </div>
                       ) : (
-                        <div
-                          dangerouslySetInnerHTML={{
-                            __html: item.preview || item.description || "",
-                          }}
-                        />
+                        <div>{stripHtml(item.preview || item.description || "")}</div>
                       )}
                     </div>
 

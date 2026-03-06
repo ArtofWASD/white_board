@@ -6,6 +6,7 @@ import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { ru } from "date-fns/locale"
 import { useRouter } from "next/navigation"
+import { stripHtml } from "@/lib/utils"
 
 export interface NewsItem {
   id: string
@@ -113,7 +114,7 @@ export default function NewsFeed({ news }: NewsFeedProps) {
                 </h3>
                 {mainNews.excerpt && (
                   <p className="text-gray-200 text-lg line-clamp-2 md:line-clamp-3 max-w-2xl mb-4">
-                    {mainNews.excerpt}
+                    {stripHtml(mainNews.excerpt)}
                   </p>
                 )}
                 <div className="flex items-center gap-2 text-white/60 text-sm font-medium self-end mt-auto">

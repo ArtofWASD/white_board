@@ -4,16 +4,9 @@ import { RichTextEditor } from "@/components/ui/RichTextEditor"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import { Modal } from "../ui/Modal"
 import { logApiError } from "../../lib/logger"
+import { stripHtml } from "@/lib/utils"
 
 import { adminApi, ContentBlock } from "../../lib/api/admin"
-
-const stripHtml = (html: string) => {
-  if (!html) return ""
-  return html
-    .replace(/<[^>]*>?/gm, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-}
 
 export const ContentTab: React.FC = () => {
   // const { token } = useAuthStore() // Token no longer needed explicitely
