@@ -38,7 +38,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       fetchTeams()
       verifyUser()
     }
-  }, [user, isAuthenticated, router, isLoading, fetchTeams, verifyUser])
+  }, [isAuthenticated, router, isLoading, fetchTeams, verifyUser])
 
   if (!isAuthenticated || !user) {
     return null // Or a loading spinner
