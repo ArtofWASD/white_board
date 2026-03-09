@@ -31,10 +31,15 @@ export const AthletesActivity: React.FC = () => {
         const userTeams = await teamsApi.getUserTeams(user.id)
         
         // Оставляем только те команды, где пользователь - владелец или админ
-        const managedTeams = userTeams.filter(t => 
-          t.ownerId === user.id || 
-          t.members?.some(m => m.userId === user.id && (m.role === "OWNER" || m.role === "ADMIN"))
-        )
+        const managedTeams = userTeams.filter(t => {
+          if (user.role === "SUPER_ADMIN") {
+            return !user.organizationId || t.organizationId === user.organizationId
+          }
+          return (
+            t.ownerId === user.id || 
+            t.members?.some(m => m.userId === user.id && (m.role === "OWNER" || m.role === "ADMIN"))
+          )
+        })
 
         // Собираем всех участников этих команд
         const athletesMap = new Map<string, User>()

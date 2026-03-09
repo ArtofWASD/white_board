@@ -43,6 +43,9 @@ export const useTeamActivities = () => {
           return t.members?.some(
             (m: TeamMember) => m.userId === user.id && m.role === "MEMBER"
           )
+        } else if (user.role === "SUPER_ADMIN") {
+          // SUPER_ADMIN sees all teams in their organization
+          return !user.organizationId || t.organizationId === user.organizationId
         } else {
           // Trainer/Admin logic
           return (

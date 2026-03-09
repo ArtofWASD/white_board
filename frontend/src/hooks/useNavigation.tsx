@@ -54,7 +54,7 @@ export function useNavigation() {
       items.push({
         label: "Активности",
         href:
-          user.role === "TRAINER"
+          user.role === "TRAINER" || user.role === "SUPER_ADMIN"
             ? "/dashboard/team-activities"
             : "/dashboard/organization",
         icon: <Image src="/menegment.png" alt="Activities" width={32} height={32} />,
