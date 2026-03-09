@@ -501,7 +501,9 @@ export class EventsService {
 
     // Синхронизация с StrengthWorkoutResult, если это тренировка 5/3/1
     if (userId && event.exercises && Array.isArray(event.exercises)) {
-      const recordExercise = event.exercises.find((ex: any) => ex.isRecord);
+      const recordExercise = (event.exercises as any[]).find(
+        (ex: any) => ex.isRecord,
+      );
       if (recordExercise && recordExercise.exerciseId && recordExercise.week) {
         try {
           // Создаем запись в таблице силовых
