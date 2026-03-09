@@ -110,12 +110,30 @@ export function StrengthTrainingModule({
         date: new Date(),
       })
 
+      // Также обновляем 1RM на основе нового рекорда, если это возможно (формула Эпли)
+      // В 5/3/1 мы обычно не обновляем 1RM автоматически в середине цикла, 
+      // но если пользователь обновил вручную в поле ввода, это должно сохраниться.
+      
       await fetchHistory()
       setLoggingWeek(null)
       setLogReps(0)
     } catch (error) {
+      console.error("Error saving strength result:", error)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const saveOneRepMax = async () => {
+    if (!selectedExerciseId || !oneRepMax) return
+    try {
+      await apiClient.post(`/api/exercises/${selectedExerciseId}/records`, {
+        weight: oneRepMax,
+        reps: 1,
+        date: new Date().toISOString()
+      })
+    } catch (error) {
+      console.error("Error saving 1RM:", error)
     }
   }
 
@@ -150,6 +168,7 @@ export function StrengthTrainingModule({
               type="number"
               value={oneRepMax || ""}
               onChange={(e) => setOneRepMax(Number(e.target.value))}
+              onBlur={saveOneRepMax}
               onPointerDown={handleInputPointerDown}
               onKeyDown={handleInputKeyDown}
               className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-600 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900 transition-all outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -206,7 +225,11 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>65% × 5 ({calculateWeight(0.65)}кг)</div>
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
-                  <div className="font-bold text-gray-900 dark:text-white">
+                  <div 
+                    className="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => startLogging(1, calculateWeight(0.85))}
+                    title="Нажмите, чтобы записать результат"
+                  >
                     85% × 5+ ({calculateWeight(0.85)}кг)
                   </div>
                 </div>
@@ -342,7 +365,11 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>70% × 3 ({calculateWeight(0.7)}кг)</div>
                   <div>80% × 3 ({calculateWeight(0.8)}кг)</div>
-                  <div className="font-bold text-gray-900 dark:text-white">
+                  <div 
+                    className="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => startLogging(2, calculateWeight(0.9))}
+                    title="Нажмите, чтобы записать результат"
+                  >
                     90% × 3+ ({calculateWeight(0.9)}кг)
                   </div>
                 </div>
@@ -480,7 +507,11 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div>85% × 3 ({calculateWeight(0.85)}кг)</div>
-                  <div className="font-bold text-gray-900 dark:text-white">
+                  <div 
+                    className="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors"
+                    onClick={() => startLogging(3, calculateWeight(0.95))}
+                    title="Нажмите, чтобы записать результат"
+                  >
                     95% × 1+ ({calculateWeight(0.95)}кг)
                   </div>
                 </div>
