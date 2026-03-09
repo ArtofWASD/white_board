@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react"
 import Button from "../../ui/Button"
 import { useAuthStore } from "@/lib/store/useAuthStore"
+import { apiClient } from "@/lib/api/apiClient"
 
 interface Exercise {
   id: string
@@ -75,13 +76,10 @@ export function StrengthTrainingModule({
     if (!user?.id || !selectedExerciseId) return
     setLoadingHistory(true)
     try {
-      const res = await fetch(
+      const data = await apiClient.get<StrengthResult[]>(
         `/api/strength-results/${user.id}/${selectedExerciseId}`,
       )
-      if (res.ok) {
-        const data = await res.json()
-        setHistory(data)
-      }
+      setHistory(data)
     } catch (error) {
     } finally {
       setLoadingHistory(false)
@@ -103,24 +101,18 @@ export function StrengthTrainingModule({
 
     setIsSubmitting(true)
     try {
-      const res = await fetch("/api/strength-results", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.id,
-          exerciseId: selectedExerciseId,
-          week: loggingWeek,
-          weight: logWeight,
-          reps: logReps,
-          date: new Date(),
-        }),
+      await apiClient.post("/api/strength-results", {
+        userId: user.id,
+        exerciseId: selectedExerciseId,
+        week: loggingWeek,
+        weight: logWeight,
+        reps: logReps,
+        date: new Date(),
       })
 
-      if (res.ok) {
-        await fetchHistory()
-        setLoggingWeek(null)
-        setLogReps(0)
-      }
+      await fetchHistory()
+      setLoggingWeek(null)
+      setLogReps(0)
     } catch (error) {
     } finally {
       setIsSubmitting(false)
