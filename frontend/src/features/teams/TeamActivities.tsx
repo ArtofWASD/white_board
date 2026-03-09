@@ -2,8 +2,11 @@ import React from "react"
 import { Loader } from "../../components/ui/Loader"
 import { useTeamActivities } from "./components/useTeamActivities"
 import { TeamActivityCard } from "./components/TeamActivityCard"
-import { ArrowLeft, Users } from "lucide-react"
+import { Users, User as UserIcon, Activity } from "lucide-react"
 import Link from "next/link"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../components/ui/Tabs"
+import { PersonalActivity } from "./components/PersonalActivity"
+import { AthletesActivity } from "./components/AthletesActivity"
 
 const TeamActivities: React.FC = () => {
   const {
@@ -19,21 +22,13 @@ const TeamActivities: React.FC = () => {
 
   if (isLoading) return <Loader />
 
-  if (teams.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">
-          У вас пока нет команд для просмотра.
-        </p>
-      </div>
-    )
-  }
+  const isTrainerOrAdmin = user?.role === "TRAINER" || user?.role === "SUPER_ADMIN" || user?.role === "ORGANIZATION_ADMIN"
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
-          Активность команд
+          Активность
         </h1>
         {user?.role === "ATHLETE" && (
           <Link
@@ -46,20 +41,57 @@ const TeamActivities: React.FC = () => {
         )}
       </div>
 
-      <div className="grid gap-6">
-        {teams.map((team) => (
-          <TeamActivityCard
-            key={team.id}
-            team={team}
-            user={user}
-            isExpanded={expandedTeamId === team.id}
-            membersData={teamMembers[team.id]}
-            eventResultsMap={eventResults}
-            onToggleTeam={handleToggleTeamExpand}
-            onToggleEvent={handleToggleEventExpand}
-          />
-        ))}
-      </div>
+      <Tabs defaultValue="teams" className="w-full">
+        <TabsList className="mb-6 w-full sm:w-auto overflow-x-auto justify-start sm:justify-center">
+          <TabsTrigger value="teams" className="flex items-center gap-2">
+            <Users className="w-4 h-4" />
+            Команды
+          </TabsTrigger>
+          {isTrainerOrAdmin && (
+            <TabsTrigger value="athletes" className="flex items-center gap-2">
+              <UserIcon className="w-4 h-4" />
+              Атлеты
+            </TabsTrigger>
+          )}
+          <TabsTrigger value="personal" className="flex items-center gap-2">
+            <Activity className="w-4 h-4" />
+            Личная
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="teams">
+          {teams.length === 0 ? (
+            <div className="text-center py-12 text-muted-foreground whitespace-pre-wrap">
+              У вас пока нет активных команд.
+            </div>
+          ) : (
+            <div className="grid gap-6">
+              {teams.map((team) => (
+                <TeamActivityCard
+                  key={team.id}
+                  team={team}
+                  user={user}
+                  isExpanded={expandedTeamId === team.id}
+                  membersData={teamMembers[team.id]}
+                  eventResultsMap={eventResults}
+                  onToggleTeam={handleToggleTeamExpand}
+                  onToggleEvent={handleToggleEventExpand}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {isTrainerOrAdmin && (
+          <TabsContent value="athletes">
+            <AthletesActivity />
+          </TabsContent>
+        )}
+
+        <TabsContent value="personal">
+          {user && <PersonalActivity userId={user.id} />}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
