@@ -76,7 +76,7 @@ export function StrengthTrainingModule({
     setLoadingHistory(true)
     try {
       const res = await fetch(
-        `/api/strength-results?userId=${user.id}&exerciseId=${selectedExerciseId}`,
+        `/api/strength-results/${user.id}/${selectedExerciseId}`,
       )
       if (res.ok) {
         const data = await res.json()

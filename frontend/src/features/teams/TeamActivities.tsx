@@ -30,15 +30,6 @@ const TeamActivities: React.FC = () => {
         <h1 className="text-3xl font-bold text-gray-800 dark:text-white">
           Активность
         </h1>
-        {user?.role === "ATHLETE" && (
-          <Link
-            href="/teams"
-            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-lg transition-colors bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200 dark:border-gray-700 shadow-sm"
-          >
-            <Users className="w-4 h-4" />
-            К списку команд
-          </Link>
-        )}
       </div>
 
       <Tabs defaultValue="teams" className="w-full">

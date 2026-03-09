@@ -76,7 +76,7 @@ export const exercisesApi = {
 export const strengthResultsApi = {
   /** Получить силовые результаты пользователя */
   getUserResults: (userId: string) =>
-    apiClient.get<StrengthWorkoutResult[]>("/api/strength-results", { userId }),
+    apiClient.get<StrengthWorkoutResult[]>(`/api/strength-results/${userId}`),
 }
 
 // ─── Контент (Blog) ────────────────────────────────────────────────────────────

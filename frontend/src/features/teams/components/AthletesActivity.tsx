@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react"
-import { User, StrengthWorkoutResult } from "../../../types"
-import { usersApi, strengthResultsApi } from "../../../lib/api/users"
+import { User, StrengthWorkoutResult, TeamMember } from "../../../types"
+import { strengthResultsApi } from "../../../lib/api/users"
+import { teamsApi } from "../../../lib/api/teams"
 import { StrengthProgressTable } from "./StrengthProgressTable"
 import { Loader } from "../../../components/ui/Loader"
+import { useAuthStore } from "../../../lib/store/useAuthStore"
 import {
   Select,
   SelectContent,
@@ -12,6 +14,7 @@ import {
 } from "../../../components/ui/select"
 
 export const AthletesActivity: React.FC = () => {
+  const { user } = useAuthStore()
   const [athletes, setAthletes] = useState<User[]>([])
   const [selectedAthleteId, setSelectedAthleteId] = useState<string>("")
   const [results, setResults] = useState<StrengthWorkoutResult[]>([])
@@ -20,10 +23,37 @@ export const AthletesActivity: React.FC = () => {
 
   useEffect(() => {
     const fetchAthletes = async () => {
+      if (!user?.id) return
       try {
         setIsLoadingAthletes(true)
-        const data = await usersApi.getAthletes()
-        setAthletes(data)
+        
+        // Для тренеров и админов получаем только атлетов из их команд
+        const userTeams = await teamsApi.getUserTeams(user.id)
+        
+        // Оставляем только те команды, где пользователь - владелец или админ
+        const managedTeams = userTeams.filter(t => 
+          t.ownerId === user.id || 
+          t.members?.some(m => m.userId === user.id && (m.role === "OWNER" || m.role === "ADMIN"))
+        )
+
+        // Собираем всех участников этих команд
+        const athletesMap = new Map<string, User>()
+        
+        await Promise.all(managedTeams.map(async (team) => {
+          const members = await teamsApi.getMembers(team.id)
+          members.forEach((member: TeamMember) => {
+            // Добавляем только атлетов, исключая самого тренера
+            if (member.user && member.userId !== user.id) {
+              athletesMap.set(member.userId, member.user)
+            }
+          })
+        }))
+
+        // Если это Super Admin, возможно он должен видеть всех? 
+        // Но в запросе сказано "только список атлетов в его командах".
+        // Придерживаемся фильтрации по командам.
+        
+        setAthletes(Array.from(athletesMap.values()))
       } catch (error) {
         console.error("Error fetching athletes:", error)
       } finally {
@@ -32,7 +62,7 @@ export const AthletesActivity: React.FC = () => {
     }
 
     fetchAthletes()
-  }, [])
+  }, [user])
 
   useEffect(() => {
     const fetchResults = async () => {
