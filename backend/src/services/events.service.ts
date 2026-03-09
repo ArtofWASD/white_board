@@ -499,6 +499,31 @@ export class EventsService {
       },
     });
 
+    // Синхронизация с StrengthWorkoutResult, если это тренировка 5/3/1
+    if (userId && event.exercises && Array.isArray(event.exercises)) {
+      const recordExercise = event.exercises.find((ex: any) => ex.isRecord);
+      if (recordExercise && recordExercise.exerciseId && recordExercise.week) {
+        try {
+          // Создаем запись в таблице силовых
+          await this.prisma.strengthWorkoutResult.create({
+            data: {
+              userId: userId,
+              exerciseId: recordExercise.exerciseId,
+              week: Number(recordExercise.week),
+              weight: Number(
+                recordExercise.rxWeight || recordExercise.weight || 0,
+              ),
+              reps: value || 0,
+              date: new Date(),
+            },
+          });
+        } catch (error) {
+          console.error('Error syncing to strength results:', error);
+          // Не прерываем основной процесс, если синхронизация не удалась
+        }
+      }
+    }
+
     return eventResult;
   }
 

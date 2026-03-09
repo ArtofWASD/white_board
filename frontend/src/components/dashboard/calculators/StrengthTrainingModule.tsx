@@ -325,6 +325,9 @@ export function StrengthTrainingModule({
                             repetitions: "5",
                             rxWeight: String(calculateWeight(0.85)),
                             rxReps: "5",
+                            exerciseId: selectedExerciseId,
+                            week: 1,
+                            isRecord: true,
                           },
                         ])
                       }}
@@ -467,6 +470,9 @@ export function StrengthTrainingModule({
                             repetitions: "3",
                             rxWeight: String(calculateWeight(0.9)),
                             rxReps: "3",
+                            exerciseId: selectedExerciseId,
+                            week: 2,
+                            isRecord: true,
                           },
                         ])
                       }}
@@ -609,6 +615,9 @@ export function StrengthTrainingModule({
                             repetitions: "1",
                             rxWeight: String(calculateWeight(0.95)),
                             rxReps: "1",
+                            exerciseId: selectedExerciseId,
+                            week: 3,
+                            isRecord: true,
                           },
                         ])
                       }}
