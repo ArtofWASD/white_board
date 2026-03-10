@@ -4,9 +4,16 @@ let socket: Socket | null = null
 let connectionPromise: Promise<Socket> | null = null
 let connectionResolver: ((s: Socket) => void) | null = null
 let activeConnections = 0
+let disconnectTimeout: NodeJS.Timeout | null = null
 
 export const initializeSocket = (userId: string) => {
   activeConnections++
+
+  // Если был запланирован дисконнект, отменяем его
+  if (disconnectTimeout) {
+    clearTimeout(disconnectTimeout)
+    disconnectTimeout = null
+  }
 
   if (socket?.connected) {
     if (socket.id) {
@@ -16,30 +23,27 @@ export const initializeSocket = (userId: string) => {
   }
 
   if (!socket) {
+    // ... (rest of initializeSocket logic remains similar)
     let socketUrl = process.env.NEXT_PUBLIC_API_URL || ""
 
-    // Dynamic resolution to bypass Next.js build-time baked variables in Docker
+    // Dynamic resolution logic...
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname
-      // If we are on production/staging domains (not localhost), dynamically prepend 'api.'
       if (hostname !== "localhost" && hostname !== "127.0.0.1") {
         socketUrl = `https://api.${hostname}`
       } else if (socketUrl) {
         try {
           const url = new URL(socketUrl)
           socketUrl = url.origin
-        } catch {
-          // Keep as is
-        }
+        } catch {}
       }
     } else if (socketUrl) {
       try {
         const url = new URL(socketUrl)
         socketUrl = url.origin
-      } catch {
-          // Keep as is
-      }
+      } catch {}
     }
+
     socket = io(socketUrl, {
       path: "/socket.io",
       withCredentials: true,
@@ -55,7 +59,6 @@ export const initializeSocket = (userId: string) => {
     })
   }
 
-  // Resolve waiting consumers
   if (connectionResolver && socket) {
     connectionResolver(socket)
     connectionResolver = null
@@ -83,13 +86,20 @@ export const disconnectSocket = () => {
     activeConnections--
   }
 
-  if (activeConnections === 0) {
-    if (socket) {
-      socket.disconnect()
-      socket = null
-    }
-    // Reset promise for next connection
-    connectionPromise = null
-    connectionResolver = null
+  // Используем небольшую задержку перед реальным отключением.
+  // Это предотвращает ошибку "WebSocket is closed before the connection is established"
+  // при быстром перемонтировании компонентов в React Dev Mode или при навигации.
+  if (activeConnections === 0 && socket) {
+    if (disconnectTimeout) clearTimeout(disconnectTimeout)
+
+    disconnectTimeout = setTimeout(() => {
+      if (activeConnections === 0 && socket) {
+        socket.disconnect()
+        socket = null
+        connectionPromise = null
+        connectionResolver = null
+      }
+      disconnectTimeout = null
+    }, 1000)
   }
 }

@@ -146,7 +146,16 @@ export const useAuthStore = create<AuthState>()(
           const response = await authApi.getProfile(userId)
           // Синхронизируем локальный стор с актуальными данными с сервера
           if (response && response.user) {
-            set({ user: response.user, isAuthenticated: true })
+            // Предотвращаем лишние ререндеры, если данные не изменились
+            const currentUserStr = JSON.stringify(state.user)
+            const newUserStr = JSON.stringify(response.user)
+
+            if (currentUserStr !== newUserStr) {
+              set({ user: response.user, isAuthenticated: true })
+            } else {
+              // Если данные те же, просто подтверждаем аутентификацию
+              set({ isAuthenticated: true })
+            }
           }
           return true
         } catch (error) {

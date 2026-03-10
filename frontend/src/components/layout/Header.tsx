@@ -114,11 +114,10 @@ const Header: React.FC<HeaderProps> = ({
 
         try {
           // Инициализируем сокет (увеличиваем счетчик ссылок)
-          const socket = initializeSocket(user.id)
+          socketInstance = initializeSocket(user.id)
 
-          if (isMounted) {
-            socketInstance = socket
-            socket.on("newNotification", handleNewNotification)
+          if (isMounted && socketInstance) {
+            socketInstance.on("newNotification", handleNewNotification)
           }
         } catch (e) {
           console.error("[Header] Socket init failed", e)
@@ -136,7 +135,7 @@ const Header: React.FC<HeaderProps> = ({
         disconnectSocket()
       }
     }
-  }, [isAuthenticated, user])
+  }, [isAuthenticated, user?.id])
 
   return (
     <header className="sticky top-0 bg-gray-800 text-white py-2 px-2 sm:px-4 flex justify-between items-center relative gap-2 sm:gap-4 z-50">
@@ -319,7 +318,10 @@ const Header: React.FC<HeaderProps> = ({
               Привет, {user.name}
               {user.lastName ? ` ${user.lastName}` : ""}!
             </span>
-            <Avatar user={user} className="w-[27px] h-[27px] sm:w-[35px] sm:h-[35px] text-sm sm:text-base" />
+            <Avatar
+              user={user}
+              className="w-[27px] h-[27px] sm:w-[35px] sm:h-[35px] text-sm sm:text-base"
+            />
           </div>
         </div>
       ) : (

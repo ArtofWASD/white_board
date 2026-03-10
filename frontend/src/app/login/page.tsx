@@ -29,7 +29,12 @@ function LoginForm() {
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      window.location.href = redirect || "/"
+      // Используем router.push для мягкой навигации,
+      // но если мы уже на нужной странице, ничего не делаем
+      const target = redirect || "/"
+      if (window.location.pathname !== target) {
+        router.push(target)
+      }
     }
   }, [isAuthenticated, router, isLoading, redirect])
 
@@ -38,7 +43,7 @@ function LoginForm() {
     try {
       const success = await login(data.email, data.password)
       if (success) {
-        window.location.href = redirect || "/"
+        router.push(redirect || "/")
       } else {
         setFormError("root", {
           type: "manual",

@@ -11,20 +11,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { fetchTeams } = useTeamStore()
   const router = useRouter()
 
-  // Initialize Socket
-  useEffect(() => {
-    if (typeof window !== "undefined" && user?.id) {
-      import("../../lib/socket").then(({ initializeSocket }) => {
-        initializeSocket(user.id)
-      })
-    }
-
-    return () => {
-      import("../../lib/socket").then(({ disconnectSocket }) => {
-        disconnectSocket()
-      })
-    }
-  }, [user])
+  // Socket initialization is handled in Header component which is part of this layout.
+  // Redundant initialization here can lead to connection flickering.
 
   useEffect(() => {
     if (isLoading) return
