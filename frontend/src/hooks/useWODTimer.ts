@@ -32,19 +32,20 @@ export interface TimerState {
 const WARMUP_TIME = 10 * 1000 // 10 секунд
 
 export const useWODTimer = (config: TimerConfig) => {
+  const initialRound = config.mode === "FOR_TIME" || config.mode === "AMRAP" ? 0 : 1
+
   const [state, setState] = useState<TimerState>({
     status: "IDLE",
     phase: "WARMUP",
     timeLeft: WARMUP_TIME,
     elapsedTime: 0,
-    currentRound: 1,
+    currentRound: initialRound,
     totalRounds: config.rounds || 1,
     roundTimes: [],
   })
 
   const requestRef = useRef<number | undefined>(undefined)
   const startTimeRef = useRef<number | undefined>(undefined)
-
 
   // Помощник для обработки смены фаз
   const transitionPhase = useCallback(
@@ -58,17 +59,14 @@ export const useWODTimer = (config: TimerConfig) => {
         if (config.mode === "AMRAP") workTime = (config.duration || 0) * 1000
         else if (["EMOM", "TABATA", "INTERVALS"].includes(config.mode))
           workTime = (config.intervalWork || 0) * 1000
-        else if (config.mode === "FOR_TIME")
-          workTime = config.timeCap ? config.timeCap * 1000 : 999999999 // Если нет лимита, ставим большое время
-
-        // FOR_TIME особенный, он считает ВВЕРХ, но мы можем моделировать его как обратный отсчет от лимита или просто бесконечный вверх.
-        // Давайте стандартизируем: timeLeft - это то, что отображается.
-        // Для AMRAP/Intervals: timeLeft уменьшается.
-        // Для FOR_TIME: timeLeft увеличивается? Или timeLeft оставшееся до лимита?
-        // Давайте использовать timeLeft как оставшееся время для текущей фазы.
+        else if (config.mode === "FOR_TIME") {
+          // If no timeCap, start from 0 and count up. If timeCap, count down from it.
+          workTime = config.timeCap ? config.timeCap * 1000 : 0
+        }
 
         audioController.playStart()
-        return { nextPhase: "WORK", nextRound: 1, nextTime: workTime }
+        const startRound = config.mode === "FOR_TIME" || config.mode === "AMRAP" ? 0 : 1
+        return { nextPhase: "WORK", nextRound: startRound, nextTime: workTime }
       }
 
       // РАБОТА -> ОТДЫХ или РАБОТА -> ГОТОВО или РАБОТА -> РАБОТА (след. раунд)
@@ -131,8 +129,6 @@ export const useWODTimer = (config: TimerConfig) => {
     [config],
   )
 
-
-
   // Пересмотренная логика тика с useEffect
   useEffect(() => {
     if (state.status !== "RUNNING") {
@@ -152,16 +148,26 @@ export const useWODTimer = (config: TimerConfig) => {
       pPreviousTime = time
 
       setState((prev) => {
-        const newTimeLeft = prev.timeLeft - deltaTime
+        const isForTimeUp =
+          config.mode === "FOR_TIME" && !config.timeCap && prev.phase === "WORK"
+        const newTimeLeft = isForTimeUp
+          ? prev.timeLeft + deltaTime
+          : prev.timeLeft - deltaTime
 
         // Аудио проверки для отсчета (3, 2, 1)
         const prevSeconds = Math.ceil(prev.timeLeft / 1000)
         const newSeconds = Math.ceil(newTimeLeft / 1000)
-        if (newSeconds < prevSeconds && newSeconds <= 3 && newSeconds > 0) {
+
+        if (
+          !isForTimeUp &&
+          newSeconds < prevSeconds &&
+          newSeconds <= 3 &&
+          newSeconds > 0
+        ) {
           audioController.playCountdown()
         }
 
-        if (newTimeLeft <= 0) {
+        if (!isForTimeUp && newTimeLeft <= 0) {
           // Фаза завершена
           const next = transitionPhase(prev.phase, prev.currentRound)
           if (next) {
@@ -208,7 +214,7 @@ export const useWODTimer = (config: TimerConfig) => {
       phase: "WARMUP",
       timeLeft: WARMUP_TIME,
       elapsedTime: 0,
-      currentRound: 1,
+      currentRound: initialRound,
       totalRounds: config.rounds || 1,
       roundTimes: [],
     })
@@ -230,14 +236,17 @@ export const useWODTimer = (config: TimerConfig) => {
   }
 
   const addRound = () => {
-    setState((prev) => ({
-      ...prev,
-      currentRound: prev.currentRound + 1,
-      roundTimes: [
-        ...prev.roundTimes,
-        { round: prev.currentRound, elapsedMs: prev.elapsedTime },
-      ],
-    }))
+    setState((prev) => {
+      const nextRound = prev.currentRound + 1
+      return {
+        ...prev,
+        currentRound: nextRound,
+        roundTimes: [
+          ...prev.roundTimes,
+          { round: nextRound, elapsedMs: prev.elapsedTime },
+        ],
+      }
+    })
     audioController.playRoundComplete()
   }
 

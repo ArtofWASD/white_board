@@ -105,7 +105,7 @@ export function WorkoutFormFields({ form }: WorkoutFormFieldsProps) {
             <FieldError msg={errors.timeCap?.message} />
           </div>
         )}
-        {scheme === "EMOM" && (
+        {(scheme === "EMOM" || scheme === "FOR_TIME") && (
           <div className="space-y-2">
             <Label htmlFor="rounds">Раунды</Label>
             <Input

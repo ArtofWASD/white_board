@@ -21,12 +21,16 @@ export function AgendaView({
   formatDayNumber,
 }: AgendaViewProps) {
   const todayRef = useRef<HTMLDivElement>(null)
+  const hasScrolledRef = useRef(false)
 
   useEffect(() => {
-    if (todayRef.current && days.length > 0) {
+    if (todayRef.current && days.length > 0 && !hasScrolledRef.current) {
       // Use a slightly longer timeout for mobile/PWA rendering
       const timer = setTimeout(() => {
-        todayRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+        if (todayRef.current) {
+          todayRef.current.scrollIntoView({ behavior: "smooth", block: "start" })
+          hasScrolledRef.current = true
+        }
       }, 300)
       return () => clearTimeout(timer)
     }

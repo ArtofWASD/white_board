@@ -37,7 +37,7 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart, onModeSelect })
       workBytes: 20,
       restBytes: 10,
       rounds: 8,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any,
   })
 
@@ -59,11 +59,9 @@ export const TimerSetup: React.FC<TimerSetupProps> = ({ onStart, onModeSelect })
     switch (selectedMode) {
       case "FOR_TIME":
         config.timeCap = (data.timeCapMinutes || 0) * 60
-        config.rounds = 1
         break
       case "AMRAP":
         config.duration = (data.durationMinutes || 0) * 60
-        config.rounds = 1
         break
       case "EMOM":
         config.intervalWork = data.emomInterval

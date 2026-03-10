@@ -140,7 +140,7 @@ export const workoutFormSchema = z
         })
       }
     }
-    if (data.scheme === "EMOM") {
+    if (data.scheme === "EMOM" || data.scheme === "FOR_TIME") {
       if (data.rounds && !/^\d+$/.test(data.rounds)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

@@ -76,6 +76,9 @@ export function WorkoutDetail({
           params.set("timeCap", totalSeconds.toString())
         }
       }
+      if (workout.rounds) {
+        params.set("rounds", workout.rounds)
+      }
     } else if (workout.type === "AMRAP") {
       params.set("mode", "AMRAP")
       if (workout.timeCap) {
@@ -90,11 +93,29 @@ export function WorkoutDetail({
         }
         if (!isNaN(durationSeconds)) params.set("duration", durationSeconds.toString())
       }
+      if (workout.rounds) {
+        params.set("rounds", workout.rounds)
+      }
     } else if (workout.type === "EMOM") {
       params.set("mode", "EMOM")
-      // EMOM logic customization needed if data available
-      // Defaulting to standard 1 minute
       params.set("intervalWork", "60")
+
+      // Check if rounds are specified directly
+      if (workout.rounds) {
+        params.set("rounds", workout.rounds)
+      } else if (workout.timeCap) {
+        // If not, try to derive rounds from timeCap (assumes 1 min per round)
+        const parts = workout.timeCap.split(":")
+        let rounds = 0
+        if (parts.length === 2) {
+          rounds = parseInt(parts[0])
+        } else {
+          rounds = parseInt(workout.timeCap)
+        }
+        if (!isNaN(rounds) && rounds > 0) {
+          params.set("rounds", rounds.toString())
+        }
+      }
     } else if (workout.type === "CARDIO") {
       if (workout.timeCap) {
         const parts = workout.timeCap.split(":")

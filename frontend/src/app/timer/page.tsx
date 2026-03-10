@@ -39,11 +39,21 @@ function TimerPageContent() {
     if (modeParam && !config) {
       const initialConfig: TimerConfig = {
         mode: modeParam as TimerMode,
-        rounds: Number(searchParams.get("rounds")) || 1,
-        timeCap: Number(searchParams.get("timeCap")) || undefined,
-        duration: Number(searchParams.get("duration")) || undefined,
-        intervalWork: Number(searchParams.get("intervalWork")) || undefined,
-        intervalRest: Number(searchParams.get("intervalRest")) || undefined,
+        rounds: searchParams.get("rounds")
+          ? Number(searchParams.get("rounds"))
+          : undefined,
+        timeCap: searchParams.get("timeCap")
+          ? Number(searchParams.get("timeCap"))
+          : undefined,
+        duration: searchParams.get("duration")
+          ? Number(searchParams.get("duration"))
+          : undefined,
+        intervalWork: searchParams.get("intervalWork")
+          ? Number(searchParams.get("intervalWork"))
+          : undefined,
+        intervalRest: searchParams.get("intervalRest")
+          ? Number(searchParams.get("intervalRest"))
+          : undefined,
       }
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setConfig(initialConfig)
@@ -144,6 +154,9 @@ const ActiveTimer: React.FC<{
     if (config.mode === "FOR_TIME") {
       const completed = state.roundTimes.length
       const timeStr = formatTime(state.elapsedTime)
+      if (config.rounds && config.rounds > 0) {
+        return `FOR TIME: ${timeStr} (${completed} из ${config.rounds} раундов)`
+      }
       return completed > 0
         ? `FOR TIME: ${timeStr} — ${completed} раунд(а)`
         : `FOR TIME: ${timeStr}`

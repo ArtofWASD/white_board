@@ -70,9 +70,18 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
     status === "RUNNING" &&
     phase === "WORK"
 
+  // "Завершить" button visibility:
+  // - mode is FOR_TIME
+  // - status is PAUSED
+  // - OR reached required rounds
+  const showFinishButton =
+    config.mode === "FOR_TIME" &&
+    (status === "PAUSED" ||
+      (config.rounds && config.rounds > 0 && currentRound >= config.rounds))
+
   const displayRounds =
     config.mode === "AMRAP" || config.mode === "FOR_TIME"
-      ? `Раунд ${currentRound}`
+      ? `Раунд ${currentRound}${config.rounds ? ` / ${config.rounds}` : ""}`
       : `${currentRound} / ${totalRounds}`
 
   const hasRoundTimes = roundTimes && roundTimes.length > 0
@@ -120,6 +129,14 @@ export const TimerDisplay: React.FC<TimerDisplayProps> = ({
             onClick={onAddRound}
             className="px-8 py-4 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xl font-bold transition-all active:scale-95 shadow-lg shadow-purple-200 dark:shadow-none">
             РАУНД +1
+          </button>
+        )}
+
+        {showFinishButton && onAddResult && (
+          <button
+            onClick={onAddResult}
+            className="px-8 py-4 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xl font-bold transition-all active:scale-95 shadow-lg shadow-red-200 dark:shadow-none">
+            ЗАВЕРШИТЬ
           </button>
         )}
 
