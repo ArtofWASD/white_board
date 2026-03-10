@@ -87,7 +87,7 @@ export interface EventResult {
   userId?: string
   value?: number
   scaling?: string
-  notes?: string
+  notes?: string | string[]
 }
 
 export interface CalendarEvent {

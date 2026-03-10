@@ -3,8 +3,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/Switch"
 import { cn } from "@/lib/utils"
-import { Calendar, Trophy, Timer, PlayCircle, ClipboardEdit } from "lucide-react"
-import { useState } from "react"
+import {
+  Calendar,
+  Trophy,
+  Timer,
+  PlayCircle,
+  ClipboardEdit,
+  ChevronDown,
+  ChevronUp,
+  History,
+} from "lucide-react"
+import { useState, useEffect } from "react"
 import { Workout } from "./WorkoutCard"
 import { useRouter } from "next/navigation" // Import useRouter
 import { AddResultModal } from "./AddResultModal" // Import AddResultModal
@@ -30,6 +39,28 @@ export function WorkoutDetail({
   const [isEditModalOpen, setIsEditModalOpen] = useState(false) // State for edit modal
   const router = useRouter()
   const { user } = useAuthStore() // Added for delete ownership check
+  const [userResult, setUserResult] = useState<any>(null)
+  const [isNotesOpen, setIsNotesOpen] = useState(false)
+  const [isLoadingResult, setIsLoadingResult] = useState(false)
+
+  // Fetch result when modal opens
+  useEffect(() => {
+    if (isOpen && workout && user) {
+      const fetchResult = async () => {
+        setIsLoadingResult(true)
+        try {
+          const results = await eventsApi.getResults(workout.id)
+          const myResult = results.find((r) => r.userId === user.id)
+          setUserResult(myResult || null)
+        } catch (error) {
+          console.error("Failed to fetch results:", error)
+        } finally {
+          setIsLoadingResult(false)
+        }
+      }
+      fetchResult()
+    }
+  }, [isOpen, workout, user])
 
   if (!workout) return null
 
@@ -298,6 +329,76 @@ export function WorkoutDetail({
                       ))}
                 </ul>
               </div>
+
+              {/* Athlete Result section */}
+              {!isLoadingResult && userResult && (
+                <div className="space-y-3 pt-2 border-t border-border/50">
+                  <div className="flex items-center justify-between bg-primary/5 dark:bg-primary/10 border border-primary/20 p-4 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                        <History className="h-5 w-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                          Ваш результат
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-foreground">
+                            {userResult.time || userResult.value}
+                          </span>
+                          <span
+                            className={cn(
+                              "px-1.5 py-0.5 rounded text-[10px] font-bold ring-1 ring-inset",
+                              userResult.scaling === "RX"
+                                ? "bg-primary/10 text-primary ring-primary/20"
+                                : "bg-muted text-muted-foreground ring-border",
+                            )}>
+                            {userResult.scaling}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Accordion for Round Details */}
+                  {(workout.type === "AMRAP" || workout.type === "FOR_TIME") &&
+                    userResult.notes &&
+                    (Array.isArray(userResult.notes)
+                      ? userResult.notes.length > 0 &&
+                        userResult.notes.some((n: string) => n.trim() !== "")
+                      : typeof userResult.notes === "string" &&
+                        userResult.notes.trim() !== "") && (
+                      <div className="border border-border/50 rounded-lg overflow-hidden transition-all duration-200">
+                        <button
+                          onClick={() => setIsNotesOpen(!isNotesOpen)}
+                          className="w-full flex items-center justify-between p-3 text-sm font-semibold hover:bg-muted/30 transition-colors">
+                          <span className="flex items-center gap-2">
+                            <History className="h-4 w-4 text-muted-foreground" />
+                            Детализация по раундам
+                          </span>
+                          {isNotesOpen ? (
+                            <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                          ) : (
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          )}
+                        </button>
+                        <div
+                          className={cn(
+                            "transition-all duration-300 ease-in-out overflow-hidden",
+                            isNotesOpen
+                              ? "max-h-[500px] opacity-100"
+                              : "max-h-0 opacity-0",
+                          )}>
+                          <div className="p-4 pt-0 text-sm font-mono text-muted-foreground whitespace-pre-wrap leading-relaxed border-t border-border/30 bg-muted/10">
+                            {Array.isArray(userResult.notes)
+                              ? userResult.notes.join("\n")
+                              : userResult.notes}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -345,7 +446,14 @@ export function WorkoutDetail({
         onClose={() => setIsAddResultOpen(false)}
         onSuccess={() => {
           setIsAddResultOpen(false)
-          onClose()
+          // Refetch results locally instead of closing the whole detail view
+          if (workout && user) {
+            eventsApi.getResults(workout.id).then((results) => {
+              const myResult = results.find((r) => r.userId === user.id)
+              setUserResult(myResult || null)
+            })
+          }
+          if (onDelete) onDelete() // Use this to notify parent for card update
         }}
       />
 
