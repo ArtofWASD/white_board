@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button"
 import { Label } from "@/components/ui/label"
 import { eventsApi } from "@/lib/api/events"
 import { useAuthStore } from "@/lib/store/useAuthStore"
+import { useToast } from "@/lib/context/ToastContext"
 import { Workout } from "./WorkoutCard"
 
 interface AddToCalendarBlockProps {
@@ -13,6 +14,7 @@ interface AddToCalendarBlockProps {
 
 export function AddToCalendarBlock({ workout, onClose }: AddToCalendarBlockProps) {
   const { user } = useAuthStore()
+  const { success, error: toastError } = useToast()
   
   const [selectedDate, setSelectedDate] = useState(() => {
     const d = new Date()
@@ -37,11 +39,11 @@ export function AddToCalendarBlock({ workout, onClose }: AddToCalendarBlockProps
         description: workout.description,
         scheme: workout.type,
       })
-      alert("Событие успешно добавлено в ваш календарь!")
+      success("Событие успешно добавлено в ваш календарь!")
       onClose()
     } catch (err) {
       console.error(err)
-      alert("Не удалось добавить событие в календарь.")
+      toastError("Не удалось добавить событие в календарь.")
     } finally {
       setIsAddingToCalendar(false)
     }
