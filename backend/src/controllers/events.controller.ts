@@ -58,6 +58,11 @@ export class EventsController {
     }
   }
 
+  @Get('favorites/:userId')
+  async getUserFavorites(@Param('userId') userId: string) {
+    return this.eventsService.getUserFavorites(userId);
+  }
+
   @Get(':userId')
   async getEventsByUserId(
     @Param('userId') userId: string,
@@ -168,6 +173,26 @@ export class EventsController {
       throw new BadRequestException('User ID is required');
     }
     return this.eventsService.toggleResultLike(resultId, body.userId);
+  }
+
+  @Post(':eventId/favorite')
+  @HttpCode(HttpStatus.OK)
+  async toggleFavorite(
+    @Param('eventId') eventId: string,
+    @Body() body: { userId: string },
+  ) {
+    if (!body.userId) {
+      throw new BadRequestException('User ID is required');
+    }
+    return this.eventsService.toggleFavorite(body.userId, eventId);
+  }
+
+  @Get(':eventId/favorite/:userId')
+  async isEventFavorited(
+    @Param('eventId') eventId: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.eventsService.isEventFavorited(userId, eventId);
   }
 
   @Put(':eventId')

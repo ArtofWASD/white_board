@@ -12,7 +12,6 @@ import {
   ChevronDown,
   ChevronUp,
   History,
-  Star,
 } from "lucide-react"
 import { useState, useEffect } from "react"
 import { Workout } from "./WorkoutCard"
@@ -21,14 +20,12 @@ import { AddResultModal } from "./AddResultModal" // Import AddResultModal
 import { EditWorkoutModal } from "./EditWorkoutModal"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { eventsApi } from "@/lib/api/events"
-import { AddToCalendarBlock } from "./AddToCalendarBlock"
 
 interface WorkoutDetailProps {
   workout: Workout | null
   isOpen: boolean
   onClose: () => void
   onDelete?: () => void
-  isFromFavorites?: boolean
 }
 
 export function WorkoutDetail({
@@ -36,7 +33,6 @@ export function WorkoutDetail({
   isOpen,
   onClose,
   onDelete,
-  isFromFavorites,
 }: WorkoutDetailProps) {
   const [isRx, setIsRx] = useState(true)
   const [isAddResultOpen, setIsAddResultOpen] = useState(false) // State for result modal
@@ -46,26 +42,6 @@ export function WorkoutDetail({
   const [userResult, setUserResult] = useState<any>(null)
   const [isNotesOpen, setIsNotesOpen] = useState(false)
   const [isLoadingResult, setIsLoadingResult] = useState(false)
-
-  const [isFavorite, setIsFavorite] = useState(false)
-  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false)
-
-  // Fetch favorite status
-  useEffect(() => {
-    if (isOpen && workout && user) {
-      const fetchFavoriteStatus = async () => {
-        try {
-          const res = await eventsApi.isEventFavorited(workout.id, user.id);
-          setIsFavorite(res.favorited);
-        } catch (error) {
-          console.error("Failed to fetch favorite status", error);
-        }
-      };
-      fetchFavoriteStatus();
-    } else {
-      setIsFavorite(false);
-    }
-  }, [isOpen, workout, user])
 
   // Fetch result when modal opens
   useEffect(() => {
@@ -101,24 +77,6 @@ export function WorkoutDetail({
     } catch (error) {
       console.error("Failed to delete workout:", error)
       alert("Не удалось удалить тренировку.")
-    }
-  }
-
-  const handleToggleFavorite = async () => {
-    if (!workout || !user) return;
-    setIsFavoriteLoading(true);
-    try {
-      const res = await eventsApi.toggleFavorite(workout.id, user.id);
-      setIsFavorite(res.favorited);
-      // Если передана коллбек-функция удаления (что также служит флагом обновления списка для избранного),
-      // вызываем её чтобы удалить карточку из UI без полной перезагрузки если мы на странице избранного.
-      if (!res.favorited && onDelete) {
-        onDelete();
-      }
-    } catch (error) {
-      console.error("Failed to toggle favorite:", error);
-    } finally {
-      setIsFavoriteLoading(false);
     }
   }
 
@@ -227,8 +185,6 @@ export function WorkoutDetail({
     onClose() // Close modal after navigating
   }
 
-  if (!isOpen) return null
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -240,32 +196,13 @@ export function WorkoutDetail({
               <Calendar className="h-4 w-4" />
               <span>Тренировка дня</span>
             </div>
-            <DialogTitle className="text-2xl flex items-start justify-between pr-6">
-              <div className="flex items-center gap-3 text-left">
-                <div>
-                  {workout.title}
-                  {workout.teamName && (
-                    <span className="text-muted-foreground text-lg font-normal ml-2">
-                      для {workout.teamName}
-                    </span>
-                  )}
-                </div>
-                <button
-                  onClick={handleToggleFavorite}
-                  disabled={isFavoriteLoading}
-                  className="rounded-full p-1.5 hover:bg-muted transition-colors disabled:opacity-50 shrink-0"
-                  title={isFavorite ? "В избранном" : "В избранное"}
-                >
-                  <Star
-                    className={cn(
-                      "w-6 h-6 transition-colors duration-200",
-                      isFavorite 
-                        ? "fill-yellow-500 text-yellow-500" 
-                        : "text-muted-foreground hover:text-foreground"
-                    )}
-                  />
-                </button>
-              </div>
+            <DialogTitle className="text-2xl">
+              {workout.title}
+              {workout.teamName && (
+                <span className="text-muted-foreground text-lg font-normal ml-2">
+                  для {workout.teamName}
+                </span>
+              )}
             </DialogTitle>
             <div className="flex items-center gap-2 mt-2 justify-center sm:justify-start">
               <span
@@ -466,45 +403,38 @@ export function WorkoutDetail({
           </div>
 
           <div className="p-4 border-t bg-muted/20 flex flex-col gap-3 mt-auto">
-            {!isFromFavorites ? (
-              <>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    variant="outline"
-                    className="min-h-[48px] h-12 flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
-                    onClick={handleStartTimer}>
-                    <PlayCircle className="h-5 w-5" />
-                    Запустить таймер
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="min-h-[48px] h-12 flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
-                    onClick={() => setIsAddResultOpen(true)}>
-                    <ClipboardEdit className="h-5 w-5" />
-                    Записать результат
-                  </Button>
-                </div>
-                {workout.userId === user?.id && (
-                  <div className="flex flex-col sm:flex-row gap-3 w-full">
-                    <Button
-                      variant="outline"
-                      className="min-h-[48px] h-12 flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-blue-900 border-blue-500 border bg-transparent transition-colors"
-                      onClick={() => setIsEditModalOpen(true)}>
-                      Изменить
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="min-h-[48px] h-12 flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-red-900 border-red-500 border bg-transparent transition-colors"
-                      onClick={handleDeleteWorkout}>
-                      Удалить занятие
-                    </Button>
-                  </div>
-                )}
-              </>
-            ) : (
-              <AddToCalendarBlock workout={workout} onClose={onClose} />
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                variant="outline"
+                className="min-h-[48px] h-12 flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
+                onClick={handleStartTimer}>
+                <PlayCircle className="h-5 w-5" />
+                Запустить таймер
+              </Button>
+              <Button
+                variant="outline"
+                className="min-h-[48px] h-12 flex-1 gap-2 whitespace-nowrap border-black text-black hover:bg-gray-100 dark:border-gray-600 dark:text-white dark:bg-gray-800 dark:hover:bg-gray-700 bg-transparent transition-colors"
+                onClick={() => setIsAddResultOpen(true)}>
+                <ClipboardEdit className="h-5 w-5" />
+                Записать результат
+              </Button>
+            </div>
+            {workout.userId === user?.id && (
+              <div className="flex flex-col sm:flex-row gap-3 w-full">
+                <Button
+                  variant="outline"
+                  className="min-h-[48px] h-12 flex-1 text-blue-500 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:text-blue-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-blue-900 border-blue-500 border bg-transparent transition-colors"
+                  onClick={() => setIsEditModalOpen(true)}>
+                  Изменить
+                </Button>
+                <Button
+                  variant="outline"
+                  className="min-h-[48px] h-12 flex-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:bg-gray-800 dark:hover:bg-gray-700 dark:border-red-900 border-red-500 border bg-transparent transition-colors"
+                  onClick={handleDeleteWorkout}>
+                  Удалить занятие
+                </Button>
+              </div>
             )}
-            
           </div>
         </DialogContent>
       </Dialog>

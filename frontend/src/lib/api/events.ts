@@ -94,4 +94,16 @@ export const eventsApi = {
   /** Добавить заметку/комментарий к результату */
   addNote: (resultId: string, notes: string) =>
     apiClient.post<void>(`/api/events/results/${resultId}/notes`, { notes }),
+
+  /** Переключить событие в избранное/из избранного */
+  toggleFavorite: (eventId: string, userId: string) =>
+    apiClient.post<{ favorited: boolean }>(`/api/events/${eventId}/favorite`, { userId }),
+
+  /** Получить список избранных событий пользователя */
+  getFavorites: (userId: string) =>
+    apiClient.get<Event[]>(`/api/events/favorites/${userId}`),
+
+  /** Проверить, добавлено ли событие в избранное */
+  isEventFavorited: (eventId: string, userId: string) =>
+    apiClient.get<{ favorited: boolean }>(`/api/events/${eventId}/favorite/${userId}`),
 }

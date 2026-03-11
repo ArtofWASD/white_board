@@ -800,6 +800,57 @@ export class EventsService {
 
     return updatedEvent;
   }
+  async toggleFavorite(userId: string, eventId: string) {
+    const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+    if (!event) {
+      throw new NotFoundException('Event not found');
+    }
+
+    const existing = await this.prisma.favoriteEvent.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+
+    if (existing) {
+      await this.prisma.favoriteEvent.delete({ where: { id: existing.id } });
+      return { favorited: false };
+    } else {
+      await this.prisma.favoriteEvent.create({ data: { userId, eventId } });
+      return { favorited: true };
+    }
+  }
+
+  async getUserFavorites(userId: string) {
+    const favorites = await this.prisma.favoriteEvent.findMany({
+      where: { userId },
+      include: {
+        event: {
+          include: {
+            results: {
+              where: { userId },
+              orderBy: { dateAdded: 'desc' },
+            },
+            participants: {
+              select: { id: true, name: true, lastName: true },
+            },
+            team: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return favorites.map((f) => f.event);
+  }
+
+  async isEventFavorited(userId: string, eventId: string) {
+    const existing = await this.prisma.favoriteEvent.findUnique({
+      where: { userId_eventId: { userId, eventId } },
+    });
+    return { favorited: !!existing };
+  }
+
   async getDebugInfo(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },

@@ -75,6 +75,7 @@ model User {
   eventResults       EventResult[]
   eventResultLikes   EventResultLike[]
   notifications      Notification[]
+  favorites          FavoriteEvent[]
 
   // Chat Relations
   chatParticipations ChatParticipant[]
@@ -203,6 +204,7 @@ model Event {
   rounds       String?
   teamId       String?       @map("team_id")
   team         Team?         @relation(fields: [teamId], references: [id])
+  favoritedBy  FavoriteEvent[]
 
   @@map("events")
 }
@@ -398,4 +400,17 @@ model Message {
   sender    User     @relation(fields: [senderId], references: [id])
 
   @@map("messages")
+}
+
+model FavoriteEvent {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  eventId   String   @map("event_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, eventId])
+  @@map("favorite_events")
 }

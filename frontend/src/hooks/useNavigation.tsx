@@ -33,6 +33,12 @@ export function useNavigation() {
         tooltip: "Личный кабинет",
       },
       {
+        label: "Календарь",
+        href: "/calendar",
+        icon: <Image src="/calendar_icon.png" alt="Calendar" width={32} height={32} />,
+        tooltip: "Календарь",
+      },
+      {
         label: "Команды",
         href: "/dashboard/teams",
         icon: <Image src="/teams_icon.png" alt="Teams" width={32} height={32} />,
@@ -62,6 +68,13 @@ export function useNavigation() {
       })
     }
 
+    items.push({
+      label: "Избранное",
+      href: "/dashboard/favorites",
+      icon: <Image src="/favorite.png" alt="Favorites" width={32} height={32} />,
+      tooltip: "Избранное",
+    })
+
     if (user.role === "TRAINER" || user.role === "SUPER_ADMIN") {
       items.push({
         label: "Занятия",
@@ -89,19 +102,12 @@ export function useNavigation() {
       })
     }
 
-    items.push({
-      label: "Таймер",
-      href: "/timer",
-      icon: <Image src="/stopwatch.png" alt="Timer" width={32} height={32} />,
-      tooltip: "Таймер",
-    })
-
     items.push(
       {
-        label: "Календарь",
-        href: "/calendar",
-        icon: <Image src="/calendar_icon.png" alt="Calendar" width={32} height={32} />,
-        tooltip: "Календарь",
+        label: "Таймер",
+        href: "/timer",
+        icon: <Image src="/stopwatch.png" alt="Timer" width={32} height={32} />,
+        tooltip: "Таймер",
       },
       {
         label: "Чат",
