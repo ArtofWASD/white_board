@@ -59,6 +59,14 @@ export class ExerciseDto {
   @IsOptional()
   @IsString()
   measurement?: string;
+
+  @IsOptional()
+  @IsString()
+  rxTime?: string;
+
+  @IsOptional()
+  @IsString()
+  scTime?: string;
 }
 
 export class CreateEventDto {
