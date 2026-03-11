@@ -43,6 +43,7 @@ export class EventsController {
         createEventDto.rounds,
         createEventDto.teamId,
         createEventDto.scheme,
+        createEventDto.calculatorType,
       );
     } catch (error: unknown) {
       // Handle specific errors
@@ -117,7 +118,6 @@ export class EventsController {
     @Param('eventId') eventId: string,
     @Body() createEventResultDto: CreateEventResultDto,
   ) {
-    console.log('Backend Create Result DTO:', createEventResultDto);
     try {
       return await this.eventsService.createEventResult(
         eventId,
@@ -190,6 +190,7 @@ export class EventsController {
         updateEventDto.rounds,
         updateEventDto.teamId,
         updateEventDto.scheme,
+        updateEventDto.calculatorType,
       );
     } catch (error: unknown) {
       // Handle specific errors

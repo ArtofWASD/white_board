@@ -6,7 +6,9 @@ interface StrengthProgressTableProps {
   results: StrengthWorkoutResult[]
 }
 
-export const StrengthProgressTable: React.FC<StrengthProgressTableProps> = ({ results }) => {
+export const StrengthProgressTable: React.FC<StrengthProgressTableProps> = ({
+  results,
+}) => {
   // Group results by exercise name
   const exerciseMap: { [key: string]: { [week: number]: StrengthWorkoutResult } } = {}
 
@@ -45,17 +47,37 @@ export const StrengthProgressTable: React.FC<StrengthProgressTableProps> = ({ re
         <tbody className="divide-y divide-border">
           {exercises.map((exerciseName) => (
             <tr key={exerciseName} className="hover:bg-accent/50 transition-colors">
-              <td className="px-4 py-3 font-medium text-foreground">
-                {exerciseName}
-              </td>
+              <td className="px-4 py-3 font-medium text-foreground">{exerciseName}</td>
               {weeks.map((week) => {
                 const result = exerciseMap[exerciseName][week]
+
+                const getRepsColorClass = (reps: number, week: number) => {
+                  if (reps === 0) return "text-red-600 dark:text-red-400 font-medium"
+
+                  let target = 0
+                  if (week === 1) target = 5
+                  else if (week === 2) target = 3
+                  else if (week === 3) target = 1
+                  else return "text-muted-foreground"
+
+                  if (reps >= target)
+                    return "text-green-600 dark:text-green-400 font-medium"
+                  if (reps === target - 1)
+                    return "text-yellow-600 dark:text-yellow-500 font-medium"
+                  return "text-red-600 dark:text-red-400 font-medium"
+                }
+
                 return (
                   <td key={week} className="px-4 py-3 text-center text-muted-foreground">
                     {result ? (
                       <div className="flex flex-col">
-                        <span className="font-bold text-foreground">{result.weight} кг</span>
-                        <span className="text-xs">{result.reps} повт.</span>
+                        <span className="font-bold text-foreground">
+                          {result.weight} кг
+                        </span>
+                        <span
+                          className={`text-xs ${getRepsColorClass(result.reps, week)}`}>
+                          {result.reps} повт.
+                        </span>
                       </div>
                     ) : (
                       <span className="text-muted-foreground/30">—</span>

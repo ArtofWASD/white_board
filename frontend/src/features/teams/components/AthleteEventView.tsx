@@ -6,23 +6,42 @@ import { eventsApi } from "../../../lib/api/events"
 interface AthleteEventViewProps {
   event: Event
   user: User
-  resultsData:
-    | { results: EventResult[]; isLoading: boolean; isOpen: boolean }
-    | undefined
+  resultsData: { results: EventResult[]; isLoading: boolean; isOpen: boolean } | undefined
 }
 
-const formatResultValue = (result: EventResult, scheme?: string) => {
+const formatResultValue = (result: EventResult, event?: Event) => {
+  const scheme = event?.scheme
+  const calculatorType = event?.calculatorType
+
   if (scheme === "FOR_TIME") {
     return result.time || "0:00"
-  } else if (
-    scheme === "AMRAP" ||
-    scheme === "EMOM" ||
-    scheme === "WEIGHTLIFTING"
-  ) {
-    const unit = scheme === "AMRAP" ? "reps" : "kg"
+  } else if (scheme === "AMRAP" || scheme === "EMOM" || scheme === "WEIGHTLIFTING") {
+    const unit = scheme === "AMRAP" || calculatorType === "5/3/1" ? "reps" : "kg"
     return `${result.value || 0} ${unit}`
   }
   return result.time || (result.value ? `${result.value}` : "Выполнено")
+}
+
+const getResultColorClass = (result: EventResult | undefined, event: Event) => {
+  if (!result || event.calculatorType !== "5/3/1") return ""
+
+  const recordExercise = event.exercises?.find((ex) => ex.isRecord)
+  if (!recordExercise || !recordExercise.rxReps) return ""
+
+  const rxReps = parseInt(recordExercise.rxReps, 10)
+  const achievedReps = result.value || 0
+
+  if (achievedReps === 0) {
+    return "text-red-600 dark:text-red-400"
+  }
+
+  if (achievedReps >= rxReps) {
+    return "text-green-600 dark:text-green-400"
+  } else if (achievedReps === rxReps - 1) {
+    return "text-yellow-600 dark:text-yellow-400"
+  } else {
+    return "text-red-600 dark:text-red-400"
+  }
 }
 
 export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
@@ -70,7 +89,7 @@ export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
 
   // Find personal result
   const personalResult = resultsData?.results?.find(
-    (r) => r.userId === user.id || r.username === user.name
+    (r) => r.userId === user.id || r.username === user.name,
   )
 
   const isCompleted = event.status === "COMPLETED" || personalResult
@@ -87,8 +106,7 @@ export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
           {exercises.map((exercise, index) => (
             <li
               key={exercise.id || index}
-              className="bg-gray-50/80 dark:bg-gray-800/60 p-3 rounded-lg border border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-            >
+              className="bg-gray-50/80 dark:bg-gray-800/60 p-3 rounded-lg border border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="font-medium text-gray-900 dark:text-white">
                 {exercise.name}
               </div>
@@ -97,7 +115,7 @@ export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
                   <span>Повторы: {exercise.rxReps || exercise.repetitions}</span>
                 )}
                 {(exercise.rxWeight || exercise.weight) && (
-                  <span>Вес: {(exercise.rxWeight || exercise.weight)} кг</span>
+                  <span>Вес: {exercise.rxWeight || exercise.weight} кг</span>
                 )}
                 {exercise.rxDistance && <span>Дистанция: {exercise.rxDistance}</span>}
                 {exercise.rxCalories && <span>Калории: {exercise.rxCalories} kcal</span>}
@@ -121,18 +139,18 @@ export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
           {personalResult ? (
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
               <div className="flex items-center gap-3">
-                <span className="text-2xl font-black text-gray-900 dark:text-white">
-                  {formatResultValue(personalResult, event.scheme)}
+                <span
+                  className={`text-2xl font-black ${getResultColorClass(personalResult, event) || "text-gray-900 dark:text-white"}`}>
+                  {formatResultValue(personalResult, event)}
                 </span>
                 <span
                   className={`px-3 py-1 text-xs font-bold rounded-full ${
                     personalResult.scaling === "RX"
                       ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400"
                       : personalResult.scaling === "SCALED"
-                      ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
-                      : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
-                  }`}
-                >
+                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+                  }`}>
                   {personalResult.scaling || "RX"}
                 </span>
               </div>
@@ -145,7 +163,8 @@ export const AthleteEventView: React.FC<AthleteEventViewProps> = ({
             </div>
           ) : (
             <p className="text-sm text-gray-500 dark:text-gray-400 italic">
-              Вы еще не внесли результат для этого комплекса. Перейдите в &quot;Календарь&quot;, чтобы добавить.
+              Вы еще не внесли результат для этого комплекса. Перейдите в
+              &quot;Календарь&quot;, чтобы добавить.
             </p>
           )}
         </div>

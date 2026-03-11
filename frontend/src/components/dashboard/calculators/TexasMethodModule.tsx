@@ -14,6 +14,7 @@ interface TexasMethodModuleProps {
     description: string,
     scheme?: string,
     exercises?: any[],
+    calculatorType?: string,
   ) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
@@ -170,6 +171,7 @@ export function TexasMethodModule({
                               rxReps: "5",
                             },
                           ],
+                          "Texas Method",
                         )
                       }}
                       className="text-gray-300 hover:text-gray-700 p-1"
@@ -214,6 +216,7 @@ export function TexasMethodModule({
                               rxReps: "5",
                             },
                           ],
+                          "Texas Method",
                         )
                       }}
                       className="text-gray-300 hover:text-gray-700 p-1"
@@ -259,6 +262,7 @@ export function TexasMethodModule({
                               rxReps: reps,
                             },
                           ],
+                          "Texas Method",
                         )
                       }}
                       className="text-gray-300 hover:text-gray-700 p-1"

@@ -8,6 +8,7 @@ const mockPrismaService = {
   wod: {
     create: jest.fn(),
     findMany: jest.fn(),
+    findFirst: jest.fn(),
     findUnique: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -49,12 +50,12 @@ describe('WodsService', () => {
 
   describe('findOne', () => {
     it('should return a WOD if found', async () => {
-      prisma.wod.findUnique.mockResolvedValue({ id: '1' });
+      prisma.wod.findFirst.mockResolvedValue({ id: '1' });
       expect(await service.findOne('1')).toEqual({ id: '1' });
     });
 
     it('should throw NotFoundException if not found', async () => {
-      prisma.wod.findUnique.mockResolvedValue(null);
+      prisma.wod.findFirst.mockResolvedValue(null);
       await expect(service.findOne('1')).rejects.toThrow(NotFoundException);
     });
   });

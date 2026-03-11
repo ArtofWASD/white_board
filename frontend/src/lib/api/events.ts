@@ -23,6 +23,7 @@ interface CreateEventData {
   rounds?: string
   assignees?: string[]
   scheme?: string
+  calculatorType?: string
 }
 
 interface UpdateEventData {
@@ -35,6 +36,7 @@ interface UpdateEventData {
   timeCap?: string
   rounds?: string
   scheme?: string
+  calculatorType?: string
 }
 
 interface AddResultData {

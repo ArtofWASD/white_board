@@ -10,9 +10,7 @@ interface TeamEventItemProps {
   event: Event
   user: User | null
   membersData: { members: TeamMember[]; isLoading: boolean } | undefined
-  resultsData:
-    | { results: EventResult[]; isLoading: boolean; isOpen: boolean }
-    | undefined
+  resultsData: { results: EventResult[]; isLoading: boolean; isOpen: boolean } | undefined
   onToggleExpand: (eventId: string) => void
 }
 
@@ -60,8 +58,7 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
     <div className="bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 overflow-hidden shadow-sm">
       <div
         className="group p-4 flex items-start sm:items-center justify-between cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors gap-4"
-        onClick={() => onToggleExpand(event.id)}
-      >
+        onClick={() => onToggleExpand(event.id)}>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-2">
             <h4 className="font-bold text-gray-900 dark:text-white truncate">
@@ -75,10 +72,7 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
               <span>{eventDate.toLocaleDateString()}</span>
             </div>
 
-            {(event.exerciseType ||
-              event.scheme ||
-              event.timeCap ||
-              event.rounds) && (
+            {(event.exerciseType || event.scheme || event.timeCap || event.rounds) && (
               <div className="flex items-center gap-2 shrink-0">
                 <span className="hidden md:block w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600" />
                 <span className="font-medium text-blue-700 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded text-[11px] uppercase tracking-wider">
@@ -86,15 +80,16 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
                     event.exerciseType === "CROSSFIT"
                       ? "Кроссфит"
                       : event.exerciseType === "WEIGHTLIFTING"
-                      ? "Тяжелая атлетика"
-                      : event.exerciseType === "STRENGTH"
-                      ? "Силовая"
-                      : event.exerciseType === "CARDIO"
-                      ? "Кардио"
-                      : event.exerciseType,
+                        ? "Тяжелая атлетика"
+                        : event.exerciseType === "STRENGTH"
+                          ? "Силовая"
+                          : event.exerciseType === "CARDIO"
+                            ? "Кардио"
+                            : event.exerciseType,
                     event.scheme === "FOR_TIME" ? "AFAP" : event.scheme,
                     event.rounds && `${event.rounds} раундов`,
                     event.timeCap && `Cap: ${event.timeCap}`,
+                    event.calculatorType && `Источник: ${event.calculatorType}`,
                   ]
                     .filter(Boolean)
                     .join(" • ")}
@@ -139,8 +134,7 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
                   return (
                     <div
                       key={exercise.id || index}
-                      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm"
-                    >
+                      className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-sm">
                       <span className="font-medium text-gray-900 dark:text-gray-200">
                         {exercise.name}
                       </span>
@@ -175,8 +169,8 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
                 ? "Скрыть комплекс"
                 : "Скрыть результаты"
               : isAthlete
-              ? "Посмотреть комплекс"
-              : "Посмотреть результаты"}
+                ? "Посмотреть комплекс"
+                : "Посмотреть результаты"}
           </span>
           {isEventExpanded ? (
             <ChevronUp className="w-5 h-5 transition-transform" />
@@ -186,13 +180,10 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
         </div>
       </div>
 
-      {isEventExpanded && user && (
-        isAthlete ? (
-          <AthleteEventView
-            event={event}
-            user={user}
-            resultsData={resultsData}
-          />
+      {isEventExpanded &&
+        user &&
+        (isAthlete ? (
+          <AthleteEventView event={event} user={user} resultsData={resultsData} />
         ) : (
           <EventResultsTable
             team={team}
@@ -200,8 +191,7 @@ export const TeamEventItem: React.FC<TeamEventItemProps> = ({
             membersData={membersData}
             resultsData={resultsData}
           />
-        )
-      )}
+        ))}
     </div>
   )
 }

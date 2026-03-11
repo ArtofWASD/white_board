@@ -77,6 +77,9 @@ export interface Exercise {
   scDistance?: string
   rxDistanceWeight?: string
   scDistanceWeight?: string
+  isRecord?: boolean
+  week?: number
+  exerciseId?: string
 }
 
 export interface EventResult {
@@ -106,6 +109,7 @@ export interface CalendarEvent {
   participants?: { id: string; name: string; lastName?: string }[]
   teamName?: string
   scheme?: string
+  calculatorType?: string
 }
 
 export interface Event {
@@ -125,6 +129,7 @@ export interface Event {
   exercises?: Exercise[]
   results?: EventResult[]
   participants?: { id: string; name: string; lastName?: string }[]
+  calculatorType?: string
 }
 
 export interface StrengthWorkoutResult {

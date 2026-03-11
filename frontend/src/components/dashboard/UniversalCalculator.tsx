@@ -35,6 +35,7 @@ export const UniversalCalculator = React.memo(function UniversalCalculator({
     title: string
     description: string
     scheme?: string
+    calculatorType?: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     exercises?: any[]
   } | null>(null)
@@ -65,8 +66,9 @@ export const UniversalCalculator = React.memo(function UniversalCalculator({
     description: string,
     scheme?: string,
     exercises?: any[],
+    calculatorType?: string,
   ) => {
-    setCalendarModalData({ title, description, scheme, exercises })
+    setCalendarModalData({ title, description, scheme, exercises, calculatorType })
     setIsCalendarModalOpen(true)
   }
 
@@ -86,6 +88,7 @@ export const UniversalCalculator = React.memo(function UniversalCalculator({
           eventDate: date.toISOString(),
           exerciseType: calendarModalData.scheme || "WEIGHTLIFTING",
           scheme: calendarModalData.scheme || "WEIGHTLIFTING",
+          calculatorType: calendarModalData.calculatorType,
           exercises: calendarModalData.exercises,
         }),
       })

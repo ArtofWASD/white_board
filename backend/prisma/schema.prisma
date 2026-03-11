@@ -190,6 +190,7 @@ model Event {
   eventDate    DateTime      @map("event_date")
   status       EventStatus   @default(FUTURE)
   scheme       String        @default("FOR_TIME") // FOR_TIME, AMRAP, EMOM, WEIGHTLIFTING
+  calculatorType String?     @map("calculator_type")
   exerciseType String?       @map("exercise_type")
   exercises    Json?
   userId       String        @map("user_id")

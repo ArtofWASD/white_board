@@ -9,6 +9,16 @@ import { UserRole } from '@prisma/client';
 
 import { NotificationsService } from './notifications.service';
 
+interface Exercise {
+  id: string | number;
+  name: string;
+  isRecord?: boolean;
+  exerciseId?: string;
+  week?: number;
+  rxWeight?: string;
+  weight?: string;
+}
+
 @Injectable()
 export class EventsService {
   constructor(
@@ -34,6 +44,7 @@ export class EventsService {
     rounds?: string,
     teamId?: string,
     scheme?: string, // Добавляем схему
+    calculatorType?: string,
   ) {
     // Проверяем существование пользователя
     const user = await this.prisma.user.findUnique({
@@ -72,6 +83,7 @@ export class EventsService {
       rounds,
       teamId,
       scheme: scheme || 'FOR_TIME',
+      calculatorType,
     };
 
     // Добавляем участников, если они указаны
@@ -501,8 +513,8 @@ export class EventsService {
 
     // Синхронизация с StrengthWorkoutResult, если это тренировка 5/3/1
     if (userId && event.exercises && Array.isArray(event.exercises)) {
-      const recordExercise = (event.exercises as any[]).find(
-        (ex: any) => ex.isRecord,
+      const recordExercise = (event.exercises as unknown as Exercise[]).find(
+        (ex) => ex.isRecord,
       );
       if (recordExercise && recordExercise.exerciseId && recordExercise.week) {
         try {
@@ -746,6 +758,7 @@ export class EventsService {
     rounds?: string,
     teamId?: string,
     scheme?: string,
+    calculatorType?: string,
   ) {
     // Проверяем, существует ли событие
     const event = await this.prisma.event.findUnique({
@@ -777,6 +790,7 @@ export class EventsService {
       rounds,
       teamId,
       scheme,
+      calculatorType,
     };
 
     const updatedEvent = await this.prisma.event.update({

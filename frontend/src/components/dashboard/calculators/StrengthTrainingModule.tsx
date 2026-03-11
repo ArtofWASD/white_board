@@ -25,6 +25,7 @@ interface StrengthTrainingModuleProps {
     description: string,
     scheme?: string,
     exercises?: any[],
+    calculatorType?: string,
   ) => void
   handleInputPointerDown: (e: React.PointerEvent) => void
   handleInputKeyDown: (e: React.KeyboardEvent) => void
@@ -111,9 +112,9 @@ export function StrengthTrainingModule({
       })
 
       // Также обновляем 1RM на основе нового рекорда, если это возможно (формула Эпли)
-      // В 5/3/1 мы обычно не обновляем 1RM автоматически в середине цикла, 
+      // В 5/3/1 мы обычно не обновляем 1RM автоматически в середине цикла,
       // но если пользователь обновил вручную в поле ввода, это должно сохраниться.
-      
+
       await fetchHistory()
       setLoggingWeek(null)
       setLogReps(0)
@@ -130,7 +131,7 @@ export function StrengthTrainingModule({
       await apiClient.post(`/api/exercises/${selectedExerciseId}/records`, {
         weight: oneRepMax,
         reps: 1,
-        date: new Date().toISOString()
+        date: new Date().toISOString(),
       })
     } catch (error) {
       console.error("Error saving 1RM:", error)
@@ -225,11 +226,10 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>65% × 5 ({calculateWeight(0.65)}кг)</div>
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
-                  <div 
+                  <div
                     className="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors"
                     onClick={() => startLogging(1, calculateWeight(0.85))}
-                    title="Нажмите, чтобы записать результат"
-                  >
+                    title="Нажмите, чтобы записать результат">
                     85% × 5+ ({calculateWeight(0.85)}кг)
                   </div>
                 </div>
@@ -271,65 +271,71 @@ export function StrengthTrainingModule({
                           exercises.find((e) => e.id === selectedExerciseId)?.name ||
                           "5/3/1"
                         const now = Date.now()
-                        onAddToCalendar(`${exName} - Неделя 1`, "", "WEIGHTLIFTING", [
-                          {
-                            id: `ex-${now}-1`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.4)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.4)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-2`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.5)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.5)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-3`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.6)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.6)),
-                            rxReps: "3",
-                          },
-                          {
-                            id: `ex-${now}-4`,
-                            name: `${exName} (Рабочий)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.65)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.65)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-5`,
-                            name: `${exName} (Рабочий)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.75)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.75)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-6`,
-                            name: `${exName} (Рабочий: Рекорд)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.85)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.85)),
-                            rxReps: "5",
-                            exerciseId: selectedExerciseId,
-                            week: 1,
-                            isRecord: true,
-                          },
-                        ])
+                        onAddToCalendar(
+                          `${exName} - Неделя 1`,
+                          "",
+                          "WEIGHTLIFTING",
+                          [
+                            {
+                              id: `ex-${now}-1`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.4)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.4)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-2`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.5)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.5)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-3`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.6)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.6)),
+                              rxReps: "3",
+                            },
+                            {
+                              id: `ex-${now}-4`,
+                              name: `${exName} (Рабочий)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.65)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.65)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-5`,
+                              name: `${exName} (Рабочий)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.75)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.75)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-6`,
+                              name: `${exName} (Рабочий: Рекорд)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.85)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.85)),
+                              rxReps: "5",
+                              exerciseId: selectedExerciseId,
+                              week: 1,
+                              isRecord: true,
+                            },
+                          ],
+                          "5/3/1",
+                        )
                       }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"
@@ -368,11 +374,10 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>70% × 3 ({calculateWeight(0.7)}кг)</div>
                   <div>80% × 3 ({calculateWeight(0.8)}кг)</div>
-                  <div 
+                  <div
                     className="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors"
                     onClick={() => startLogging(2, calculateWeight(0.9))}
-                    title="Нажмите, чтобы записать результат"
-                  >
+                    title="Нажмите, чтобы записать результат">
                     90% × 3+ ({calculateWeight(0.9)}кг)
                   </div>
                 </div>
@@ -416,65 +421,71 @@ export function StrengthTrainingModule({
                           exercises.find((e) => e.id === selectedExerciseId)?.name ||
                           "5/3/1"
                         const now = Date.now()
-                        onAddToCalendar(`${exName} - Неделя 2`, "", "WEIGHTLIFTING", [
-                          {
-                            id: `ex-${now}-1`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.45)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.45)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-2`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.55)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.55)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-3`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.65)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.65)),
-                            rxReps: "3",
-                          },
-                          {
-                            id: `ex-${now}-4`,
-                            name: `${exName} (Рабочий)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.7)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.7)),
-                            rxReps: "3",
-                          },
-                          {
-                            id: `ex-${now}-5`,
-                            name: `${exName} (Рабочий)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.8)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.8)),
-                            rxReps: "3",
-                          },
-                          {
-                            id: `ex-${now}-6`,
-                            name: `${exName} (Рабочий: Рекорд)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.9)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.9)),
-                            rxReps: "3",
-                            exerciseId: selectedExerciseId,
-                            week: 2,
-                            isRecord: true,
-                          },
-                        ])
+                        onAddToCalendar(
+                          `${exName} - Неделя 2`,
+                          "",
+                          "WEIGHTLIFTING",
+                          [
+                            {
+                              id: `ex-${now}-1`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.45)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.45)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-2`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.55)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.55)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-3`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.65)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.65)),
+                              rxReps: "3",
+                            },
+                            {
+                              id: `ex-${now}-4`,
+                              name: `${exName} (Рабочий)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.7)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.7)),
+                              rxReps: "3",
+                            },
+                            {
+                              id: `ex-${now}-5`,
+                              name: `${exName} (Рабочий)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.8)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.8)),
+                              rxReps: "3",
+                            },
+                            {
+                              id: `ex-${now}-6`,
+                              name: `${exName} (Рабочий: Рекорд)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.9)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.9)),
+                              rxReps: "3",
+                              exerciseId: selectedExerciseId,
+                              week: 2,
+                              isRecord: true,
+                            },
+                          ],
+                          "5/3/1",
+                        )
                       }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в calendar"
@@ -513,11 +524,10 @@ export function StrengthTrainingModule({
                 <div className="space-y-1">
                   <div>75% × 5 ({calculateWeight(0.75)}кг)</div>
                   <div>85% × 3 ({calculateWeight(0.85)}кг)</div>
-                  <div 
+                  <div
                     className="font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 transition-colors"
                     onClick={() => startLogging(3, calculateWeight(0.95))}
-                    title="Нажмите, чтобы записать результат"
-                  >
+                    title="Нажмите, чтобы записать результат">
                     95% × 1+ ({calculateWeight(0.95)}кг)
                   </div>
                 </div>
@@ -561,65 +571,71 @@ export function StrengthTrainingModule({
                           exercises.find((e) => e.id === selectedExerciseId)?.name ||
                           "5/3/1"
                         const now = Date.now()
-                        onAddToCalendar(`${exName} - Неделя 3`, "", "WEIGHTLIFTING", [
-                          {
-                            id: `ex-${now}-1`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.5)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.5)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-2`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.6)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.6)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-3`,
-                            name: `${exName} (Разминка)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.7)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.7)),
-                            rxReps: "3",
-                          },
-                          {
-                            id: `ex-${now}-4`,
-                            name: `${exName} (Рабочий)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.75)),
-                            repetitions: "5",
-                            rxWeight: String(calculateWeight(0.75)),
-                            rxReps: "5",
-                          },
-                          {
-                            id: `ex-${now}-5`,
-                            name: `${exName} (Рабочий)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.85)),
-                            repetitions: "3",
-                            rxWeight: String(calculateWeight(0.85)),
-                            rxReps: "3",
-                          },
-                          {
-                            id: `ex-${now}-6`,
-                            name: `${exName} (Рабочий: Рекорд)`,
-                            measurement: "weight",
-                            weight: String(calculateWeight(0.95)),
-                            repetitions: "1",
-                            rxWeight: String(calculateWeight(0.95)),
-                            rxReps: "1",
-                            exerciseId: selectedExerciseId,
-                            week: 3,
-                            isRecord: true,
-                          },
-                        ])
+                        onAddToCalendar(
+                          `${exName} - Неделя 3`,
+                          "",
+                          "WEIGHTLIFTING",
+                          [
+                            {
+                              id: `ex-${now}-1`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.5)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.5)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-2`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.6)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.6)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-3`,
+                              name: `${exName} (Разминка)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.7)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.7)),
+                              rxReps: "3",
+                            },
+                            {
+                              id: `ex-${now}-4`,
+                              name: `${exName} (Рабочий)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.75)),
+                              repetitions: "5",
+                              rxWeight: String(calculateWeight(0.75)),
+                              rxReps: "5",
+                            },
+                            {
+                              id: `ex-${now}-5`,
+                              name: `${exName} (Рабочий)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.85)),
+                              repetitions: "3",
+                              rxWeight: String(calculateWeight(0.85)),
+                              rxReps: "3",
+                            },
+                            {
+                              id: `ex-${now}-6`,
+                              name: `${exName} (Рабочий: Рекорд)`,
+                              measurement: "weight",
+                              weight: String(calculateWeight(0.95)),
+                              repetitions: "1",
+                              rxWeight: String(calculateWeight(0.95)),
+                              rxReps: "1",
+                              exerciseId: selectedExerciseId,
+                              week: 3,
+                              isRecord: true,
+                            },
+                          ],
+                          "5/3/1",
+                        )
                       }}
                       className="text-gray-400 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
                       title="Добавить в календарь"

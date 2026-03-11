@@ -7,21 +7,26 @@ import {
   IsDateString,
   IsNumber,
   IsBoolean,
+  ValidateNested,
+  IsDefined,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class ExerciseDto {
-  @IsNotEmpty()
-  id: number;
+  @IsDefined()
+  id: string | number;
 
   @IsString()
   @IsNotEmpty()
   name: string;
 
+  @IsOptional()
   @IsString()
-  weight: string;
+  weight?: string;
 
+  @IsOptional()
   @IsString()
-  repetitions: string;
+  repetitions?: string;
 
   @IsOptional()
   @IsString()
@@ -38,6 +43,22 @@ export class ExerciseDto {
   @IsOptional()
   @IsString()
   scReps?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isRecord?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  week?: number;
+
+  @IsOptional()
+  @IsString()
+  exerciseId?: string;
+
+  @IsOptional()
+  @IsString()
+  measurement?: string;
 }
 
 export class CreateEventDto {
@@ -63,6 +84,8 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ExerciseDto)
   exercises?: ExerciseDto[]; // Упражнения как массив объектов
 
   @IsOptional()
@@ -80,13 +103,15 @@ export class CreateEventDto {
 
   @IsOptional()
   @IsString()
-  @IsOptional()
-  @IsString()
   teamId?: string;
 
   @IsOptional()
   @IsString()
   scheme?: string;
+
+  @IsOptional()
+  @IsString()
+  calculatorType?: string;
 }
 
 export class UpdateEventStatusDto {
