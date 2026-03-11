@@ -85,7 +85,11 @@ export default function DashboardPage() {
   }
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8, // drag активируется только после смещения на 8px — обычные клики/тапы не перехватываются
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     }),
