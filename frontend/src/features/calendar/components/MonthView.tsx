@@ -5,6 +5,7 @@ import { getWorkoutColorClass } from "../utils/workoutColors"
 import { format } from "date-fns"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/HoverCard"
 import { WorkoutQuickView } from "@/features/workouts/components/WorkoutQuickView"
+import { Star } from "lucide-react"
 
 interface MonthViewProps {
   days: CalendarDay[]
@@ -40,7 +41,7 @@ export function MonthView({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 auto-rows-[minmax(144px,1fr)] flex-1 overflow-hidden">
+      <div className="grid grid-cols-7 auto-rows-[minmax(194px,1fr)] flex-1 overflow-hidden">
         {days.map((day, idx) => {
           const dateKey = format(day.date, "yyyy-MM-dd")
           const dayWorkouts = workouts[dateKey] || []
@@ -85,15 +86,17 @@ export function MonthView({
                           onWorkoutClick(workout)
                         }}
                         className={cn(
-                          "cursor-pointer text-xs truncate px-2 py-1 rounded-md font-semibold border border-transparent transition-colors shadow-sm flex-shrink-0",
+                          "cursor-pointer text-xs py-1 rounded-md font-semibold border border-transparent transition-colors shadow-sm flex-shrink-0 flex items-center h-[36px] relative",
+                          workout.isFavorite ? "pl-2 pr-5 text-left" : "px-2",
                           getWorkoutColorClass(workout.type),
                         )}>
-                        {workout.title}
+                        {workout.isFavorite && <Star className="h-3 w-3 absolute right-1 fill-yellow-400 text-yellow-400 shrink-0" />}
+                        <span className="truncate">{workout.title}</span>
                       </div>
                     </HoverCardTrigger>
                     <HoverCardContent
                       align="start"
-                      className="w-72 p-3 z-50 pointer-events-none"
+                      className="w-96 p-3 z-50 pointer-events-none"
                       side="right"
                       sideOffset={5}>
                       <WorkoutQuickView workout={workout} />

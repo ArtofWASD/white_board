@@ -24,6 +24,7 @@ export interface Workout {
   teamName?: string
   durationMinutes?: number // For Gantt view duration/width
   date?: string // Used for pre-filling edit modal
+  isFavorite?: boolean
 }
 
 interface WorkoutCardProps {

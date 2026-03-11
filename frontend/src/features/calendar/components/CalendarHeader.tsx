@@ -36,13 +36,13 @@ export function CalendarHeader({
         </h2>
 
         <div className="flex items-center gap-1">
-          <Button variant="outline" size="icon"  onClick={onPrevMonth}>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onPrevMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={onToday}>
+          <Button variant="outline" size="sm" className="h-8" onClick={onToday}>
             Сегодня
           </Button>
-          <Button variant="outline" size="icon"  onClick={onNextMonth}>
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={onNextMonth}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

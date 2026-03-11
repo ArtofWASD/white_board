@@ -53,7 +53,11 @@ export default function CalendarPage() {
       const isSpecialFilter = ["all", "my", "all_teams"].includes(calendarTeamId || "")
       const filterTeamId = calendarTeamId && !isSpecialFilter ? calendarTeamId : undefined
 
-      const data = await eventsApi.getUserEvents(user.id, filterTeamId)
+      const [data, favorites] = await Promise.all([
+        eventsApi.getUserEvents(user.id, filterTeamId),
+        eventsApi.getFavorites(user.id),
+      ])
+      const favoriteIds = new Set(favorites.map((f: any) => f.id))
 
       // Transform for Legacy Support (LeftMenu)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,6 +152,7 @@ export default function CalendarPage() {
           teamName: (event as any).team?.name,
           durationMinutes: event.timeCap ? parseInt(event.timeCap) || 60 : 60,
           date: dateKey,
+          isFavorite: favoriteIds.has(event.id),
         })
       })
 
