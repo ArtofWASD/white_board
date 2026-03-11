@@ -40,12 +40,13 @@ export default function RichTextEditorClient({
           ["clean"],
         ],
         handlers: {
-          divider: function () {
-            // @ts-ignore
+          divider: function (this: { quill: any }) {
             const quill = this.quill
             const range = quill.getSelection(true)
-            quill.insertEmbed(range.index, "divider", true, Quill.sources.USER)
-            quill.setSelection(range.index + 1, Quill.sources.SILENT)
+            if (range) {
+              quill.insertEmbed(range.index, "divider", true, Quill.sources.USER)
+              quill.setSelection(range.index + 1, 0, Quill.sources.SILENT)
+            }
           },
         },
       },

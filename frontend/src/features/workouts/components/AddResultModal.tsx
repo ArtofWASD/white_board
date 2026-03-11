@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/Button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog"
 import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/Label"
+import { Textarea } from "@/components/ui/Textarea"
 import { eventsApi } from "@/lib/api/events"
 import { Loader2 } from "lucide-react"
 import { Workout } from "./WorkoutCard"
@@ -13,7 +13,7 @@ import { AddResultFormData, addResultSchema } from "@/lib/validators/workout"
 import { useEffect, useState } from "react"
 import { EditWorkoutModal } from "./EditWorkoutModal"
 import { useToast } from "@/lib/context/ToastContext"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@/components/ui/Checkbox"
 
 interface AddResultModalProps {
   workout: Workout

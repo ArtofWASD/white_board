@@ -5,23 +5,23 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/Dialog"
 import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/Label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 import { useState, useEffect } from "react"
 import { Plus, Trash2, Edit2, Check, AlertCircle } from "lucide-react"
 import { Exercise, Team, TeamMember } from "@/types"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { teamsApi } from "@/lib/api/teams"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/RadioGroup"
 import { z } from "zod"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"

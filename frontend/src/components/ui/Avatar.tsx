@@ -5,7 +5,6 @@ interface UserLike {
   name: string
   lastName?: string | null
   avatarUrl?: string | null
-  [key: string]: any
 }
 
 export interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {

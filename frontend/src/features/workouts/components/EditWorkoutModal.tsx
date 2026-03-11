@@ -5,7 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/Dialog"
 import { useEffect } from "react"
 import { eventsApi } from "@/lib/api/events"
 import { Workout } from "@/features/workouts/components/WorkoutCard"

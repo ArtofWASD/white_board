@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/Badge"
 import { getWorkoutColorClass } from "@/features/calendar/utils/workoutColors"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/HoverCard"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/Popover"
 import { cn } from "@/lib/utils"
 // import { WorkoutDetail } from "./WorkoutDetail" // Circular dependency note: Will be implemented next
 import { useState } from "react"

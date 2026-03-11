@@ -16,7 +16,7 @@ const meta = {
 export default meta
 type Story = StoryObj<typeof meta>
 
-const SwitchWithState = (args: any) => {
+const SwitchWithState = (args: React.ComponentProps<typeof Switch>) => {
   const [checked, setChecked] = useState(args.checked ?? false)
   return <Switch {...args} checked={checked} onChange={setChecked} />
 }

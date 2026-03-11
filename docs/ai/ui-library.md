@@ -151,7 +151,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 ;<Select value={value} onValueChange={setValue}>
   <SelectTrigger>
     <SelectValue placeholder="Выберите..." />
@@ -177,7 +177,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
+} from "@/components/ui/Dialog"
 ;<Dialog open={isOpen} onOpenChange={onClose}>
   <DialogContent>
     <DialogHeader>

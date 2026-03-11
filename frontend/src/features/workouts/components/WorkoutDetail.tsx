@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/Button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/Dialog"
+import { Label } from "@/components/ui/Label"
 import { Switch } from "@/components/ui/Switch"
 import { cn } from "@/lib/utils"
 import {

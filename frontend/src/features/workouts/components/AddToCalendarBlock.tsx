@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Calendar } from "lucide-react"
 import { Button } from "@/components/ui/Button"
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/Label"
 import { eventsApi } from "@/lib/api/events"
 import { useAuthStore } from "@/lib/store/useAuthStore"
 import { useToast } from "@/lib/context/ToastContext"

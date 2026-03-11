@@ -3,7 +3,7 @@ import { CalendarDay } from "../hooks/useCalendar"
 import { Workout } from "@/features/workouts/components/WorkoutCard"
 import { getWorkoutColorClass } from "../utils/workoutColors"
 import { format } from "date-fns"
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/HoverCard"
 import { WorkoutQuickView } from "@/features/workouts/components/WorkoutQuickView"
 
 interface MonthViewProps {

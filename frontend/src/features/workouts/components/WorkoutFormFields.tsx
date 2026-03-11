@@ -1,13 +1,13 @@
 import { UseFormReturn, Controller } from "react-hook-form"
 import { Input } from "@/components/ui/Input"
-import { Label } from "@/components/ui/label"
+import { Label } from "@/components/ui/Label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 import { cn } from "@/lib/utils"
 import { WorkoutFormValues } from "../schemas/workoutFormSchema"
 

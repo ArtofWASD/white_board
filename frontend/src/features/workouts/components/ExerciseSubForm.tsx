@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/Select"
 import { cn } from "@/lib/utils"
 import { UseFieldArrayReturn, UseFormReturn } from "react-hook-form"
 import { WorkoutFormValues, exerciseInputSchema } from "../schemas/workoutFormSchema"
