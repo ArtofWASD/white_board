@@ -67,6 +67,30 @@ export class ExerciseDto {
   @IsOptional()
   @IsString()
   scTime?: string;
+
+  @IsOptional()
+  @IsString()
+  rxDistance?: string;
+
+  @IsOptional()
+  @IsString()
+  scDistance?: string;
+
+  @IsOptional()
+  @IsString()
+  rxDistanceWeight?: string;
+
+  @IsOptional()
+  @IsString()
+  scDistanceWeight?: string;
+
+  @IsOptional()
+  @IsString()
+  rxCalories?: string;
+
+  @IsOptional()
+  @IsString()
+  scCalories?: string;
 }
 
 export class CreateEventDto {
