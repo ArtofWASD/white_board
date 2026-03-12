@@ -140,6 +140,7 @@ export interface StrengthWorkoutResult {
   week: number
   weight: number
   reps: number
+  calculatorType?: string
   createdAt: string
   exercise?: {
     id: string

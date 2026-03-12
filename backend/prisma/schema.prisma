@@ -272,6 +272,7 @@ model StrengthWorkoutResult {
   week       Int
   weight     Float
   reps       Int
+  calculatorType String? @map("calculator_type")
   createdAt  DateTime @default(now()) @map("created_at")
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise   UserExercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)

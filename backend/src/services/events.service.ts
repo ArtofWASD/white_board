@@ -528,7 +528,8 @@ export class EventsService {
                 recordExercise.rxWeight || recordExercise.weight || 0,
               ),
               reps: value || 0,
-              date: new Date(),
+              calculatorType: event.calculatorType,
+              date: event.eventDate,
             },
           });
         } catch (error) {
