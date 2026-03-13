@@ -6,7 +6,8 @@ import RegisterForm from "./RegisterForm"
  * из runtime process.env и передаёт его в клиентский RegisterForm как проп.
  */
 export default function RegisterPage() {
-  const captchaKey = process.env.NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY || ""
+  // Bracket notation обходит статическую подстановку Next.js при сборке.
+  const captchaKey = process.env["NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY"] || ""
 
   return (
     <Suspense

@@ -6,7 +6,10 @@ import LoginForm from "./LoginForm"
  * из runtime process.env и передаёт его в клиентский LoginForm как проп.
  */
 export default function LoginPage() {
-  const captchaKey = process.env.NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY || ""
+  // Bracket notation обходит статическую подстановку Next.js при сборке.
+  // process.env.NEXT_PUBLIC_* заменяется на значение при `npm run build`,
+  // а process.env["KEY"] читается из runtime env контейнера.
+  const captchaKey = process.env["NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY"] || ""
 
   return (
     <Suspense
