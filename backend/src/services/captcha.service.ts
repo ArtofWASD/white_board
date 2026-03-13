@@ -19,13 +19,16 @@ export class CaptchaService {
       return;
     }
 
-    // Если ключ не настроен — пропускаем только в dev
+    // Bypass когда клиентский ключ капчи не настроен (фронтенд прислал заглушку)
+    if (token === 'no-captcha-configured') {
+      return;
+    }
+
+    // Если серверный ключ не настроен — пропускаем валидацию с предупреждением.
+    // Блокировать вход из-за отсутствия ключа — неправильно.
     if (!this.serverKey) {
-      if (!this.isProduction) {
-        console.warn('[CaptchaService] YANDEX_CAPTCHA_SERVER_KEY не задан. Валидация пропущена (dev).');
-        return;
-      }
-      throw new BadRequestException('Captcha service misconfigured.');
+      console.warn('[CaptchaService] YANDEX_CAPTCHA_SERVER_KEY не задан. Валидация пропущена.');
+      return;
     }
 
     if (!token) {
