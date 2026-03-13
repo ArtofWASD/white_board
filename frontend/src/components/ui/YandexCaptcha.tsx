@@ -3,16 +3,11 @@
 /**
  * Обёртка над официальным @yandex/smart-captcha.
  *
- * Переменные окружения:
- *   NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY  — клиентский ключ SmartCaptcha
- *   NEXT_PUBLIC_CAPTCHA_DEV_BYPASS=true    — заменяет капчу на чекбокс (для dev)
- *
- * Ключ читается из build-time env (если передан через --build-arg)
- * или фетчится из /api/config в рантайме (Dokploy env → Next.js server route).
+ * Принимает sitekey как проп (передаётся из серверного компонента).
+ * В dev-режиме без ключа показывает чекбокс-заглушку.
  */
 
 import React, {
-  useEffect,
   useImperativeHandle,
   forwardRef,
   useState,
@@ -25,6 +20,8 @@ export interface YandexCaptchaRef {
 }
 
 interface YandexCaptchaProps {
+  /** Клиентский ключ SmartCaptcha (передаётся из серверного компонента) */
+  sitekey: string
   /** Вызывается с токеном при успешном прохождении капчи */
   onSuccess: (token: string) => void
   /** Вызывается когда токен истёк */
@@ -34,67 +31,35 @@ interface YandexCaptchaProps {
   className?: string
 }
 
-// Ключ встроенный при сборке (пуст если Dokploy не передал как build-arg)
-const BUILD_TIME_KEY = process.env.NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY || ""
-const DEV_BYPASS =
-  process.env.NEXT_PUBLIC_CAPTCHA_DEV_BYPASS === "true" ||
-  (process.env.NODE_ENV === "development" && !BUILD_TIME_KEY)
+const DEV_BYPASS = process.env.NEXT_PUBLIC_CAPTCHA_DEV_BYPASS === "true"
 
 const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
-  ({ onSuccess, onExpire, onError, className }, ref) => {
-    const [siteKey, setSiteKey] = useState(BUILD_TIME_KEY)
-    const [keyLoading, setKeyLoading] = useState(!BUILD_TIME_KEY && !DEV_BYPASS)
-    // Счётчик для принудительного пересоздания SmartCaptcha (reset)
+  ({ sitekey, onSuccess, onExpire, onError, className }, ref) => {
     const [resetKey, setResetKey] = useState(0)
 
     useImperativeHandle(ref, () => ({
       reset: () => setResetKey((k) => k + 1),
     }))
 
-    // Если build-time ключ пуст — фетчим из /api/config (runtime env контейнера)
-    useEffect(() => {
-      if (BUILD_TIME_KEY || DEV_BYPASS) return
-
-      fetch("/api/config")
-        .then((r) => r.json())
-        .then((data: { captchaClientKey?: string }) => {
-          const key = data.captchaClientKey || ""
-          setSiteKey(key)
-          setKeyLoading(false)
-          if (!key) {
-            console.warn("[YandexCaptcha] Ключ не найден ни в build-time, ни в runtime.")
-            onSuccess("no-captcha-configured")
-          }
-        })
-        .catch(() => {
-          setKeyLoading(false)
-          onSuccess("no-captcha-configured")
-        })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    // Пока подгружаем ключ — показываем скелетон
-    if (keyLoading) {
-      return (
-        <div className="h-[80px] w-[300px] rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
-      )
-    }
-
-    // Ключ не найден — ничего не рендерим (форма уже разблокирована через onSuccess)
-    if (!siteKey && !DEV_BYPASS) {
-      return null
-    }
-
-    // Dev-bypass: простой чекбокс вместо капчи
-    if (DEV_BYPASS) {
+    // Dev-bypass: чекбокс вместо капчи
+    if (DEV_BYPASS || (process.env.NODE_ENV === "development" && !sitekey)) {
       return <DevBypassCheckbox onSuccess={onSuccess} resetRef={ref} />
+    }
+
+    // Ключ не найден — не блокируем форму
+    if (!sitekey) {
+      // Автоматически разблокируем форму
+      if (typeof window !== "undefined") {
+        setTimeout(() => onSuccess("no-captcha-configured"), 0)
+      }
+      return null
     }
 
     return (
       <div className={className}>
         <SmartCaptcha
           key={resetKey}
-          sitekey={siteKey}
+          sitekey={sitekey}
           onSuccess={onSuccess}
           onTokenExpired={onExpire}
           onNetworkError={onError}
