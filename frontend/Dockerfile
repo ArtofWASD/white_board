@@ -15,6 +15,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# NEXT_PUBLIC_* переменные встраиваются в бандл во время сборки (не в рантайме).
+# Объявляем ARG чтобы Dokploy/Docker передал их в этот слой через --build-arg.
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY=$NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY
+
 # Собираем проект
 RUN npm run build
 
