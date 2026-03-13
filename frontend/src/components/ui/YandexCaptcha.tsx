@@ -74,6 +74,15 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
       },
     }))
 
+    // Если ключ не задан и не DEV_BYPASS — автоматически разблокируем форму.
+    // Эффект здесь (не в if) — чтобы не нарушать правила хуков.
+    useEffect(() => {
+      if (!SITE_KEY && !DEV_BYPASS) {
+        onSuccess("no-captcha-configured")
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
+
     useEffect(() => {
       if (!SITE_KEY && !DEV_BYPASS) {
         console.warn("[YandexCaptcha] NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY не задан.")
@@ -135,7 +144,7 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
     }, [])
 
     if (!SITE_KEY && !DEV_BYPASS) {
-      return null // В prod без ключа — ничего не рендерим
+      return null
     }
 
     // ── Dev-bypass: простой чекбокс вместо капчи ──────────────────────────────
