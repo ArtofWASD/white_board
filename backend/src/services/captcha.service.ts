@@ -32,7 +32,8 @@ export class CaptchaService {
     }
 
     if (!token) {
-      throw new BadRequestException('Captcha token is required.');
+      // Фронтенд не прислал токен — капча не настроена/отключена на клиенте
+      return;
     }
 
     try {
