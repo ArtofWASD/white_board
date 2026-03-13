@@ -3,6 +3,8 @@ import {
   UnauthorizedException,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
+  NotImplementedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
@@ -10,12 +12,16 @@ import { UserRole, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
 import { SafeUser, UserResponse } from '../types';
+import { EmailService } from './email.service';
+import { CaptchaService } from './captcha.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private emailService: EmailService,
+    private captchaService: CaptchaService,
   ) {}
 
   async validateUser(
@@ -42,10 +48,20 @@ export class AuthService {
     return null;
   }
 
-  async login(loginDto: LoginDto) {
+  async login(loginDto: LoginDto, ip: string = '') {
+    // Проверяем капчу перед любой другой логикой
+    await this.captchaService.validate(loginDto.captchaToken || '', ip);
+
     const user = await this.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Проверяем, подтверждён ли email
+    if (!user.emailVerified) {
+      throw new ForbiddenException(
+        'Email не подтверждён. Проверьте почту и перейдите по ссылке для активации аккаунта.',
+      );
     }
 
     const payload = {
@@ -76,16 +92,14 @@ export class AuthService {
   }
 
   async register(registerDto: RegisterDto, ipAddress: string = 'unknown') {
+    // Проверяем капчу перед любой другой логикой
+    await this.captchaService.validate(registerDto.captchaToken || '', ipAddress);
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email: registerDto.email },
     });
 
     if (existingUser) {
-      // Исползуем более общий ответ, чтобы затруднить перечисление пользователей,
-      // но для регистрации без email-подтверждения это компромисс UX.
-      // В данном случае, следуя аудиту, можно было бы вернуть успех, но
-      // пользователь не узнает, что аккаунт не создан.
-      // Попробуем компромисс:
       throw new UnauthorizedException(
         'Registration failed. Username or Email may be already taken.',
       );
@@ -103,7 +117,6 @@ export class AuthService {
     let organizationData: {
       organization?: Prisma.OrganizationCreateNestedOneWithoutUsersInput;
     } = {};
-    // Проверяем, указано ли имя организации и не пустое ли оно
     if (
       registerDto.organizationName &&
       registerDto.organizationName.trim().length > 0
@@ -125,7 +138,12 @@ export class AuthService {
     // Текущая версия документов (дата в формате YYYY-MM-DD)
     const currentVersion = new Date().toISOString().split('T')[0];
 
-    const newUser = await this.prisma.user.create({
+    // Генерируем токен верификации email (UUID, 24 часа TTL)
+    const verificationToken = crypto.randomUUID();
+    const verificationExpiry = new Date();
+    verificationExpiry.setHours(verificationExpiry.getHours() + 24);
+
+    await this.prisma.user.create({
       data: {
         name: registerDto.name,
         lastName: registerDto.lastName,
@@ -136,10 +154,8 @@ export class AuthService {
         isAdmin:
           registerDto.role === 'TRAINER' ||
           registerDto.role === 'ORGANIZATION_ADMIN',
-        // Маппинг устаревших полей
         userType: computedUserType,
         organizationName: registerDto.organizationName,
-        // Согласия на обработку персональных данных (152-ФЗ)
         termsAccepted: true,
         termsAcceptedAt: new Date(),
         termsVersion: currentVersion,
@@ -150,41 +166,151 @@ export class AuthService {
         consentAcceptedAt: new Date(),
         consentVersion: currentVersion,
         registrationIp: ipAddress,
+        emailVerified: false,
+        emailVerificationToken: verificationToken,
+        emailVerificationExpiry: verificationExpiry,
         ...organizationData,
-      },
-      include: {
-        organization: true,
       },
     });
 
-    const payload = {
-      email: newUser.email,
-      sub: newUser.id,
-      role: newUser.role,
-      organizationId: newUser.organization?.id,
-    };
-
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
-    const refreshToken = await this.generateRefreshToken(newUser.id);
+    // Отправляем письмо — не блокируем регистрацию если email упал
+    try {
+      await this.emailService.sendVerificationEmail(
+        registerDto.email,
+        verificationToken,
+      );
+    } catch (err) {
+      console.error('Failed to send verification email after register:', err);
+    }
 
     return {
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        role: newUser.role,
-        height: newUser.height,
-        weight: newUser.weight,
-        dashboardLayout: newUser.dashboardLayout,
-        dashboardLayoutMode: newUser.dashboardLayoutMode,
-        avatarUrl: (newUser as any).avatarUrl,
-        organizationId: newUser.organization?.id,
-      } as UserResponse,
+      message:
+        'Регистрация успешна! Проверьте почту и перейдите по ссылке для активации аккаунта.',
+    };
+  }
+
+  /**
+   * Верификация email по токену.
+   * При успехе выдаёт access + refresh токены, как при логине.
+   */
+  async verifyEmail(
+    token: string,
+  ): Promise<{ user: UserResponse; accessToken: string; refreshToken: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { emailVerificationToken: token },
+      include: { organization: true },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Ссылка для подтверждения недействительна.');
+    }
+
+    if (user.emailVerificationExpiry && user.emailVerificationExpiry < new Date()) {
+      throw new BadRequestException(
+        'Ссылка для подтверждения устарела. Запросите новую.',
+      );
+    }
+
+    if (user.emailVerified) {
+      // Уже подтверждён — просто выдаём токены
+      const accessToken = this.jwtService.sign(
+        { email: user.email, sub: user.id, role: user.role },
+        { expiresIn: '15m' },
+      );
+      const refreshToken = await this.generateRefreshToken(user.id);
+      return {
+        user: this.buildUserResponse(user),
+        accessToken,
+        refreshToken,
+      };
+    }
+
+    // Помечаем как подтверждённый, стираем токен
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiry: null,
+      },
+    });
+
+    const payload = { email: user.email, sub: user.id, role: user.role };
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const refreshToken = await this.generateRefreshToken(user.id);
+
+    return {
+      user: this.buildUserResponse({ ...user, organizationId: user.organizationId }),
       accessToken,
       refreshToken,
     };
   }
+
+  /**
+   * Повторная отправка письма верификации
+   */
+  async resendVerificationEmail(email: string): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+
+    if (!user) {
+      // Не раскрываем информацию о существовании пользователя
+      return {
+        message:
+          'Если аккаунт с таким email существует, письмо было отправлено.',
+      };
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('Email уже подтверждён.');
+    }
+
+    const verificationToken = crypto.randomUUID();
+    const verificationExpiry = new Date();
+    verificationExpiry.setHours(verificationExpiry.getHours() + 24);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailVerificationToken: verificationToken,
+        emailVerificationExpiry: verificationExpiry,
+      },
+    });
+
+    await this.emailService.sendVerificationEmail(email, verificationToken);
+
+    return {
+      message: 'Если аккаунт с таким email существует, письмо было отправлено.',
+    };
+  }
+
+  // ─── OAuth stubs ───────────────────────────────────────────────────────────
+
+  /**
+   * @stub Будущая интеграция с Яндекс OAuth 2.0.
+   * Реализация: получить code от Яндекс → обменять на access_token →
+   * получить профиль пользователя → найти/создать OAuthAccount + User →
+   * выдать наши JWT-токены.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async loginWithYandex(_yandexCode: string): Promise<never> {
+    throw new NotImplementedException(
+      'Авторизация через Яндекс ещё не реализована.',
+    );
+  }
+
+  /**
+   * @stub Будущая интеграция с Telegram Bot Auth / Login Widget.
+   * Реализация: проверить подпись Telegram hash (HMAC-SHA256 через bot token) →
+   * найти/создать OAuthAccount + User → выдать наши JWT-токены.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async loginWithTelegram(_telegramData: Record<string, string>): Promise<never> {
+    throw new NotImplementedException(
+      'Авторизация через Telegram ещё не реализована.',
+    );
+  }
+
+  // ─── Profile ───────────────────────────────────────────────────────────────
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const user = await this.prisma.user.findUnique({
@@ -194,9 +320,6 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    // Log the incoming data
-
-    // Создаем объект обновления только с предоставленными полями
     const updateData: Prisma.UserUpdateInput = {};
     if (updateProfileDto.lastName !== undefined) {
       updateData.lastName = updateProfileDto.lastName;
@@ -214,7 +337,6 @@ export class AuthService {
       updateData.dashboardLayoutMode = updateProfileDto.dashboardLayoutMode;
     }
 
-    // Обработка обновления Email
     if (updateProfileDto.email && updateProfileDto.email !== user.email) {
       const existingUser = await this.prisma.user.findUnique({
         where: { email: updateProfileDto.email },
@@ -225,7 +347,6 @@ export class AuthService {
       updateData.email = updateProfileDto.email;
     }
 
-    // Обработка обновления пароля
     if (updateProfileDto.password) {
       if (!updateProfileDto.currentPassword) {
         throw new UnauthorizedException(
@@ -246,26 +367,12 @@ export class AuthService {
       updateData.password = hashedPassword;
     }
 
-    // Обновляем пользователя новыми данными
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: updateData,
     });
 
-    return {
-      user: {
-        id: updatedUser.id,
-        name: updatedUser.name,
-        lastName: updatedUser.lastName,
-        email: updatedUser.email,
-        role: updatedUser.role,
-        height: updatedUser.height,
-        weight: updatedUser.weight,
-        dashboardLayout: updatedUser.dashboardLayout,
-        dashboardLayoutMode: updatedUser.dashboardLayoutMode,
-        avatarUrl: (updatedUser as any).avatarUrl,
-      } as UserResponse,
-    };
+    return { user: this.buildUserResponse(updatedUser) };
   }
 
   async lookupUserByEmail(email: string) {
@@ -310,6 +417,7 @@ export class AuthService {
 
     return users;
   }
+
   async getUser(userId: string) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -319,26 +427,11 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    return {
-      user: {
-        id: user.id,
-        name: user.name,
-        lastName: user.lastName,
-        email: user.email,
-        role: user.role,
-        height: user.height,
-        weight: user.weight,
-        dashboardLayout: user.dashboardLayout,
-        dashboardLayoutMode: user.dashboardLayoutMode,
-        avatarUrl: (user as any).avatarUrl,
-        organizationId: user.organizationId,
-      } as UserResponse,
-    };
+    return { user: this.buildUserResponse(user) };
   }
 
-  /**
-   * Генерация refresh токена
-   */
+  // ─── Token helpers ─────────────────────────────────────────────────────────
+
   async generateRefreshToken(userId: string): Promise<string> {
     const token = this.jwtService.sign(
       { sub: userId, type: 'refresh' },
@@ -346,7 +439,7 @@ export class AuthService {
     );
 
     const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7); // 7 дней
+    expiresAt.setDate(expiresAt.getDate() + 7);
 
     await this.prisma.refreshToken.create({
       data: {
@@ -359,12 +452,8 @@ export class AuthService {
     return token;
   }
 
-  /**
-   * Валидация и обновление токенов через refresh token
-   */
   async refreshAccessToken(refreshToken: string) {
     try {
-      // Проверяем, существует ли токен в базе
       const storedToken = await this.prisma.refreshToken.findUnique({
         where: { token: refreshToken },
         include: { user: true },
@@ -374,16 +463,13 @@ export class AuthService {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      // Проверяем, не истек ли токен
       if (new Date() > storedToken.expiresAt) {
-        // Удаляем истекший токен
         await this.prisma.refreshToken.delete({
           where: { id: storedToken.id },
         });
         throw new UnauthorizedException('Refresh token expired');
       }
 
-      // Генерируем новый access token
       const payload = {
         email: storedToken.user.email,
         sub: storedToken.user.id,
@@ -394,40 +480,40 @@ export class AuthService {
 
       return {
         accessToken,
-        user: {
-          id: storedToken.user.id,
-          name: storedToken.user.name,
-          lastName: storedToken.user.lastName,
-          email: storedToken.user.email,
-          role: storedToken.user.role,
-          height: storedToken.user.height,
-          weight: storedToken.user.weight,
-          dashboardLayout: storedToken.user.dashboardLayout,
-          dashboardLayoutMode: storedToken.user.dashboardLayoutMode,
-          avatarUrl: (storedToken.user as any).avatarUrl,
-          organizationId: storedToken.user.organizationId,
-        } as UserResponse,
+        user: this.buildUserResponse(storedToken.user),
       };
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }
 
-  /**
-   * Удаление refresh токена (logout)
-   */
   async revokeRefreshToken(refreshToken: string): Promise<void> {
     await this.prisma.refreshToken.deleteMany({
       where: { token: refreshToken },
     });
   }
 
-  /**
-   * Удаление всех refresh токенов пользователя
-   */
   async revokeAllUserTokens(userId: string): Promise<void> {
     await this.prisma.refreshToken.deleteMany({
       where: { userId },
     });
+  }
+
+  // ─── Private helpers ───────────────────────────────────────────────────────
+
+  private buildUserResponse(user: any): UserResponse {
+    return {
+      id: user.id,
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role,
+      height: user.height,
+      weight: user.weight,
+      dashboardLayout: user.dashboardLayout,
+      dashboardLayoutMode: user.dashboardLayoutMode,
+      avatarUrl: user.avatarUrl,
+      organizationId: user.organizationId,
+    } as UserResponse;
   }
 }

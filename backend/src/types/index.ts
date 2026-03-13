@@ -12,6 +12,9 @@ export interface User {
   avatarUrl?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  emailVerified: boolean;
+  emailVerificationToken?: string | null;
+  emailVerificationExpiry?: Date | null;
 }
 
 export type SafeUser = Omit<User, 'password'>;

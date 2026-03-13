@@ -1,8 +1,8 @@
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
-  previewFeatures = ["driverAdapters"]
 }
+
 
 datasource db {
   provider = "postgresql"
@@ -105,8 +105,16 @@ model User {
   dashboardLayout    String[]      @default(["exercise-tracker", "weight-tracker", "recent-activities"]) @map("dashboard_layout")
   dashboardLayoutMode String       @default("asymmetric") @map("dashboard_layout_mode")
   
+  // Email verification
+  emailVerified             Boolean   @default(false) @map("email_verified")
+  emailVerificationToken    String?   @unique @map("email_verification_token")
+  emailVerificationExpiry   DateTime? @map("email_verification_expiry")
+
   // Refresh tokens for secure authentication
   refreshTokens      RefreshToken[]
+
+  // OAuth accounts (Yandex, Telegram, etc.)
+  oauthAccounts      OAuthAccount[]
 
   @@map("users")
 }
@@ -414,4 +422,19 @@ model FavoriteEvent {
 
   @@unique([userId, eventId])
   @@map("favorite_events")
+}
+
+// OAuth integration (Yandex, Telegram)
+model OAuthAccount {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  provider    String   // "yandex" | "telegram"
+  providerId  String   @map("provider_id")
+  accessToken String?  @map("access_token")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([provider, providerId])
+  @@map("oauth_accounts")
 }

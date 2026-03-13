@@ -19,12 +19,20 @@ export class LoginDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @IsString()
+  @IsOptional()
+  captchaToken?: string;
 }
 
 export class RegisterDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsString()
+  @IsOptional()
+  captchaToken?: string;
 
   @IsString()
   @IsOptional() // Фамилия необязательна
@@ -119,4 +127,16 @@ export class RemoveTeamMemberDto {
   @IsUUID()
   @IsNotEmpty()
   userId: string;
+}
+
+export class VerifyEmailDto {
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+}
+
+export class ResendVerificationDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
 }

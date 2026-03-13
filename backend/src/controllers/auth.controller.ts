@@ -17,7 +17,13 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Response, Request } from 'express';
 import { AuthService } from '../services/auth.service';
-import { LoginDto, RegisterDto, UpdateProfileDto } from '../dtos/auth.dto';
+import {
+  LoginDto,
+  RegisterDto,
+  UpdateProfileDto,
+  VerifyEmailDto,
+  ResendVerificationDto,
+} from '../dtos/auth.dto';
 
 import { SettingsService } from '../services/settings.service';
 
@@ -32,9 +38,14 @@ export class AuthController {
   @Post('login')
   async login(
     @Body() loginDto: LoginDto,
+    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const result = await this.authService.login(loginDto);
+    const ip =
+      (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+      request.socket?.remoteAddress ||
+      '';
+    const result = await this.authService.login(loginDto, ip);
 
     // Устанавливаем httpOnly cookies
     const isProduction = process.env.NODE_ENV === 'production';
@@ -108,25 +119,8 @@ export class AuthController {
 
     try {
       const result = await this.authService.register(body, ipAddress);
-
-      // Устанавливаем httpOnly cookies
-      const isProduction = process.env.NODE_ENV === 'production';
-
-      response.cookie('access_token', result.accessToken, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: 'strict',
-        maxAge: 15 * 60 * 1000,
-      });
-
-      response.cookie('refresh_token', result.refreshToken, {
-        httpOnly: true,
-        secure: isProduction,
-        sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
-
-      return { user: result.user };
+      // Регистрация успешна — письмо отправлено, cookies не устанавливаем
+      return result;
     } catch (error: unknown) {
       console.error('Registration Error:', error);
       if (error instanceof ForbiddenException) {
@@ -136,8 +130,6 @@ export class AuthController {
       return {
         status: 'error',
         message: err.message || 'Unknown error',
-        stack: err.stack,
-        details: err,
       };
     }
   }
@@ -222,5 +214,45 @@ export class AuthController {
     });
 
     return { user: result.user };
+  }
+
+  /**
+   * GET /auth/verify-email?token=...
+   * Подтверждение email по токену из письма.
+   * При успехе — устанавливает cookies и возвращает { user }.
+   */
+  @HttpCode(HttpStatus.OK)
+  @Get('verify-email')
+  async verifyEmail(
+    @Query() query: VerifyEmailDto,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const result = await this.authService.verifyEmail(query.token);
+
+    const isProduction = process.env.NODE_ENV === 'production';
+    response.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000,
+    });
+    response.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return { user: result.user };
+  }
+
+  /**
+   * POST /auth/resend-verification
+   * Повторная отправка письма верификации.
+   */
+  @HttpCode(HttpStatus.OK)
+  @Post('resend-verification')
+  async resendVerification(@Body() dto: ResendVerificationDto) {
+    return this.authService.resendVerificationEmail(dto.email);
   }
 }

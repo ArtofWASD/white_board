@@ -31,6 +31,13 @@ export const usersApi = {
 
   /** Удалить пользователя */
   deleteUser: (userId: string) => apiClient.delete<void>(`/api/users/${userId}`),
+
+  /** Вручную подтвердить/снять подтверждение email (только SUPER_ADMIN) */
+  setEmailVerified: (userId: string, emailVerified: boolean) =>
+    apiClient.patch<{ id: string; emailVerified: boolean }>(
+      `/api/users/${userId}/verify-email`,
+      { emailVerified },
+    ),
 }
 
 // ─── Упражнения ────────────────────────────────────────────────────────────────

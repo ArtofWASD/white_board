@@ -5,6 +5,8 @@ import { AuthController } from '../controllers/auth.controller';
 import { PrismaModule } from '../prisma/prisma.module';
 import { jwtConfig } from '../config/jwt.config';
 import { SettingsModule } from './settings.module';
+import { EmailModule } from './email.module';
+import { CaptchaModule } from './captcha.module';
 
 @Module({
   imports: [
@@ -14,9 +16,12 @@ import { SettingsModule } from './settings.module';
       signOptions: jwtConfig.signOptions,
     }),
     SettingsModule,
+    EmailModule,
+    CaptchaModule,
   ],
   providers: [AuthService],
   controllers: [AuthController],
   exports: [AuthService],
 })
 export class AuthModule {}
+

@@ -49,6 +49,15 @@ export class UsersController {
     return this.usersService.updateStatus(id, isBlocked);
   }
 
+  @Patch(':id/verify-email')
+  @Roles(UserRole.SUPER_ADMIN)
+  verifyEmail(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body('emailVerified') emailVerified: boolean,
+  ) {
+    return this.usersService.setEmailVerified(id, emailVerified);
+  }
+
   @Delete(':id')
   @Roles(UserRole.SUPER_ADMIN)
   delete(@Param('id', ParseUUIDPipe) id: string) {

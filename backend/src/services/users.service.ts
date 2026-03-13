@@ -24,6 +24,7 @@ export class UsersService {
         isBlocked: true,
         createdAt: true,
         organizationId: true,
+        emailVerified: true,
       },
     });
   }
@@ -60,6 +61,34 @@ export class UsersService {
       select: {
         id: true,
         role: true,
+      },
+    });
+  }
+
+  async setEmailVerified(id: string, emailVerified: boolean) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.user.update({
+      where: { id },
+      data: {
+        emailVerified,
+        // При ручном подтверждении чистим токен, чтобы письмо больше не работало
+        ...(emailVerified
+          ? {
+              emailVerificationToken: null,
+              emailVerificationExpiry: null,
+            }
+          : {}),
+      },
+      select: {
+        id: true,
+        emailVerified: true,
       },
     });
   }

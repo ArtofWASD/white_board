@@ -4,9 +4,10 @@ import { Modal } from "../ui/Modal"
 import { User } from "../../types"
 import { logApiError } from "../../lib/logger"
 import { usersApi } from "../../lib/api/users"
+import { CheckCircle2, XCircle } from "lucide-react"
 
 export const UsersTab: React.FC = () => {
-  const { user } = useAuthStore() // Removed token
+  const { user } = useAuthStore()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [users, setUsers] = useState<any[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
@@ -32,7 +33,7 @@ export const UsersTab: React.FC = () => {
       }
     }
     fetchUsers()
-  }, []) // Removed token dependency
+  }, [])
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const openRoleModal = (u: any) => {
@@ -45,7 +46,6 @@ export const UsersTab: React.FC = () => {
     if (!selectedUser || !newRole) return
 
     setActionLoading(true)
-    // Оптимистичное обновление
     const oldUsers = [...users]
     setUsers(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,6 +88,27 @@ export const UsersTab: React.FC = () => {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleToggleEmailVerified = async (u: any) => {
+    // SUPER_ADMIN не требует подтверждения — кнопка недоступна
+    if (u.role === "SUPER_ADMIN") return
+
+    const newVerified = !u.emailVerified
+    const oldUsers = [...users]
+    setUsers(
+      users.map((usr) =>
+        usr.id === u.id ? { ...usr, emailVerified: newVerified } : usr,
+      ),
+    )
+
+    try {
+      await usersApi.setEmailVerified(u.id, newVerified)
+    } catch (e) {
+      setUsers(oldUsers)
+      alert("Ошибка изменения статуса email")
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleDeleteUser = async (u: any) => {
     if (
       !confirm(
@@ -118,7 +139,7 @@ export const UsersTab: React.FC = () => {
 
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
-      if (user && u.id === user.id) return false // Не показывать текущего пользователя
+      if (user && u.id === user.id) return false
 
       const matchesSearch =
         (u.name || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,6 +155,38 @@ export const UsersTab: React.FC = () => {
       <div className="flex justify-center p-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
+    )
+  }
+
+  // Иконка подтверждения email — для SUPER_ADMIN всегда CheckCircle без кнопки
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const EmailVerifiedBadge = ({ u }: { u: any }) => {
+    if (u.role === "SUPER_ADMIN") {
+      return (
+        <span title="Для Супер Админа подтверждение не требуется">
+          <CheckCircle2 className="w-5 h-5 text-gray-300" />
+        </span>
+      )
+    }
+    if (u.emailVerified) {
+      return (
+        <button
+          onClick={() => handleToggleEmailVerified(u)}
+          title="Email подтверждён — нажмите чтобы снять"
+          className="p-1 rounded hover:bg-gray-100 transition-colors group"
+        >
+          <CheckCircle2 className="w-5 h-5 text-green-500 group-hover:text-orange-400 transition-colors" />
+        </button>
+      )
+    }
+    return (
+      <button
+        onClick={() => handleToggleEmailVerified(u)}
+        title="Email не подтверждён — нажмите чтобы подтвердить"
+        className="p-1 rounded hover:bg-green-50 transition-colors group"
+      >
+        <XCircle className="w-5 h-5 text-red-400 group-hover:text-green-500 transition-colors" />
+      </button>
     )
   }
 
@@ -195,7 +248,18 @@ export const UsersTab: React.FC = () => {
                 {getRoleName(u.role)}
               </span>
             </div>
-            <p className="text-gray-500 text-sm mb-3">{u.email}</p>
+            <p className="text-gray-500 text-sm mb-1">{u.email}</p>
+            {/* Email статус — мобайл */}
+            <div className="flex items-center gap-1 mb-3">
+              <EmailVerifiedBadge u={u} />
+              <span className="text-xs text-gray-500">
+                {u.role === "SUPER_ADMIN"
+                  ? "Верификация не требуется"
+                  : u.emailVerified
+                    ? "Email подтверждён"
+                    : "Email не подтверждён"}
+              </span>
+            </div>
             <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
               <button
                 onClick={() => openRoleModal(u)}
@@ -227,6 +291,9 @@ export const UsersTab: React.FC = () => {
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Email
+              </th>
+              <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Email верифицирован
               </th>
               <th className="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                 Текущая Роль
@@ -260,6 +327,12 @@ export const UsersTab: React.FC = () => {
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <p className="text-gray-900 whitespace-no-wrap">{u.email}</p>
+                </td>
+                {/* Колонка Email Verified */}
+                <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
+                  <div className="flex justify-center items-center">
+                    <EmailVerifiedBadge u={u} />
+                  </div>
                 </td>
                 <td className="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                   <span

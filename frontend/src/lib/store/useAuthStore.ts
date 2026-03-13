@@ -22,6 +22,8 @@ interface AuthState {
   logout: () => Promise<void>
   initializeAuth: () => void
   updateUser: (user: User) => void
+  /** Alias for updateUser — used after email verification to set authenticated user */
+  setUser: (user: User) => void
   verifyUser: () => Promise<boolean>
   refreshToken: () => Promise<boolean>
 }
@@ -73,11 +75,14 @@ export const useAuthStore = create<AuthState>()(
             organizationName: organizationName || undefined,
           })
 
+          // После внедрения email-верификации бэкенд возвращает { message } без user.
+          // Считаем регистрацию успешной и в случае user (старый flow), и в случае message.
           if (response && response.user) {
-            set({
-              user: response.user,
-              isAuthenticated: true,
-            })
+            set({ user: response.user, isAuthenticated: true })
+            return true
+          }
+          if (response && response.message) {
+            // Email verification required — user not authenticated yet
             return true
           }
           return false
@@ -110,6 +115,10 @@ export const useAuthStore = create<AuthState>()(
 
       updateUser: (user) => {
         set({ user })
+      },
+
+      setUser: (user) => {
+        set({ user, isAuthenticated: true })
       },
 
       refreshToken: async () => {

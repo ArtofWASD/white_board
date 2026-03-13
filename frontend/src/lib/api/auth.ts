@@ -12,7 +12,8 @@ import { apiClient } from "./apiClient"
 import { User } from "../../types"
 
 interface LoginResponse {
-  user: User
+  user?: User
+  message?: string
 }
 
 interface RegisterData {

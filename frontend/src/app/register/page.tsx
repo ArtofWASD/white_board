@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, Suspense } from "react"
+import React, { useState, useEffect, Suspense, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
@@ -10,6 +10,7 @@ import { useAuthStore } from "../../lib/store/useAuthStore"
 import Button from "../../components/ui/Button"
 import SuccessModal from "../../components/ui/SuccessModal"
 import ErrorDisplay from "../../components/ui/ErrorDisplay"
+import YandexCaptcha, { YandexCaptchaRef } from "../../components/ui/YandexCaptcha"
 import { logApiError } from "../../lib/logger"
 import { registerSchema, RegisterFormData } from "../../lib/validators/auth"
 
@@ -21,6 +22,8 @@ function RegisterForm() {
   const { register: registerUser, isAuthenticated, isLoading } = useAuthStore()
 
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState("")
+  const captchaRef = useRef<YandexCaptchaRef>(null)
 
   // Settings state
   const [settings, setSettings] = useState<Record<string, boolean>>({})
@@ -145,6 +148,8 @@ function RegisterForm() {
         setError("root", {
           message: "Не удалось зарегистрироваться. Попробуйте еще раз.",
         })
+        captchaRef.current?.reset()
+        setCaptchaToken("")
       } else {
         setShowSuccessModal(true)
       }
@@ -195,6 +200,7 @@ function RegisterForm() {
       <SuccessModal
         isOpen={showSuccessModal}
         onClose={() => setShowSuccessModal(false)}
+        email={watch("email")}
       />
 
       <div className="max-w-4xl w-full bg-[var(--card)] rounded-3xl shadow-xl flex flex-col md:flex-row p-2">
@@ -599,6 +605,15 @@ function RegisterForm() {
                     </motion.div>
                   )}
 
+                  {/* Капча — только на последнем шаге перед отправкой */}
+                  <div className="mt-4 flex justify-center">
+                    <YandexCaptcha
+                      ref={captchaRef}
+                      onSuccess={(token) => setCaptchaToken(token)}
+                      onExpire={() => setCaptchaToken("")}
+                    />
+                  </div>
+
                   {/* Чекбокс согласия на обработку персональных данных */}
                   <div className="mt-6 pt-6 border-t border-border">
                     <div className="flex items-start">
@@ -662,7 +677,7 @@ function RegisterForm() {
                 <Button
                   key="submit-btn"
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !captchaToken}
                   className="flex-1">
                   {isSubmitting ? "Обработка..." : "Зарегистрироваться"}
                 </Button>

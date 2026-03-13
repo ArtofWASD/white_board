@@ -146,9 +146,117 @@ return new NextResponse(response.body, {
 145:   set({ data: response.data })
 146: }
 147: `
-  148:
-  149: ### Безопасные редиректы
-  150: Избегайте использования `window.location.href` для внутренних переходов, так как это вызывает полную перезагрузку приложения и потерю стейта. Используйте `router.push()` / `router.replace()` из `next/navigation`.
-  151:
-  152: - **Исключение:** Жесткая перезагрузка допустима только при полном сбросе авторизации или серьезных системных сбоях, где требуется очистка кэша браузера.
-  153:
+
+## 10. Стабильность соединений и предотвращение циклов рендеринга
+
+Чтобы избежать "бесконечных перезагрузок" и спама WebSocket-подключений (особенно при нестабильном бэкенде), следуйте этим правилам:
+
+### Стабильные зависимости в эффектах
+**Никогда** не ставьте весь объект `user` или `state` в зависимости `useEffect`, если вам нужно только одно поле.
+
+`tsx
+// ПЛОХО: Перезапускает сокет при ЛЮБОМ изменении профиля (даже если ID тот же)
+useEffect(() => { ... }, [user])
+
+// ХОРОШО: Перезапускает только при смене аккаунта
+useEffect(() => { ... }, [user?.id])
+`
+
+### Предотвращение лишних обновлений Zustand
+Если API возвращает данные, которые могут быть идентичны текущим, делайте проверку перед вызовом `set()`. Это предотвращает каскадные ререндеры зависимых компонентов.
+
+`typescript
+// Внутри стора
+const currentData = JSON.stringify(get().data)
+const newData = JSON.stringify(response.data)
+if (currentData !== newData) {
+  set({ data: response.data })
+}
+`
+
+### Безопасные редиректы
+Избегайте использования `window.location.href` для внутренних переходов, так как это вызывает полную перезагрузку приложения и потерю стейта. Используйте `router.push()` / `router.replace()` из `next/navigation`.
+
+- **Исключение:** Жесткая перезагрузка допустима только при полном сбросе авторизации или серьезных системных сбоях, где требуется очистка кэша браузера.
+
+## 11. Email Verification Flow
+
+После регистрации пользователь **не авторизуется автоматически**. При попытке войти с неподтверждённым email — `403 ForbiddenException`.
+
+### Новые эндпоинты
+
+| Метод | URL | Описание |
+|--------|-----|-----------|
+| `GET` | `/api/auth/verify-email?token=<UUID>` | Подтверждает email, устанавливает cookies, возвращает `{ user }` |
+| `POST` | `/api/auth/resend-verification` | Тело: `{ email }`. Повторная отправка письма |
+
+### Flow
+
+```
+1. POST /api/auth/register  →  { message: "Проверьте почту..." }  (без cookies)
+2. Пользователь переходит по ссылке в письме  →  /verify-email?token=<UUID>
+3. GET /api/auth/verify-email?token=<UUID>  →  { user } + httpOnly cookies
+4. Авторедирект на /dashboard
+```
+
+### Ошибки
+
+- `400` — токен недействителен или устарел (срок 24 часа)
+- `403` при логине — email не подтверждён
+
+### SMTP-переменные окружения для Dokploy
+
+```dotenv
+SMTP_HOST=smtp.yandex.ru
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=noreply@yourdomain.ru
+SMTP_PASS=your_smtp_password
+FRONTEND_URL=https://app.yourdomain.ru
+```
+
+Задаются в **Dokploy → ваш сервис → Environment**.
+
+---
+
+## 12. Подготовка OAuth (Яндекс, Telegram)
+
+Структура подготовлена, код готов к расширению:
+
+- **Prisma:** модель `OAuthAccount` (поля `provider`, `providerId`, `accessToken`).
+- **AuthService:** заглушки `loginWithYandex(code)` и `loginWithTelegram(data)` — бросают `NotImplementedException`.
+- **Яндекс OAuth 2.0:** `GET /auth/yandex` → редирект на Yandex, `GET /auth/yandex/callback?code=...` → обмен code на токен, выдача наших JWT
+- **Telegram Login Widget:** `POST /auth/telegram` → проверка HMAC-SHA256 подписи через bot token, выдача наших JWT
+
+---
+
+## 13. Яндекс SmartCaptcha
+
+Защита форм входа и регистрации от ботов.
+
+### Архитектура
+
+| Слой | Роль |
+|------|------|
+| **Frontend** `YandexCaptcha.tsx` | Загружает виджет, возвращает `token` через `onSuccess` |
+| **Frontend** `LoginDto` / `RegisterDto` | Поле `captchaToken?` передаётся в теле запроса к бэкенду |
+| **Backend** `CaptchaService` | Валидирует токен через `https://smartcaptcha.yandexcloud.net/validate` |
+| **Backend** `AuthService` | Вызывает `captchaService.validate()` **первым шагом** в `login()` и `register()` |
+
+### Переменные окружения
+
+| Переменная | Где | Описание |
+|------------|-----|---------|
+| `NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY` | Frontend (Dokploy) | Client Key из консоли SmartCaptcha |
+| `NEXT_PUBLIC_CAPTCHA_DEV_BYPASS=true` | Frontend `.env.local` | Заменяет капчу чекбоксом в dev |
+| `YANDEX_CAPTCHA_SERVER_KEY` | Backend (Dokploy) | Server Key для серверной проверки |
+
+### Dev-режим
+
+Если `NODE_ENV !== 'production'` и фронтенд передаёт `captchaToken = 'dev-bypass-token'`, сервер пропускает валидацию. Это позволяет разрабатывать без реального ключа.
+
+### Важно
+
+- Кнопки «Войти» / «Зарегистрироваться» заблокированы пока капча не пройдена (UI).
+- При ошибке входа виджет сбрасывается автоматически (`captchaRef.current?.reset()`).
+- Если в `login()` бэкенд возвращает `403` (email не подтверждён) — в форме входа появляется ссылка «Отправить письмо повторно».

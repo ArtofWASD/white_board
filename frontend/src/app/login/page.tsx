@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, Suspense } from "react"
+import React, { useEffect, Suspense, useState, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
@@ -9,6 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useAuthStore } from "../../lib/store/useAuthStore"
 import Button from "../../components/ui/Button"
 import ErrorDisplay from "../../components/ui/ErrorDisplay"
+import YandexCaptcha, { YandexCaptchaRef } from "../../components/ui/YandexCaptcha"
 import { loginSchema, LoginFormData } from "../../lib/validators/auth"
 
 function LoginForm() {
@@ -17,6 +18,7 @@ function LoginForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     setError: setFormError,
+    getValues,
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   })
@@ -27,10 +29,12 @@ function LoginForm() {
   const redirect = searchParams.get("redirect")
   const inviteCode = searchParams.get("inviteCode")
 
+  const [captchaToken, setCaptchaToken] = useState("")
+  const [showResend, setShowResend] = useState(false)
+  const captchaRef = useRef<YandexCaptchaRef>(null)
+
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
-      // Используем router.push для мягкой навигации,
-      // но если мы уже на нужной странице, ничего не делаем
       const target = redirect || "/"
       if (window.location.pathname !== target) {
         router.push(target)
@@ -39,7 +43,6 @@ function LoginForm() {
   }, [isAuthenticated, router, isLoading, redirect])
 
   const onSubmit = async (data: LoginFormData) => {
-    console.log("Submitting login form:", data.email) // Debug log
     try {
       const success = await login(data.email, data.password)
       if (success) {
@@ -49,17 +52,49 @@ function LoginForm() {
           type: "manual",
           message: "Не удалось войти. Пожалуйста, проверьте учетные данные.",
         })
+        captchaRef.current?.reset()
+        setCaptchaToken("")
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      // Проверяем — 403 означает "email не подтверждён"
+      const status = (error as { status?: number })?.status
+      if (status === 403) {
+        setFormError("root", {
+          type: "manual",
+          message: "Email не подтверждён. Проверьте почту или запросите новое письмо.",
+        })
+        setShowResend(true)
+      } else {
+        setFormError("root", {
+          type: "manual",
+          message: "Произошла ошибка при входе",
+        })
+      }
+      captchaRef.current?.reset()
+      setCaptchaToken("")
+    }
+  }
+
+  const handleResend = async () => {
+    const email = getValues("email")
+    if (!email) return
+    try {
+      await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      })
       setFormError("root", {
         type: "manual",
-        message: "Произошла ошибка при входе",
+        message: "Письмо отправлено повторно. Проверьте почту.",
       })
+    } catch {
+      // ignore
     }
   }
 
   if (isLoading || isAuthenticated) {
-    return null // or a loading spinner
+    return null
   }
 
   return (
@@ -97,9 +132,24 @@ function LoginForm() {
 
           <ErrorDisplay
             error={errors.root?.message || ""}
-            onClose={() => setFormError("root", { message: "" })}
-            className="mb-6"
+            onClose={() => {
+              setFormError("root", { message: "" })
+              setShowResend(false)
+            }}
+            className="mb-4"
           />
+
+          {/* Кнопка повторной отправки письма */}
+          {showResend && (
+            <div className="mb-4 text-center">
+              <button
+                type="button"
+                onClick={handleResend}
+                className="text-sm text-primary underline hover:opacity-80 transition-opacity">
+                Отправить письмо повторно
+              </button>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <motion.div
@@ -145,7 +195,19 @@ function LoginForm() {
                 )}
               </div>
 
-              <Button type="submit" disabled={isSubmitting} className="w-full mt-6">
+              {/* Яндекс SmartCaptcha */}
+              <div className="flex justify-center pt-2">
+                <YandexCaptcha
+                  ref={captchaRef}
+                  onSuccess={(token) => setCaptchaToken(token)}
+                  onExpire={() => setCaptchaToken("")}
+                />
+              </div>
+
+              <Button
+                type="submit"
+                disabled={isSubmitting || !captchaToken}
+                className="w-full mt-2">
                 {isSubmitting ? "Обработка..." : "Войти"}
               </Button>
             </motion.div>
