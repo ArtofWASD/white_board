@@ -41,6 +41,11 @@ const nextConfig: NextConfig = {
         destination: `${backendUrl}/socket.io/:path*`,
       },
       {
+        // Internal Next.js API routes — NOT proxied to backend
+        source: "/api/config",
+        destination: "/api/config",
+      },
+      {
         source: "/api/:path*",
         destination: `${backendUrl}/:path*`,
       },
