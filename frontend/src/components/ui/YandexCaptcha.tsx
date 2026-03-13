@@ -1,26 +1,23 @@
 "use client"
 
 /**
- * Компонент Яндекс SmartCaptcha.
+ * Обёртка над официальным @yandex/smart-captcha.
  *
  * Переменные окружения:
- *   NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY  — ключ от Яндекс SmartCaptcha
+ *   NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY  — клиентский ключ SmartCaptcha
  *   NEXT_PUBLIC_CAPTCHA_DEV_BYPASS=true    — заменяет капчу на чекбокс (для dev)
  *
- * В Docker/Dokploy NEXT_PUBLIC_* не встраиваются в бандл (нет build-arg).
- * Поэтому компонент фетчит ключ из /api/config в рантайме если build-time ключ пуст.
- *
- * Получить ключ: https://smartcaptcha.yandexcloud.net/
+ * Ключ читается из build-time env (если передан через --build-arg)
+ * или фетчится из /api/config в рантайме (Dokploy env → Next.js server route).
  */
 
 import React, {
   useEffect,
-  useRef,
   useImperativeHandle,
   forwardRef,
-  useId,
   useState,
 } from "react"
+import { SmartCaptcha } from "@yandex/smart-captcha"
 
 export interface YandexCaptchaRef {
   /** Сбросить виджет (после неудачной отправки формы) */
@@ -37,28 +34,6 @@ interface YandexCaptchaProps {
   className?: string
 }
 
-// Глобальный тип для Yandex SmartCaptcha
-declare global {
-  interface Window {
-    smartCaptcha?: {
-      render: (
-        container: HTMLElement,
-        params: {
-          sitekey: string
-          callback: (token: string) => void
-          expired_callback?: () => void
-          error_callback?: () => void
-          hl?: string
-        },
-      ) => number
-      reset: (id: number) => void
-      destroy: (id: number) => void
-    }
-  }
-}
-
-const CAPTCHA_SCRIPT_ID = "yandex-smartcaptcha-script"
-
 // Ключ встроенный при сборке (пуст если Dokploy не передал как build-arg)
 const BUILD_TIME_KEY = process.env.NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY || ""
 const DEV_BYPASS =
@@ -67,19 +42,13 @@ const DEV_BYPASS =
 
 const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
   ({ onSuccess, onExpire, onError, className }, ref) => {
-    const containerId = `captcha-${useId().replace(/:/g, "")}`
-    const widgetIdRef = useRef<number | null>(null)
-    const containerRef = useRef<HTMLDivElement>(null)
-    // Ключ полученный в рантайме из /api/config (если build-time ключ пуст)
     const [siteKey, setSiteKey] = useState(BUILD_TIME_KEY)
     const [keyLoading, setKeyLoading] = useState(!BUILD_TIME_KEY && !DEV_BYPASS)
+    // Счётчик для принудительного пересоздания SmartCaptcha (reset)
+    const [resetKey, setResetKey] = useState(0)
 
     useImperativeHandle(ref, () => ({
-      reset: () => {
-        if (widgetIdRef.current !== null && window.smartCaptcha) {
-          window.smartCaptcha.reset(widgetIdRef.current)
-        }
-      },
+      reset: () => setResetKey((k) => k + 1),
     }))
 
     // Если build-time ключ пуст — фетчим из /api/config (runtime env контейнера)
@@ -93,75 +62,16 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
           setSiteKey(key)
           setKeyLoading(false)
           if (!key) {
-            // Ключа нет нигде — разблокируем форму
             console.warn("[YandexCaptcha] Ключ не найден ни в build-time, ни в runtime.")
             onSuccess("no-captcha-configured")
           }
         })
         .catch(() => {
           setKeyLoading(false)
-          // Fallback: не блокируем форму
           onSuccess("no-captcha-configured")
         })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
-
-    // Инициализация виджета
-    useEffect(() => {
-      if (!siteKey || DEV_BYPASS || keyLoading) return
-
-      const initWidget = () => {
-        if (!containerRef.current || !window.smartCaptcha) return
-        // Не дублировать виджет
-        if (widgetIdRef.current !== null) return
-
-        widgetIdRef.current = window.smartCaptcha.render(containerRef.current, {
-          sitekey: siteKey,
-          callback: onSuccess,
-          expired_callback: onExpire,
-          error_callback: onError,
-          hl: "ru",
-        })
-      }
-
-      // Если скрипт уже загружен
-      if (window.smartCaptcha) {
-        initWidget()
-        return
-      }
-
-      // Добавляем скрипт один раз
-      if (!document.getElementById(CAPTCHA_SCRIPT_ID)) {
-        const script = document.createElement("script")
-        script.id = CAPTCHA_SCRIPT_ID
-        script.src = "https://smartcaptcha.yandexcloud.net/captcha.js?render=onload&onload=onYandexCaptchaLoad"
-        script.async = true
-        script.defer = true
-        document.head.appendChild(script)
-      }
-
-      // Колбэк onload из window (Yandex дёргает его после загрузки)
-      ;(window as any).onYandexCaptchaLoad = () => {
-        initWidget()
-      }
-
-      // Если между рендерами уже загрузился, инициализируем сразу
-      const interval = setInterval(() => {
-        if (window.smartCaptcha) {
-          clearInterval(interval)
-          initWidget()
-        }
-      }, 100)
-
-      return () => {
-        clearInterval(interval)
-        if (widgetIdRef.current !== null && window.smartCaptcha) {
-          window.smartCaptcha.destroy(widgetIdRef.current)
-          widgetIdRef.current = null
-        }
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [siteKey, keyLoading])
 
     // Пока подгружаем ключ — показываем скелетон
     if (keyLoading) {
@@ -175,13 +85,22 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
       return null
     }
 
-    // ── Dev-bypass: простой чекбокс вместо капчи ──────────────────────────────
+    // Dev-bypass: простой чекбокс вместо капчи
     if (DEV_BYPASS) {
       return <DevBypassCheckbox onSuccess={onSuccess} resetRef={ref} />
     }
 
     return (
-      <div id={containerId} ref={containerRef} className={className} />
+      <div className={className}>
+        <SmartCaptcha
+          key={resetKey}
+          sitekey={siteKey}
+          onSuccess={onSuccess}
+          onTokenExpired={onExpire}
+          onNetworkError={onError}
+          language="ru"
+        />
+      </div>
     )
   },
 )
