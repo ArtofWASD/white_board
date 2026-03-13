@@ -7,6 +7,9 @@
  *   NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY  — ключ от Яндекс SmartCaptcha
  *   NEXT_PUBLIC_CAPTCHA_DEV_BYPASS=true    — заменяет капчу на чекбокс (для dev)
  *
+ * В Docker/Dokploy NEXT_PUBLIC_* не встраиваются в бандл (нет build-arg).
+ * Поэтому компонент фетчит ключ из /api/config в рантайме если build-time ключ пуст.
+ *
  * Получить ключ: https://smartcaptcha.yandexcloud.net/
  */
 
@@ -55,16 +58,21 @@ declare global {
 }
 
 const CAPTCHA_SCRIPT_ID = "yandex-smartcaptcha-script"
-const SITE_KEY = process.env.NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY || ""
+
+// Ключ встроенный при сборке (пуст если Dokploy не передал как build-arg)
+const BUILD_TIME_KEY = process.env.NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY || ""
 const DEV_BYPASS =
   process.env.NEXT_PUBLIC_CAPTCHA_DEV_BYPASS === "true" ||
-  (process.env.NODE_ENV === "development" && !SITE_KEY)
+  (process.env.NODE_ENV === "development" && !BUILD_TIME_KEY)
 
 const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
   ({ onSuccess, onExpire, onError, className }, ref) => {
     const containerId = `captcha-${useId().replace(/:/g, "")}`
     const widgetIdRef = useRef<number | null>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+    // Ключ полученный в рантайме из /api/config (если build-time ключ пуст)
+    const [siteKey, setSiteKey] = useState(BUILD_TIME_KEY)
+    const [keyLoading, setKeyLoading] = useState(!BUILD_TIME_KEY && !DEV_BYPASS)
 
     useImperativeHandle(ref, () => ({
       reset: () => {
@@ -74,21 +82,33 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
       },
     }))
 
-    // Если ключ не задан и не DEV_BYPASS — автоматически разблокируем форму.
-    // Эффект здесь (не в if) — чтобы не нарушать правила хуков.
+    // Если build-time ключ пуст — фетчим из /api/config (runtime env контейнера)
     useEffect(() => {
-      if (!SITE_KEY && !DEV_BYPASS) {
-        onSuccess("no-captcha-configured")
-      }
+      if (BUILD_TIME_KEY || DEV_BYPASS) return
+
+      fetch("/api/config")
+        .then((r) => r.json())
+        .then((data: { captchaClientKey?: string }) => {
+          const key = data.captchaClientKey || ""
+          setSiteKey(key)
+          setKeyLoading(false)
+          if (!key) {
+            // Ключа нет нигде — разблокируем форму
+            console.warn("[YandexCaptcha] Ключ не найден ни в build-time, ни в runtime.")
+            onSuccess("no-captcha-configured")
+          }
+        })
+        .catch(() => {
+          setKeyLoading(false)
+          // Fallback: не блокируем форму
+          onSuccess("no-captcha-configured")
+        })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
+    // Инициализация виджета
     useEffect(() => {
-      if (!SITE_KEY && !DEV_BYPASS) {
-        console.warn("[YandexCaptcha] NEXT_PUBLIC_YANDEX_CAPTCHA_CLIENT_KEY не задан.")
-        return
-      }
-      if (DEV_BYPASS) return // dev-чекбокс обрабатывается отдельно
+      if (!siteKey || DEV_BYPASS || keyLoading) return
 
       const initWidget = () => {
         if (!containerRef.current || !window.smartCaptcha) return
@@ -96,7 +116,7 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
         if (widgetIdRef.current !== null) return
 
         widgetIdRef.current = window.smartCaptcha.render(containerRef.current, {
-          sitekey: SITE_KEY,
+          sitekey: siteKey,
           callback: onSuccess,
           expired_callback: onExpire,
           error_callback: onError,
@@ -141,9 +161,17 @@ const YandexCaptcha = forwardRef<YandexCaptchaRef, YandexCaptchaProps>(
         }
       }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    }, [siteKey, keyLoading])
 
-    if (!SITE_KEY && !DEV_BYPASS) {
+    // Пока подгружаем ключ — показываем скелетон
+    if (keyLoading) {
+      return (
+        <div className="h-[80px] w-[300px] rounded-lg bg-zinc-100 dark:bg-zinc-800 animate-pulse" />
+      )
+    }
+
+    // Ключ не найден — ничего не рендерим (форма уже разблокирована через onSuccess)
+    if (!siteKey && !DEV_BYPASS) {
       return null
     }
 
