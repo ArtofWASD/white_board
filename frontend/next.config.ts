@@ -35,25 +35,29 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const backendUrl =
       process.env.NEXT_PUBLIC_API_URL || "http://slate-backend-lihtfr:3001"
-    return [
-      {
-        source: "/socket.io/:path*",
-        destination: `${backendUrl}/socket.io/:path*`,
-      },
-      {
-        // Internal Next.js API routes — NOT proxied to backend
-        source: "/api/config",
-        destination: "/api/config",
-      },
-      {
-        source: "/api/:path*",
-        destination: `${backendUrl}/:path*`,
-      },
-      {
-        source: "/uploads/:path*",
-        destination: `${backendUrl}/uploads/:path*`,
-      },
-    ]
+    return {
+      // beforeFiles: обрабатываются первыми (socket.io, uploads — всегда на бэкенд)
+      beforeFiles: [
+        {
+          source: "/socket.io/:path*",
+          destination: `${backendUrl}/socket.io/:path*`,
+        },
+        {
+          source: "/uploads/:path*",
+          destination: `${backendUrl}/uploads/:path*`,
+        },
+      ],
+      afterFiles: [],
+      // fallback: срабатывает ТОЛЬКО если Next.js не нашёл собственный route/page.
+      // /api/config обрабатывается Next.js (src/app/api/config/route.ts),
+      // остальные /api/* проксируются на бэкенд.
+      fallback: [
+        {
+          source: "/api/:path*",
+          destination: `${backendUrl}/:path*`,
+        },
+      ],
+    }
   },
 }
 
