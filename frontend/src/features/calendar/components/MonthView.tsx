@@ -28,9 +28,9 @@ export function MonthView({
   const weekDays = days.slice(0, 7)
 
   return (
-    <div className="flex flex-col h-full border dark:border-gray-700 rounded-md overflow-hidden bg-background dark:bg-gray-800">
+    <div className="flex flex-col border rounded-md bg-background">
       {/* Weekday Headers */}
-      <div className="grid grid-cols-7 border-b dark:border-gray-700 bg-muted/30 dark:bg-gray-700/50">
+      <div className="grid grid-cols-7 border-b border-border bg-muted/30">
         {weekDays.map((day) => (
           <div
             key={day.date.toISOString()}
@@ -41,7 +41,7 @@ export function MonthView({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 auto-rows-[minmax(194px,1fr)] flex-1 overflow-hidden">
+      <div className="grid grid-cols-7 auto-rows-[minmax(194px,auto)] flex-1">
         {days.map((day, idx) => {
           const dateKey = format(day.date, "yyyy-MM-dd")
           const dayWorkouts = workouts[dateKey] || []
@@ -56,12 +56,12 @@ export function MonthView({
               key={day.date.toISOString()}
               onClick={() => onDayClick(day.date)}
               className={cn(
-                "relative flex flex-col p-2 transition-colors hover:bg-muted/20 dark:hover:bg-gray-700/50 cursor-pointer border-b dark:border-gray-700 overflow-hidden",
-                !isLastCol && "border-r dark:border-r-gray-700",
+                "relative flex flex-col p-2 transition-colors hover:bg-accent/30 cursor-pointer border-b border-border overflow-hidden",
+                !isLastCol && "border-r border-border",
                 !day.isCurrentMonth &&
-                  "bg-muted/10 dark:bg-gray-900/40 text-muted-foreground/50",
+                  "bg-muted/10 text-muted-foreground/50",
                 day.isToday &&
-                  "bg-primary/15 dark:bg-primary/20 ring-1 ring-inset ring-primary/30",
+                  "bg-primary/15 ring-1 ring-inset ring-primary/30",
               )}>
               <div className="flex justify-between items-start flex-shrink-0">
                 <span

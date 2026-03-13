@@ -210,7 +210,7 @@ export default function CalendarPage() {
 
       <main className={`flex-grow transition-all duration-300 ease-in-out ml-0 pt-0`}>
         {/* Removed padding to let CalendarSystem take full space if needed, handled by internal padding */}
-        <div className="h-[calc(100vh-100px)]">
+        <div className="min-h-[calc(100vh-100px)]">
           <CalendarSystem
             workouts={workouts}
             onWorkoutCreated={loadEvents}

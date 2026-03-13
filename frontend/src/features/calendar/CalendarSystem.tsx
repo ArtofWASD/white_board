@@ -150,7 +150,7 @@ export function CalendarSystem({
       />
       <div className="w-full border-b" />
 
-      <div className="flex-1 overflow-hidden p-1 sm:p-2 relative">
+      <div className="flex-1 p-1 sm:p-2 relative">
         {view === "month" ? (
           <MonthView
             days={calendarDays}
